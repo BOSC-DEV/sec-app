@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, ThumbsUp, ThumbsDown, DollarSign, MessageSquare, Edit } from 'lucide-react';
@@ -7,7 +6,7 @@ import { Toggle } from '@/components/ui/toggle';
 import { truncateText } from '@/lib/utils';
 import { Scammer } from '@/types/dataTypes';
 import { useProfile } from '@/contexts/ProfileContext';
-import { likeScammer, dislikeScammer, getProfileByWallet } from '@/services/supabaseService';
+import { likeScammer, dislikeScammer, getProfileByWallet, getUserScammerInteraction } from '@/services/supabaseService';
 import { toast } from '@/hooks/use-toast';
 import { Profile } from '@/types/dataTypes';
 import { supabase } from '@/integrations/supabase/client';
@@ -50,28 +49,22 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
     setDislikes(scammer.dislikes || 0);
   }, [scammer.views, scammer.likes, scammer.dislikes]);
 
-  // Check if the current user has liked or disliked this scammer
+  // Check if the current user has liked or disliked this scammer - run this on mount and when profile changes
   useEffect(() => {
     const checkUserInteraction = async () => {
       if (!profile?.wallet_address) return;
       
       try {
-        // Query the user_scammer_interactions table to see if the user has liked/disliked
-        const { data, error } = await supabase
-          .from('user_scammer_interactions')
-          .select('liked, disliked')
-          .eq('scammer_id', scammer.id)
-          .eq('user_id', profile.wallet_address)
-          .maybeSingle();
+        const interaction = await getUserScammerInteraction(scammer.id, profile.wallet_address);
         
-        if (error) {
-          console.error('Error checking user interaction:', error);
-          return;
-        }
-        
-        if (data) {
-          setIsLiked(data.liked);
-          setIsDisliked(data.disliked);
+        if (interaction) {
+          console.log("Found user interaction:", interaction);
+          setIsLiked(interaction.liked);
+          setIsDisliked(interaction.disliked);
+        } else {
+          // Reset like/dislike state if no interaction found
+          setIsLiked(false);
+          setIsDisliked(false);
         }
       } catch (error) {
         console.error('Error in checkUserInteraction:', error);
@@ -146,11 +139,10 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
       
     } catch (error) {
       console.error("Error liking scammer:", error);
-      // Revert UI changes on error
-      setIsLiked(!isLiked);
-      if (isDisliked !== isDisliked) {
-        setIsDisliked(!isDisliked);
-      }
+      // Revert UI changes on error and refetch the correct state
+      const interaction = await getUserScammerInteraction(scammer.id, profile.wallet_address);
+      setIsLiked(interaction?.liked || false);
+      setIsDisliked(interaction?.disliked || false);
       setLikes(scammer.likes || 0);
       setDislikes(scammer.dislikes || 0);
       
@@ -229,11 +221,10 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
       
     } catch (error) {
       console.error("Error disliking scammer:", error);
-      // Revert UI changes on error
-      setIsDisliked(!isDisliked);
-      if (isLiked !== isLiked) {
-        setIsLiked(!isLiked);
-      }
+      // Revert UI changes on error and refetch the correct state
+      const interaction = await getUserScammerInteraction(scammer.id, profile.wallet_address);
+      setIsLiked(interaction?.liked || false);
+      setIsDisliked(interaction?.disliked || false);
       setLikes(scammer.likes || 0);
       setDislikes(scammer.dislikes || 0);
       

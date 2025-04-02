@@ -294,19 +294,27 @@ export const getProfileByWallet = async (walletAddress: string): Promise<Profile
 export const getUserScammerInteraction = async (scammerId: string, walletAddress: string): Promise<{ liked: boolean, disliked: boolean } | null> => {
   if (!walletAddress) return null;
   
-  const { data, error } = await supabase
-    .from('user_scammer_interactions')
-    .select('liked, disliked')
-    .eq('scammer_id', scammerId)
-    .eq('user_id', walletAddress)
-    .maybeSingle();
+  try {
+    console.log(`Fetching interaction for scammer ${scammerId} by user ${walletAddress}`);
+    
+    const { data, error } = await supabase
+      .from('user_scammer_interactions')
+      .select('liked, disliked')
+      .eq('scammer_id', scammerId)
+      .eq('user_id', walletAddress)
+      .maybeSingle();
 
-  if (error) {
-    console.error('Error fetching user interaction:', error);
+    if (error) {
+      console.error('Error fetching user interaction:', error);
+      return null;
+    }
+
+    console.log('Found interaction:', data);
+    return data;
+  } catch (err) {
+    console.error('Exception in getUserScammerInteraction:', err);
     return null;
   }
-
-  return data;
 };
 
 export const likeScammer = async (scammerId: string, walletAddress: string): Promise<{ likes: number; dislikes: number } | void> => {
@@ -368,7 +376,7 @@ export const likeScammer = async (scammerId: string, walletAddress: string): Pro
       }
     }
 
-    // Update scammer like/dislike counts and return the updated counts
+    // Always update scammer like/dislike counts and return the updated counts
     const updatedCounts = await updateScammerLikes(scammerId);
     
     console.log('Updated scammer counts:', updatedCounts);
@@ -430,7 +438,7 @@ export const dislikeScammer = async (scammerId: string, walletAddress: string): 
       }
     }
 
-    // Update scammer like/dislike counts
+    // Always update scammer like/dislike counts
     const updatedCounts = await updateScammerLikes(scammerId);
     
     console.log('Updated scammer counts:', updatedCounts);
