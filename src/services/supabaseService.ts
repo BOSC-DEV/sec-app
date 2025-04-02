@@ -35,6 +35,8 @@ export const getScammerById = async (id: string): Promise<Scammer | null> => {
   }
   
   if (data) {
+    // Update the view count directly without checking for duplicates
+    // This will just increment the counter in the scammers table
     const { error: updateError } = await supabase
       .from('scammers')
       .update({ views: (data.views || 0) + 1 })
@@ -44,13 +46,22 @@ export const getScammerById = async (id: string): Promise<Scammer | null> => {
       console.error('Error updating scammer views:', updateError);
     }
     
-    const ipHash = 'anonymous'; // In a real app, you might hash the IP address
-    const { error: viewError } = await supabase
-      .from('scammer_views')
-      .insert({ scammer_id: id, ip_hash: ipHash });
-      
-    if (viewError) {
-      console.error('Error logging scammer view:', viewError);
+    // Generate a unique identifier by combining IP and timestamp to avoid constraint violations
+    // In a real app you might hash the IP for privacy
+    const ipHash = `anonymous-${new Date().getTime()}`;
+    
+    try {
+      // Insert view record with a unique hash to avoid constraint violations
+      const { error: viewError } = await supabase
+        .from('scammer_views')
+        .insert({ scammer_id: id, ip_hash: ipHash });
+        
+      if (viewError && viewError.code !== '23505') { // Ignore duplicate key errors
+        console.error('Error logging scammer view:', viewError);
+      }
+    } catch (e) {
+      // Silently fail on view tracking errors to not disrupt user experience
+      console.error('Failed to track view:', e);
     }
   }
   
@@ -112,7 +123,8 @@ export const addComment = async (comment: {
   author_name: string,
   author_profile_pic?: string
 }): Promise<Comment> => {
-  const id = `cmt-${Date.now()}`;
+  // Generate a unique ID for the comment
+  const id = `cmt-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
   
   const { data, error } = await supabase
     .from('comments')
@@ -134,6 +146,26 @@ export const addComment = async (comment: {
   if (error) {
     console.error('Error adding comment:', error);
     throw error;
+  }
+  
+  // Update the scammer's comments array with the new comment ID
+  try {
+    const { data: scammer } = await supabase
+      .from('scammers')
+      .select('comments')
+      .eq('id', comment.scammer_id)
+      .single();
+      
+    if (scammer) {
+      const comments = [...(scammer.comments || []), id];
+      await supabase
+        .from('scammers')
+        .update({ comments })
+        .eq('id', comment.scammer_id);
+    }
+  } catch (e) {
+    console.error('Error updating scammer comments array:', e);
+    // Don't throw here - the comment was added successfully
   }
   
   return data;

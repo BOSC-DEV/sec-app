@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -47,6 +46,7 @@ const ScammerDetailPage = () => {
   } = useQuery({
     queryKey: ['scammer', id],
     queryFn: () => getScammerById(id || ''),
+    staleTime: 1000 * 60 * 1, // 1 minute
   });
 
   const { 
@@ -57,6 +57,7 @@ const ScammerDetailPage = () => {
   } = useQuery({
     queryKey: ['comments', id],
     queryFn: () => getScammerComments(id || ''),
+    staleTime: 1000 * 30, // 30 seconds - refresh comments more frequently
   });
 
   const isCreator = profile?.wallet_address === scammer?.added_by;
@@ -79,21 +80,38 @@ const ScammerDetailPage = () => {
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newComment) return;
+    if (!newComment.trim()) {
+      toast({
+        title: "Comment cannot be empty",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!profile?.wallet_address) {
+      toast({
+        title: "Authentication required",
+        description: "Please connect your wallet to comment.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     try {
+      setIsLoading(true);
       const comment = {
         scammer_id: id || '',
         content: newComment,
-        author: profile?.wallet_address || 'anonymous',
-        author_name: profile?.display_name || 'Anonymous User',
-        author_profile_pic: profile?.profile_pic_url || '/placeholder.svg'
+        author: profile.wallet_address || 'anonymous',
+        author_name: profile.display_name || 'Anonymous User',
+        author_profile_pic: profile.profile_pic_url || '/placeholder.svg'
       };
 
       await addComment(comment);
       
-      // Refresh comments
-      await refetchComments();
+      // Refresh comments and scammer data
+      await Promise.all([refetchComments(), refetchScammer()]);
+      
       setNewComment('');
       toast({
         title: "Comment added",
@@ -106,6 +124,8 @@ const ScammerDetailPage = () => {
         title: "Failed to add comment",
         description: "There was an error adding your comment. Please try again.",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
