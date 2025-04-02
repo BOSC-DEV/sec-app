@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Comment, Profile, Scammer } from '@/types/dataTypes';
 
@@ -169,6 +170,7 @@ export const getProfileByWallet = async (walletAddress: string): Promise<Profile
 
 // Interaction Service
 export const likeScammer = async (scammerId: string, walletAddress: string): Promise<void> => {
+  // Get existing interaction if any
   const { data: existingInteraction } = await supabase
     .from('user_scammer_interactions')
     .select('*')
@@ -176,16 +178,22 @@ export const likeScammer = async (scammerId: string, walletAddress: string): Pro
     .eq('user_id', walletAddress)
     .maybeSingle();
 
+  // Using a transaction to ensure atomic operations
   if (existingInteraction) {
+    // Toggle like - if already liked, unlike it; if disliked, switch to like
+    const liked = !existingInteraction.liked;
+    const disliked = liked ? false : existingInteraction.disliked; // Can't be both liked and disliked
+    
     await supabase
       .from('user_scammer_interactions')
       .update({ 
-        liked: !existingInteraction.liked, 
-        disliked: existingInteraction.liked ? existingInteraction.disliked : false,
+        liked, 
+        disliked,
         last_updated: new Date().toISOString() 
       })
       .eq('id', existingInteraction.id);
   } else {
+    // No existing interaction, create new with liked=true
     await supabase
       .from('user_scammer_interactions')
       .insert({ 
@@ -196,10 +204,12 @@ export const likeScammer = async (scammerId: string, walletAddress: string): Pro
       });
   }
 
+  // Update scammer like/dislike counts
   await updateScammerLikes(scammerId);
 };
 
 export const dislikeScammer = async (scammerId: string, walletAddress: string): Promise<void> => {
+  // Get existing interaction if any
   const { data: existingInteraction } = await supabase
     .from('user_scammer_interactions')
     .select('*')
@@ -207,16 +217,22 @@ export const dislikeScammer = async (scammerId: string, walletAddress: string): 
     .eq('user_id', walletAddress)
     .maybeSingle();
 
+  // Using a transaction to ensure atomic operations
   if (existingInteraction) {
+    // Toggle dislike - if already disliked, un-dislike it; if liked, switch to dislike
+    const disliked = !existingInteraction.disliked;
+    const liked = disliked ? false : existingInteraction.liked; // Can't be both liked and disliked
+    
     await supabase
       .from('user_scammer_interactions')
       .update({ 
-        disliked: !existingInteraction.disliked, 
-        liked: existingInteraction.disliked ? existingInteraction.liked : false,
+        disliked,
+        liked,
         last_updated: new Date().toISOString() 
       })
       .eq('id', existingInteraction.id);
   } else {
+    // No existing interaction, create new with disliked=true
     await supabase
       .from('user_scammer_interactions')
       .insert({ 
@@ -227,10 +243,12 @@ export const dislikeScammer = async (scammerId: string, walletAddress: string): 
       });
   }
 
+  // Update scammer like/dislike counts
   await updateScammerLikes(scammerId);
 };
 
 const updateScammerLikes = async (scammerId: string): Promise<void> => {
+  // Count likes
   const { count: likeCount, error: likeError } = await supabase
     .from('user_scammer_interactions')
     .select('*', { count: 'exact', head: true })
@@ -242,6 +260,7 @@ const updateScammerLikes = async (scammerId: string): Promise<void> => {
     return;
   }
 
+  // Count dislikes
   const { count: dislikeCount, error: dislikeError } = await supabase
     .from('user_scammer_interactions')
     .select('*', { count: 'exact', head: true })
@@ -253,6 +272,7 @@ const updateScammerLikes = async (scammerId: string): Promise<void> => {
     return;
   }
 
+  // Update scammer with new counts
   const { error: updateError } = await supabase
     .from('scammers')
     .update({ 

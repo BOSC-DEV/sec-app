@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { getScammerById, getScammerComments, addComment } from '@/services/supabaseService';
+import { getScammerById, getScammerComments, addComment, likeScammer, dislikeScammer } from '@/services/supabaseService';
 import { Scammer, Comment } from '@/types/dataTypes';
 import { Button } from '@/components/ui/button';
+import { Toggle } from '@/components/ui/toggle';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,11 +33,17 @@ const ScammerDetailPage = () => {
   const [activeTab, setActiveTab] = useState('identity');
   const { profile } = useProfile();
   const [bountyAmount, setBountyAmount] = useState('0.0');
+  const [localLikes, setLocalLikes] = useState(0);
+  const [localDislikes, setLocalDislikes] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isDisliked, setIsDisliked] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { 
     data: scammer, 
     isLoading: isScammerLoading, 
-    error: scammerError 
+    error: scammerError,
+    refetch: refetchScammer
   } = useQuery({
     queryKey: ['scammer', id],
     queryFn: () => getScammerById(id || ''),
@@ -52,6 +60,13 @@ const ScammerDetailPage = () => {
   });
 
   const isCreator = profile?.wallet_address === scammer?.added_by;
+
+  useEffect(() => {
+    if (scammer) {
+      setLocalLikes(scammer.likes || 0);
+      setLocalDislikes(scammer.dislikes || 0);
+    }
+  }, [scammer]);
 
   useEffect(() => {
     if (scammerError) {
@@ -98,18 +113,104 @@ const ScammerDetailPage = () => {
     navigate(`/report/${id}`);
   };
 
-  const handleLikeScammer = () => {
-    toast({
-      title: "Liked",
-      description: "You've marked this report as accurate.",
-    });
+  const handleLikeScammer = async () => {
+    if (!profile?.wallet_address) {
+      toast({
+        title: "Authentication required",
+        description: "Please connect your wallet to like this report.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (isLoading || !id) return;
+    
+    setIsLoading(true);
+    try {
+      await likeScammer(id, profile.wallet_address);
+      
+      // Toggle like state
+      if (isLiked) {
+        setLocalLikes(prev => Math.max(prev - 1, 0));
+        setIsLiked(false);
+      } else {
+        setLocalLikes(prev => prev + 1);
+        setIsLiked(true);
+        
+        // If it was previously disliked, remove the dislike
+        if (isDisliked) {
+          setLocalDislikes(prev => Math.max(prev - 1, 0));
+          setIsDisliked(false);
+        }
+      }
+      
+      toast({
+        title: isLiked ? "Like removed" : "Report liked",
+        description: isLiked ? "You've removed your like from this report." : "You've marked this report as accurate."
+      });
+      
+      // Refetch to update with server data
+      await refetchScammer();
+    } catch (error) {
+      console.error("Error liking scammer:", error);
+      toast({
+        title: "Error",
+        description: "Failed to like this report. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleDislikeScammer = () => {
-    toast({
-      title: "Disliked",
-      description: "You've marked this report as inaccurate.",
-    });
+  const handleDislikeScammer = async () => {
+    if (!profile?.wallet_address) {
+      toast({
+        title: "Authentication required",
+        description: "Please connect your wallet to dislike this report.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (isLoading || !id) return;
+    
+    setIsLoading(true);
+    try {
+      await dislikeScammer(id, profile.wallet_address);
+      
+      // Toggle dislike state
+      if (isDisliked) {
+        setLocalDislikes(prev => Math.max(prev - 1, 0));
+        setIsDisliked(false);
+      } else {
+        setLocalDislikes(prev => prev + 1);
+        setIsDisliked(true);
+        
+        // If it was previously liked, remove the like
+        if (isLiked) {
+          setLocalLikes(prev => Math.max(prev - 1, 0));
+          setIsLiked(false);
+        }
+      }
+      
+      toast({
+        title: isDisliked ? "Dislike removed" : "Report disliked",
+        description: isDisliked ? "You've removed your dislike from this report." : "You've marked this report as inaccurate."
+      });
+      
+      // Refetch to update with server data
+      await refetchScammer();
+    } catch (error) {
+      console.error("Error disliking scammer:", error);
+      toast({
+        title: "Error",
+        description: "Failed to dislike this report. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleShareScammer = () => {
@@ -154,8 +255,8 @@ const ScammerDetailPage = () => {
     return <div className="text-center py-12">Scammer not found.</div>;
   }
 
-  const agreePercentage = scammer.likes 
-    ? Math.round((scammer.likes / (scammer.likes + scammer.dislikes)) * 100) 
+  const agreePercentage = localLikes > 0 || localDislikes > 0
+    ? Math.round((localLikes / (localLikes + localDislikes)) * 100) 
     : 0;
 
   return (
@@ -183,24 +284,28 @@ const ScammerDetailPage = () => {
               </div>
               
               <div className="flex flex-wrap gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="text-green-600"
+                <Toggle 
+                  pressed={isLiked}
+                  onPressedChange={() => {}}
                   onClick={handleLikeScammer}
+                  className={`${isLiked ? 'bg-green-100 text-green-700' : ''} border border-gray-200`}
+                  size="sm"
                 >
                   <ThumbsUp className="h-4 w-4 mr-2" />
-                  {scammer.likes || 0}
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="text-red-600"
+                  {localLikes}
+                </Toggle>
+                
+                <Toggle 
+                  pressed={isDisliked}
+                  onPressedChange={() => {}}
                   onClick={handleDislikeScammer}
+                  className={`${isDisliked ? 'bg-red-100 text-red-700' : ''} border border-gray-200`}
+                  size="sm"
                 >
                   <ThumbsDown className="h-4 w-4 mr-2" />
-                  {scammer.dislikes || 0}
-                </Button>
+                  {localDislikes}
+                </Toggle>
+                
                 <Button 
                   variant="outline" 
                   size="sm"
@@ -209,6 +314,7 @@ const ScammerDetailPage = () => {
                   <Share2 className="h-4 w-4 mr-2" />
                   Share
                 </Button>
+                
                 <Button 
                   variant="outline" 
                   size="sm"
@@ -216,6 +322,7 @@ const ScammerDetailPage = () => {
                   <Eye className="h-4 w-4 mr-2" />
                   {scammer.views || 0} Views
                 </Button>
+                
                 <Button 
                   variant="outline" 
                   size="sm"
@@ -350,10 +457,10 @@ const ScammerDetailPage = () => {
               <div className="flex justify-between items-center mb-2">
                 <div className="flex items-center text-green-600">
                   <ThumbsUp className="h-4 w-4 mr-1" />
-                  <span>Agree ({scammer.likes || 0})</span>
+                  <span>Agree ({localLikes})</span>
                 </div>
                 <div className="flex items-center text-red-600">
-                  <span>Disagree ({scammer.dislikes || 0})</span>
+                  <span>Disagree ({localDislikes})</span>
                   <ThumbsDown className="h-4 w-4 ml-1" />
                 </div>
               </div>

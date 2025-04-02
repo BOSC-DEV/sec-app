@@ -1,11 +1,14 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, ThumbsUp, ThumbsDown, DollarSign, MessageSquare, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Toggle } from '@/components/ui/toggle';
 import { truncateText } from '@/lib/utils';
 import { Scammer } from '@/types/dataTypes';
 import { useProfile } from '@/contexts/ProfileContext';
+import { likeScammer, dislikeScammer } from '@/services/supabaseService';
+import { toast } from '@/hooks/use-toast';
 
 interface ScammerCardProps {
   scammer: Scammer;
@@ -14,6 +17,111 @@ interface ScammerCardProps {
 const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
   const { profile } = useProfile();
   const isCreator = profile?.wallet_address === scammer.added_by;
+  const [likes, setLikes] = useState(scammer.likes || 0);
+  const [dislikes, setDislikes] = useState(scammer.dislikes || 0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isDisliked, setIsDisliked] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLike = async (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent navigation
+    e.stopPropagation(); // Prevent event bubbling
+    
+    if (!profile?.wallet_address) {
+      toast({
+        title: "Authentication required",
+        description: "Please connect your wallet to like this report.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (isLoading) return;
+    
+    setIsLoading(true);
+    try {
+      await likeScammer(scammer.id, profile.wallet_address);
+      
+      // Toggle like state
+      if (isLiked) {
+        setLikes(prev => Math.max(prev - 1, 0));
+        setIsLiked(false);
+      } else {
+        setLikes(prev => prev + 1);
+        setIsLiked(true);
+        
+        // If it was previously disliked, remove the dislike
+        if (isDisliked) {
+          setDislikes(prev => Math.max(prev - 1, 0));
+          setIsDisliked(false);
+        }
+      }
+      
+      toast({
+        title: isLiked ? "Like removed" : "Report liked",
+        description: isLiked ? "You've removed your like from this report." : "You've marked this report as accurate."
+      });
+    } catch (error) {
+      console.error("Error liking scammer:", error);
+      toast({
+        title: "Error",
+        description: "Failed to like this report. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDislike = async (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent navigation
+    e.stopPropagation(); // Prevent event bubbling
+    
+    if (!profile?.wallet_address) {
+      toast({
+        title: "Authentication required",
+        description: "Please connect your wallet to dislike this report.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (isLoading) return;
+    
+    setIsLoading(true);
+    try {
+      await dislikeScammer(scammer.id, profile.wallet_address);
+      
+      // Toggle dislike state
+      if (isDisliked) {
+        setDislikes(prev => Math.max(prev - 1, 0));
+        setIsDisliked(false);
+      } else {
+        setDislikes(prev => prev + 1);
+        setIsDisliked(true);
+        
+        // If it was previously liked, remove the like
+        if (isLiked) {
+          setLikes(prev => Math.max(prev - 1, 0));
+          setIsLiked(false);
+        }
+      }
+      
+      toast({
+        title: isDisliked ? "Dislike removed" : "Report disliked",
+        description: isDisliked ? "You've removed your dislike from this report." : "You've marked this report as inaccurate."
+      });
+    } catch (error) {
+      console.error("Error disliking scammer:", error);
+      toast({
+        title: "Error",
+        description: "Failed to dislike this report. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="icc-card overflow-hidden group">
@@ -45,11 +153,11 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
               </span>
               <span className="flex items-center">
                 <ThumbsUp className="h-3.5 w-3.5 mr-1" />
-                {scammer.likes}
+                {likes}
               </span>
               <span className="flex items-center">
                 <ThumbsDown className="h-3.5 w-3.5 mr-1" />
-                {scammer.dislikes}
+                {dislikes}
               </span>
               <span className="flex items-center">
                 <MessageSquare className="h-3.5 w-3.5 mr-1" />
@@ -61,14 +169,22 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
       </Link>
       
       <div className="p-4 pt-0 mt-2 border-t border-gray-100 flex justify-between">
-        <Button variant="outline" size="sm" className="text-xs">
+        <Toggle
+          pressed={isLiked}
+          onPressedChange={() => {}}
+          onClick={handleLike}
+          className={`${isLiked ? 'bg-green-100 text-green-700' : ''} border border-gray-200`}
+          size="sm"
+        >
           <ThumbsUp className="h-3.5 w-3.5 mr-1" />
           Agree
-        </Button>
+        </Toggle>
+        
         <Button variant="outline" size="sm" className="text-xs">
           <DollarSign className="h-3.5 w-3.5 mr-1" />
           Add Bounty
         </Button>
+        
         {isCreator ? (
           <Link to={`/report/${scammer.id}`}>
             <Button variant="outline" size="sm" className="text-xs">
@@ -77,10 +193,16 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
             </Button>
           </Link>
         ) : (
-          <Button variant="outline" size="sm" className="text-xs">
+          <Toggle
+            pressed={isDisliked}
+            onPressedChange={() => {}}
+            onClick={handleDislike}
+            className={`${isDisliked ? 'bg-red-100 text-red-700' : ''} border border-gray-200`}
+            size="sm"
+          >
             <ThumbsDown className="h-3.5 w-3.5 mr-1" />
             Disagree
-          </Button>
+          </Toggle>
         )}
       </div>
     </div>
