@@ -27,8 +27,8 @@ const Header = () => {
           <Link to="/" className="flex items-center space-x-2">
             <ICCLogo className="h-10 w-auto" />
             <div className="font-serif">
-              <div className="text-lg font-bold leading-tight">International</div>
-              <div className="text-xl font-bold leading-tight">Cyber-crime Commission</div>
+              <div className="text-lg font-bold leading-tight">Scams &</div>
+              <div className="text-xl font-bold leading-tight">E-Crime Commission</div>
             </div>
           </Link>
 

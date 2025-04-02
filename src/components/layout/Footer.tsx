@@ -13,8 +13,8 @@ const Footer = () => {
             <Link to="/" className="flex items-center space-x-2 mb-4">
               <ICCLogo className="h-10 w-auto" />
               <div className="font-serif">
-                <div className="text-sm font-bold leading-tight">International</div>
-                <div className="text-base font-bold leading-tight">Cyber-crime Commission</div>
+                <div className="text-sm font-bold leading-tight">Scams &</div>
+                <div className="text-base font-bold leading-tight">E-Crime Commission</div>
               </div>
             </Link>
             <p className="text-sm text-gray-300 mt-4">
@@ -46,7 +46,7 @@ const Footer = () => {
           <div>
             <h4 className="text-white font-serif font-bold mb-4">Resources</h4>
             <ul className="space-y-2">
-              <li><Link to="/about" className="text-gray-300 hover:text-icc-gold text-sm">About ICC</Link></li>
+              <li><Link to="/about" className="text-gray-300 hover:text-icc-gold text-sm">About SEC</Link></li>
               <li><Link to="/faq" className="text-gray-300 hover:text-icc-gold text-sm">FAQ</Link></li>
               <li><Link to="/contact" className="text-gray-300 hover:text-icc-gold text-sm">Contact Us</Link></li>
               <li><Link to="/safety" className="text-gray-300 hover:text-icc-gold text-sm">Safety Guidelines</Link></li>
@@ -66,7 +66,7 @@ const Footer = () => {
         
         <div className="border-t border-icc-blue-light mt-8 pt-8 text-sm text-gray-300">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p>&copy; {new Date().getFullYear()} International Cyber-crime Commission. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} Scams & E-Crime Commission. All rights reserved.</p>
             <p className="mt-2 md:mt-0">
               This site is for informational purposes only. 
               <span className="block md:inline md:ml-1">Not affiliated with any government entity.</span>
