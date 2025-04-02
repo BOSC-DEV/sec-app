@@ -98,9 +98,7 @@ const Index = () => {
               <AlertTriangle className="h-10 w-10 mr-4 flex-shrink-0" />
               <div>
                 <h3 className="text-xl font-serif font-bold text-white">Responsible Reporting</h3>
-                <p className="text-gray-100 max-w-2xl">
-                  This platform is for informational purposes only. Always verify information and follow proper legal channels for reporting crimes.
-                </p>
+                <p className="text-gray-100 max-w-2xl">This platform is for informational purposes only. Always verify and follow all legal channels for reporting crimes.</p>
               </div>
             </div>
             <Button asChild variant="outline" className="border-white text-black hover:bg-white/10 hover:text-white">
