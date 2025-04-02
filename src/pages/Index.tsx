@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import Hero from '@/components/common/Hero';
 import ScammerCard from '@/components/common/ScammerCard';
@@ -25,7 +24,6 @@ const Index = () => {
   return (
     <div>
       <Hero 
-        title="International Cyber-crime Commission"
         subtitle="Tracking and exposing cryptocurrency scammers worldwide through decentralized community intelligence."
       />
 

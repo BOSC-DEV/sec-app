@@ -25,7 +25,7 @@ const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
             />
           </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white mb-6">
-            {title}
+            Scams & E-crimes Commission
           </h1>
           <p className="text-xl md:text-2xl text-gray-100 mb-8 max-w-2xl mx-auto">
             {subtitle}
