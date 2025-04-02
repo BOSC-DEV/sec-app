@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Comment, Profile, Scammer } from '@/types/dataTypes';
 
@@ -34,7 +33,6 @@ export const getScammerById = async (id: string): Promise<Scammer | null> => {
     throw error;
   }
   
-  // Increment view count
   if (data) {
     const { error: updateError } = await supabase
       .from('scammers')
@@ -45,7 +43,6 @@ export const getScammerById = async (id: string): Promise<Scammer | null> => {
       console.error('Error updating scammer views:', updateError);
     }
     
-    // Log view in scammer_views table
     const ipHash = 'anonymous'; // In a real app, you might hash the IP address
     const { error: viewError } = await supabase
       .from('scammer_views')
@@ -75,6 +72,22 @@ export const getTopScammers = async (limit: number = 3): Promise<Scammer[]> => {
   return data || [];
 };
 
+export const getScammersByReporter = async (walletAddress: string): Promise<Scammer[]> => {
+  const { data, error } = await supabase
+    .from('scammers')
+    .select('*')
+    .eq('added_by', walletAddress)
+    .is('deleted_at', null)
+    .order('date_added', { ascending: false });
+  
+  if (error) {
+    console.error('Error fetching scammers by reporter:', error);
+    throw error;
+  }
+  
+  return data || [];
+};
+
 // Comments Service
 export const getScammerComments = async (scammerId: string): Promise<Comment[]> => {
   const { data, error } = await supabase
@@ -98,7 +111,6 @@ export const addComment = async (comment: {
   author_name: string,
   author_profile_pic?: string
 }): Promise<Comment> => {
-  // Generate a unique ID for the comment
   const id = `cmt-${Date.now()}`;
   
   const { data, error } = await supabase
@@ -157,7 +169,6 @@ export const getProfileByWallet = async (walletAddress: string): Promise<Profile
 
 // Interaction Service
 export const likeScammer = async (scammerId: string, walletAddress: string): Promise<void> => {
-  // First, check if there's an existing interaction
   const { data: existingInteraction } = await supabase
     .from('user_scammer_interactions')
     .select('*')
@@ -166,7 +177,6 @@ export const likeScammer = async (scammerId: string, walletAddress: string): Pro
     .maybeSingle();
 
   if (existingInteraction) {
-    // Update existing interaction
     await supabase
       .from('user_scammer_interactions')
       .update({ 
@@ -176,7 +186,6 @@ export const likeScammer = async (scammerId: string, walletAddress: string): Pro
       })
       .eq('id', existingInteraction.id);
   } else {
-    // Create new interaction
     await supabase
       .from('user_scammer_interactions')
       .insert({ 
@@ -187,12 +196,10 @@ export const likeScammer = async (scammerId: string, walletAddress: string): Pro
       });
   }
 
-  // Update scammer like counts
   await updateScammerLikes(scammerId);
 };
 
 export const dislikeScammer = async (scammerId: string, walletAddress: string): Promise<void> => {
-  // First, check if there's an existing interaction
   const { data: existingInteraction } = await supabase
     .from('user_scammer_interactions')
     .select('*')
@@ -201,7 +208,6 @@ export const dislikeScammer = async (scammerId: string, walletAddress: string): 
     .maybeSingle();
 
   if (existingInteraction) {
-    // Update existing interaction
     await supabase
       .from('user_scammer_interactions')
       .update({ 
@@ -211,7 +217,6 @@ export const dislikeScammer = async (scammerId: string, walletAddress: string): 
       })
       .eq('id', existingInteraction.id);
   } else {
-    // Create new interaction
     await supabase
       .from('user_scammer_interactions')
       .insert({ 
@@ -222,13 +227,10 @@ export const dislikeScammer = async (scammerId: string, walletAddress: string): 
       });
   }
 
-  // Update scammer like counts
   await updateScammerLikes(scammerId);
 };
 
-// Helper function to update scammer like/dislike counts
 const updateScammerLikes = async (scammerId: string): Promise<void> => {
-  // Count likes
   const { count: likeCount, error: likeError } = await supabase
     .from('user_scammer_interactions')
     .select('*', { count: 'exact', head: true })
@@ -240,7 +242,6 @@ const updateScammerLikes = async (scammerId: string): Promise<void> => {
     return;
   }
 
-  // Count dislikes
   const { count: dislikeCount, error: dislikeError } = await supabase
     .from('user_scammer_interactions')
     .select('*', { count: 'exact', head: true })
@@ -252,7 +253,6 @@ const updateScammerLikes = async (scammerId: string): Promise<void> => {
     return;
   }
 
-  // Update scammer record
   const { error: updateError } = await supabase
     .from('scammers')
     .update({ 

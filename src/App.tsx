@@ -11,6 +11,7 @@ import ScammerDetailPage from "./pages/ScammerDetailPage";
 import ReportPage from "./pages/ReportPage";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import ProfilePage from "./pages/ProfilePage";
+import PublicProfilePage from "./pages/PublicProfilePage";
 import NotFound from "./pages/NotFound";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ProfileProvider } from "./contexts/ProfileContext";
@@ -39,6 +40,7 @@ const App = () => (
               <Route path="/report" element={<ReportPage />} />
               <Route path="/leaderboard" element={<LeaderboardPage />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/:username" element={<PublicProfilePage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>

@@ -78,6 +78,22 @@ export const getProfileByWallet = async (walletAddress: string): Promise<Profile
   return data;
 };
 
+// Get profile by username
+export const getProfileByUsername = async (username: string): Promise<Profile | null> => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('username', username)
+    .maybeSingle();
+  
+  if (error) {
+    console.error('Error fetching profile by username:', error);
+    throw error;
+  }
+  
+  return data;
+};
+
 // Create or update profile
 export const saveProfile = async (profile: Partial<Profile>): Promise<Profile> => {
   // Check if the profile already exists
