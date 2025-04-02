@@ -10,8 +10,10 @@ import MostWantedPage from "./pages/MostWantedPage";
 import ScammerDetailPage from "./pages/ScammerDetailPage";
 import ReportPage from "./pages/ReportPage";
 import LeaderboardPage from "./pages/LeaderboardPage";
+import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { ProfileProvider } from "./contexts/ProfileContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,20 +27,23 @@ const queryClient = new QueryClient({
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/most-wanted" element={<MostWantedPage />} />
-            <Route path="/scammer/:id" element={<ScammerDetailPage />} />
-            <Route path="/report" element={<ReportPage />} />
-            <Route path="/leaderboard" element={<LeaderboardPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Layout>
-      </BrowserRouter>
+      <ProfileProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/most-wanted" element={<MostWantedPage />} />
+              <Route path="/scammer/:id" element={<ScammerDetailPage />} />
+              <Route path="/report" element={<ReportPage />} />
+              <Route path="/leaderboard" element={<LeaderboardPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Layout>
+        </BrowserRouter>
+      </ProfileProvider>
     </TooltipProvider>
     <ReactQueryDevtools initialIsOpen={false} />
   </QueryClientProvider>

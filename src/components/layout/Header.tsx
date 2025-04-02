@@ -1,25 +1,22 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Menu, X, Search, User, Shield } from 'lucide-react';
 import ICCLogo from '../common/ICCLogo';
+import { useProfile } from '@/contexts/ProfileContext';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
+  const { isConnected, connectWallet, disconnectWallet, profile } = useProfile();
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const connectWallet = () => {
-    // This would integrate with Phantom wallet in a real implementation
-    setIsConnected(true);
-  };
-
-  const disconnectWallet = () => {
-    setIsConnected(false);
+  const handleProfileClick = () => {
+    navigate('/profile');
   };
 
   return (
@@ -51,17 +48,20 @@ const Header = () => {
             
             {isConnected ? (
               <div className="flex items-center space-x-3">
-                <Link to="/profile">
-                  <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light">
-                    <User className="h-5 w-5" />
-                  </Button>
-                </Link>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-white hover:bg-icc-blue-light"
+                  onClick={handleProfileClick}
+                >
+                  <User className="h-5 w-5" />
+                </Button>
                 <Button 
                   variant="outline" 
                   className="border-icc-gold text-icc-gold hover:bg-icc-blue-light"
                   onClick={disconnectWallet}
                 >
-                  Disconnect
+                  {profile ? profile.display_name.substring(0, 10) || 'Disconnect' : 'Disconnect'}
                 </Button>
               </div>
             ) : (
@@ -102,18 +102,21 @@ const Header = () => {
                 
                 {isConnected ? (
                   <div className="flex items-center space-x-2">
-                    <Link to="/profile">
-                      <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue">
-                        <User className="h-5 w-5" />
-                      </Button>
-                    </Link>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="text-white hover:bg-icc-blue"
+                      onClick={handleProfileClick}
+                    >
+                      <User className="h-5 w-5" />
+                    </Button>
                     <Button 
                       variant="outline" 
                       className="border-icc-gold text-icc-gold hover:bg-icc-blue"
                       onClick={disconnectWallet}
                       size="sm"
                     >
-                      Disconnect
+                      {profile ? (profile.display_name.substring(0, 6) || 'Disconnect') : 'Disconnect'}
                     </Button>
                   </div>
                 ) : (
