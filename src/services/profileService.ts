@@ -33,6 +33,36 @@ export const uploadProfilePicture = async (walletAddress: string, file: File): P
   }
 };
 
+// Upload scammer photo
+export const uploadScammerPhoto = async (file: File): Promise<string | null> => {
+  try {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `scammer-${Date.now()}.${fileExt}`;
+    
+    // Upload the file to the scammer_photos bucket
+    const { error: uploadError } = await supabase.storage
+      .from('scammer_photos')
+      .upload(fileName, file, {
+        upsert: true
+      });
+      
+    if (uploadError) {
+      console.error('Error uploading scammer photo:', uploadError);
+      throw uploadError;
+    }
+    
+    // Get the public URL
+    const { data } = supabase.storage
+      .from('scammer_photos')
+      .getPublicUrl(fileName);
+      
+    return data.publicUrl;
+  } catch (error) {
+    console.error('Error in uploadScammerPhoto:', error);
+    return null;
+  }
+};
+
 // Get profile by wallet address
 export const getProfileByWallet = async (walletAddress: string): Promise<Profile | null> => {
   const { data, error } = await supabase

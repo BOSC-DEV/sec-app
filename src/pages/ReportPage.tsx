@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import Hero from '@/components/common/Hero';
 import { Button } from '@/components/ui/button';
+import { Trash, Plus, Upload, Image } from 'lucide-react';
 import {
   Form,
   FormControl,
@@ -18,6 +19,8 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { uploadScammerPhoto } from '@/services/profileService';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -26,14 +29,11 @@ const formSchema = z.object({
   accusedOf: z.string().min(10, {
     message: "Description must be at least 10 characters.",
   }),
-  walletAddress: z.string().optional(),
-  photoUrl: z.string().url({
-    message: "Please enter a valid URL for the photo.",
-  }).optional().or(z.literal('')),
-  links: z.string().optional(),
-  aliases: z.string().optional(),
+  walletAddresses: z.array(z.string()),
+  photoUrl: z.string().optional(),
+  links: z.array(z.string()),
+  aliases: z.array(z.string()),
   accomplices: z.string().optional(),
-  bountyAmount: z.coerce.number().min(0).default(0),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -42,36 +42,99 @@ const ReportPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
       accusedOf: '',
-      walletAddress: '',
+      walletAddresses: [''],
       photoUrl: '',
-      links: '',
-      aliases: '',
+      links: [''],
+      aliases: [''],
       accomplices: '',
-      bountyAmount: 0,
     },
   });
+
+  const handlePhotoClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: 'File too large',
+        description: 'Please upload an image smaller than 5MB',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: 'Invalid file type',
+        description: 'Please upload an image file',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setPhotoFile(file);
+    
+    // Create a preview URL
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPhotoPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const addField = (fieldName: 'walletAddresses' | 'links' | 'aliases') => {
+    const currentValues = form.getValues(fieldName);
+    form.setValue(fieldName, [...currentValues, '']);
+  };
+
+  const removeField = (fieldName: 'walletAddresses' | 'links' | 'aliases', index: number) => {
+    const currentValues = form.getValues(fieldName);
+    if (currentValues.length > 1) {
+      form.setValue(
+        fieldName,
+        currentValues.filter((_, i) => i !== index)
+      );
+    }
+  };
 
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
     
-    // This is a placeholder for the actual submission logic
-    // In a real implementation, this would connect to Supabase
     try {
-      // Convert comma-separated strings to arrays
-      const formattedValues = {
+      // Upload photo if there is one
+      let photoUrl = '';
+      if (photoFile) {
+        const uploadedUrl = await uploadScammerPhoto(photoFile);
+        if (uploadedUrl) {
+          photoUrl = uploadedUrl;
+        }
+      }
+      
+      // Filter out empty entries
+      const filteredValues = {
         ...values,
-        links: values.links ? values.links.split(',').map(item => item.trim()) : [],
-        aliases: values.aliases ? values.aliases.split(',').map(item => item.trim()) : [],
-        accomplices: values.accomplices ? values.accomplices.split(',').map(item => item.trim()) : [],
+        photoUrl,
+        walletAddresses: values.walletAddresses.filter(address => address.trim() !== ''),
+        links: values.links.filter(link => link.trim() !== ''),
+        aliases: values.aliases.filter(alias => alias.trim() !== ''),
       };
       
-      console.log('Submitting scammer report:', formattedValues);
+      console.log('Submitting scammer report:', filteredValues);
       
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -124,6 +187,47 @@ const ReportPage = () => {
                 )}
               />
               
+              <FormItem>
+                <FormLabel>Scammer's Photo</FormLabel>
+                <div className="mt-2 flex items-center gap-x-3">
+                  <div 
+                    onClick={handlePhotoClick}
+                    className="relative group cursor-pointer"
+                  >
+                    <Avatar className="h-20 w-20 border border-gray-200">
+                      {photoPreview ? (
+                        <AvatarImage src={photoPreview} alt="Preview" />
+                      ) : (
+                        <AvatarFallback className="bg-gray-100 text-gray-400">
+                          <Image className="h-8 w-8" />
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Upload className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handlePhotoClick}
+                  >
+                    {photoFile ? 'Change Photo' : 'Upload Photo'}
+                  </Button>
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    className="hidden" 
+                    accept="image/*"
+                    onChange={handleFileChange}
+                  />
+                </div>
+                <FormDescription>
+                  Upload a photo of the scammer, if available.
+                </FormDescription>
+              </FormItem>
+              
               <FormField
                 control={form.control}
                 name="accusedOf"
@@ -145,106 +249,144 @@ const ReportPage = () => {
                 )}
               />
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="walletAddress"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Wallet Address</FormLabel>
-                      <FormControl>
-                        <Input placeholder="0x..." {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Crypto wallet(s) used in the scam, if known.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="photoUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Photo URL</FormLabel>
-                      <FormControl>
-                        <Input placeholder="https://..." {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Link to a photo of the scammer, if available.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              {/* Wallet Addresses */}
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <FormLabel>Wallet Addresses</FormLabel>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => addField('walletAddresses')}
+                  >
+                    <Plus className="h-4 w-4 mr-1" /> Add Address
+                  </Button>
+                </div>
+                {form.getValues('walletAddresses').map((_, index) => (
+                  <div key={`wallet-${index}`} className="flex gap-2 mb-2">
+                    <FormField
+                      control={form.control}
+                      name={`walletAddresses.${index}`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            <Input placeholder="0x..." {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => removeField('walletAddresses', index)}
+                      disabled={form.getValues('walletAddresses').length <= 1}
+                    >
+                      <Trash className="h-4 w-4 text-gray-500" />
+                    </Button>
+                  </div>
+                ))}
+                <FormDescription>
+                  Crypto wallet(s) used in the scam, if known.
+                </FormDescription>
               </div>
               
-              <FormField
-                control={form.control}
-                name="links"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Related Links</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://example.com, https://another.com" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      Websites, social media profiles, etc. (comma-separated).
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="aliases"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Known Aliases</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Alias 1, Alias 2" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Other names they go by (comma-separated).
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="accomplices"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Known Accomplices</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Name 1, Name 2" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Others involved in the scam (comma-separated).
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              {/* Links */}
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <FormLabel>Related Links</FormLabel>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => addField('links')}
+                  >
+                    <Plus className="h-4 w-4 mr-1" /> Add Link
+                  </Button>
+                </div>
+                {form.getValues('links').map((_, index) => (
+                  <div key={`link-${index}`} className="flex gap-2 mb-2">
+                    <FormField
+                      control={form.control}
+                      name={`links.${index}`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            <Input placeholder="https://example.com" {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => removeField('links', index)}
+                      disabled={form.getValues('links').length <= 1}
+                    >
+                      <Trash className="h-4 w-4 text-gray-500" />
+                    </Button>
+                  </div>
+                ))}
+                <FormDescription>
+                  Websites, social media profiles, etc.
+                </FormDescription>
               </div>
               
+              {/* Aliases */}
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <FormLabel>Known Aliases</FormLabel>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => addField('aliases')}
+                  >
+                    <Plus className="h-4 w-4 mr-1" /> Add Alias
+                  </Button>
+                </div>
+                {form.getValues('aliases').map((_, index) => (
+                  <div key={`alias-${index}`} className="flex gap-2 mb-2">
+                    <FormField
+                      control={form.control}
+                      name={`aliases.${index}`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            <Input placeholder="Other name they go by" {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => removeField('aliases', index)}
+                      disabled={form.getValues('aliases').length <= 1}
+                    >
+                      <Trash className="h-4 w-4 text-gray-500" />
+                    </Button>
+                  </div>
+                ))}
+                <FormDescription>
+                  Other names they go by.
+                </FormDescription>
+              </div>
+              
+              {/* Accomplices */}
               <FormField
                 control={form.control}
-                name="bountyAmount"
+                name="accomplices"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Bounty Amount (USD)</FormLabel>
+                    <FormLabel>Known Accomplices</FormLabel>
                     <FormControl>
-                      <Input type="number" min="0" step="100" {...field} />
+                      <Input placeholder="Name 1, Name 2" {...field} />
                     </FormControl>
                     <FormDescription>
-                      Optional bounty for catching this scammer.
+                      Others involved in the scam (comma-separated).
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
