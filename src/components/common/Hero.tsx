@@ -18,7 +18,11 @@ const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
       <div className="icc-container py-16 md:py-24 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
           <div className="flex justify-center mb-6">
-            <ICCLogo className="h-20 w-20" />
+            <img 
+              src="/lovable-uploads/c850a89f-266d-4c68-abc5-e825eb8d23a5.png" 
+              alt="SEC Logo" 
+              className="h-32 w-32 object-contain"
+            />
           </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white mb-6">
             {title}
