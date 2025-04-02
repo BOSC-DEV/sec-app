@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, ThumbsUp, ThumbsDown, DollarSign, MessageSquare, Edit } from 'lucide-react';
@@ -9,6 +10,7 @@ import { useProfile } from '@/contexts/ProfileContext';
 import { likeScammer, dislikeScammer, getProfileByWallet } from '@/services/supabaseService';
 import { toast } from '@/hooks/use-toast';
 import { Profile } from '@/types/dataTypes';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ScammerCardProps {
   scammer: Scammer;
