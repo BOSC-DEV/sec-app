@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, ThumbsUp, ThumbsDown, DollarSign, MessageSquare, Edit } from 'lucide-react';
@@ -298,7 +297,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
           size="sm"
         >
           <ThumbsUp className="h-3.5 w-3.5 mr-1" />
-          Agree
+          Agree {likes > 0 && <span className="ml-1">{likes}</span>}
         </Toggle>
         
         <Button variant="outline" size="sm" className="text-xs">
@@ -322,7 +321,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
             size="sm"
           >
             <ThumbsDown className="h-3.5 w-3.5 mr-1" />
-            Disagree
+            Disagree {dislikes > 0 && <span className="ml-1">{dislikes}</span>}
           </Toggle>
         )}
       </div>
