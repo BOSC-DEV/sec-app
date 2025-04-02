@@ -84,9 +84,7 @@ const Index = () => {
                 <DollarSign className="h-8 w-8 text-white" />
               </div>
               <h3 className="text-xl font-serif font-bold text-icc-blue mb-3">Incentivize</h3>
-              <p className="text-icc-gray">
-                Bounties are placed on confirmed scammers, incentivizing the community to provide additional information.
-              </p>
+              <p className="text-icc-gray">Bounties are placed on confirmed scammers, incentivizing the community to serve social justice.</p>
             </div>
           </div>
         </div>
