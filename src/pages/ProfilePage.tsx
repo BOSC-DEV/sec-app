@@ -1,9 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProfile } from '@/contexts/ProfileContext';
 import { saveProfile } from '@/services/profileService';
-import { Twitter, Globe } from 'lucide-react';
+import { Twitter, Globe, Camera, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,6 +12,7 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, For
 import { useForm } from 'react-hook-form';
 import { toast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface ProfileFormValues {
   display_name: string;
@@ -22,9 +23,11 @@ interface ProfileFormValues {
 }
 
 const ProfilePage = () => {
-  const { isConnected, walletAddress, profile, isLoading, refreshProfile } = useProfile();
+  const { isConnected, walletAddress, profile, isLoading, refreshProfile, uploadAvatar } = useProfile();
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<ProfileFormValues>({
     defaultValues: {
@@ -46,6 +49,7 @@ const ProfilePage = () => {
   // Load profile data into form
   useEffect(() => {
     if (profile) {
+      setAvatarUrl(profile.profile_pic_url || null);
       form.reset({
         display_name: profile.display_name || '',
         username: profile.username || '',
@@ -55,6 +59,44 @@ const ProfilePage = () => {
       });
     }
   }, [profile, form]);
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: 'File too large',
+        description: 'Please upload an image smaller than 2MB',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: 'Invalid file type',
+        description: 'Please upload an image file',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      const publicUrl = await uploadAvatar(file);
+      if (publicUrl) {
+        setAvatarUrl(publicUrl);
+      }
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+    }
+  };
 
   const onSubmit = async (data: ProfileFormValues) => {
     if (!walletAddress) return;
@@ -71,6 +113,7 @@ const ProfilePage = () => {
         bio: data.bio,
         x_link: data.x_link,
         website_link: data.website_link,
+        profile_pic_url: avatarUrl,
         created_at: profile?.created_at || new Date().toISOString(),
       });
       
@@ -111,6 +154,9 @@ const ProfilePage = () => {
   }
 
   const isNewProfile = !profile;
+  const getInitials = (name: string) => {
+    return name?.substring(0, 2).toUpperCase() || '👤';
+  };
 
   return (
     <div className="container py-10">
@@ -133,6 +179,30 @@ const ProfilePage = () => {
           )}
         </CardHeader>
         <CardContent>
+          <div className="flex justify-center mb-6">
+            <div className="relative group">
+              <Avatar className="h-24 w-24 cursor-pointer">
+                <AvatarImage src={avatarUrl || undefined} alt="Profile" />
+                <AvatarFallback className="bg-icc-blue text-white text-xl">
+                  {getInitials(form.getValues().display_name)}
+                </AvatarFallback>
+              </Avatar>
+              <div 
+                className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                onClick={handleAvatarClick}
+              >
+                <Camera className="h-8 w-8 text-white" />
+              </div>
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                className="hidden" 
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+            </div>
+          </div>
+
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField

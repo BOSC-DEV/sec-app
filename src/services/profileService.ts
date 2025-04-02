@@ -2,6 +2,37 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Profile } from '@/types/dataTypes';
 
+// Upload profile picture
+export const uploadProfilePicture = async (walletAddress: string, file: File): Promise<string | null> => {
+  try {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${walletAddress}-${Date.now()}.${fileExt}`;
+    const filePath = `${walletAddress}/${fileName}`;
+    
+    // Upload the file to the profile_pictures bucket
+    const { error: uploadError } = await supabase.storage
+      .from('profile_pictures')
+      .upload(filePath, file, {
+        upsert: true
+      });
+      
+    if (uploadError) {
+      console.error('Error uploading profile picture:', uploadError);
+      throw uploadError;
+    }
+    
+    // Get the public URL
+    const { data } = supabase.storage
+      .from('profile_pictures')
+      .getPublicUrl(filePath);
+      
+    return data.publicUrl;
+  } catch (error) {
+    console.error('Error in uploadProfilePicture:', error);
+    return null;
+  }
+};
+
 // Get profile by wallet address
 export const getProfileByWallet = async (walletAddress: string): Promise<Profile | null> => {
   const { data, error } = await supabase

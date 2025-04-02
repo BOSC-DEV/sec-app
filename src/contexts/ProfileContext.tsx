@@ -1,7 +1,7 @@
 
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { Profile } from '@/types/dataTypes';
-import { getProfileByWallet } from '@/services/profileService';
+import { getProfileByWallet, uploadProfilePicture } from '@/services/profileService';
 import { toast } from '@/hooks/use-toast';
 
 interface ProfileContextType {
@@ -12,6 +12,7 @@ interface ProfileContextType {
   connectWallet: () => Promise<void>;
   disconnectWallet: () => void;
   refreshProfile: () => Promise<void>;
+  uploadAvatar: (file: File) => Promise<string | null>;
 }
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
@@ -44,6 +45,41 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         description: 'Failed to load profile',
         variant: 'destructive',
       });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const uploadAvatar = async (file: File): Promise<string | null> => {
+    if (!walletAddress) {
+      toast({
+        title: 'Error',
+        description: 'You must be connected to upload an avatar',
+        variant: 'destructive',
+      });
+      return null;
+    }
+
+    try {
+      setIsLoading(true);
+      const publicUrl = await uploadProfilePicture(walletAddress, file);
+      
+      if (publicUrl) {
+        toast({
+          title: 'Success',
+          description: 'Profile picture uploaded successfully',
+        });
+      }
+      
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to upload profile picture',
+        variant: 'destructive',
+      });
+      return null;
     } finally {
       setIsLoading(false);
     }
@@ -108,7 +144,8 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     isLoading,
     connectWallet,
     disconnectWallet,
-    refreshProfile
+    refreshProfile,
+    uploadAvatar
   };
 
   return (
