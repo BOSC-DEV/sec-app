@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getScammerById, getScammerComments, addComment } from '@/services/supabaseService';
 import { Scammer, Comment } from '@/types/dataTypes';
@@ -15,7 +14,9 @@ import {
   Share2, 
   Copy, 
   ArrowRight,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Eye,
+  Edit
 } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +26,7 @@ import { useProfile } from '@/contexts/ProfileContext';
 
 const ScammerDetailPage = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [newComment, setNewComment] = useState('');
   const [activeTab, setActiveTab] = useState('identity');
   const { profile } = useProfile();
@@ -48,6 +50,8 @@ const ScammerDetailPage = () => {
     queryKey: ['comments', id],
     queryFn: () => getScammerComments(id || ''),
   });
+
+  const isCreator = profile?.wallet_address === scammer?.added_by;
 
   useEffect(() => {
     if (scammerError) {
@@ -88,6 +92,10 @@ const ScammerDetailPage = () => {
         description: "There was an error adding your comment. Please try again.",
       });
     }
+  };
+
+  const handleEditReport = () => {
+    navigate(`/report/${id}`);
   };
 
   const handleLikeScammer = () => {
@@ -154,17 +162,27 @@ const ScammerDetailPage = () => {
     <div className="bg-gray-50 min-h-screen pt-6 pb-12">
       <div className="max-w-6xl mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Main Content - Left Column */}
           <div className="md:col-span-2">
-            {/* Scammer Header */}
             <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-              <div className="mb-2">
-                <h1 className="text-2xl font-bold">{scammer.name}</h1>
-                <p className="text-gray-600">{scammer.accused_of || "No description provided."}</p>
+              <div className="mb-4 flex justify-between items-start">
+                <div>
+                  <h1 className="text-2xl font-bold">{scammer.name}</h1>
+                  <p className="text-gray-600">{scammer.accused_of || "No description provided."}</p>
+                </div>
+                {isCreator && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex items-center"
+                    onClick={handleEditReport}
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit Report
+                  </Button>
+                )}
               </div>
               
-              {/* Interaction Buttons */}
-              <div className="flex space-x-2">
+              <div className="flex flex-wrap gap-2">
                 <Button 
                   variant="outline" 
                   size="sm" 
@@ -191,10 +209,23 @@ const ScammerDetailPage = () => {
                   <Share2 className="h-4 w-4 mr-2" />
                   Share
                 </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  {scammer.views || 0} Views
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  {comments?.length || 0} Comments
+                </Button>
               </div>
             </div>
 
-            {/* Scammer Photo */}
             <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
               <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden">
                 <img 
@@ -205,7 +236,6 @@ const ScammerDetailPage = () => {
               </div>
             </div>
 
-            {/* Details Card */}
             <div className="bg-white rounded-lg shadow-sm mb-6">
               <div className="p-4">
                 <h2 className="text-lg font-semibold mb-4">Details</h2>
@@ -224,7 +254,6 @@ const ScammerDetailPage = () => {
                 </div>
               </div>
 
-              {/* Tabs */}
               <Tabs defaultValue="identity" value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="grid grid-cols-4 rounded-none">
                   <TabsTrigger value="identity">Identity</TabsTrigger>
@@ -317,7 +346,6 @@ const ScammerDetailPage = () => {
               </Tabs>
             </div>
 
-            {/* Community Agreement */}
             <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
               <div className="flex justify-between items-center mb-2">
                 <div className="flex items-center text-green-600">
@@ -335,7 +363,6 @@ const ScammerDetailPage = () => {
               </p>
             </div>
 
-            {/* Comments Section */}
             <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold flex items-center">
@@ -347,7 +374,6 @@ const ScammerDetailPage = () => {
                 </span>
               </div>
               
-              {/* Comment Form */}
               <form onSubmit={handleSubmitComment} className="mb-6">
                 <div className="mb-2">
                   <Input
@@ -364,7 +390,6 @@ const ScammerDetailPage = () => {
                 </div>
               </form>
 
-              {/* Display Comments */}
               {isCommentsLoading ? (
                 <div className="text-center py-4">Loading comments...</div>
               ) : comments && comments.length > 0 ? (
@@ -407,7 +432,6 @@ const ScammerDetailPage = () => {
             </div>
           </div>
 
-          {/* Right Column - Bounty Contribution */}
           <div className="md:col-span-1">
             <Card className="bg-amber-50 border-amber-200">
               <CardHeader>
