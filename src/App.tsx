@@ -38,8 +38,10 @@ const App = () => (
               <Route path="/most-wanted" element={<MostWantedPage />} />
               <Route path="/scammer/:id" element={<ScammerDetailPage />} />
               <Route path="/report" element={<ReportPage />} />
+              <Route path="/report/:id" element={<ReportPage />} />
               <Route path="/leaderboard" element={<LeaderboardPage />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/profile/:username" element={<PublicProfilePage />} />
               <Route path="/:username" element={<PublicProfilePage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

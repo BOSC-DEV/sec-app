@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, ThumbsUp, ThumbsDown, DollarSign, MessageSquare, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,8 +7,9 @@ import { Toggle } from '@/components/ui/toggle';
 import { truncateText } from '@/lib/utils';
 import { Scammer } from '@/types/dataTypes';
 import { useProfile } from '@/contexts/ProfileContext';
-import { likeScammer, dislikeScammer } from '@/services/supabaseService';
+import { likeScammer, dislikeScammer, getProfileByWallet } from '@/services/supabaseService';
 import { toast } from '@/hooks/use-toast';
+import { Profile } from '@/types/dataTypes';
 
 interface ScammerCardProps {
   scammer: Scammer;
@@ -22,6 +23,23 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [creatorProfile, setCreatorProfile] = useState<Profile | null>(null);
+
+  // Fetch creator profile on component mount
+  useEffect(() => {
+    const fetchCreatorProfile = async () => {
+      if (scammer.added_by) {
+        try {
+          const profile = await getProfileByWallet(scammer.added_by);
+          setCreatorProfile(profile);
+        } catch (error) {
+          console.error("Error fetching creator profile:", error);
+        }
+      }
+    };
+
+    fetchCreatorProfile();
+  }, [scammer.added_by]);
 
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation
@@ -141,6 +159,23 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
         <div className="p-4">
           <h3 className="text-lg font-serif font-bold text-icc-blue">{scammer.name}</h3>
           <p className="text-sm text-icc-gray mt-1">{truncateText(scammer.accused_of, 100)}</p>
+          
+          {creatorProfile && (
+            <div className="mt-2 flex items-center">
+              <Link 
+                to={`/${creatorProfile.username}`} 
+                className="flex items-center text-xs text-icc-gray-dark hover:text-icc-gold"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <img 
+                  src={creatorProfile.profile_pic_url || '/placeholder.svg'} 
+                  alt={creatorProfile.display_name} 
+                  className="w-5 h-5 rounded-full mr-1"
+                />
+                <span>@{creatorProfile.username || 'anonymous'}</span>
+              </Link>
+            </div>
+          )}
           
           <div className="mt-4 text-xs text-icc-gray-dark flex justify-between items-center">
             <div>
