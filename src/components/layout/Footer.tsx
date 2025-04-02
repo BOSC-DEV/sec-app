@@ -13,8 +13,7 @@ const Footer = () => {
             <Link to="/" className="flex items-center space-x-2 mb-4">
               <ICCLogo className="h-10 w-auto" />
               <div className="font-serif">
-                <div className="text-sm font-bold leading-tight">Scams &</div>
-                <div className="text-base font-bold leading-tight">E-Crime Commission</div>
+                <div className="text-base font-bold leading-tight">Scams & E-Crime Commission</div>
               </div>
             </Link>
             <p className="text-sm text-gray-300 mt-4">
