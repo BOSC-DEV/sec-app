@@ -79,7 +79,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif text-icc-blue dark:text-white font-bold;
+    @apply font-serif text-icc-blue dark:text-white;
   }
 }
 
@@ -101,15 +101,15 @@
   }
 
   .icc-btn-primary {
-    @apply bg-icc-blue hover:bg-icc-blue-light text-white font-medium transition-colors duration-200;
+    @apply bg-icc-blue hover:bg-icc-blue-light text-white transition-colors duration-200;
   }
 
   .icc-btn-secondary {
-    @apply bg-icc-gold hover:bg-icc-gold-light text-icc-blue-dark font-medium transition-colors duration-200;
+    @apply bg-icc-gold hover:bg-icc-gold-light text-icc-blue-dark transition-colors duration-200;
   }
 
   .icc-btn-danger {
-    @apply bg-icc-red hover:bg-icc-red-light text-white font-medium transition-colors duration-200;
+    @apply bg-icc-red hover:bg-icc-red-light text-white transition-colors duration-200;
   }
 
   .icc-section {
@@ -121,10 +121,10 @@
   }
 
   .icc-subtitle {
-    @apply text-xl font-serif text-icc-blue-dark dark:text-gray-100 mb-4;
+    @apply text-xl font-serif text-icc-blue-light dark:text-gray-200 mb-4;
   }
 
   .icc-link {
-    @apply text-icc-blue-dark hover:text-icc-blue dark:text-icc-gold dark:hover:text-icc-gold-light underline;
+    @apply text-icc-blue-light hover:text-icc-blue dark:text-icc-gold dark:hover:text-icc-gold-light underline;
   }
 }
