@@ -6,12 +6,11 @@ import { AlertCircle, Search } from 'lucide-react';
 import ICCLogo from './ICCLogo';
 
 interface HeroProps {
-  title: string;
-  subtitle: string;
+  subtitle?: string;
   showCta?: boolean;
 }
 
-const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
+const Hero: React.FC<HeroProps> = ({ subtitle, showCta = true }) => {
   return (
     <div className="relative bg-icc-blue text-white">
       <div className="absolute inset-0 bg-[url('/images/cyber-pattern.png')] opacity-10"></div>
@@ -28,7 +27,7 @@ const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
             Scams & E-crimes Commission
           </h1>
           <p className="text-xl md:text-2xl text-gray-100 mb-8 max-w-2xl mx-auto">
-            {subtitle}
+            A decentralized crime registry to bring accountability and self govern the new digital world.
           </p>
           
           {showCta && (

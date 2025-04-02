@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import Hero from '@/components/common/Hero';
 import ScammerCard from '@/components/common/ScammerCard';
 import { Button } from '@/components/ui/button';
@@ -23,9 +23,7 @@ const Index = () => {
 
   return (
     <div>
-      <Hero 
-        subtitle="Tracking and exposing cryptocurrency scammers worldwide through decentralized community intelligence."
-      />
+      <Hero />
 
       {/* Featured Scammers Section */}
       <section className="icc-section bg-white">
