@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, ThumbsUp, ThumbsDown, DollarSign, MessageSquare, Edit } from 'lucide-react';
@@ -132,7 +133,6 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
         description: wasLiked ? "You've removed your like from this report." : "You've marked this report as accurate."
       });
       
-      // No need to update the counts from the database since we already updated them optimistically
     } catch (error) {
       console.error("Error liking scammer:", error);
       // Revert UI changes on error
@@ -205,7 +205,6 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
         description: wasDisliked ? "You've removed your dislike from this report." : "You've marked this report as inaccurate."
       });
       
-      // No need to update the counts from the database since we already updated them optimistically
     } catch (error) {
       console.error("Error disliking scammer:", error);
       // Revert UI changes on error
@@ -297,7 +296,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
           size="sm"
         >
           <ThumbsUp className="h-3.5 w-3.5 mr-1" />
-          Agree {likes > 0 && <span className="ml-1">{likes}</span>}
+          Agree{likes > 0 ? ` ${likes}` : ''}
         </Toggle>
         
         <Button variant="outline" size="sm" className="text-xs">
@@ -321,7 +320,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
             size="sm"
           >
             <ThumbsDown className="h-3.5 w-3.5 mr-1" />
-            Disagree {dislikes > 0 && <span className="ml-1">{dislikes}</span>}
+            Disagree{dislikes > 0 ? ` ${dislikes}` : ''}
           </Toggle>
         )}
       </div>

@@ -381,9 +381,10 @@ export const likeScammer = async (scammerId: string, walletAddress: string): Pro
     if (scammerError) {
       console.error('Error fetching updated scammer:', scammerError);
       // Don't throw here, as the main operation succeeded
+    } else {
+      console.log('Updated scammer counts:', updatedScammer);
+      return updatedScammer;
     }
-    
-    console.log('Updated scammer counts:', updatedScammer);
   } catch (error) {
     console.error('Error in likeScammer:', error);
     throw error;
@@ -454,9 +455,10 @@ export const dislikeScammer = async (scammerId: string, walletAddress: string): 
     if (scammerError) {
       console.error('Error fetching updated scammer:', scammerError);
       // Don't throw here, as the main operation succeeded
+    } else {
+      console.log('Updated scammer counts:', updatedScammer);
+      return updatedScammer;
     }
-    
-    console.log('Updated scammer counts:', updatedScammer);
   } catch (error) {
     console.error('Error in dislikeScammer:', error);
     throw error;
