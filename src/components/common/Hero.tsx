@@ -34,7 +34,7 @@ const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
                   View Scammers
                 </Link>
               </Button>
-              <Button asChild className="bg-icc-blue-dark border-2 border-white hover:bg-icc-blue-light text-white text-lg py-6 px-8 font-medium shadow-md">
+              <Button asChild className="bg-icc-blue-dark border-2 border-white hover:bg-icc-blue-light hover:text-white text-white text-lg py-6 px-8 font-medium shadow-md">
                 <Link to="/report">
                   <AlertCircle className="mr-2 h-5 w-5" />
                   Report a Scammer
