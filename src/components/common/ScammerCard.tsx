@@ -43,12 +43,12 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
     fetchCreatorProfile();
   }, [scammer.added_by]);
 
-  // Always display the latest data from the scammer prop
+  // Always update the local state when scammer prop changes
   useEffect(() => {
     setViewCount(scammer.views || 0);
     setLikes(scammer.likes || 0);
     setDislikes(scammer.dislikes || 0);
-  }, [scammer]);
+  }, [scammer.views, scammer.likes, scammer.dislikes]);
 
   // Check if the current user has liked or disliked this scammer
   useEffect(() => {
@@ -98,10 +98,10 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
     
     setIsLoading(true);
     try {
-      // Update UI optimistically
+      // Store current state for toast message
       const wasLiked = isLiked;
-      const wasDisliked = isDisliked;
       
+      // Update UI optimistically
       let newLikes = likes;
       let newDislikes = dislikes;
       
@@ -134,7 +134,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
         setLikes(result.likes || 0);
         setDislikes(result.dislikes || 0);
         
-        // Force update the scammer prop's likes/dislikes
+        // Important: Update the scammer object itself so the UI stays consistent
         scammer.likes = result.likes || 0;
         scammer.dislikes = result.dislikes || 0;
       }
@@ -181,10 +181,10 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
     
     setIsLoading(true);
     try {
-      // Update UI optimistically
+      // Store current state for toast message
       const wasDisliked = isDisliked;
-      const wasLiked = isLiked;
       
+      // Update UI optimistically
       let newDislikes = dislikes;
       let newLikes = likes;
       
@@ -217,7 +217,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
         setLikes(result.likes || 0);
         setDislikes(result.dislikes || 0);
         
-        // Force update the scammer prop's likes/dislikes
+        // Important: Update the scammer object itself so the UI stays consistent
         scammer.likes = result.likes || 0;
         scammer.dislikes = result.dislikes || 0;
       }
@@ -326,7 +326,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
         </Button>
         
         {isCreator ? (
-          <Link to={`/report/${scammer.id}`}>
+          <Link to={`/report/${scammer.id}`} onClick={(e) => e.stopPropagation()}>
             <Button variant="outline" size="sm" className="text-xs">
               <Edit className="h-3.5 w-3.5 mr-1" />
               Edit
