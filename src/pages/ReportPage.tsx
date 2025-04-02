@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
@@ -9,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Form } from '@/components/ui/form';
 import ScammerInfoFields from '@/components/report/ScammerInfoFields';
 import DynamicFieldArray from '@/components/report/DynamicFieldArray';
 import ScammerPhotoUpload from '@/components/report/ScammerPhotoUpload';
@@ -37,7 +39,7 @@ const ReportPage = () => {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>('');
   
-  const { control, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<ReportFormValues>({
+  const form = useForm<ReportFormValues>({
     resolver: zodResolver(reportSchema),
     defaultValues: {
       name: '',
@@ -49,6 +51,8 @@ const ReportPage = () => {
       accomplices: [''],
     }
   });
+  
+  const { control, handleSubmit, reset, setValue, watch, formState: { errors } } = form;
 
   const { data: scammer, isLoading: isLoadingScammer } = useQuery({
     queryKey: ['edit-scammer', id],
@@ -198,52 +202,56 @@ const ReportPage = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Tabs defaultValue="info" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="info">Info</TabsTrigger>
-              <TabsTrigger value="details">Details</TabsTrigger>
-              <TabsTrigger value="media">Media</TabsTrigger>
-            </TabsList>
-            <TabsContent value="info">
-              <ScammerInfoFields control={control} errors={errors} />
-            </TabsContent>
-            <TabsContent value="details">
-              <DynamicFieldArray
-                name="aliases"
-                label="Aliases"
-                control={control}
-                errors={errors}
-                setValue={setValue}
-              />
-              <DynamicFieldArray
-                name="links"
-                label="Links"
-                control={control}
-                errors={errors}
-                setValue={setValue}
-              />
-              <DynamicFieldArray
-                name="accomplices"
-                label="Accomplices"
-                control={control}
-                errors={errors}
-                setValue={setValue}
-              />
-            </TabsContent>
-            <TabsContent value="media">
-              <ScammerPhotoUpload
-                photoPreview={photoPreview}
-                setPhotoPreview={setPhotoPreview}
-                photoFile={photoFile}
-                setPhotoFile={setPhotoFile}
-                setValue={setValue}
-                control={control}
-              />
-            </TabsContent>
-          </Tabs>
+          <Form {...form}>
+            <form onSubmit={handleSubmit(onSubmit)} id="report-form">
+              <Tabs defaultValue="info" className="space-y-4">
+                <TabsList>
+                  <TabsTrigger value="info">Info</TabsTrigger>
+                  <TabsTrigger value="details">Details</TabsTrigger>
+                  <TabsTrigger value="media">Media</TabsTrigger>
+                </TabsList>
+                <TabsContent value="info">
+                  <ScammerInfoFields control={control} errors={errors} />
+                </TabsContent>
+                <TabsContent value="details">
+                  <DynamicFieldArray
+                    name="aliases"
+                    label="Aliases"
+                    control={control}
+                    errors={errors}
+                    setValue={setValue}
+                  />
+                  <DynamicFieldArray
+                    name="links"
+                    label="Links"
+                    control={control}
+                    errors={errors}
+                    setValue={setValue}
+                  />
+                  <DynamicFieldArray
+                    name="accomplices"
+                    label="Accomplices"
+                    control={control}
+                    errors={errors}
+                    setValue={setValue}
+                  />
+                </TabsContent>
+                <TabsContent value="media">
+                  <ScammerPhotoUpload
+                    photoPreview={photoPreview}
+                    setPhotoPreview={setPhotoPreview}
+                    photoFile={photoFile}
+                    setPhotoFile={setPhotoFile}
+                    setValue={setValue}
+                    control={control}
+                  />
+                </TabsContent>
+              </Tabs>
+            </form>
+          </Form>
         </CardContent>
         <CardFooter>
-          <Button disabled={isSubmitting} onClick={handleSubmit(onSubmit)}>
+          <Button form="report-form" disabled={isSubmitting}>
             {isSubmitting ? "Submitting..." : isEditMode ? "Update Report" : "Submit Report"}
           </Button>
         </CardFooter>

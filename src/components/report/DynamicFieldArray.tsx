@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Control, FieldErrors, UseFormSetValue } from 'react-hook-form';
+import { Control, FieldErrors, UseFormSetValue, useWatch } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
@@ -21,17 +21,17 @@ const DynamicFieldArray = ({
   errors,
   setValue,
 }: DynamicFieldArrayProps) => {
+  const fieldValues = useWatch({ control, name }) || [''];
+  
   const addField = () => {
-    const currentValues = control._getWatch(name) || [];
-    setValue(name, [...currentValues, '']);
+    setValue(name, [...fieldValues, '']);
   };
 
   const removeField = (index: number) => {
-    const currentValues = control._getWatch(name) || [];
-    if (currentValues.length > 1) {
+    if (fieldValues.length > 1) {
       setValue(
         name,
-        currentValues.filter((_, i) => i !== index)
+        fieldValues.filter((_, i) => i !== index)
       );
     }
   };
@@ -50,7 +50,7 @@ const DynamicFieldArray = ({
         </Button>
       </div>
       
-      {control._getWatch(name)?.map((_, index) => (
+      {fieldValues.map((_, index) => (
         <div key={`${name}-${index}`} className="flex gap-2 items-center">
           <FormField
             control={control}
@@ -68,7 +68,7 @@ const DynamicFieldArray = ({
             variant="ghost" 
             size="icon"
             onClick={() => removeField(index)}
-            disabled={control._getWatch(name)?.length <= 1}
+            disabled={fieldValues.length <= 1}
           >
             <Trash className="h-4 w-4 text-gray-500" />
           </Button>
