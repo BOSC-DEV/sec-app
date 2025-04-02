@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Profile } from '@/types/dataTypes';
 
@@ -81,37 +80,64 @@ export const getProfileByWallet = async (walletAddress: string): Promise<Profile
 
 // Create or update profile
 export const saveProfile = async (profile: Partial<Profile>): Promise<Profile> => {
-  // Generate a unique ID if one doesn't exist
-  const profileId = profile.id || crypto.randomUUID();
-  
-  const { data, error } = await supabase.rpc('upsert_profile', {
-    profile_id: profileId,
-    profile_display_name: profile.display_name || '',
-    profile_username: profile.username || '',
-    profile_pic_url: profile.profile_pic_url || '',
-    profile_wallet_address: profile.wallet_address || '',
-    profile_created_at: profile.created_at || new Date().toISOString(),
-    profile_x_link: profile.x_link || '',
-    profile_website_link: profile.website_link || '',
-    profile_bio: profile.bio || ''
-  });
-  
-  if (error) {
-    console.error('Error saving profile:', error);
-    throw error;
-  }
-  
-  // Fetch the updated profile
-  const { data: updatedProfile, error: fetchError } = await supabase
+  // Check if the profile already exists
+  const { data: existingProfile, error: checkError } = await supabase
     .from('profiles')
-    .select('*')
+    .select('id')
     .eq('wallet_address', profile.wallet_address)
-    .single();
-    
-  if (fetchError) {
-    console.error('Error fetching updated profile:', fetchError);
-    throw fetchError;
+    .maybeSingle();
+  
+  if (checkError && checkError.code !== 'PGRST116') {
+    console.error('Error checking existing profile:', checkError);
+    throw checkError;
   }
   
-  return updatedProfile;
+  // If profile exists, update it
+  if (existingProfile) {
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({
+        display_name: profile.display_name,
+        username: profile.username,
+        profile_pic_url: profile.profile_pic_url,
+        bio: profile.bio,
+        x_link: profile.x_link,
+        website_link: profile.website_link
+      })
+      .eq('id', existingProfile.id)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error updating profile:', error);
+      throw error;
+    }
+    
+    return data;
+  } 
+  // Otherwise, insert a new profile
+  else {
+    const { data, error } = await supabase
+      .from('profiles')
+      .insert({
+        id: profile.id || crypto.randomUUID(),
+        wallet_address: profile.wallet_address,
+        display_name: profile.display_name,
+        username: profile.username,
+        profile_pic_url: profile.profile_pic_url,
+        bio: profile.bio,
+        x_link: profile.x_link,
+        website_link: profile.website_link,
+        created_at: profile.created_at || new Date().toISOString()
+      })
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error creating profile:', error);
+      throw error;
+    }
+    
+    return data;
+  }
 };
