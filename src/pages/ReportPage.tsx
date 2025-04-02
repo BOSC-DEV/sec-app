@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,7 +23,7 @@ const formSchema = z.object({
   photoUrl: z.string().optional(),
   links: z.array(z.string()),
   aliases: z.array(z.string()),
-  accomplices: z.string().optional(),
+  accomplices: z.array(z.string()),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -43,7 +44,7 @@ const ReportPage = () => {
       photoUrl: '',
       links: [''],
       aliases: [''],
-      accomplices: '',
+      accomplices: [''],
     },
   });
 
@@ -78,6 +79,7 @@ const ReportPage = () => {
         walletAddresses: values.walletAddresses.filter(address => address.trim() !== ''),
         links: values.links.filter(link => link.trim() !== ''),
         aliases: values.aliases.filter(alias => alias.trim() !== ''),
+        accomplices: values.accomplices.filter(accomplice => accomplice.trim() !== ''),
       };
       
       console.log('Submitting scammer report:', filteredValues);
@@ -124,6 +126,24 @@ const ReportPage = () => {
               
               <DynamicFieldArray
                 form={form}
+                fieldName="aliases"
+                label="Known Aliases"
+                placeholder="Other name they go by"
+                description="Other names they go by."
+                buttonLabel="Add Alias"
+              />
+              
+              <DynamicFieldArray
+                form={form}
+                fieldName="accomplices"
+                label="Known Accomplices"
+                placeholder="Name of accomplice"
+                description="Others involved in the scam."
+                buttonLabel="Add Accomplice"
+              />
+              
+              <DynamicFieldArray
+                form={form}
                 fieldName="walletAddresses"
                 label="Wallet Addresses"
                 placeholder="0x..."
@@ -138,15 +158,6 @@ const ReportPage = () => {
                 placeholder="https://example.com"
                 description="Websites, social media profiles, etc."
                 buttonLabel="Add Link"
-              />
-              
-              <DynamicFieldArray
-                form={form}
-                fieldName="aliases"
-                label="Known Aliases"
-                placeholder="Other name they go by"
-                description="Other names they go by."
-                buttonLabel="Add Alias"
               />
               
               <div className="flex justify-end space-x-4">

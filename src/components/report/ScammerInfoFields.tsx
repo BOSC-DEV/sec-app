@@ -57,23 +57,6 @@ const ScammerInfoFields = ({ form, photoPreview, onPhotoChange }: ScammerInfoFie
           </FormItem>
         )}
       />
-      
-      <FormField
-        control={form.control}
-        name="accomplices"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Known Accomplices</FormLabel>
-            <FormControl>
-              <Input placeholder="Name 1, Name 2" {...field} />
-            </FormControl>
-            <FormDescription>
-              Others involved in the scam (comma-separated).
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
     </>
   );
 };
