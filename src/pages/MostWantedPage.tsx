@@ -6,16 +6,27 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getScammers } from '@/services/supabaseService';
-import { Grid, List, Search, SlidersHorizontal } from 'lucide-react';
+import { Grid, Globe, List, Search, SlidersHorizontal } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { Scammer } from '@/types/dataTypes';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 
 const MostWantedPage = () => {
   const [filteredScammers, setFilteredScammers] = useState<Scammer[]>([]);
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('bounty');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [showFilters, setShowFilters] = useState(false);
 
   const { 
@@ -27,35 +38,73 @@ const MostWantedPage = () => {
     queryFn: getScammers,
   });
 
+  const handleSort = (column: string) => {
+    if (sortBy === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortDirection('desc');
+    }
+  };
+
   useEffect(() => {
     // Filter scammers based on search query
     const filtered = scammers.filter(scammer => 
       scammer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (scammer.accused_of && scammer.accused_of.toLowerCase().includes(searchQuery.toLowerCase()))
+      (scammer.accused_of && scammer.accused_of.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (scammer.aliases && scammer.aliases.some(alias => alias.toLowerCase().includes(searchQuery.toLowerCase())))
     );
     
     // Sort filtered scammers
     const sorted = [...filtered].sort((a, b) => {
+      let compareResult = 0;
+      
       switch (sortBy) {
+        case 'rank':
+          compareResult = (filtered.indexOf(a) + 1) - (filtered.indexOf(b) + 1);
+          break;
+        case 'name':
+          compareResult = a.name.localeCompare(b.name);
+          break;
         case 'bounty':
-          return b.bounty_amount - a.bounty_amount;
-        case 'date':
-          return new Date(b.date_added).getTime() - new Date(a.date_added).getTime();
+          compareResult = (b.bounty_amount || 0) - (a.bounty_amount || 0);
+          break;
+        case 'accused_of':
+          compareResult = (a.accused_of || '').localeCompare(b.accused_of || '');
+          break;
+        case 'aliases':
+          compareResult = ((a.aliases || []).join(', ')).localeCompare((b.aliases || []).join(', '));
+          break;
         case 'views':
-          return (b.views || 0) - (a.views || 0);
+          compareResult = (b.views || 0) - (a.views || 0);
+          break;
         case 'likes':
-          return (b.likes || 0) - (a.likes || 0);
+          compareResult = (b.likes || 0) - (a.likes || 0);
+          break;
+        case 'date':
+          compareResult = new Date(b.date_added).getTime() - new Date(a.date_added).getTime();
+          break;
         default:
-          return 0;
+          compareResult = 0;
       }
+      
+      return sortDirection === 'asc' ? compareResult * -1 : compareResult;
     });
     
     setFilteredScammers(sorted);
-  }, [scammers, searchQuery, sortBy]);
+  }, [scammers, searchQuery, sortBy, sortDirection]);
 
   if (error) {
     console.error('Failed to load scammers', error);
   }
+
+  // Helper function to render sort indicator
+  const renderSortIndicator = (columnName: string) => {
+    if (sortBy === columnName) {
+      return <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>;
+    }
+    return null;
+  };
 
   return (
     <div>
@@ -166,16 +215,66 @@ const MostWantedPage = () => {
 
           {/* Scammers List */}
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[1, 2, 3, 4, 5, 6].map((index) => (
-                <div key={index} className="animate-pulse">
-                  <div className="bg-gray-200 aspect-square mb-4"></div>
-                  <div className="h-6 bg-gray-200 rounded mb-2"></div>
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                </div>
-              ))}
-            </div>
+            viewMode === 'grid' ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[1, 2, 3, 4, 5, 6].map((index) => (
+                  <div key={index} className="animate-pulse">
+                    <div className="bg-gray-200 aspect-square mb-4"></div>
+                    <div className="h-6 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="w-full overflow-hidden rounded-lg border">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-amber-50">
+                      <TableHead className="w-12 font-bold text-icc-primary">№</TableHead>
+                      <TableHead className="font-bold text-icc-primary">Outlaw</TableHead>
+                      <TableHead className="font-bold text-icc-primary">Links</TableHead>
+                      <TableHead className="font-bold text-icc-primary">Accused Of</TableHead>
+                      <TableHead className="font-bold text-icc-primary">Aliases</TableHead>
+                      <TableHead className="font-bold text-icc-primary text-center">
+                        <span>💰</span>
+                      </TableHead>
+                      <TableHead className="font-bold text-icc-primary text-center">
+                        <span>👍</span>
+                      </TableHead>
+                      <TableHead className="font-bold text-icc-primary text-center">
+                        <span>👁️</span>
+                      </TableHead>
+                      <TableHead className="font-bold text-icc-primary">Posted</TableHead>
+                      <TableHead></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {[1, 2, 3, 4, 5].map((index) => (
+                      <TableRow key={index}>
+                        <TableCell>
+                          <Skeleton className="h-6 w-6" />
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Skeleton className="h-10 w-10 rounded-full" />
+                            <Skeleton className="h-4 w-32" />
+                          </div>
+                        </TableCell>
+                        <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                        <TableCell className="text-center"><Skeleton className="h-4 w-12 mx-auto" /></TableCell>
+                        <TableCell className="text-center"><Skeleton className="h-4 w-6 mx-auto" /></TableCell>
+                        <TableCell className="text-center"><Skeleton className="h-4 w-6 mx-auto" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                        <TableCell><Skeleton className="h-8 w-8 rounded-full" /></TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )
           ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {filteredScammers.map(scammer => (
@@ -183,60 +282,140 @@ const MostWantedPage = () => {
               ))}
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="bg-gray-50 border-b">
-                    <th className="px-4 py-3 text-left font-serif">Name</th>
-                    <th className="px-4 py-3 text-left font-serif">Accusations</th>
-                    <th className="px-4 py-3 text-left font-serif">Bounty</th>
-                    <th className="px-4 py-3 text-left font-serif">Date Added</th>
-                    <th className="px-4 py-3 text-left font-serif">Stats</th>
-                    <th className="px-4 py-3 text-left font-serif">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredScammers.map(scammer => (
-                    <tr key={scammer.id} className="border-b hover:bg-gray-50">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center">
+            <div className="w-full overflow-hidden rounded-lg border">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-amber-50">
+                    <TableHead 
+                      className="w-12 font-bold text-icc-primary cursor-pointer"
+                      onClick={() => handleSort('rank')}
+                    >
+                      №{renderSortIndicator('rank')}
+                    </TableHead>
+                    <TableHead 
+                      className="font-bold text-icc-primary cursor-pointer"
+                      onClick={() => handleSort('name')}
+                    >
+                      Outlaw{renderSortIndicator('name')}
+                    </TableHead>
+                    <TableHead className="font-bold text-icc-primary">Links</TableHead>
+                    <TableHead 
+                      className="font-bold text-icc-primary cursor-pointer"
+                      onClick={() => handleSort('accused_of')}
+                    >
+                      Accused Of{renderSortIndicator('accused_of')}
+                    </TableHead>
+                    <TableHead 
+                      className="font-bold text-icc-primary cursor-pointer"
+                      onClick={() => handleSort('aliases')}
+                    >
+                      Aliases{renderSortIndicator('aliases')}
+                    </TableHead>
+                    <TableHead 
+                      className="font-bold text-icc-primary text-center cursor-pointer"
+                      onClick={() => handleSort('bounty')}
+                    >
+                      <span>💰</span>{renderSortIndicator('bounty')}
+                    </TableHead>
+                    <TableHead 
+                      className="font-bold text-icc-primary text-center cursor-pointer"
+                      onClick={() => handleSort('likes')}
+                    >
+                      <span>👍</span>{renderSortIndicator('likes')}
+                    </TableHead>
+                    <TableHead 
+                      className="font-bold text-icc-primary text-center cursor-pointer"
+                      onClick={() => handleSort('views')}
+                    >
+                      <span>👁️</span>{renderSortIndicator('views')}
+                    </TableHead>
+                    <TableHead 
+                      className="font-bold text-icc-primary cursor-pointer"
+                      onClick={() => handleSort('date')}
+                    >
+                      Posted{renderSortIndicator('date')}
+                    </TableHead>
+                    <TableHead></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredScammers.map((scammer, index) => (
+                    <TableRow key={scammer.id} className="bg-amber-50/30 hover:bg-amber-50/50">
+                      <TableCell className="font-medium">{index + 1}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
                           <img 
-                            src={scammer.photo_url} 
+                            src={scammer.photo_url || 'public/placeholder.svg'} 
                             alt={scammer.name} 
-                            className="w-10 h-10 rounded-full mr-3"
+                            className="w-10 h-10 rounded-full object-cover border border-amber-200"
                           />
                           <span className="font-medium">{scammer.name}</span>
                         </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <p className="text-sm text-gray-600 line-clamp-2">{scammer.accused_of}</p>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="font-medium text-icc-blue">
-                          ${scammer.bounty_amount.toLocaleString()}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="text-sm text-gray-600">
-                          {new Date(scammer.date_added).toLocaleDateString()}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex space-x-3 text-sm text-gray-600">
-                          <span>👍 {scammer.likes || 0}</span>
-                          <span>👎 {scammer.dislikes || 0}</span>
-                          <span>👁️ {scammer.views || 0}</span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          {scammer.links && scammer.links.length > 0 ? (
+                            scammer.links.map((link, i) => (
+                              <a 
+                                key={i} 
+                                href={link.startsWith('http') ? link : `https://${link}`} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="inline-block p-1 rounded-full bg-amber-100 hover:bg-amber-200"
+                              >
+                                <Globe className="h-4 w-4 text-amber-800" />
+                              </a>
+                            ))
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
                         </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <Button asChild size="sm">
-                          <Link to={`/scammer/${scammer.id}`}>View Details</Link>
+                      </TableCell>
+                      <TableCell className="max-w-[200px] truncate">
+                        {scammer.accused_of || '-'}
+                      </TableCell>
+                      <TableCell>
+                        {scammer.aliases && scammer.aliases.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {scammer.aliases.map((alias, i) => (
+                              <Badge key={i} variant="outline" className="bg-amber-100 hover:bg-amber-200 text-amber-800 border-amber-300">
+                                {alias}
+                              </Badge>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-center font-semibold text-icc-primary">
+                        {scammer.bounty_amount ? `${scammer.bounty_amount} $BOSC` : '0 $BOSC'}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {scammer.likes || 0}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {scammer.views || 0}
+                      </TableCell>
+                      <TableCell>
+                        {new Date(scammer.date_added).toLocaleDateString('en-US', {
+                          month: '2-digit',
+                          day: '2-digit',
+                          year: '2-digit'
+                        })}
+                      </TableCell>
+                      <TableCell>
+                        <Button 
+                          asChild 
+                          size="sm" 
+                          className="rounded-full w-8 h-8 p-0 bg-amber-800 hover:bg-amber-900"
+                        >
+                          <Link to={`/scammer/${scammer.id}`}>?</Link>
                         </Button>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           )}
 
