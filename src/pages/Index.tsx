@@ -1,30 +1,29 @@
-
 import React, { useEffect, useState } from 'react';
 import Hero from '@/components/common/Hero';
 import ScammerCard, { ScammerData } from '@/components/common/ScammerCard';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { getTopScammers } from '@/services/mockData';
+import { getTopScammers, seedInitialData } from '@/services/supabaseService';
 import { Shield, AlertTriangle, ExternalLink, DollarSign } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 const Index = () => {
-  const [topScammers, setTopScammers] = useState<ScammerData[]>([]);
-  const [loading, setLoading] = useState(true);
-
   useEffect(() => {
-    const loadTopScammers = async () => {
-      try {
-        const data = await getTopScammers(3);
-        setTopScammers(data);
-      } catch (error) {
-        console.error('Failed to load top scammers', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadTopScammers();
+    seedInitialData();
   }, []);
+
+  const { 
+    data: topScammers = [], 
+    isLoading,
+    error 
+  } = useQuery({
+    queryKey: ['topScammers'],
+    queryFn: () => getTopScammers(3),
+  });
+
+  if (error) {
+    console.error('Failed to load top scammers', error);
+  }
 
   return (
     <div>
@@ -44,7 +43,7 @@ const Index = () => {
             </p>
           </div>
 
-          {loading ? (
+          {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[1, 2, 3].map((index) => (
                 <div key={index} className="animate-pulse">

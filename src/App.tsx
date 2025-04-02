@@ -9,8 +9,16 @@ import Index from "./pages/Index";
 import MostWantedPage from "./pages/MostWantedPage";
 import ScammerDetailPage from "./pages/ScammerDetailPage";
 import NotFound from "./pages/NotFound";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -28,6 +36,7 @@ const App = () => (
         </Layout>
       </BrowserRouter>
     </TooltipProvider>
+    <ReactQueryDevtools initialIsOpen={false} />
   </QueryClientProvider>
 );
 

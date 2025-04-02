@@ -1,43 +1,35 @@
-
 import React, { useEffect, useState } from 'react';
 import Hero from '@/components/common/Hero';
 import ScammerCard, { ScammerData } from '@/components/common/ScammerCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getScammers } from '@/services/mockData';
+import { getScammers } from '@/services/supabaseService';
 import { Grid, List, Search, SlidersHorizontal } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 
 const MostWantedPage = () => {
-  const [scammers, setScammers] = useState<ScammerData[]>([]);
   const [filteredScammers, setFilteredScammers] = useState<ScammerData[]>([]);
-  const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('bounty');
   const [showFilters, setShowFilters] = useState(false);
 
-  useEffect(() => {
-    const loadScammers = async () => {
-      try {
-        const data = await getScammers();
-        setScammers(data);
-        setFilteredScammers(data);
-      } catch (error) {
-        console.error('Failed to load scammers', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadScammers();
-  }, []);
+  const { 
+    data: scammers = [], 
+    isLoading,
+    error 
+  } = useQuery({
+    queryKey: ['scammers'],
+    queryFn: getScammers,
+  });
 
   useEffect(() => {
     // Filter scammers based on search query
     const filtered = scammers.filter(scammer => 
       scammer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      scammer.accused_of.toLowerCase().includes(searchQuery.toLowerCase())
+      (scammer.accused_of && scammer.accused_of.toLowerCase().includes(searchQuery.toLowerCase()))
     );
     
     // Sort filtered scammers
@@ -48,9 +40,9 @@ const MostWantedPage = () => {
         case 'date':
           return new Date(b.date_added).getTime() - new Date(a.date_added).getTime();
         case 'views':
-          return b.views - a.views;
+          return (b.views || 0) - (a.views || 0);
         case 'likes':
-          return b.likes - a.likes;
+          return (b.likes || 0) - (a.likes || 0);
         default:
           return 0;
       }
@@ -58,6 +50,10 @@ const MostWantedPage = () => {
     
     setFilteredScammers(sorted);
   }, [scammers, searchQuery, sortBy]);
+
+  if (error) {
+    console.error('Failed to load scammers', error);
+  }
 
   return (
     <div>
@@ -167,7 +163,7 @@ const MostWantedPage = () => {
           </div>
 
           {/* Scammers List */}
-          {loading ? (
+          {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[1, 2, 3, 4, 5, 6].map((index) => (
                 <div key={index} className="animate-pulse">
@@ -225,14 +221,14 @@ const MostWantedPage = () => {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex space-x-3 text-sm text-gray-600">
-                          <span>👍 {scammer.likes}</span>
-                          <span>👎 {scammer.dislikes}</span>
-                          <span>👁️ {scammer.views}</span>
+                          <span>👍 {scammer.likes || 0}</span>
+                          <span>👎 {scammer.dislikes || 0}</span>
+                          <span>👁️ {scammer.views || 0}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3">
                         <Button asChild size="sm">
-                          <a href={`/scammer/${scammer.id}`}>View Details</a>
+                          <Link to={`/scammer/${scammer.id}`}>View Details</Link>
                         </Button>
                       </td>
                     </tr>
@@ -243,7 +239,7 @@ const MostWantedPage = () => {
           )}
 
           {/* Empty State */}
-          {!loading && filteredScammers.length === 0 && (
+          {!isLoading && filteredScammers.length === 0 && (
             <div className="text-center py-12">
               <div className="mb-4">
                 <Search className="h-12 w-12 mx-auto text-gray-400" />
