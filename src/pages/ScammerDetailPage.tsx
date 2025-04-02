@@ -99,7 +99,7 @@ const ScammerDetailPage = () => {
           const profile = await getProfileByWallet(scammer.added_by);
           setCreatorProfile(profile);
         } catch (error) {
-          console.error('Error fetching creator profile:', error);
+          console.error("Error fetching creator profile:", error);
         }
       }
     };
@@ -202,20 +202,25 @@ const ScammerDetailPage = () => {
       }
       
       // Call the API
-      await likeScammer(id, profile.wallet_address);
+      const result = await likeScammer(id, profile.wallet_address);
+      
+      // If we got a result back with real counts, update the UI
+      if (result && 'likes' in result) {
+        setLocalLikes(result.likes || 0);
+        setLocalDislikes(result.dislikes || 0);
+      }
       
       toast({
         title: wasLiked ? "Like removed" : "Report liked",
         description: wasLiked ? "You've removed your like from this report." : "You've marked this report as accurate."
       });
       
-      // Refresh data
-      await refetchScammer();
     } catch (error) {
       console.error("Error liking scammer:", error);
       
       // Revert UI on error
       await fetchUserInteraction();
+      await refetchScammer();
       
       toast({
         title: "Error",
@@ -265,20 +270,25 @@ const ScammerDetailPage = () => {
       }
       
       // Call the API
-      await dislikeScammer(id, profile.wallet_address);
+      const result = await dislikeScammer(id, profile.wallet_address);
+      
+      // If we got a result back with real counts, update the UI
+      if (result && 'likes' in result) {
+        setLocalLikes(result.likes || 0);
+        setLocalDislikes(result.dislikes || 0);
+      }
       
       toast({
         title: wasDisliked ? "Dislike removed" : "Report disliked",
         description: wasDisliked ? "You've removed your dislike from this report." : "You've marked this report as inaccurate."
       });
       
-      // Refresh data
-      await refetchScammer();
     } catch (error) {
       console.error("Error disliking scammer:", error);
       
       // Revert UI on error
       await fetchUserInteraction();
+      await refetchScammer();
       
       toast({
         title: "Error",

@@ -126,7 +126,13 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
       }
 
       // Call the likeScammer function to update the database
-      await likeScammer(scammer.id, profile.wallet_address);
+      const result = await likeScammer(scammer.id, profile.wallet_address);
+      
+      // If we got a result back with real counts, update the UI
+      if (result && 'likes' in result) {
+        setLikes(result.likes || 0);
+        setDislikes(result.dislikes || 0);
+      }
       
       toast({
         title: wasLiked ? "Like removed" : "Report liked",
@@ -198,7 +204,13 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
       }
       
       // Call the dislikeScammer function to update the database
-      await dislikeScammer(scammer.id, profile.wallet_address);
+      const result = await dislikeScammer(scammer.id, profile.wallet_address);
+      
+      // If we got a result back with real counts, update the UI
+      if (result && 'likes' in result) {
+        setLikes(result.likes || 0);
+        setDislikes(result.dislikes || 0);
+      }
       
       toast({
         title: wasDisliked ? "Dislike removed" : "Report disliked",

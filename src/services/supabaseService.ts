@@ -368,10 +368,10 @@ export const likeScammer = async (scammerId: string, walletAddress: string): Pro
       }
     }
 
-    // Update scammer like/dislike counts
+    // Update scammer like/dislike counts and return the updated counts
     await updateScammerLikes(scammerId);
     
-    // Return the updated scammer to get the latest counts
+    // Fetch and return the updated scammer to get the latest counts
     const { data: updatedScammer, error: scammerError } = await supabase
       .from('scammers')
       .select('likes, dislikes')
@@ -383,7 +383,10 @@ export const likeScammer = async (scammerId: string, walletAddress: string): Pro
       // Don't throw here, as the main operation succeeded
     } else {
       console.log('Updated scammer counts:', updatedScammer);
-      return updatedScammer;
+      return {
+        likes: updatedScammer.likes,
+        dislikes: updatedScammer.dislikes
+      };
     }
   } catch (error) {
     console.error('Error in likeScammer:', error);
@@ -457,7 +460,10 @@ export const dislikeScammer = async (scammerId: string, walletAddress: string): 
       // Don't throw here, as the main operation succeeded
     } else {
       console.log('Updated scammer counts:', updatedScammer);
-      return updatedScammer;
+      return {
+        likes: updatedScammer.likes,
+        dislikes: updatedScammer.dislikes
+      };
     }
   } catch (error) {
     console.error('Error in dislikeScammer:', error);
@@ -468,45 +474,53 @@ export const dislikeScammer = async (scammerId: string, walletAddress: string): 
 const updateScammerLikes = async (scammerId: string): Promise<void> => {
   console.log(`Updating like counts for scammer ${scammerId}`);
   
-  // Count likes
-  const { count: likeCount, error: likeError } = await supabase
-    .from('user_scammer_interactions')
-    .select('*', { count: 'exact', head: true })
-    .eq('scammer_id', scammerId)
-    .eq('liked', true);
+  try {
+    // Count likes
+    const { count: likeCount, error: likeError } = await supabase
+      .from('user_scammer_interactions')
+      .select('*', { count: 'exact', head: true })
+      .eq('scammer_id', scammerId)
+      .eq('liked', true);
 
-  if (likeError) {
-    console.error('Error counting likes:', likeError);
-    return;
-  }
+    if (likeError) {
+      console.error('Error counting likes:', likeError);
+      return;
+    }
 
-  // Count dislikes
-  const { count: dislikeCount, error: dislikeError } = await supabase
-    .from('user_scammer_interactions')
-    .select('*', { count: 'exact', head: true })
-    .eq('scammer_id', scammerId)
-    .eq('disliked', true);
+    // Count dislikes
+    const { count: dislikeCount, error: dislikeError } = await supabase
+      .from('user_scammer_interactions')
+      .select('*', { count: 'exact', head: true })
+      .eq('scammer_id', scammerId)
+      .eq('disliked', true);
 
-  if (dislikeError) {
-    console.error('Error counting dislikes:', dislikeError);
-    return;
-  }
+    if (dislikeError) {
+      console.error('Error counting dislikes:', dislikeError);
+      return;
+    }
 
-  console.log(`New like count: ${likeCount}, new dislike count: ${dislikeCount}`);
+    // Make sure counts are actual numbers, not null
+    const likes = likeCount || 0;
+    const dislikes = dislikeCount || 0;
 
-  // Update scammer with new counts
-  const { error: updateError } = await supabase
-    .from('scammers')
-    .update({ 
-      likes: likeCount || 0, 
-      dislikes: dislikeCount || 0 
-    })
-    .eq('id', scammerId);
+    console.log(`New like count: ${likes}, new dislike count: ${dislikes}`);
 
-  if (updateError) {
-    console.error('Error updating scammer like/dislike counts:', updateError);
-  } else {
-    console.log(`Successfully updated scammer like/dislike counts`);
+    // Update scammer with new counts
+    const { error: updateError } = await supabase
+      .from('scammers')
+      .update({ 
+        likes, 
+        dislikes 
+      })
+      .eq('id', scammerId);
+
+    if (updateError) {
+      console.error('Error updating scammer like/dislike counts:', updateError);
+    } else {
+      console.log(`Successfully updated scammer like/dislike counts`);
+    }
+  } catch (error) {
+    console.error('Error in updateScammerLikes:', error);
   }
 };
 
