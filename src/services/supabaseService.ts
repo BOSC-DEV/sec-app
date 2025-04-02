@@ -242,21 +242,30 @@ export const getProfileByWallet = async (walletAddress: string): Promise<Profile
 
 // Interaction Service
 export const likeScammer = async (scammerId: string, walletAddress: string): Promise<void> => {
+  console.log(`Processing like for scammer ${scammerId} by user ${walletAddress}`);
+  
   // Get existing interaction if any
-  const { data: existingInteraction } = await supabase
+  const { data: existingInteraction, error: fetchError } = await supabase
     .from('user_scammer_interactions')
     .select('*')
     .eq('scammer_id', scammerId)
     .eq('user_id', walletAddress)
     .maybeSingle();
 
+  if (fetchError) {
+    console.error('Error fetching interaction:', fetchError);
+    throw fetchError;
+  }
+
   // Using a transaction to ensure atomic operations
   if (existingInteraction) {
+    console.log('Existing interaction found:', existingInteraction);
+    
     // Toggle like - if already liked, unlike it; if disliked, switch to like
     const liked = !existingInteraction.liked;
     const disliked = liked ? false : existingInteraction.disliked; // Can't be both liked and disliked
     
-    await supabase
+    const { error: updateError } = await supabase
       .from('user_scammer_interactions')
       .update({ 
         liked, 
@@ -264,9 +273,18 @@ export const likeScammer = async (scammerId: string, walletAddress: string): Pro
         last_updated: new Date().toISOString() 
       })
       .eq('id', existingInteraction.id);
+      
+    if (updateError) {
+      console.error('Error updating interaction:', updateError);
+      throw updateError;
+    }
+    
+    console.log(`Updated interaction: liked=${liked}, disliked=${disliked}`);
   } else {
     // No existing interaction, create new with liked=true
-    await supabase
+    console.log('No existing interaction, creating new one with liked=true');
+    
+    const { error: insertError } = await supabase
       .from('user_scammer_interactions')
       .insert({ 
         scammer_id: scammerId, 
@@ -274,6 +292,11 @@ export const likeScammer = async (scammerId: string, walletAddress: string): Pro
         liked: true, 
         disliked: false 
       });
+      
+    if (insertError) {
+      console.error('Error inserting interaction:', insertError);
+      throw insertError;
+    }
   }
 
   // Update scammer like/dislike counts
@@ -320,6 +343,8 @@ export const dislikeScammer = async (scammerId: string, walletAddress: string): 
 };
 
 const updateScammerLikes = async (scammerId: string): Promise<void> => {
+  console.log(`Updating like counts for scammer ${scammerId}`);
+  
   // Count likes
   const { count: likeCount, error: likeError } = await supabase
     .from('user_scammer_interactions')
@@ -344,6 +369,8 @@ const updateScammerLikes = async (scammerId: string): Promise<void> => {
     return;
   }
 
+  console.log(`New like count: ${likeCount}, new dislike count: ${dislikeCount}`);
+
   // Update scammer with new counts
   const { error: updateError } = await supabase
     .from('scammers')
@@ -355,6 +382,8 @@ const updateScammerLikes = async (scammerId: string): Promise<void> => {
 
   if (updateError) {
     console.error('Error updating scammer like/dislike counts:', updateError);
+  } else {
+    console.log(`Successfully updated scammer like/dislike counts`);
   }
 };
 

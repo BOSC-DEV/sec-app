@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { getScammerById, getScammerComments, addComment, likeScammer, dislikeScammer } from '@/services/supabaseService';
-import { Scammer, Comment } from '@/types/dataTypes';
+import { getScammerById, getScammerComments, addComment, likeScammer, dislikeScammer, getProfileByWallet } from '@/services/supabaseService';
+import { Scammer, Comment, Profile } from '@/types/dataTypes';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { Input } from '@/components/ui/input';
@@ -37,6 +38,7 @@ const ScammerDetailPage = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [creatorProfile, setCreatorProfile] = useState<Profile | null>(null);
 
   const { 
     data: scammer, 
@@ -66,6 +68,24 @@ const ScammerDetailPage = () => {
     if (scammer) {
       setLocalLikes(scammer.likes || 0);
       setLocalDislikes(scammer.dislikes || 0);
+    }
+  }, [scammer]);
+
+  // Fetch creator profile whenever scammer data changes
+  useEffect(() => {
+    const fetchCreatorProfile = async () => {
+      if (scammer?.added_by) {
+        try {
+          const profile = await getProfileByWallet(scammer.added_by);
+          setCreatorProfile(profile);
+        } catch (error) {
+          console.error('Error fetching creator profile:', error);
+        }
+      }
+    };
+
+    if (scammer) {
+      fetchCreatorProfile();
     }
   }, [scammer]);
 
@@ -146,7 +166,7 @@ const ScammerDetailPage = () => {
     try {
       await likeScammer(id, profile.wallet_address);
       
-      // Toggle like state
+      // Toggle like state - update local state immediately for better UX
       if (isLiked) {
         setLocalLikes(prev => Math.max(prev - 1, 0));
         setIsLiked(false);
@@ -370,10 +390,20 @@ const ScammerDetailPage = () => {
                   </div>
                   <div>
                     <span className="text-gray-600">Added by</span>
-                    <p className="flex items-center">
-                      <span className="inline-block w-3 h-3 bg-amber-600 rounded-full mr-1"></span>
-                      {scammer.added_by || 'Anonymous'}
-                    </p>
+                    {creatorProfile ? (
+                      <Link to={`/${creatorProfile.username}`} className="flex items-center mt-1 hover:text-blue-600">
+                        <Avatar className="h-6 w-6 mr-2">
+                          <AvatarImage src={creatorProfile.profile_pic_url || '/placeholder.svg'} alt={creatorProfile.display_name} />
+                          <AvatarFallback>{creatorProfile.display_name?.charAt(0) || '?'}</AvatarFallback>
+                        </Avatar>
+                        <span>{creatorProfile.display_name || creatorProfile.username}</span>
+                      </Link>
+                    ) : (
+                      <p className="flex items-center mt-1">
+                        <span className="inline-block w-3 h-3 bg-amber-600 rounded-full mr-1"></span>
+                        Anonymous
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, ThumbsUp, ThumbsDown, DollarSign, MessageSquare, Edit } from 'lucide-react';
@@ -44,7 +45,11 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
   // Always display the latest view count from the scammer prop
   useEffect(() => {
     setViewCount(scammer.views || 0);
-  }, [scammer.views]);
+    
+    // Update local likes and dislikes when scammer data changes
+    setLikes(scammer.likes || 0);
+    setDislikes(scammer.dislikes || 0);
+  }, [scammer.views, scammer.likes, scammer.dislikes]);
 
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation
@@ -65,7 +70,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
     try {
       await likeScammer(scammer.id, profile.wallet_address);
       
-      // Toggle like state
+      // Toggle like state - update local state immediately for better UX
       if (isLiked) {
         setLikes(prev => Math.max(prev - 1, 0));
         setIsLiked(false);
