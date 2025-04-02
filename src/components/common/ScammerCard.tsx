@@ -24,6 +24,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
   const [isDisliked, setIsDisliked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [creatorProfile, setCreatorProfile] = useState<Profile | null>(null);
+  const [viewCount, setViewCount] = useState(scammer.views || 0);
 
   // Fetch creator profile on component mount
   useEffect(() => {
@@ -40,6 +41,11 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
 
     fetchCreatorProfile();
   }, [scammer.added_by]);
+
+  // Always display the latest view count from the scammer prop
+  useEffect(() => {
+    setViewCount(scammer.views || 0);
+  }, [scammer.views]);
 
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation
@@ -184,7 +190,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
             <div className="flex items-center space-x-3">
               <span className="flex items-center">
                 <Eye className="h-3.5 w-3.5 mr-1" />
-                {scammer.views}
+                {viewCount}
               </span>
               <span className="flex items-center">
                 <ThumbsUp className="h-3.5 w-3.5 mr-1" />
