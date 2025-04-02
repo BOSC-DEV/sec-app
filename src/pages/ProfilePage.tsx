@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -104,7 +103,7 @@ const ProfilePage = () => {
     try {
       setIsSaving(true);
       
-      await saveProfile({
+      const updatedProfile = await saveProfile({
         ...profile,
         id: profile?.id || crypto.randomUUID(),
         wallet_address: walletAddress,
@@ -123,6 +122,11 @@ const ProfilePage = () => {
         title: 'Profile Saved',
         description: 'Your profile has been updated successfully',
       });
+      
+      // Navigate to public profile page if username is available
+      if (data.username) {
+        navigate(`/${data.username}`);
+      }
       
     } catch (error) {
       console.error('Error saving profile:', error);

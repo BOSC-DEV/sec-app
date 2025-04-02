@@ -16,7 +16,13 @@ const Header = () => {
   };
 
   const handleProfileClick = () => {
-    navigate('/profile');
+    if (profile?.username) {
+      // If user has a username, navigate to their public profile
+      navigate(`/${profile.username}`);
+    } else {
+      // If not, navigate to the profile edit page
+      navigate('/profile');
+    }
   };
 
   return (
