@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, ThumbsUp, ThumbsDown, DollarSign, MessageSquare, Edit } from 'lucide-react';
@@ -51,6 +50,37 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
     setDislikes(scammer.dislikes || 0);
   }, [scammer.views, scammer.likes, scammer.dislikes]);
 
+  // Check if the current user has liked or disliked this scammer
+  useEffect(() => {
+    const checkUserInteraction = async () => {
+      if (!profile?.wallet_address) return;
+      
+      try {
+        // Query the user_scammer_interactions table to see if the user has liked/disliked
+        const { data, error } = await supabase
+          .from('user_scammer_interactions')
+          .select('liked, disliked')
+          .eq('scammer_id', scammer.id)
+          .eq('user_id', profile.wallet_address)
+          .maybeSingle();
+        
+        if (error) {
+          console.error('Error checking user interaction:', error);
+          return;
+        }
+        
+        if (data) {
+          setIsLiked(data.liked);
+          setIsDisliked(data.disliked);
+        }
+      } catch (error) {
+        console.error('Error in checkUserInteraction:', error);
+      }
+    };
+    
+    checkUserInteraction();
+  }, [scammer.id, profile?.wallet_address]);
+
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation
     e.stopPropagation(); // Prevent event bubbling
@@ -68,9 +98,6 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
     
     setIsLoading(true);
     try {
-      // Call the likeScammer function to update the database
-      await likeScammer(scammer.id, profile.wallet_address);
-      
       // Update UI optimistically
       if (isLiked) {
         // If already liked, unlike it
@@ -87,6 +114,9 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
           setIsDisliked(false);
         }
       }
+
+      // Call the likeScammer function to update the database
+      await likeScammer(scammer.id, profile.wallet_address);
       
       toast({
         title: isLiked ? "Like removed" : "Report liked",
@@ -94,6 +124,14 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
       });
     } catch (error) {
       console.error("Error liking scammer:", error);
+      // Revert UI changes on error
+      setIsLiked(!isLiked);
+      if (isDisliked !== isDisliked) {
+        setIsDisliked(!isDisliked);
+      }
+      setLikes(scammer.likes || 0);
+      setDislikes(scammer.dislikes || 0);
+      
       toast({
         title: "Error",
         description: "Failed to like this report. Please try again.",
@@ -121,9 +159,6 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
     
     setIsLoading(true);
     try {
-      // Call the dislikeScammer function to update the database
-      await dislikeScammer(scammer.id, profile.wallet_address);
-      
       // Update UI optimistically
       if (isDisliked) {
         // If already disliked, un-dislike it
@@ -141,12 +176,23 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
         }
       }
       
+      // Call the dislikeScammer function to update the database
+      await dislikeScammer(scammer.id, profile.wallet_address);
+      
       toast({
         title: isDisliked ? "Dislike removed" : "Report disliked",
         description: isDisliked ? "You've removed your dislike from this report." : "You've marked this report as inaccurate."
       });
     } catch (error) {
       console.error("Error disliking scammer:", error);
+      // Revert UI changes on error
+      setIsDisliked(!isDisliked);
+      if (isLiked !== isLiked) {
+        setIsLiked(!isLiked);
+      }
+      setLikes(scammer.likes || 0);
+      setDislikes(scammer.dislikes || 0);
+      
       toast({
         title: "Error",
         description: "Failed to dislike this report. Please try again.",
