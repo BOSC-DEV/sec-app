@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -71,7 +70,6 @@ const ScammerDetailPage = () => {
     }
   }, [scammer]);
 
-  // Fetch creator profile whenever scammer data changes
   useEffect(() => {
     const fetchCreatorProfile = async () => {
       if (scammer?.added_by) {
@@ -501,7 +499,7 @@ const ScammerDetailPage = () => {
             </div>
 
             <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-              <div className="flex justify-between items-center mb-2">
+              <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center text-green-600">
                   <ThumbsUp className="h-4 w-4 mr-1" />
                   <span>Agree ({localLikes})</span>
@@ -551,13 +549,17 @@ const ScammerDetailPage = () => {
                   {comments.map((comment) => (
                     <div key={comment.id} className="p-3 bg-gray-50 rounded-lg">
                       <div className="flex items-start space-x-3">
-                        <Avatar>
-                          <AvatarImage src={comment.author_profile_pic || '/placeholder.svg'} alt={comment.author_name} />
-                          <AvatarFallback>{comment.author_name.charAt(0).toUpperCase()}</AvatarFallback>
-                        </Avatar>
+                        <Link to={`/${comment.author}`} className="hover:opacity-80 transition-opacity">
+                          <Avatar>
+                            <AvatarImage src={comment.author_profile_pic || '/placeholder.svg'} alt={comment.author_name} />
+                            <AvatarFallback>{comment.author_name.charAt(0).toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                        </Link>
                         <div className="flex-1">
                           <div className="flex justify-between">
-                            <div className="font-medium">{comment.author_name}</div>
+                            <Link to={`/${comment.author}`} className="font-medium hover:text-blue-600">
+                              {comment.author_name}
+                            </Link>
                             <div className="text-xs text-gray-500">
                               {new Date(comment.created_at).toLocaleDateString()}
                             </div>
