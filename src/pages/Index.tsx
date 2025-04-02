@@ -6,54 +6,39 @@ import { Link } from 'react-router-dom';
 import { getTopScammers } from '@/services/supabaseService';
 import { Shield, AlertTriangle, ExternalLink, DollarSign } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-
 const Index = () => {
-  const { 
-    data: topScammers = [], 
+  const {
+    data: topScammers = [],
     isLoading,
-    error 
+    error
   } = useQuery({
     queryKey: ['topScammers'],
-    queryFn: () => getTopScammers(3),
+    queryFn: () => getTopScammers(3)
   });
-
   if (error) {
     console.error('Failed to load top scammers', error);
   }
-
-  return (
-    <div>
+  return <div>
       <Hero />
 
       {/* Featured Scammers Section */}
       <section className="icc-section bg-white">
         <div className="icc-container">
           <div className="text-center mb-12">
-            <h2 className="icc-title">Most Wanted Scammers</h2>
-            <p className="max-w-2xl mx-auto text-icc-gray">
-              These individuals are wanted for major cryptocurrency fraud schemes. 
-              Help protect our community by sharing intelligence and contributing to bounties.
-            </p>
+            <h2 className="icc-title">Most Wanted List</h2>
+            <p className="max-w-2xl mx-auto text-icc-gray"></p>
           </div>
 
-          {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[1, 2, 3].map((index) => (
-                <div key={index} className="animate-pulse">
+          {isLoading ? <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[1, 2, 3].map(index => <div key={index} className="animate-pulse">
                   <div className="bg-gray-200 aspect-square mb-4"></div>
                   <div className="h-6 bg-gray-200 rounded mb-2"></div>
                   <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
                   <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {topScammers.map(scammer => (
-                <ScammerCard key={scammer.id} scammer={scammer} />
-              ))}
-            </div>
-          )}
+                </div>)}
+            </div> : <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {topScammers.map(scammer => <ScammerCard key={scammer.id} scammer={scammer} />)}
+            </div>}
 
           <div className="text-center mt-10">
             <Button asChild className="icc-btn-primary py-6 px-8">
@@ -153,8 +138,6 @@ const Index = () => {
           </div>
         </div>
       </section>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
