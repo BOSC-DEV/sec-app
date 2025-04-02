@@ -2,10 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Instagram } from 'lucide-react';
 import ICCLogo from '../common/ICCLogo';
-
 const Footer = () => {
-  return (
-    <footer className="icc-footer">
+  return <footer className="icc-footer">
       <div className="icc-container">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-1">
@@ -15,9 +13,7 @@ const Footer = () => {
                 <div className="text-base font-bold leading-tight">Scams & E-crimes Commission</div>
               </div>
             </Link>
-            <p className="text-sm text-gray-300 mt-4">
-              Tracking and exposing digital & cryptocurrency scammers worldwide.
-            </p>
+            <p className="text-sm text-gray-300 mt-4">A decentralized crime registry to bring accountability and self govern the new digital world.</p>
             <div className="flex space-x-4 mt-6">
               <a href="#" className="text-white hover:text-icc-gold">
                 <Facebook className="h-5 w-5" />
@@ -72,8 +68,6 @@ const Footer = () => {
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
