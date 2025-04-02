@@ -128,10 +128,15 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
       // Call the likeScammer function to update the database
       const result = await likeScammer(scammer.id, profile.wallet_address);
       
-      // If we got a result back with real counts, update the UI
-      if (result && 'likes' in result) {
+      // If we got a result back with updated counts, update the UI
+      if (result && typeof result === 'object' && 'likes' in result) {
+        console.log("Received updated counts from likeScammer:", result);
         setLikes(result.likes || 0);
         setDislikes(result.dislikes || 0);
+        
+        // Force update the scammer prop's likes/dislikes
+        scammer.likes = result.likes || 0;
+        scammer.dislikes = result.dislikes || 0;
       }
       
       toast({
@@ -206,10 +211,15 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
       // Call the dislikeScammer function to update the database
       const result = await dislikeScammer(scammer.id, profile.wallet_address);
       
-      // If we got a result back with real counts, update the UI
-      if (result && 'likes' in result) {
+      // If we got a result back with updated counts, update the UI
+      if (result && typeof result === 'object' && 'likes' in result) {
+        console.log("Received updated counts from dislikeScammer:", result);
         setLikes(result.likes || 0);
         setDislikes(result.dislikes || 0);
+        
+        // Force update the scammer prop's likes/dislikes
+        scammer.likes = result.likes || 0;
+        scammer.dislikes = result.dislikes || 0;
       }
       
       toast({
@@ -258,9 +268,8 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
           
           {creatorProfile && (
             <div className="mt-2 flex items-center">
-              <Link 
-                to={`/${creatorProfile.username}`} 
-                className="flex items-center text-xs text-icc-gray-dark hover:text-icc-gold"
+              <span 
+                className="flex items-center text-xs text-icc-gray-dark"
                 onClick={(e) => e.stopPropagation()}
               >
                 <img 
@@ -269,7 +278,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
                   className="w-5 h-5 rounded-full mr-1"
                 />
                 <span>@{creatorProfile.username || 'anonymous'}</span>
-              </Link>
+              </span>
             </div>
           )}
           
