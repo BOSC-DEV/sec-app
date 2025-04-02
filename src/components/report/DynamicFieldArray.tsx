@@ -23,7 +23,10 @@ const DynamicFieldArray = ({
   description,
   buttonLabel,
 }: DynamicFieldArrayProps) => {
-  const addField = () => {
+  const addField = (e: React.MouseEvent) => {
+    // Prevent the default form submission
+    e.preventDefault();
+    
     const currentValues = form.getValues(fieldName);
     form.setValue(fieldName, [...currentValues, '']);
   };
