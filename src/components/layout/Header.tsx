@@ -31,7 +31,7 @@ const Header = () => {
             <ICCLogo className="h-10 w-auto" />
             <div className="font-serif">
               <div className="text-lg font-bold leading-tight">International</div>
-              <div className="text-xl font-bold leading-tight">Cyber-crime Committee</div>
+              <div className="text-xl font-bold leading-tight">Cyber-crime Commission</div>
             </div>
           </Link>
 

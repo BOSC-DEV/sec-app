@@ -29,7 +29,7 @@ const Index = () => {
   return (
     <div>
       <Hero 
-        title="International Cyber-crime Committee"
+        title="International Cyber-crime Commission"
         subtitle="Tracking and exposing cryptocurrency scammers worldwide through decentralized community intelligence."
       />
 
