@@ -1,23 +1,43 @@
+
 import React from 'react';
 import Hero from '@/components/common/Hero';
 import ScammerCard from '@/components/common/ScammerCard';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { getTopScammers } from '@/services/supabaseService';
+import { getTopScammers, getStatistics } from '@/services/supabaseService';
 import { Shield, AlertTriangle, ExternalLink, DollarSign } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { formatNumber } from '@/lib/utils';
+
 const Index = () => {
+  // Query for top scammers
   const {
     data: topScammers = [],
-    isLoading,
-    error
+    isLoading: isLoadingScammers,
+    error: scammersError
   } = useQuery({
     queryKey: ['topScammers'],
     queryFn: () => getTopScammers(3)
   });
-  if (error) {
-    console.error('Failed to load top scammers', error);
+
+  // Query for statistics
+  const {
+    data: statistics = { totalBounty: 0, scammersCount: 0, reportersCount: 0, usersCount: 0 },
+    isLoading: isLoadingStats,
+    error: statsError
+  } = useQuery({
+    queryKey: ['statistics'],
+    queryFn: getStatistics
+  });
+
+  if (scammersError) {
+    console.error('Failed to load top scammers', scammersError);
   }
+
+  if (statsError) {
+    console.error('Failed to load statistics', statsError);
+  }
+
   return <div>
       <Hero />
 
@@ -29,7 +49,7 @@ const Index = () => {
             <p className="max-w-2xl mx-auto text-icc-gray"></p>
           </div>
 
-          {isLoading ? <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {isLoadingScammers ? <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[1, 2, 3].map(index => <div key={index} className="animate-pulse">
                   <div className="bg-gray-200 aspect-square mb-4"></div>
                   <div className="h-6 bg-gray-200 rounded mb-2"></div>
@@ -115,22 +135,36 @@ const Index = () => {
       <section className="icc-section bg-white">
         <div className="icc-container">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-6">
-              <div className="text-4xl font-bold text-icc-blue mb-2">$120M+</div>
-              <div className="text-sm text-icc-gray">Scam Funds Tracked</div>
-            </div>
-            <div className="text-center p-6">
-              <div className="text-4xl font-bold text-icc-blue mb-2">450+</div>
-              <div className="text-sm text-icc-gray">Scammers Identified</div>
-            </div>
-            <div className="text-center p-6">
-              <div className="text-4xl font-bold text-icc-blue mb-2">12K+</div>
-              <div className="text-sm text-icc-gray">Community Members</div>
-            </div>
-            <div className="text-center p-6">
-              <div className="text-4xl font-bold text-icc-blue mb-2">$2.5M</div>
-              <div className="text-sm text-icc-gray">Bounties Posted</div>
-            </div>
+            {/* Loading states for statistics */}
+            {isLoadingStats ? (
+              <>
+                {[1, 2, 3, 4].map((_, index) => (
+                  <div key={index} className="text-center p-6">
+                    <div className="h-10 bg-gray-200 rounded-md mb-2 animate-pulse mx-auto w-3/4"></div>
+                    <div className="h-5 bg-gray-200 rounded-md w-1/2 mx-auto animate-pulse"></div>
+                  </div>
+                ))}
+              </>
+            ) : (
+              <>
+                <div className="text-center p-6">
+                  <div className="text-4xl font-bold text-icc-blue mb-2">${formatNumber(statistics.totalBounty)}</div>
+                  <div className="text-sm text-icc-gray">Total Bounties Posted</div>
+                </div>
+                <div className="text-center p-6">
+                  <div className="text-4xl font-bold text-icc-blue mb-2">{formatNumber(statistics.scammersCount)}+</div>
+                  <div className="text-sm text-icc-gray">Scammers Reported</div>
+                </div>
+                <div className="text-center p-6">
+                  <div className="text-4xl font-bold text-icc-blue mb-2">{formatNumber(statistics.reportersCount)}+</div>
+                  <div className="text-sm text-icc-gray">Total Reporters</div>
+                </div>
+                <div className="text-center p-6">
+                  <div className="text-4xl font-bold text-icc-blue mb-2">{formatNumber(statistics.usersCount)}</div>
+                  <div className="text-sm text-icc-gray">Total Users</div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </section>
