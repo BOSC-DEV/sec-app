@@ -8,7 +8,7 @@ import { Plus, Trash } from 'lucide-react';
 
 interface DynamicFieldArrayProps {
   form: UseFormReturn<any>;
-  fieldName: 'walletAddresses' | 'links' | 'aliases';
+  fieldName: 'walletAddresses' | 'links' | 'aliases' | 'accomplices';
   label: string;
   placeholder: string;
   description: string;
