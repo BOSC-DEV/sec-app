@@ -164,16 +164,26 @@ const PublicProfilePage = () => {
                   
                   <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                     {profile?.x_link && (
-                      <a href={profile.x_link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary">
-                        <Twitter size={16} />
-                        <ExternalLink size={12} />
+                      <a 
+                        href={profile.x_link} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary p-2 rounded-full hover:bg-gray-100 transition-colors"
+                        title="Twitter/X"
+                      >
+                        <Twitter size={20} />
                       </a>
                     )}
                     
                     {profile?.website_link && (
-                      <a href={profile.website_link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary">
-                        <Globe size={16} />
-                        <ExternalLink size={12} />
+                      <a 
+                        href={profile.website_link} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary p-2 rounded-full hover:bg-gray-100 transition-colors"
+                        title="Website"
+                      >
+                        <Globe size={20} />
                       </a>
                     )}
                   </div>
