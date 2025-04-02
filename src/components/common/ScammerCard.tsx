@@ -4,21 +4,10 @@ import { Link } from 'react-router-dom';
 import { Eye, ThumbsUp, ThumbsDown, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { truncateText } from '@/lib/utils';
-
-export interface ScammerData {
-  id: string;
-  name: string;
-  photo_url: string;
-  accused_of: string;
-  bounty_amount: number;
-  date_added: string;
-  likes: number;
-  dislikes: number;
-  views: number;
-}
+import { Scammer } from '@/types/dataTypes';
 
 interface ScammerCardProps {
-  scammer: ScammerData;
+  scammer: Scammer;
 }
 
 const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {

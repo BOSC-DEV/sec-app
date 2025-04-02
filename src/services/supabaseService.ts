@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Scammer, Profile, Comment } from './mockData';
+import { Comment, Profile, Scammer } from '@/types/dataTypes';
 
 // Scammers Service
 export const getScammers = async (): Promise<Scammer[]> => {
@@ -91,10 +91,30 @@ export const getScammerComments = async (scammerId: string): Promise<Comment[]> 
   return data || [];
 };
 
-export const addComment = async (comment: Partial<Comment>): Promise<Comment> => {
+export const addComment = async (comment: {
+  scammer_id: string,
+  content: string,
+  author: string,
+  author_name: string,
+  author_profile_pic?: string
+}): Promise<Comment> => {
+  // Generate a unique ID for the comment
+  const id = `cmt-${Date.now()}`;
+  
   const { data, error } = await supabase
     .from('comments')
-    .insert(comment)
+    .insert({
+      id,
+      scammer_id: comment.scammer_id,
+      content: comment.content,
+      author: comment.author,
+      author_name: comment.author_name,
+      author_profile_pic: comment.author_profile_pic,
+      created_at: new Date().toISOString(),
+      likes: 0,
+      dislikes: 0,
+      views: 0
+    })
     .select()
     .single();
   
@@ -202,7 +222,7 @@ export const dislikeScammer = async (scammerId: string, walletAddress: string): 
       });
   }
 
-  // Update scammer dislike counts
+  // Update scammer like counts
   await updateScammerLikes(scammerId);
 };
 
@@ -243,55 +263,5 @@ const updateScammerLikes = async (scammerId: string): Promise<void> => {
 
   if (updateError) {
     console.error('Error updating scammer like/dislike counts:', updateError);
-  }
-};
-
-// Data Seeding Function
-export const seedInitialData = async () => {
-  try {
-    const { data: existingScammers } = await supabase
-      .from('scammers')
-      .select('id')
-      .limit(1);
-    
-    // If data already exists, don't seed
-    if (existingScammers && existingScammers.length > 0) {
-      console.log('Data already exists, skipping seed');
-      return;
-    }
-
-    // Load initial data
-    const { mockScammers, mockProfiles, mockComments } = await import('./mockData');
-    
-    // Insert profiles
-    const { error: profilesError } = await supabase
-      .from('profiles')
-      .insert(mockProfiles);
-    
-    if (profilesError) {
-      console.error('Error seeding profiles:', profilesError);
-    }
-    
-    // Insert scammers
-    const { error: scammersError } = await supabase
-      .from('scammers')
-      .insert(mockScammers);
-    
-    if (scammersError) {
-      console.error('Error seeding scammers:', scammersError);
-    }
-    
-    // Insert comments
-    const { error: commentsError } = await supabase
-      .from('comments')
-      .insert(mockComments);
-    
-    if (commentsError) {
-      console.error('Error seeding comments:', commentsError);
-    }
-    
-    console.log('Initial data seeded successfully');
-  } catch (error) {
-    console.error('Error seeding initial data:', error);
   }
 };

@@ -1,0 +1,46 @@
+
+export interface Scammer {
+  id: string;
+  name: string;
+  photo_url: string;
+  accused_of: string;
+  links: string[];
+  aliases: string[];
+  accomplices: string[];
+  official_response: string;
+  bounty_amount: number;
+  wallet_address: string;
+  date_added: string;
+  added_by: string;
+  likes: number;
+  dislikes: number;
+  views: number;
+  shares: number;
+  comments: string[];
+}
+
+export interface Profile {
+  id: string;
+  wallet_address: string;
+  display_name: string;
+  username: string;
+  profile_pic_url: string;
+  created_at: string;
+  x_link: string;
+  website_link: string;
+  bio: string;
+  points: number;
+}
+
+export interface Comment {
+  id: string;
+  scammer_id: string;
+  content: string;
+  author: string;
+  author_name: string;
+  author_profile_pic: string;
+  created_at: string;
+  likes: number;
+  dislikes: number;
+  views: number;
+}

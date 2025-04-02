@@ -1,17 +1,14 @@
-import React, { useEffect, useState } from 'react';
+
+import React, { useEffect } from 'react';
 import Hero from '@/components/common/Hero';
-import ScammerCard, { ScammerData } from '@/components/common/ScammerCard';
+import ScammerCard from '@/components/common/ScammerCard';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { getTopScammers, seedInitialData } from '@/services/supabaseService';
+import { getTopScammers } from '@/services/supabaseService';
 import { Shield, AlertTriangle, ExternalLink, DollarSign } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 
 const Index = () => {
-  useEffect(() => {
-    seedInitialData();
-  }, []);
-
   const { 
     data: topScammers = [], 
     isLoading,
