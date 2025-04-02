@@ -101,6 +101,9 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
     setIsLoading(true);
     try {
       // Update UI optimistically
+      const wasLiked = isLiked;
+      const wasDisliked = isDisliked;
+      
       if (isLiked) {
         // If already liked, unlike it
         setLikes(prev => Math.max(prev - 1, 0));
@@ -121,8 +124,8 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
       await likeScammer(scammer.id, profile.wallet_address);
       
       toast({
-        title: isLiked ? "Like removed" : "Report liked",
-        description: isLiked ? "You've removed your like from this report." : "You've marked this report as accurate."
+        title: wasLiked ? "Like removed" : "Report liked",
+        description: wasLiked ? "You've removed your like from this report." : "You've marked this report as accurate."
       });
     } catch (error) {
       console.error("Error liking scammer:", error);
@@ -162,6 +165,9 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
     setIsLoading(true);
     try {
       // Update UI optimistically
+      const wasDisliked = isDisliked;
+      const wasLiked = isLiked;
+      
       if (isDisliked) {
         // If already disliked, un-dislike it
         setDislikes(prev => Math.max(prev - 1, 0));
@@ -182,8 +188,8 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
       await dislikeScammer(scammer.id, profile.wallet_address);
       
       toast({
-        title: isDisliked ? "Dislike removed" : "Report disliked",
-        description: isDisliked ? "You've removed your dislike from this report." : "You've marked this report as inaccurate."
+        title: wasDisliked ? "Dislike removed" : "Report disliked",
+        description: wasDisliked ? "You've removed your dislike from this report." : "You've marked this report as inaccurate."
       });
     } catch (error) {
       console.error("Error disliking scammer:", error);

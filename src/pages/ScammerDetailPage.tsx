@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { getScammerById, getScammerComments, addComment, likeScammer, dislikeScammer, getProfileByWallet } from '@/services/supabaseService';
+import { getScammerById, getScammerComments, addComment, likeScammer, dislikeScammer, getProfileByWallet, getUserScammerInteraction } from '@/services/supabaseService';
 import { Scammer, Comment, Profile } from '@/types/dataTypes';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
@@ -62,14 +63,35 @@ const ScammerDetailPage = () => {
     staleTime: 1000 * 30, // 30 seconds - refresh comments more frequently
   });
 
+  // Fetch user interaction data
+  const fetchUserInteraction = async () => {
+    if (!profile?.wallet_address || !id) return;
+    
+    try {
+      const interaction = await getUserScammerInteraction(id, profile.wallet_address);
+      if (interaction) {
+        setIsLiked(interaction.liked);
+        setIsDisliked(interaction.disliked);
+      }
+    } catch (error) {
+      console.error('Error fetching user interaction:', error);
+    }
+  };
+
   const isCreator = profile?.wallet_address === scammer?.added_by;
 
+  // Update local states when scammer data changes
   useEffect(() => {
     if (scammer) {
       setLocalLikes(scammer.likes || 0);
       setLocalDislikes(scammer.dislikes || 0);
     }
   }, [scammer]);
+
+  // Fetch user interaction when profile or id changes
+  useEffect(() => {
+    fetchUserInteraction();
+  }, [profile?.wallet_address, id]);
 
   useEffect(() => {
     const fetchCreatorProfile = async () => {
@@ -157,8 +179,10 @@ const ScammerDetailPage = () => {
     
     setIsLoading(true);
     try {
-      await likeScammer(id, profile.wallet_address);
+      // Store current state for toast message
+      const wasLiked = isLiked;
       
+      // Update UI optimistically
       if (isLiked) {
         setLocalLikes(prev => Math.max(prev - 1, 0));
         setIsLiked(false);
@@ -172,14 +196,22 @@ const ScammerDetailPage = () => {
         }
       }
       
+      // Call the API
+      await likeScammer(id, profile.wallet_address);
+      
       toast({
-        title: isLiked ? "Like removed" : "Report liked",
-        description: isLiked ? "You've removed your like from this report." : "You've marked this report as accurate."
+        title: wasLiked ? "Like removed" : "Report liked",
+        description: wasLiked ? "You've removed your like from this report." : "You've marked this report as accurate."
       });
       
+      // Refresh data
       await refetchScammer();
     } catch (error) {
       console.error("Error liking scammer:", error);
+      
+      // Revert UI on error
+      await fetchUserInteraction();
+      
       toast({
         title: "Error",
         description: "Failed to like this report. Please try again.",
@@ -204,8 +236,10 @@ const ScammerDetailPage = () => {
     
     setIsLoading(true);
     try {
-      await dislikeScammer(id, profile.wallet_address);
+      // Store current state for toast message
+      const wasDisliked = isDisliked;
       
+      // Update UI optimistically
       if (isDisliked) {
         setLocalDislikes(prev => Math.max(prev - 1, 0));
         setIsDisliked(false);
@@ -219,14 +253,22 @@ const ScammerDetailPage = () => {
         }
       }
       
+      // Call the API
+      await dislikeScammer(id, profile.wallet_address);
+      
       toast({
-        title: isDisliked ? "Dislike removed" : "Report disliked",
-        description: isDisliked ? "You've removed your dislike from this report." : "You've marked this report as inaccurate."
+        title: wasDisliked ? "Dislike removed" : "Report disliked",
+        description: wasDisliked ? "You've removed your dislike from this report." : "You've marked this report as inaccurate."
       });
       
+      // Refresh data
       await refetchScammer();
     } catch (error) {
       console.error("Error disliking scammer:", error);
+      
+      // Revert UI on error
+      await fetchUserInteraction();
+      
       toast({
         title: "Error",
         description: "Failed to dislike this report. Please try again.",
