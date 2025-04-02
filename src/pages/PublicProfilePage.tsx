@@ -42,8 +42,8 @@ const PublicProfilePage = () => {
   const shareProfile = () => {
     if (navigator.share) {
       navigator.share({
-        title: `${profile?.display_name}'s Profile | Scam Detector`,
-        text: `Check out ${profile?.display_name}'s profile on Scam Detector`,
+        title: `${profile?.display_name}'s Profile | SEC.digital`,
+        text: `Check out ${profile?.display_name}'s profile on SEC.digital`,
         url: window.location.href,
       }).catch(err => {
         console.error('Error sharing:', err);
@@ -104,9 +104,12 @@ const PublicProfilePage = () => {
     return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
   };
 
-  const pageTitle = profile ? `${profile.display_name} (@${profile.username}) | Scam Detector` : 'Profile | Scam Detector';
-  const pageDescription = profile?.bio || `Check out this profile on Scam Detector`;
-  const pageImage = profile?.profile_pic_url || '/placeholder.svg';
+  // Default image for SEC.digital
+  const defaultShareImage = '/lovable-uploads/3f23090d-4e36-43fc-b230-a8f898d7edd2.png';
+  // Determine if we should use the profile image or the default image for sharing
+  const pageImage = profile?.profile_pic_url || defaultShareImage;
+  const pageTitle = profile ? `${profile.display_name} (@${profile.username}) | SEC.digital` : 'Profile | SEC.digital';
+  const pageDescription = profile?.bio || `Check out this profile on SEC.digital - The Scams & E-crimes Commission`;
 
   return (
     <HelmetProvider>
