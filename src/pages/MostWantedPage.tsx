@@ -1,6 +1,7 @@
+
 import React, { useEffect, useState } from 'react';
 import Hero from '@/components/common/Hero';
-import ScammerCard, { ScammerData } from '@/components/common/ScammerCard';
+import ScammerCard from '@/components/common/ScammerCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -8,9 +9,10 @@ import { getScammers } from '@/services/supabaseService';
 import { Grid, List, Search, SlidersHorizontal } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import { Scammer } from '@/types/dataTypes';
 
 const MostWantedPage = () => {
-  const [filteredScammers, setFilteredScammers] = useState<ScammerData[]>([]);
+  const [filteredScammers, setFilteredScammers] = useState<Scammer[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('bounty');
