@@ -68,13 +68,16 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
     
     setIsLoading(true);
     try {
+      // Call the likeScammer function to update the database
       await likeScammer(scammer.id, profile.wallet_address);
       
-      // Toggle like state - update local state immediately for better UX
+      // Update UI optimistically
       if (isLiked) {
+        // If already liked, unlike it
         setLikes(prev => Math.max(prev - 1, 0));
         setIsLiked(false);
       } else {
+        // If not liked, like it
         setLikes(prev => prev + 1);
         setIsLiked(true);
         
@@ -118,13 +121,16 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
     
     setIsLoading(true);
     try {
+      // Call the dislikeScammer function to update the database
       await dislikeScammer(scammer.id, profile.wallet_address);
       
-      // Toggle dislike state
+      // Update UI optimistically
       if (isDisliked) {
+        // If already disliked, un-dislike it
         setDislikes(prev => Math.max(prev - 1, 0));
         setIsDisliked(false);
       } else {
+        // If not disliked, dislike it
         setDislikes(prev => prev + 1);
         setIsDisliked(true);
         
