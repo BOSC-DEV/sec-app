@@ -2,7 +2,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, Shield, Search } from 'lucide-react';
+import { AlertCircle, Search } from 'lucide-react';
+import ICCLogo from './ICCLogo';
 
 interface HeroProps {
   title: string;
@@ -17,7 +18,7 @@ const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
       <div className="icc-container py-16 md:py-24 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
           <div className="flex justify-center mb-6">
-            <Shield className="h-16 w-16 text-icc-gold" />
+            <ICCLogo className="h-20 w-20" />
           </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white mb-6">
             {title}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Facebook, Twitter, Instagram, Shield } from 'lucide-react';
+import { Facebook, Twitter, Instagram } from 'lucide-react';
 import ICCLogo from '../common/ICCLogo';
 
 const Footer = () => {
