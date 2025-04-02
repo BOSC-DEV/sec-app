@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Comment, Profile, Scammer } from '@/types/dataTypes';
 
@@ -160,6 +161,8 @@ export const addComment = async (comment: {
   author_name: string,
   author_profile_pic?: string
 }): Promise<Comment> => {
+  console.log('Adding comment:', comment);
+  
   // Generate a unique ID for the comment
   const id = `cmt-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
   

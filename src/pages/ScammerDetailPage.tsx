@@ -88,25 +88,22 @@ const ScammerDetailPage = () => {
       return;
     }
 
-    if (!profile?.wallet_address) {
-      toast({
-        title: "Authentication required",
-        description: "Please connect your wallet to comment.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     try {
       setIsLoading(true);
+      
+      // For debugging
+      console.log('Submitting comment with profile:', profile);
+      
       const comment = {
         scammer_id: id || '',
         content: newComment,
-        author: profile.wallet_address || 'anonymous',
-        author_name: profile.display_name || 'Anonymous User',
-        author_profile_pic: profile.profile_pic_url || '/placeholder.svg'
+        author: profile?.wallet_address || 'anonymous',
+        author_name: profile?.display_name || 'Anonymous User',
+        author_profile_pic: profile?.profile_pic_url || '/placeholder.svg'
       };
 
+      console.log('Comment to be added:', comment);
+      
       await addComment(comment);
       
       // Refresh comments and scammer data
