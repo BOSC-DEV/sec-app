@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
@@ -11,9 +10,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import { getProfileByUsername } from '@/services/profileService';
-import { Twitter, Globe, Copy, ExternalLink, Share2 } from 'lucide-react';
-import { getScammersByReporter } from '@/services/supabaseService';
+import { Twitter, Globe, Copy, ExternalLink, Share2, ThumbsUp } from 'lucide-react';
+import { getScammersByReporter, getLikedScammersByUser } from '@/services/supabaseService';
 import { Profile, Scammer } from '@/types/dataTypes';
+import ScammerCard from '@/components/common/ScammerCard';
 
 const PublicProfilePage = () => {
   const { username } = useParams<{ username: string }>();
@@ -28,6 +28,12 @@ const PublicProfilePage = () => {
   const { data: scammerReports, isLoading: isLoadingReports } = useQuery({
     queryKey: ['scammerReports', profile?.wallet_address],
     queryFn: () => getScammersByReporter(profile?.wallet_address || ''),
+    enabled: !!profile?.wallet_address,
+  });
+  
+  const { data: likedScammers, isLoading: isLoadingLikedScammers } = useQuery({
+    queryKey: ['likedScammers', profile?.wallet_address],
+    queryFn: () => getLikedScammersByUser(profile?.wallet_address || ''),
     enabled: !!profile?.wallet_address,
   });
 
@@ -104,9 +110,7 @@ const PublicProfilePage = () => {
     return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
   };
 
-  // Default image for SEC.digital
   const defaultShareImage = '/lovable-uploads/3f23090d-4e36-43fc-b230-a8f898d7edd2.png';
-  // Determine if we should use the profile image or the default image for sharing
   const pageImage = profile?.profile_pic_url || defaultShareImage;
   const pageTitle = profile ? `${profile.display_name} (@${profile.username}) | SEC.digital` : 'Profile | SEC.digital';
   const pageDescription = profile?.bio || `Check out this profile on SEC.digital - The Scams & E-crimes Commission`;
@@ -118,14 +122,12 @@ const PublicProfilePage = () => {
           <title>{pageTitle}</title>
           <meta name="description" content={pageDescription} />
           
-          {/* Open Graph / Facebook */}
           <meta property="og:type" content="profile" />
           <meta property="og:url" content={window.location.href} />
           <meta property="og:title" content={pageTitle} />
           <meta property="og:description" content={pageDescription} />
           <meta property="og:image" content={pageImage} />
           
-          {/* Twitter */}
           <meta property="twitter:card" content="summary_large_image" />
           <meta property="twitter:url" content={window.location.href} />
           <meta property="twitter:title" content={pageTitle} />
@@ -135,7 +137,6 @@ const PublicProfilePage = () => {
         
         <div className="container py-10">
           <div className="space-y-8">
-            {/* Profile Header */}
             <div className="bg-background/60 backdrop-blur-sm rounded-lg p-6 border">
               {isLoading ? (
                 renderProfileSkeleton()
@@ -206,7 +207,6 @@ const PublicProfilePage = () => {
               )}
             </div>
               
-            {/* Tabs Section */}
             <Tabs defaultValue="reports" className="w-full" value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="w-full justify-start overflow-x-auto bg-background/60 backdrop-blur-sm rounded-lg border p-1 mb-6">
                 <TabsTrigger value="reports" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
@@ -219,7 +219,7 @@ const PublicProfilePage = () => {
                   Info
                 </TabsTrigger>
                 <TabsTrigger value="activity" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                  Activity
+                  Likes
                 </TabsTrigger>
                 <TabsTrigger value="comments" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
                   Comments
@@ -319,10 +319,31 @@ const PublicProfilePage = () => {
                 
               <TabsContent value="activity" className="mt-0">
                 <div className="bg-background/60 backdrop-blur-sm rounded-lg p-6 border">
-                  <h2 className="text-2xl font-bold text-icc-gold mb-6">Activity</h2>
-                  <div className="text-center py-12">
-                    <p className="text-muted-foreground text-lg">No recent activity</p>
-                  </div>
+                  <h2 className="text-2xl font-bold text-icc-gold mb-6 flex items-center">
+                    <ThumbsUp className="mr-2 h-6 w-6" />
+                    Liked Scammer Reports
+                  </h2>
+                  
+                  {isLoadingLikedScammers ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {[1, 2, 3].map((i) => (
+                        <Skeleton key={i} className="h-64 w-full rounded-lg" />
+                      ))}
+                    </div>
+                  ) : likedScammers && likedScammers.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {likedScammers.map((scammer) => (
+                        <ScammerCard key={scammer.id} scammer={scammer} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <p className="text-muted-foreground text-lg mb-6">No liked scammer reports yet</p>
+                      <Button asChild>
+                        <Link to="/most-wanted">Browse Scammers <ExternalLink className="ml-2" size={16} /></Link>
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </TabsContent>
                 

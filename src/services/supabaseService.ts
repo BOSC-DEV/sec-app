@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Comment, Profile, Scammer } from '@/types/dataTypes';
 
@@ -136,6 +135,57 @@ export const getScammersByReporter = async (walletAddress: string): Promise<Scam
   }
   
   return data || [];
+};
+
+// Get scammers liked by a user
+export const getLikedScammersByUser = async (walletAddress: string): Promise<Scammer[]> => {
+  console.log(`Fetching liked scammers for user: ${walletAddress}`);
+  
+  if (!walletAddress) {
+    console.error('No wallet address provided to getLikedScammersByUser');
+    return [];
+  }
+  
+  try {
+    // Get all the scammer IDs that this user has liked
+    const { data: interactions, error: interactionsError } = await supabase
+      .from('user_scammer_interactions')
+      .select('scammer_id')
+      .eq('user_id', walletAddress)
+      .eq('liked', true);
+    
+    if (interactionsError) {
+      console.error('Error fetching liked interactions:', interactionsError);
+      throw interactionsError;
+    }
+    
+    if (!interactions || interactions.length === 0) {
+      console.log(`No liked scammers found for user: ${walletAddress}`);
+      return [];
+    }
+    
+    // Extract the scammer IDs from the interactions
+    const scammerIds = interactions.map(interaction => interaction.scammer_id);
+    console.log(`Found ${scammerIds.length} liked scammer IDs:`, scammerIds);
+    
+    // Fetch the full scammer details for each ID
+    const { data: scammers, error: scammersError } = await supabase
+      .from('scammers')
+      .select('*')
+      .in('id', scammerIds)
+      .is('deleted_at', null);
+    
+    if (scammersError) {
+      console.error('Error fetching scammers by ID:', scammersError);
+      throw scammersError;
+    }
+    
+    console.log(`Successfully fetched ${scammers?.length || 0} liked scammers`);
+    return scammers || [];
+  } catch (error) {
+    console.error('Error in getLikedScammersByUser:', error);
+    return [];
+  }
 };
 
 // Comments Service
