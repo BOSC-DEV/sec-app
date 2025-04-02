@@ -3,20 +3,18 @@ import React from 'react';
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { UseFormReturn } from 'react-hook-form';
-import ScammerPhotoUpload from './ScammerPhotoUpload';
+import { Control, FieldErrors } from 'react-hook-form';
 
 interface ScammerInfoFieldsProps {
-  form: UseFormReturn<any>;
-  photoPreview: string | null;
-  onPhotoChange: (file: File) => void;
+  control: Control<any>;
+  errors: FieldErrors;
 }
 
-const ScammerInfoFields = ({ form, photoPreview, onPhotoChange }: ScammerInfoFieldsProps) => {
+const ScammerInfoFields = ({ control, errors }: ScammerInfoFieldsProps) => {
   return (
     <>
       <FormField
-        control={form.control}
+        control={control}
         name="name"
         render={({ field }) => (
           <FormItem>
@@ -32,14 +30,9 @@ const ScammerInfoFields = ({ form, photoPreview, onPhotoChange }: ScammerInfoFie
         )}
       />
       
-      <ScammerPhotoUpload 
-        photoPreview={photoPreview}
-        onPhotoChange={onPhotoChange}
-      />
-      
       <FormField
-        control={form.control}
-        name="accusedOf"
+        control={control}
+        name="accused_of"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Description of Scam*</FormLabel>
@@ -52,6 +45,23 @@ const ScammerInfoFields = ({ form, photoPreview, onPhotoChange }: ScammerInfoFie
             </FormControl>
             <FormDescription>
               Provide as much detail as possible about the scam.
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      <FormField
+        control={control}
+        name="wallet_address"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Wallet Address</FormLabel>
+            <FormControl>
+              <Input placeholder="Enter the wallet address if known" {...field} />
+            </FormControl>
+            <FormDescription>
+              The blockchain wallet address associated with the scammer.
             </FormDescription>
             <FormMessage />
           </FormItem>

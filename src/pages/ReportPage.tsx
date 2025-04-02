@@ -9,14 +9,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScammerInfoFields } from '@/components/report/ScammerInfoFields';
-import { DynamicFieldArray } from '@/components/report/DynamicFieldArray';
-import { ScammerPhotoUpload } from '@/components/report/ScammerPhotoUpload';
+import ScammerInfoFields from '@/components/report/ScammerInfoFields';
+import DynamicFieldArray from '@/components/report/DynamicFieldArray';
+import ScammerPhotoUpload from '@/components/report/ScammerPhotoUpload';
 import { useProfile } from '@/contexts/ProfileContext';
 import { supabase } from '@/integrations/supabase/client';
 import { generateScammerId } from '@/services/supabaseService';
 
-// Define schema for validation
 const reportSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   accused_of: z.string().optional(),
@@ -51,7 +50,6 @@ const ReportPage = () => {
     }
   });
 
-  // Fetch scammer data if editing
   const { data: scammer, isLoading: isLoadingScammer } = useQuery({
     queryKey: ['edit-scammer', id],
     queryFn: async () => {
@@ -69,7 +67,6 @@ const ReportPage = () => {
     enabled: !!id,
   });
 
-  // Set form values when editing
   useEffect(() => {
     if (scammer) {
       setIsEditMode(true);
@@ -105,7 +102,6 @@ const ReportPage = () => {
     try {
       let photoUrl = data.photo_url;
       
-      // Upload photo if provided
       if (photoFile) {
         const fileName = `scammer_photos/${Date.now()}_${photoFile.name}`;
         
@@ -122,14 +118,11 @@ const ReportPage = () => {
         photoUrl = publicUrlData.publicUrl;
       }
       
-      // Filter out empty values
       const aliases = data.aliases?.filter(item => item !== '') || [];
       const links = data.links?.filter(item => item !== '') || [];
       const accomplices = data.accomplices?.filter(item => item !== '') || [];
       
-      // Create or update scammer
       if (isEditMode && id) {
-        // Update existing scammer
         const { error } = await supabase
           .from('scammers')
           .update({
@@ -152,10 +145,8 @@ const ReportPage = () => {
         
         navigate(`/scammer/${id}`);
       } else {
-        // Generate a sequential ID for the new scammer
         const newId = await generateScammerId();
         
-        // Create new scammer
         const { error } = await supabase
           .from('scammers')
           .insert({

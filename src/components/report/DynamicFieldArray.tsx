@@ -1,49 +1,44 @@
 
 import React from 'react';
-import { UseFormReturn } from 'react-hook-form';
+import { Control, FieldErrors, UseFormSetValue } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Plus, Trash } from 'lucide-react';
 
 interface DynamicFieldArrayProps {
-  form: UseFormReturn<any>;
-  fieldName: 'walletAddresses' | 'links' | 'aliases' | 'accomplices';
+  name: string;
   label: string;
-  placeholder: string;
-  description: string;
-  buttonLabel: string;
+  control: Control<any>;
+  errors: FieldErrors;
+  setValue: UseFormSetValue<any>;
 }
 
 const DynamicFieldArray = ({
-  form,
-  fieldName,
+  name,
   label,
-  placeholder,
-  description,
-  buttonLabel,
+  control,
+  errors,
+  setValue,
 }: DynamicFieldArrayProps) => {
-  const addField = (e: React.MouseEvent) => {
-    // Prevent the default form submission
-    e.preventDefault();
-    
-    const currentValues = form.getValues(fieldName);
-    form.setValue(fieldName, [...currentValues, '']);
+  const addField = () => {
+    const currentValues = control._getWatch(name) || [];
+    setValue(name, [...currentValues, '']);
   };
 
   const removeField = (index: number) => {
-    const currentValues = form.getValues(fieldName);
+    const currentValues = control._getWatch(name) || [];
     if (currentValues.length > 1) {
-      form.setValue(
-        fieldName,
+      setValue(
+        name,
         currentValues.filter((_, i) => i !== index)
       );
     }
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-2">
+    <div className="space-y-4 mb-4">
+      <div className="flex justify-between items-center">
         <FormLabel>{label}</FormLabel>
         <Button 
           type="button" 
@@ -51,18 +46,19 @@ const DynamicFieldArray = ({
           size="sm" 
           onClick={addField}
         >
-          <Plus className="h-4 w-4 mr-1" /> {buttonLabel}
+          <Plus className="h-4 w-4 mr-1" /> Add {label}
         </Button>
       </div>
-      {form.getValues(fieldName).map((_, index) => (
-        <div key={`${fieldName}-${index}`} className="flex gap-2 mb-2">
+      
+      {control._getWatch(name)?.map((_, index) => (
+        <div key={`${name}-${index}`} className="flex gap-2 items-center">
           <FormField
-            control={form.control}
-            name={`${fieldName}.${index}`}
+            control={control}
+            name={`${name}.${index}`}
             render={({ field }) => (
-              <FormItem className="flex-1">
+              <FormItem className="flex-1 mb-0">
                 <FormControl>
-                  <Input placeholder={placeholder} {...field} />
+                  <Input placeholder={`Enter ${label.toLowerCase()}`} {...field} />
                 </FormControl>
               </FormItem>
             )}
@@ -72,15 +68,12 @@ const DynamicFieldArray = ({
             variant="ghost" 
             size="icon"
             onClick={() => removeField(index)}
-            disabled={form.getValues(fieldName).length <= 1}
+            disabled={control._getWatch(name)?.length <= 1}
           >
             <Trash className="h-4 w-4 text-gray-500" />
           </Button>
         </div>
       ))}
-      <FormDescription>
-        {description}
-      </FormDescription>
     </div>
   );
 };

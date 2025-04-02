@@ -1,22 +1,31 @@
 
-import React, { useRef, useState } from 'react';
-import { FormDescription, FormItem, FormLabel } from '@/components/ui/form';
+import React, { useState } from 'react';
+import { FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Upload, Image } from 'lucide-react';
+import { Control, UseFormSetValue } from 'react-hook-form';
 import { useToast } from '@/hooks/use-toast';
 
 interface ScammerPhotoUploadProps {
-  photoPreview: string | null;
-  onPhotoChange: (file: File) => void;
+  photoPreview: string;
+  setPhotoPreview: React.Dispatch<React.SetStateAction<string>>;
+  photoFile: File | null;
+  setPhotoFile: React.Dispatch<React.SetStateAction<File | null>>;
+  setValue: UseFormSetValue<any>;
+  control: Control<any>;
 }
 
 const ScammerPhotoUpload = ({
   photoPreview,
-  onPhotoChange,
+  setPhotoPreview,
+  photoFile,
+  setPhotoFile,
+  setValue,
+  control,
 }: ScammerPhotoUploadProps) => {
   const { toast } = useToast();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handlePhotoClick = () => {
     fileInputRef.current?.click();
@@ -46,11 +55,20 @@ const ScammerPhotoUpload = ({
       return;
     }
 
-    onPhotoChange(file);
+    setPhotoFile(file);
+    
+    // Create a preview URL
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const preview = reader.result as string;
+      setPhotoPreview(preview);
+      setValue('photo_url', preview);
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
-    <FormItem>
+    <FormItem className="mb-4">
       <FormLabel>Scammer's Photo</FormLabel>
       <div className="mt-2 flex items-center gap-x-3">
         <div 
