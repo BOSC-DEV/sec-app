@@ -3,6 +3,13 @@ import { createContext, useState, useContext, useEffect, ReactNode } from 'react
 import { Profile } from '@/types/dataTypes';
 import { getProfileByWallet, uploadProfilePicture } from '@/services/profileService';
 import { toast } from '@/hooks/use-toast';
+import { 
+  connectPhantomWallet, 
+  disconnectPhantomWallet, 
+  getPhantomProvider, 
+  getWalletPublicKey, 
+  isPhantomInstalled 
+} from '@/utils/phantomWallet';
 
 interface ProfileContextType {
   isConnected: boolean;
@@ -13,6 +20,7 @@ interface ProfileContextType {
   disconnectWallet: () => void;
   refreshProfile: () => Promise<void>;
   uploadAvatar: (file: File) => Promise<string | null>;
+  isPhantomAvailable: boolean;
 }
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
@@ -22,16 +30,57 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isPhantomAvailable, setIsPhantomAvailable] = useState<boolean>(false);
 
-  // Check for saved wallet on load
+  // Check for Phantom wallet and saved wallet on load
   useEffect(() => {
+    const checkPhantomAvailability = () => {
+      setIsPhantomAvailable(isPhantomInstalled());
+    };
+
+    checkPhantomAvailability();
+
+    // Check if wallet is already connected
     const savedWallet = localStorage.getItem('walletAddress');
     if (savedWallet) {
       setWalletAddress(savedWallet);
       setIsConnected(true);
       fetchProfile(savedWallet);
     }
+
+    // Add event listener for when Phantom is installed
+    window.addEventListener('DOMContentLoaded', checkPhantomAvailability);
+    
+    return () => {
+      window.removeEventListener('DOMContentLoaded', checkPhantomAvailability);
+    };
   }, []);
+
+  // Add event listeners for Phantom wallet connection changes
+  useEffect(() => {
+    const provider = getPhantomProvider();
+    
+    if (provider) {
+      // Handle connection events
+      provider.on('connect', () => {
+        const publicKey = getWalletPublicKey();
+        if (publicKey) {
+          setWalletAddress(publicKey);
+          setIsConnected(true);
+          localStorage.setItem('walletAddress', publicKey);
+          fetchProfile(publicKey);
+        }
+      });
+      
+      // Handle disconnection events
+      provider.on('disconnect', () => {
+        setWalletAddress(null);
+        setIsConnected(false);
+        setProfile(null);
+        localStorage.removeItem('walletAddress');
+      });
+    }
+  }, [isPhantomAvailable]);
 
   const fetchProfile = async (address: string) => {
     try {
@@ -89,25 +138,33 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     try {
       setIsLoading(true);
       
-      // This is a mock implementation. In a real app, you would integrate with Phantom or other wallet
-      // For now, we'll create a mock wallet address
-      const mockWalletAddress = `wallet_${Date.now().toString(36)}`;
-      
-      // In a real implementation, you would request the user to sign a message to prove ownership
-      // For demo purposes, we'll just simulate this
-      
-      // Save wallet address
-      localStorage.setItem('walletAddress', mockWalletAddress);
-      setWalletAddress(mockWalletAddress);
-      setIsConnected(true);
-      
-      // Check if profile exists
-      await fetchProfile(mockWalletAddress);
-      
-      toast({
-        title: 'Wallet Connected',
-        description: 'Your wallet has been connected successfully',
-      });
+      if (isPhantomAvailable) {
+        // Connect to Phantom wallet
+        const publicKey = await connectPhantomWallet();
+        
+        if (publicKey) {
+          setWalletAddress(publicKey);
+          setIsConnected(true);
+          localStorage.setItem('walletAddress', publicKey);
+          
+          // Check if profile exists
+          await fetchProfile(publicKey);
+        }
+      } else {
+        // Fallback to mock wallet for testing
+        const mockWalletAddress = `wallet_${Date.now().toString(36)}`;
+        
+        localStorage.setItem('walletAddress', mockWalletAddress);
+        setWalletAddress(mockWalletAddress);
+        setIsConnected(true);
+        
+        await fetchProfile(mockWalletAddress);
+        
+        toast({
+          title: 'Mock Wallet Connected',
+          description: 'Phantom wallet not detected. Using a mock wallet for testing.',
+        });
+      }
     } catch (error) {
       console.error('Error connecting wallet:', error);
       toast({
@@ -121,14 +178,21 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const disconnectWallet = () => {
+    if (isPhantomAvailable) {
+      disconnectPhantomWallet();
+    }
+    
     localStorage.removeItem('walletAddress');
     setWalletAddress(null);
     setIsConnected(false);
     setProfile(null);
-    toast({
-      title: 'Wallet Disconnected',
-      description: 'Your wallet has been disconnected',
-    });
+    
+    if (!isPhantomAvailable) {
+      toast({
+        title: 'Wallet Disconnected',
+        description: 'Your mock wallet has been disconnected',
+      });
+    }
   };
 
   const refreshProfile = async () => {
@@ -145,7 +209,8 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     connectWallet,
     disconnectWallet,
     refreshProfile,
-    uploadAvatar
+    uploadAvatar,
+    isPhantomAvailable
   };
 
   return (
