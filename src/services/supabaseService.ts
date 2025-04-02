@@ -309,7 +309,7 @@ export const getUserScammerInteraction = async (scammerId: string, walletAddress
   return data;
 };
 
-export const likeScammer = async (scammerId: string, walletAddress: string): Promise<void> => {
+export const likeScammer = async (scammerId: string, walletAddress: string): Promise<{ likes?: number; dislikes?: number } | void> => {
   console.log(`Processing like for scammer ${scammerId} by user ${walletAddress}`);
   
   // Get existing interaction if any
@@ -391,7 +391,7 @@ export const likeScammer = async (scammerId: string, walletAddress: string): Pro
   }
 };
 
-export const dislikeScammer = async (scammerId: string, walletAddress: string): Promise<void> => {
+export const dislikeScammer = async (scammerId: string, walletAddress: string): Promise<{ likes?: number; dislikes?: number } | void> => {
   try {
     // Get existing interaction if any
     const { data: existingInteraction, error: fetchError } = await supabase
