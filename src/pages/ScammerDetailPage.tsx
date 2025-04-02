@@ -499,23 +499,6 @@ const ScammerDetailPage = () => {
             </div>
 
             <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center text-green-600">
-                  <ThumbsUp className="h-4 w-4 mr-1" />
-                  <span>Agree ({localLikes})</span>
-                </div>
-                <div className="flex items-center text-red-600">
-                  <span>Disagree ({localDislikes})</span>
-                  <ThumbsDown className="h-4 w-4 ml-1" />
-                </div>
-              </div>
-              <Progress value={agreePercentage} className="h-3" />
-              <p className="text-center text-sm text-gray-500 mt-1">
-                {agreePercentage}% of community members agree
-              </p>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold flex items-center">
                   <MessageSquare className="h-5 w-5 mr-2" />
@@ -589,7 +572,7 @@ const ScammerDetailPage = () => {
           </div>
 
           <div className="md:col-span-1">
-            <Card className="bg-amber-50 border-amber-200">
+            <Card className="bg-amber-50 border-amber-200 mb-6">
               <CardHeader>
                 <CardTitle className="text-amber-900 text-xl">Contribute to Bounty</CardTitle>
                 <p className="text-sm text-amber-800">
@@ -653,6 +636,23 @@ const ScammerDetailPage = () => {
                 </div>
               </CardContent>
             </Card>
+
+            <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center text-green-600">
+                  <ThumbsUp className="h-4 w-4 mr-1" />
+                  <span>Agree ({localLikes})</span>
+                </div>
+                <div className="flex items-center text-red-600">
+                  <span>Disagree ({localDislikes})</span>
+                  <ThumbsDown className="h-4 w-4 ml-1" />
+                </div>
+              </div>
+              <Progress value={agreePercentage} className="h-3" />
+              <p className="text-center text-sm text-gray-500 mt-1">
+                {agreePercentage}% of community members agree
+              </p>
+            </div>
           </div>
         </div>
       </div>
