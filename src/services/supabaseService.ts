@@ -34,29 +34,28 @@ export const getScammerById = async (id: string): Promise<Scammer | null> => {
   }
   
   if (data) {
-    // Update the view count directly without checking for duplicates
-    // This will just increment the counter in the scammers table
-    const { error: updateError } = await supabase
-      .from('scammers')
-      .update({ views: (data.views || 0) + 1 })
-      .eq('id', id);
-    
-    if (updateError) {
-      console.error('Error updating scammer views:', updateError);
-    }
-    
-    // Generate a unique identifier by combining IP and timestamp to avoid constraint violations
-    // In a real app you might hash the IP for privacy
-    const ipHash = `anonymous-${new Date().getTime()}`;
-    
     try {
-      // Insert view record with a unique hash to avoid constraint violations
-      const { error: viewError } = await supabase
-        .from('scammer_views')
-        .insert({ scammer_id: id, ip_hash: ipHash });
-        
-      if (viewError && viewError.code !== '23505') { // Ignore duplicate key errors
-        console.error('Error logging scammer view:', viewError);
+      // Generate a unique IP hash based on timestamp to avoid constraint violations
+      // In a production environment, you would use a real IP address hash
+      const ipHash = `anonymous-${new Date().getTime()}`;
+      
+      // Check if this view is a duplicate using our new database function
+      const { data: isDuplicate } = await supabase
+        .rpc('is_duplicate_view', { 
+          p_scammer_id: id, 
+          p_ip_hash: ipHash 
+        });
+      
+      // Only insert view record if it's not a duplicate
+      if (!isDuplicate) {
+        // Insert view record - this will trigger our increment_scammer_views function
+        const { error: viewError } = await supabase
+          .from('scammer_views')
+          .insert({ scammer_id: id, ip_hash: ipHash });
+          
+        if (viewError) {
+          console.error('Error logging scammer view:', viewError);
+        }
       }
     } catch (e) {
       // Silently fail on view tracking errors to not disrupt user experience

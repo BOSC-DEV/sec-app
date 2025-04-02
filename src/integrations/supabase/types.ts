@@ -295,6 +295,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      is_duplicate_view: {
+        Args: {
+          p_scammer_id: string
+          p_ip_hash: string
+        }
+        Returns: boolean
+      }
       upsert_profile: {
         Args: {
           profile_id: string
