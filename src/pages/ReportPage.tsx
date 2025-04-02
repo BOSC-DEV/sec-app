@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,7 +8,6 @@ import Hero from '@/components/common/Hero';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { uploadScammerPhoto } from '@/services/profileService';
-import ScammerPhotoUpload from '@/components/report/ScammerPhotoUpload';
 import DynamicFieldArray from '@/components/report/DynamicFieldArray';
 import ScammerInfoFields from '@/components/report/ScammerInfoFields';
 
@@ -118,9 +116,8 @@ const ReportPage = () => {
         <div className="icc-container max-w-3xl">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <ScammerInfoFields form={form} />
-              
-              <ScammerPhotoUpload 
+              <ScammerInfoFields 
+                form={form} 
                 photoPreview={photoPreview}
                 onPhotoChange={handlePhotoChange}
               />

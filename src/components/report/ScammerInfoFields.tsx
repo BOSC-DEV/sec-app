@@ -4,12 +4,15 @@ import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessa
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { UseFormReturn } from 'react-hook-form';
+import ScammerPhotoUpload from './ScammerPhotoUpload';
 
 interface ScammerInfoFieldsProps {
   form: UseFormReturn<any>;
+  photoPreview: string | null;
+  onPhotoChange: (file: File) => void;
 }
 
-const ScammerInfoFields = ({ form }: ScammerInfoFieldsProps) => {
+const ScammerInfoFields = ({ form, photoPreview, onPhotoChange }: ScammerInfoFieldsProps) => {
   return (
     <>
       <FormField
@@ -27,6 +30,11 @@ const ScammerInfoFields = ({ form }: ScammerInfoFieldsProps) => {
             <FormMessage />
           </FormItem>
         )}
+      />
+      
+      <ScammerPhotoUpload 
+        photoPreview={photoPreview}
+        onPhotoChange={onPhotoChange}
       />
       
       <FormField
