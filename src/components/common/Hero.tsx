@@ -22,7 +22,7 @@ const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white mb-6">
             {title}
           </h1>
-          <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl md:text-2xl text-gray-100 mb-8 max-w-2xl mx-auto">
             {subtitle}
           </p>
           
@@ -34,7 +34,7 @@ const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
                   View Scammers
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="border-white text-white hover:bg-white/10 text-lg py-6 px-8">
+              <Button asChild variant="outline" className="border-white bg-icc-blue-dark hover:bg-icc-blue text-white text-lg py-6 px-8 font-medium">
                 <Link to="/report">
                   <AlertCircle className="mr-2 h-5 w-5" />
                   Report a Scammer
