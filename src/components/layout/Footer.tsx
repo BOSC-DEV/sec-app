@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Instagram, Shield } from 'lucide-react';
@@ -13,7 +12,7 @@ const Footer = () => {
             <Link to="/" className="flex items-center space-x-2 mb-4">
               <ICCLogo className="h-10 w-auto" />
               <div className="font-serif">
-                <div className="text-base font-bold leading-tight">Scams & E-Crime Commission</div>
+                <div className="text-base font-bold leading-tight">Scams & E-crimes Commission</div>
               </div>
             </Link>
             <p className="text-sm text-gray-300 mt-4">
@@ -65,7 +64,7 @@ const Footer = () => {
         
         <div className="border-t border-icc-blue-light mt-8 pt-8 text-sm text-gray-300">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p>&copy; {new Date().getFullYear()} Scams & E-Crime Commission. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} Scams & E-crimes Commission. All rights reserved.</p>
             <p className="mt-2 md:mt-0">
               This site is for informational purposes only. 
               <span className="block md:inline md:ml-1">Not affiliated with any government entity.</span>
