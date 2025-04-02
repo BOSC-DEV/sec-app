@@ -370,6 +370,20 @@ export const likeScammer = async (scammerId: string, walletAddress: string): Pro
 
     // Update scammer like/dislike counts
     await updateScammerLikes(scammerId);
+    
+    // Return the updated scammer to get the latest counts
+    const { data: updatedScammer, error: scammerError } = await supabase
+      .from('scammers')
+      .select('likes, dislikes')
+      .eq('id', scammerId)
+      .single();
+      
+    if (scammerError) {
+      console.error('Error fetching updated scammer:', scammerError);
+      // Don't throw here, as the main operation succeeded
+    }
+    
+    console.log('Updated scammer counts:', updatedScammer);
   } catch (error) {
     console.error('Error in likeScammer:', error);
     throw error;
@@ -429,6 +443,20 @@ export const dislikeScammer = async (scammerId: string, walletAddress: string): 
 
     // Update scammer like/dislike counts
     await updateScammerLikes(scammerId);
+    
+    // Return the updated scammer to get the latest counts
+    const { data: updatedScammer, error: scammerError } = await supabase
+      .from('scammers')
+      .select('likes, dislikes')
+      .eq('id', scammerId)
+      .single();
+      
+    if (scammerError) {
+      console.error('Error fetching updated scammer:', scammerError);
+      // Don't throw here, as the main operation succeeded
+    }
+    
+    console.log('Updated scammer counts:', updatedScammer);
   } catch (error) {
     console.error('Error in dislikeScammer:', error);
     throw error;

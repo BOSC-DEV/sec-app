@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -183,15 +182,21 @@ const ScammerDetailPage = () => {
       const wasLiked = isLiked;
       
       // Update UI optimistically
+      let newLikes = localLikes;
+      let newDislikes = localDislikes;
+      
       if (isLiked) {
-        setLocalLikes(prev => Math.max(prev - 1, 0));
+        newLikes = Math.max(localLikes - 1, 0);
+        setLocalLikes(newLikes);
         setIsLiked(false);
       } else {
-        setLocalLikes(prev => prev + 1);
+        newLikes = localLikes + 1;
+        setLocalLikes(newLikes);
         setIsLiked(true);
         
         if (isDisliked) {
-          setLocalDislikes(prev => Math.max(prev - 1, 0));
+          newDislikes = Math.max(localDislikes - 1, 0);
+          setLocalDislikes(newDislikes);
           setIsDisliked(false);
         }
       }
@@ -240,15 +245,21 @@ const ScammerDetailPage = () => {
       const wasDisliked = isDisliked;
       
       // Update UI optimistically
+      let newLikes = localLikes;
+      let newDislikes = localDislikes;
+      
       if (isDisliked) {
-        setLocalDislikes(prev => Math.max(prev - 1, 0));
+        newDislikes = Math.max(localDislikes - 1, 0);
+        setLocalDislikes(newDislikes);
         setIsDisliked(false);
       } else {
-        setLocalDislikes(prev => prev + 1);
+        newDislikes = localDislikes + 1;
+        setLocalDislikes(newDislikes);
         setIsDisliked(true);
         
         if (isLiked) {
-          setLocalLikes(prev => Math.max(prev - 1, 0));
+          newLikes = Math.max(localLikes - 1, 0);
+          setLocalLikes(newLikes);
           setIsLiked(false);
         }
       }

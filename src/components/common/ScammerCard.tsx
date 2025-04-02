@@ -43,14 +43,12 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
     fetchCreatorProfile();
   }, [scammer.added_by]);
 
-  // Always display the latest view count from the scammer prop
+  // Always display the latest data from the scammer prop
   useEffect(() => {
     setViewCount(scammer.views || 0);
-    
-    // Update local likes and dislikes when scammer data changes
     setLikes(scammer.likes || 0);
     setDislikes(scammer.dislikes || 0);
-  }, [scammer.views, scammer.likes, scammer.dislikes]);
+  }, [scammer]);
 
   // Check if the current user has liked or disliked this scammer
   useEffect(() => {
@@ -104,18 +102,25 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
       const wasLiked = isLiked;
       const wasDisliked = isDisliked;
       
+      let newLikes = likes;
+      let newDislikes = dislikes;
+      
+      // Toggle like state
       if (isLiked) {
         // If already liked, unlike it
-        setLikes(prev => Math.max(prev - 1, 0));
+        newLikes = Math.max(likes - 1, 0);
+        setLikes(newLikes);
         setIsLiked(false);
       } else {
         // If not liked, like it
-        setLikes(prev => prev + 1);
+        newLikes = likes + 1;
+        setLikes(newLikes);
         setIsLiked(true);
         
         // If it was previously disliked, remove the dislike
         if (isDisliked) {
-          setDislikes(prev => Math.max(prev - 1, 0));
+          newDislikes = Math.max(dislikes - 1, 0);
+          setDislikes(newDislikes);
           setIsDisliked(false);
         }
       }
@@ -127,6 +132,8 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
         title: wasLiked ? "Like removed" : "Report liked",
         description: wasLiked ? "You've removed your like from this report." : "You've marked this report as accurate."
       });
+      
+      // No need to update the counts from the database since we already updated them optimistically
     } catch (error) {
       console.error("Error liking scammer:", error);
       // Revert UI changes on error
@@ -168,18 +175,25 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
       const wasDisliked = isDisliked;
       const wasLiked = isLiked;
       
+      let newDislikes = dislikes;
+      let newLikes = likes;
+      
+      // Toggle dislike state
       if (isDisliked) {
         // If already disliked, un-dislike it
-        setDislikes(prev => Math.max(prev - 1, 0));
+        newDislikes = Math.max(dislikes - 1, 0);
+        setDislikes(newDislikes);
         setIsDisliked(false);
       } else {
         // If not disliked, dislike it
-        setDislikes(prev => prev + 1);
+        newDislikes = dislikes + 1;
+        setDislikes(newDislikes);
         setIsDisliked(true);
         
         // If it was previously liked, remove the like
         if (isLiked) {
-          setLikes(prev => Math.max(prev - 1, 0));
+          newLikes = Math.max(likes - 1, 0);
+          setLikes(newLikes);
           setIsLiked(false);
         }
       }
@@ -191,6 +205,8 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
         title: wasDisliked ? "Dislike removed" : "Report disliked",
         description: wasDisliked ? "You've removed your dislike from this report." : "You've marked this report as inaccurate."
       });
+      
+      // No need to update the counts from the database since we already updated them optimistically
     } catch (error) {
       console.error("Error disliking scammer:", error);
       // Revert UI changes on error
