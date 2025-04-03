@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import { getScammerComments, addComment } from '@/services/commentService';
 import { likeScammer, dislikeScammer, getUserScammerInteraction } from '@/services/interactionService';
 import { isScammerCreator } from '@/services/reportService';
 import CompactHero from '@/components/common/CompactHero';
-import { ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, Link2, Eye, AlertTriangle, Shield, TrendingUp, Edit } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, Link2, Eye, AlertTriangle, Shield, TrendingUp, Edit, Clipboard } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
@@ -23,6 +22,7 @@ import { getProfileByWallet } from '@/services/profileService';
 import { Scammer, Comment, Profile } from '@/types/dataTypes';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Input } from '@/components/ui/input';
 
 const ScammerDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -38,6 +38,7 @@ const ScammerDetailPage = () => {
   const [creatorProfile, setCreatorProfile] = useState<Profile | null>(null);
   const [agreePercentage, setAgreePercentage] = useState(0);
   const [isCreator, setIsCreator] = useState(false);
+  const [contributionAmount, setContributionAmount] = useState('0.00');
 
   // Fetch scammer details
   const {
@@ -135,6 +136,16 @@ const ScammerDetailPage = () => {
   const handleEditScammer = () => {
     if (!id) return;
     navigate(`/report/${id}`);
+  };
+
+  // Copy wallet address to clipboard
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      toast({
+        title: "Copied to clipboard",
+        description: "Wallet address copied!",
+      });
+    });
   };
 
   // Mutation to add a comment
@@ -282,6 +293,37 @@ const ScammerDetailPage = () => {
     });
   };
 
+  // Handler for adding bounty
+  const handleAddBounty = () => {
+    if (!profile) {
+      toast({
+        title: "Authentication required",
+        description: "Please connect your wallet to contribute to this bounty.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!contributionAmount || parseFloat(contributionAmount) <= 0) {
+      toast({
+        title: "Invalid amount",
+        description: "Please enter a valid contribution amount.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "Bounty contribution",
+      description: `Thank you for contributing ${contributionAmount} $BOSC to this bounty!`,
+    });
+  };
+
+  // Get truncated developer wallet address
+  const developerWallet = scammer?.added_by ? 
+    `${scammer.added_by.substring(0, 4)}...${scammer.added_by.substring(scammer.added_by.length - 4)}` : 
+    '';
+
   // Placeholder content while loading
   if (isLoadingScammer) {
     return (
@@ -357,7 +399,7 @@ const ScammerDetailPage = () => {
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute top-0 left-0 bg-icc-gold text-icc-blue-dark px-4 py-2 text-sm font-bold rounded-br-lg">
-                  {scammer.bounty_amount.toLocaleString()} $SEC Bounty
+                  {scammer.bounty_amount.toLocaleString()} $BOSC Bounty
                 </div>
               </div>
 
@@ -367,37 +409,25 @@ const ScammerDetailPage = () => {
               </div>
 
               <div className="mt-6">
-                <h2 className="icc-title">Links</h2>
-                {scammer.links && scammer.links.length > 0 ? (
+                <h2 className="icc-title">Wallet Addresses</h2>
+                {scammer.wallet_addresses && scammer.wallet_addresses.length > 0 ? (
                   <ul className="list-disc pl-5 text-icc-gray">
-                    {scammer.links.map((link, index) => (
-                      <li key={index}>
-                        <a
-                          href={link.startsWith('http') ? link : `https://${link}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-icc-blue hover:underline"
+                    {scammer.wallet_addresses.map((address, index) => (
+                      <li key={index} className="flex items-center">
+                        <span className="mr-2">{address}</span>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-6 w-6 p-0" 
+                          onClick={() => copyToClipboard(address)}
                         >
-                          {link}
-                        </a>
+                          <Copy className="h-3.5 w-3.5" />
+                        </Button>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-icc-gray">No links provided.</p>
-                )}
-              </div>
-
-              <div className="mt-6">
-                <h2 className="icc-title">Aliases</h2>
-                {scammer.aliases && scammer.aliases.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {scammer.aliases.map((alias, index) => (
-                      <Badge key={index}>{alias}</Badge>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-icc-gray">No aliases provided.</p>
+                  <p className="text-icc-gray">No wallet addresses provided.</p>
                 )}
               </div>
             </div>
@@ -487,24 +517,56 @@ const ScammerDetailPage = () => {
                     Disagree{dislikes > 0 ? ` (${dislikes})` : ''}
                   </Button>
                   
-                  <div className="bg-icc-gold/20 border border-icc-gold/50 rounded-lg p-4 mt-4">
-                    <div className="flex justify-between items-center mb-3">
-                      <h4 className="font-medium text-icc-blue">Current Bounty</h4>
-                      <span className="text-xl font-bold text-icc-blue">{scammer.bounty_amount.toLocaleString()} $SEC</span>
+                  {/* Enhanced Bounty Box */}
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-5 mt-4">
+                    <h4 className="font-bold text-lg text-icc-blue-dark mb-2">Contribute to Bounty</h4>
+                    <p className="text-sm text-icc-gray-dark mb-4">
+                      Add $BOSC tokens to increase the bounty for {scammer.name}
+                    </p>
+                    
+                    <div className="mb-4">
+                      <div className="text-sm font-medium text-icc-blue-dark mb-2">Current Bounty</div>
+                      <div className="bg-amber-100 border border-amber-200 rounded p-2 flex items-center">
+                        <DollarSign className="h-4 w-4 text-amber-700 mr-1" />
+                        <span className="font-mono font-medium">{scammer.bounty_amount.toLocaleString()} $BOSC</span>
+                      </div>
                     </div>
                     
-                    <div className="flex items-center space-x-2 text-sm text-icc-gray mb-3">
-                      <TrendingUp className="h-4 w-4" />
-                      <span>Top 5% of all bounties</span>
+                    <div className="mb-4">
+                      <div className="text-sm font-medium text-icc-blue-dark mb-2">Developer Wallet</div>
+                      <div className="bg-amber-100 border border-amber-200 rounded p-2 flex items-center justify-between">
+                        <span className="font-mono text-sm">{developerWallet}</span>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-6 w-6 p-0" 
+                          onClick={() => copyToClipboard(scammer.added_by)}
+                        >
+                          <Clipboard className="h-3.5 w-3.5 text-amber-700" />
+                        </Button>
+                      </div>
                     </div>
                     
-                    <div className="text-sm text-icc-gray mb-4">
-                      Add to this bounty to increase visibility and encourage information sharing about this scammer.
+                    <div className="mb-4">
+                      <div className="text-sm font-medium text-icc-blue-dark mb-2">Contribution Amount</div>
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          type="number"
+                          value={contributionAmount}
+                          onChange={(e) => setContributionAmount(e.target.value)}
+                          className="bg-amber-100 border-amber-200"
+                          min="0"
+                          step="0.01"
+                        />
+                        <span className="text-amber-800 font-medium">$BOSC</span>
+                      </div>
                     </div>
                     
-                    <Button variant="outline" className="w-full justify-center bg-icc-gold/20 text-icc-blue border-icc-gold/50 hover:bg-icc-gold/30">
-                      <DollarSign className="h-3.5 w-3.5 mr-1" />
-                      Add Bounty
+                    <Button
+                      className="w-full bg-amber-500 hover:bg-amber-600 text-amber-950 border-amber-600"
+                      onClick={handleAddBounty}
+                    >
+                      {profile ? "Contribute to Bounty" : "Connect your wallet to contribute"}
                     </Button>
                   </div>
                 </div>
@@ -521,6 +583,12 @@ const ScammerDetailPage = () => {
               <TabsTrigger value="comments" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
                 Comments
               </TabsTrigger>
+              <TabsTrigger value="links" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                Links
+              </TabsTrigger>
+              <TabsTrigger value="aliases" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                Aliases
+              </TabsTrigger>
               <TabsTrigger value="evidence" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
                 Evidence
               </TabsTrigger>
@@ -528,6 +596,7 @@ const ScammerDetailPage = () => {
                 Official Response
               </TabsTrigger>
             </TabsList>
+            
             <TabsContent value="comments" className="mt-2">
               <div className="mb-4">
                 <Textarea
@@ -576,9 +645,46 @@ const ScammerDetailPage = () => {
                 <div>No comments yet. Be the first to comment!</div>
               )}
             </TabsContent>
+            
+            <TabsContent value="links" className="mt-2">
+              <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4">Links</h2>
+              {scammer.links && scammer.links.length > 0 ? (
+                <ul className="list-disc pl-5 space-y-2">
+                  {scammer.links.map((link, index) => (
+                    <li key={index} className="text-icc-gray">
+                      <a
+                        href={link.startsWith('http') ? link : `https://${link}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-icc-blue hover:underline"
+                      >
+                        {link}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-icc-gray">No links provided.</p>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="aliases" className="mt-2">
+              <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4">Aliases</h2>
+              {scammer.aliases && scammer.aliases.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {scammer.aliases.map((alias, index) => (
+                    <Badge key={index} className="bg-icc-blue text-white py-2 px-4">{alias}</Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-icc-gray">No aliases provided.</p>
+              )}
+            </TabsContent>
+            
             <TabsContent value="evidence" className="mt-2">
               <div>No evidence provided.</div>
             </TabsContent>
+            
             <TabsContent value="official" className="mt-2">
               <div>No official response yet.</div>
             </TabsContent>
