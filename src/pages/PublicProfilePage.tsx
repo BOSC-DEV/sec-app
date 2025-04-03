@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
@@ -11,7 +12,7 @@ import { toast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import { getProfileByUsername } from '@/services/profileService';
 import { Twitter, Globe, Copy, ExternalLink, Share2, ThumbsUp, Edit, LogOut } from 'lucide-react';
-import { getScammersByReporter, getLikedScammersByUser } from '@/services/supabaseService';
+import { getScammersByReporter, getLikedScammersByUser } from '@/services/scammerService';
 import { Profile, Scammer } from '@/types/dataTypes';
 import ScammerCard from '@/components/common/ScammerCard';
 import { useProfile } from '@/contexts/ProfileContext';

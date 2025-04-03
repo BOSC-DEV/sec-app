@@ -1,10 +1,11 @@
+
 import React, { useEffect, useState } from 'react';
 import CompactHero from '@/components/common/CompactHero';
 import ScammerCard from '@/components/common/ScammerCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getScammers } from '@/services/supabaseService';
+import { getScammers } from '@/services/scammerService';
 import { getProfileByWallet } from '@/services/profileService';
 import { Grid, Globe, List, Search, SlidersHorizontal } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';

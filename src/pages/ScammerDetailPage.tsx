@@ -1,98 +1,91 @@
-
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { getScammerById, getScammerComments, addComment, likeScammer, dislikeScammer, getProfileByWallet, getUserScammerInteraction } from '@/services/supabaseService';
-import { Scammer, Comment, Profile } from '@/types/dataTypes';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { getScammerById } from '@/services/scammerService';
+import { getScammerComments, addComment } from '@/services/commentService';
+import { likeScammer, dislikeScammer, getUserScammerInteraction } from '@/services/interactionService';
+import CompactHero from '@/components/common/CompactHero';
+import { ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, Link2, Eye, AlertTriangle, Shield } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Textarea } from '@/components/ui/textarea';
 import { Toggle } from '@/components/ui/toggle';
-import { Input } from '@/components/ui/input';
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Helmet, HelmetProvider } from 'react-helmet-async';
-import { 
-  MessageSquare, 
-  ThumbsUp, 
-  ThumbsDown, 
-  Share2, 
-  Copy, 
-  ArrowRight,
-  Link as LinkIcon,
-  Eye,
-  Edit
-} from 'lucide-react';
-import { toast } from "@/hooks/use-toast";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
+import { toast } from '@/hooks/use-toast';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { formatDate } from '@/lib/utils';
 import { useProfile } from '@/contexts/ProfileContext';
+import { getProfileByWallet } from '@/services/profileService';
+import { Scammer, Comment, Profile } from '@/types/dataTypes';
 
 const ScammerDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [newComment, setNewComment] = useState('');
-  const [activeTab, setActiveTab] = useState('identity');
+  const queryClient = useQueryClient();
   const { profile } = useProfile();
-  const [bountyAmount, setBountyAmount] = useState('0.0');
-  const [localLikes, setLocalLikes] = useState(0);
-  const [localDislikes, setLocalDislikes] = useState(0);
+  const [commentText, setCommentText] = useState('');
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
+  const [likes, setLikes] = useState(0);
+  const [dislikes, setDislikes] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [creatorProfile, setCreatorProfile] = useState<Profile | null>(null);
 
-  const { 
-    data: scammer, 
-    isLoading: isScammerLoading, 
-    error: scammerError,
-    refetch: refetchScammer
+  // Fetch scammer details
+  const {
+    data: scammer,
+    isLoading: isLoadingScammer,
+    error: errorScammer,
   } = useQuery({
     queryKey: ['scammer', id],
     queryFn: () => getScammerById(id || ''),
-    staleTime: 1000 * 60 * 1, // 1 minute
+    enabled: !!id,
   });
 
-  const { 
+  // Fetch comments for the scammer
+  const {
     data: comments,
-    isLoading: isCommentsLoading,
-    error: commentsError,
-    refetch: refetchComments
+    isLoading: isLoadingComments,
+    error: errorComments,
   } = useQuery({
     queryKey: ['comments', id],
     queryFn: () => getScammerComments(id || ''),
-    staleTime: 1000 * 30, // 30 seconds - refresh comments more frequently
+    enabled: !!id,
   });
 
-  // Fetch user interaction data
-  const fetchUserInteraction = async () => {
-    if (!profile?.wallet_address || !id) return;
-    
-    try {
-      const interaction = await getUserScammerInteraction(id, profile.wallet_address);
-      if (interaction) {
-        setIsLiked(interaction.liked);
-        setIsDisliked(interaction.disliked);
+  // Fetch user interaction (like/dislike)
+  useEffect(() => {
+    const fetchUserInteraction = async () => {
+      if (!profile?.wallet_address || !scammer?.id) return;
+      
+      try {
+        const interaction = await getUserScammerInteraction(scammer.id, profile.wallet_address);
+        if (interaction) {
+          setIsLiked(interaction.liked);
+          setIsDisliked(interaction.disliked);
+        } else {
+          setIsLiked(false);
+          setIsDisliked(false);
+        }
+      } catch (error) {
+        console.error('Error fetching user interaction:', error);
       }
-    } catch (error) {
-      console.error('Error fetching user interaction:', error);
-    }
-  };
+    };
+    
+    fetchUserInteraction();
+  }, [scammer?.id, profile?.wallet_address]);
 
-  const isCreator = profile?.wallet_address === scammer?.added_by;
-
-  // Update local states when scammer data changes
+  // Update likes and dislikes when scammer data changes
   useEffect(() => {
     if (scammer) {
-      setLocalLikes(scammer.likes || 0);
-      setLocalDislikes(scammer.dislikes || 0);
+      setLikes(scammer.likes || 0);
+      setDislikes(scammer.dislikes || 0);
     }
   }, [scammer]);
 
-  // Fetch user interaction when profile or id changes
-  useEffect(() => {
-    fetchUserInteraction();
-  }, [profile?.wallet_address, id]);
-
+  // Fetch creator profile on component mount
   useEffect(() => {
     const fetchCreatorProfile = async () => {
       if (scammer?.added_by) {
@@ -105,67 +98,33 @@ const ScammerDetailPage = () => {
       }
     };
 
-    if (scammer) {
-      fetchCreatorProfile();
-    }
-  }, [scammer]);
+    fetchCreatorProfile();
+  }, [scammer?.added_by]);
 
-  useEffect(() => {
-    if (scammerError) {
-      console.error('Failed to load scammer', scammerError);
+  // Mutation to add a comment
+  const addCommentMutation = useMutation(
+    async (newComment: { scammer_id: string; content: string; author: string; author_name: string; author_profile_pic?: string }) => {
+      return addComment(newComment);
+    },
+    {
+      onSuccess: () => {
+        // Invalidate and refetch comments
+        queryClient.invalidateQueries(['comments', id]);
+        setCommentText('');
+      },
+      onError: (error) => {
+        console.error('Error adding comment:', error);
+        toast({
+          title: "Error",
+          description: "Failed to add comment. Please try again.",
+          variant: "destructive"
+        });
+      },
     }
-    if (commentsError) {
-      console.error('Failed to load comments', commentsError);
-    }
-  }, [scammerError, commentsError]);
+  );
 
-  const handleSubmitComment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newComment.trim()) {
-      toast({
-        title: "Comment cannot be empty",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      
-      const comment = {
-        scammer_id: id || '',
-        content: newComment,
-        author: profile?.wallet_address || 'anonymous',
-        author_name: profile?.display_name || 'Anonymous User',
-        author_profile_pic: profile?.profile_pic_url || '/placeholder.svg'
-      };
-      
-      await addComment(comment);
-      
-      await Promise.all([refetchComments(), refetchScammer()]);
-      
-      setNewComment('');
-      toast({
-        title: "Comment added",
-        description: "Your comment has been added successfully.",
-      });
-    } catch (error) {
-      console.error('Error adding comment:', error);
-      toast({
-        variant: "destructive",
-        title: "Failed to add comment",
-        description: "There was an error adding your comment. Please try again.",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleEditReport = () => {
-    navigate(`/report/${id}`);
-  };
-
-  const handleLikeScammer = async () => {
+  // Handlers for like and dislike
+  const handleLike = async () => {
     if (!profile?.wallet_address) {
       toast({
         title: "Authentication required",
@@ -175,54 +134,27 @@ const ScammerDetailPage = () => {
       return;
     }
 
-    if (isLoading || !id) return;
-    
+    if (isLoading) return;
     setIsLoading(true);
+
     try {
-      // Store current state for toast message
-      const wasLiked = isLiked;
-      
-      // Update UI optimistically
-      let newLikes = localLikes;
-      let newDislikes = localDislikes;
-      
-      if (isLiked) {
-        newLikes = Math.max(localLikes - 1, 0);
-        setLocalLikes(newLikes);
-        setIsLiked(false);
-      } else {
-        newLikes = localLikes + 1;
-        setLocalLikes(newLikes);
-        setIsLiked(true);
+      const result = await likeScammer(scammer?.id || '', profile.wallet_address);
+      if (result && typeof result === 'object' && 'likes' in result) {
+        setLikes(result.likes || 0);
+        setDislikes(result.dislikes || 0);
+        setIsLiked(!isLiked);
+        setIsDisliked(false);
         
-        if (isDisliked) {
-          newDislikes = Math.max(localDislikes - 1, 0);
-          setLocalDislikes(newDislikes);
-          setIsDisliked(false);
-        }
+        // Optimistically update the scammer data in the cache
+        queryClient.setQueryData(['scammer', id], (oldScammer: Scammer | undefined) => {
+          if (oldScammer) {
+            return { ...oldScammer, likes: result.likes || 0, dislikes: result.dislikes || 0 };
+          }
+          return oldScammer;
+        });
       }
-      
-      // Call the API
-      const result = await likeScammer(id, profile.wallet_address);
-      
-      // If we got a result back with real counts, update the UI
-      if (result && 'likes' in result) {
-        setLocalLikes(result.likes || 0);
-        setLocalDislikes(result.dislikes || 0);
-      }
-      
-      toast({
-        title: wasLiked ? "Like removed" : "Report liked",
-        description: wasLiked ? "You've removed your like from this report." : "You've marked this report as accurate."
-      });
-      
     } catch (error) {
       console.error("Error liking scammer:", error);
-      
-      // Revert UI on error
-      await fetchUserInteraction();
-      await refetchScammer();
-      
       toast({
         title: "Error",
         description: "Failed to like this report. Please try again.",
@@ -233,7 +165,7 @@ const ScammerDetailPage = () => {
     }
   };
 
-  const handleDislikeScammer = async () => {
+  const handleDislike = async () => {
     if (!profile?.wallet_address) {
       toast({
         title: "Authentication required",
@@ -243,54 +175,27 @@ const ScammerDetailPage = () => {
       return;
     }
 
-    if (isLoading || !id) return;
-    
+    if (isLoading) return;
     setIsLoading(true);
+
     try {
-      // Store current state for toast message
-      const wasDisliked = isDisliked;
-      
-      // Update UI optimistically
-      let newLikes = localLikes;
-      let newDislikes = localDislikes;
-      
-      if (isDisliked) {
-        newDislikes = Math.max(localDislikes - 1, 0);
-        setLocalDislikes(newDislikes);
-        setIsDisliked(false);
-      } else {
-        newDislikes = localDislikes + 1;
-        setLocalDislikes(newDislikes);
-        setIsDisliked(true);
+      const result = await dislikeScammer(scammer?.id || '', profile.wallet_address);
+      if (result && typeof result === 'object' && 'likes' in result) {
+        setLikes(result.likes || 0);
+        setDislikes(result.dislikes || 0);
+        setIsDisliked(!isDisliked);
+        setIsLiked(false);
         
-        if (isLiked) {
-          newLikes = Math.max(localLikes - 1, 0);
-          setLocalLikes(newLikes);
-          setIsLiked(false);
-        }
+        // Optimistically update the scammer data in the cache
+        queryClient.setQueryData(['scammer', id], (oldScammer: Scammer | undefined) => {
+          if (oldScammer) {
+            return { ...oldScammer, likes: result.likes || 0, dislikes: result.dislikes || 0 };
+          }
+          return oldScammer;
+        });
       }
-      
-      // Call the API
-      const result = await dislikeScammer(id, profile.wallet_address);
-      
-      // If we got a result back with real counts, update the UI
-      if (result && 'likes' in result) {
-        setLocalLikes(result.likes || 0);
-        setLocalDislikes(result.dislikes || 0);
-      }
-      
-      toast({
-        title: wasDisliked ? "Dislike removed" : "Report disliked",
-        description: wasDisliked ? "You've removed your dislike from this report." : "You've marked this report as inaccurate."
-      });
-      
     } catch (error) {
       console.error("Error disliking scammer:", error);
-      
-      // Revert UI on error
-      await fetchUserInteraction();
-      await refetchScammer();
-      
       toast({
         title: "Error",
         description: "Failed to dislike this report. Please try again.",
@@ -301,440 +206,293 @@ const ScammerDetailPage = () => {
     }
   };
 
-  const handleShareScammer = () => {
-    navigator.clipboard.writeText(window.location.href);
-    toast({
-      title: "Link copied!",
-      description: "Link has been copied to clipboard.",
-    });
-  };
-
-  const handleCopyWalletAddress = () => {
-    if (scammer?.wallet_addresses && scammer.wallet_addresses.length > 0) {
-      navigator.clipboard.writeText(scammer.wallet_addresses[0]);
+  // Handler for submitting a comment
+  const handleAddComment = () => {
+    if (!profile) {
       toast({
-        title: "Copied!",
-        description: "Wallet address has been copied to clipboard.",
-      });
-    }
-  };
-
-  const handleContributeToBounty = () => {
-    if (!bountyAmount || parseFloat(bountyAmount) <= 0) {
-      toast({
-        variant: "destructive",
-        title: "Invalid amount",
-        description: "Please enter a valid bounty amount.",
+        title: "Authentication required",
+        description: "Please connect your wallet to leave a comment.",
+        variant: "destructive"
       });
       return;
     }
 
-    toast({
-      title: "Thank you!",
-      description: `You've contributed ${bountyAmount} $SEC to the bounty.`,
+    if (!commentText.trim()) {
+      toast({
+        title: "Error",
+        description: "Comment cannot be empty.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    addCommentMutation.mutate({
+      scammer_id: scammer?.id || '',
+      content: commentText,
+      author: profile.wallet_address,
+      author_name: profile.display_name,
+      author_profile_pic: profile.profile_pic_url,
     });
   };
 
-  if (isScammerLoading) {
-    return <div className="text-center py-12">Loading scammer details...</div>;
+  // Placeholder content while loading
+  if (isLoadingScammer) {
+    return (
+      <div>
+        <CompactHero title={<Skeleton />} />
+        <section className="icc-section bg-white">
+          <div className="icc-container">
+            <Skeleton className="h-8 w-1/2 mb-4" />
+            <Skeleton className="h-48 w-full" />
+            <Skeleton className="h-8 w-1/4 mt-4" />
+            <Skeleton className="h-6 w-1/2 mt-2" />
+          </div>
+        </section>
+      </div>
+    );
   }
 
-  if (!scammer) {
-    return <div className="text-center py-12">Scammer not found.</div>;
+  // Error message if scammer details could not be loaded
+  if (errorScammer || !scammer) {
+    return (
+      <div>
+        <CompactHero title="Error" />
+        <section className="icc-section bg-white">
+          <div className="icc-container">
+            <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-center text-icc-blue mb-2">
+              Failed to load scammer details.
+            </h2>
+            <p className="text-icc-gray text-center">
+              Please try again later.
+            </p>
+          </div>
+        </section>
+      </div>
+    );
   }
-
-  const agreePercentage = localLikes > 0 || localDislikes > 0
-    ? Math.round((localLikes / (localLikes + localDislikes)) * 100) 
-    : 0;
-
-  const pageTitle = scammer ? `${scammer.name} | SEC.digital` : 'Scammer Report | SEC.digital';
-  const pageDescription = scammer?.accused_of || 'View details about this scammer on SEC.digital - The Scams & E-crimes Commission';
-  const pageImage = scammer?.photo_url || '/lovable-uploads/3f23090d-4e36-43fc-b230-a8f898d7edd2.png';
 
   return (
-    <HelmetProvider>
-      <>
-        <Helmet>
-          <title>{pageTitle}</title>
-          <meta name="description" content={pageDescription} />
-          
-          <meta property="og:type" content="article" />
-          <meta property="og:url" content={window.location.href} />
-          <meta property="og:title" content={pageTitle} />
-          <meta property="og:description" content={pageDescription} />
-          <meta property="og:image" content={pageImage} />
-          
-          <meta property="twitter:card" content="summary_large_image" />
-          <meta property="twitter:url" content={window.location.href} />
-          <meta property="twitter:title" content={pageTitle} />
-          <meta property="twitter:description" content={pageDescription} />
-          <meta property="twitter:image" content={pageImage} />
-        </Helmet>
-        
-        <div className="bg-gray-50 min-h-screen pt-6 pb-12">
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="md:col-span-2">
-                <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-                  <div className="mb-4 flex justify-between items-start">
-                    <div>
-                      <h1 className="text-2xl font-bold">{scammer.name}</h1>
-                      <p className="text-gray-600">{scammer.accused_of || "No description provided."}</p>
-                    </div>
-                    {isCreator && (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="flex items-center"
-                        onClick={handleEditReport}
-                      >
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit Report
-                      </Button>
-                    )}
-                  </div>
-                  
+    <div>
+      <CompactHero title={scammer.name} />
+
+      <section className="icc-section bg-white">
+        <div className="icc-container">
+          <div className="flex items-center justify-between mb-6">
+            <Button variant="ghost" onClick={() => navigate('/most-wanted')}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Most Wanted
+            </Button>
+            <div className="flex items-center space-x-3">
+              <Button variant="outline" size="sm">
+                <DollarSign className="h-3.5 w-3.5 mr-1" />
+                Add Bounty
+              </Button>
+              <Button variant="outline" size="sm">
+                <Share2 className="h-3.5 w-3.5 mr-1" />
+                Share
+              </Button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="md:col-span-2">
+              <div className="relative aspect-video overflow-hidden rounded-lg shadow-md">
+                <img
+                  src={scammer.photo_url || '/placeholder.svg'}
+                  alt={scammer.name}
+                  className="w-full h-full object-cover"
+                />
+                <Badge className="absolute top-2 right-2 bg-icc-gold text-icc-blue-dark">
+                  {scammer.bounty_amount.toLocaleString()} $SEC Bounty
+                </Badge>
+              </div>
+
+              <div className="mt-6">
+                <h2 className="icc-title">Accusations</h2>
+                <p className="text-icc-gray">{scammer.accused_of}</p>
+              </div>
+
+              <div className="mt-6">
+                <h2 className="icc-title">Links</h2>
+                {scammer.links && scammer.links.length > 0 ? (
+                  <ul className="list-disc pl-5 text-icc-gray">
+                    {scammer.links.map((link, index) => (
+                      <li key={index}>
+                        <a
+                          href={link.startsWith('http') ? link : `https://${link}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-icc-blue hover:underline"
+                        >
+                          {link}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-icc-gray">No links provided.</p>
+                )}
+              </div>
+
+              <div className="mt-6">
+                <h2 className="icc-title">Aliases</h2>
+                {scammer.aliases && scammer.aliases.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
-                    <Toggle 
-                      pressed={isLiked}
-                      onPressedChange={() => {}}
-                      onClick={handleLikeScammer}
-                      className={`${isLiked ? 'bg-green-100 text-green-700' : ''} border border-gray-200`}
-                      size="sm"
-                    >
-                      <ThumbsUp className="h-4 w-4 mr-2" />
-                      {localLikes}
-                    </Toggle>
-                    
-                    <Toggle 
-                      pressed={isDisliked}
-                      onPressedChange={() => {}}
-                      onClick={handleDislikeScammer}
-                      className={`${isDisliked ? 'bg-red-100 text-red-700' : ''} border border-gray-200`}
-                      size="sm"
-                    >
-                      <ThumbsDown className="h-4 w-4 mr-2" />
-                      {localDislikes}
-                    </Toggle>
-                    
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={handleShareScammer}
-                    >
-                      <Share2 className="h-4 w-4 mr-2" />
-                      Share
-                    </Button>
-                    
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                    >
-                      <Eye className="h-4 w-4 mr-2" />
-                      {scammer.views || 0} Views
-                    </Button>
-                    
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                    >
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                      {comments?.length || 0} Comments
-                    </Button>
+                    {scammer.aliases.map((alias, index) => (
+                      <Badge key={index}>{alias}</Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-icc-gray">No aliases provided.</p>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <div className="bg-gray-50 rounded-lg shadow-md p-4">
+                <h3 className="text-lg font-semibold text-icc-blue mb-3">Reported By</h3>
+                {creatorProfile ? (
+                  <div className="flex items-center space-x-3">
+                    <Avatar>
+                      <AvatarImage src={creatorProfile.profile_pic_url} alt={creatorProfile.display_name} />
+                      <AvatarFallback>{creatorProfile.display_name.substring(0, 2)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="text-sm font-medium leading-none">{creatorProfile.display_name}</div>
+                      <p className="text-sm text-gray-500">@{creatorProfile.username}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">Anonymous</p>
+                )}
+                <Separator className="my-4" />
+                <div className="flex justify-between items-center mb-3">
+                  <div className="text-sm text-gray-500 flex items-center">
+                    <Calendar className="h-4 w-4 mr-1" />
+                    Added on {formatDate(scammer.date_added)}
                   </div>
                 </div>
-
-                <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-                  <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden">
-                    <img 
-                      src={scammer.photo_url || '/placeholder.svg'} 
-                      alt={scammer.name} 
-                      className="w-full h-full object-cover" 
-                    />
+                <div className="flex justify-between items-center mb-3">
+                  <div className="text-sm text-gray-500 flex items-center">
+                    <Eye className="h-4 w-4 mr-1" />
+                    {scammer.views} Views
                   </div>
                 </div>
-
-                <div className="bg-white rounded-lg shadow-sm mb-6">
-                  <div className="p-4">
-                    <h2 className="text-lg font-semibold mb-4">Details</h2>
-                    <div className="space-y-2 text-sm">
-                      <div>
-                        <span className="text-gray-600">Added on</span>
-                        <p>{new Date(scammer.date_added).toLocaleDateString()}</p>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Added by</span>
-                        {creatorProfile ? (
-                          <Link to={`/${creatorProfile.username}`} className="flex items-center mt-1 hover:text-blue-600">
-                            <Avatar className="h-6 w-6 mr-2">
-                              <AvatarImage src={creatorProfile.profile_pic_url || '/placeholder.svg'} alt={creatorProfile.display_name} />
-                              <AvatarFallback>{creatorProfile.display_name?.charAt(0) || '?'}</AvatarFallback>
-                            </Avatar>
-                            <span>{creatorProfile.display_name || creatorProfile.username}</span>
-                          </Link>
-                        ) : (
-                          <p className="flex items-center mt-1">
-                            <span className="inline-block w-3 h-3 bg-amber-600 rounded-full mr-1"></span>
-                            Anonymous
-                          </p>
-                        )}
-                      </div>
-                    </div>
+                <div className="flex justify-between items-center">
+                  <div className="text-sm text-gray-500 flex items-center">
+                    <Link2 className="h-4 w-4 mr-1" />
+                    <a href="#" className="hover:underline">
+                      Permalink
+                    </a>
                   </div>
-
-                  <Tabs defaultValue="identity" value={activeTab} onValueChange={setActiveTab}>
-                    <TabsList className="grid grid-cols-4 rounded-none">
-                      <TabsTrigger value="identity">Identity</TabsTrigger>
-                      <TabsTrigger value="links">Links</TabsTrigger>
-                      <TabsTrigger value="network">Network</TabsTrigger>
-                      <TabsTrigger value="response">Response</TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="identity" className="p-4">
-                      <h3 className="text-lg font-semibold mb-2">Known Aliases</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {scammer.aliases && scammer.aliases.length > 0 ? (
-                          scammer.aliases.map((alias, index) => (
-                            <Badge key={index} variant="outline">
-                              {alias}
-                            </Badge>
-                          ))
-                        ) : (
-                          <p className="text-gray-500">No known aliases.</p>
-                        )}
-                      </div>
-                    </TabsContent>
-                    
-                    <TabsContent value="links" className="p-4">
-                      <h3 className="text-lg font-semibold mb-2">Related Links</h3>
-                      {scammer.links && scammer.links.length > 0 ? (
-                        <ul className="space-y-2">
-                          {scammer.links.map((link, index) => (
-                            <li key={index} className="flex items-center">
-                              <LinkIcon className="h-4 w-4 mr-2 text-blue-500" />
-                              <a 
-                                href={link.startsWith('http') ? link : `https://${link}`} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="text-blue-500 hover:underline"
-                              >
-                                {link}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="text-gray-500">No links provided.</p>
-                      )}
-                    </TabsContent>
-                    
-                    <TabsContent value="network" className="p-4">
-                      <h3 className="text-lg font-semibold mb-2">Wallet Address</h3>
-                      {scammer.wallet_addresses && scammer.wallet_addresses.length > 0 ? (
-                        <div className="flex items-center space-x-2">
-                          <code className="bg-gray-100 p-2 rounded text-sm flex-1 overflow-hidden text-ellipsis">
-                            {scammer.wallet_addresses[0]}
-                          </code>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={handleCopyWalletAddress}
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <p className="text-gray-500">No wallet address provided.</p>
-                      )}
-
-                      <h3 className="text-lg font-semibold mt-4 mb-2">Accomplices</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {scammer.accomplices && scammer.accomplices.length > 0 ? (
-                          scammer.accomplices.map((accomplice, index) => (
-                            <Badge key={index} variant="outline" className="bg-red-50">
-                              {accomplice}
-                            </Badge>
-                          ))
-                        ) : (
-                          <p className="text-gray-500">No known accomplices.</p>
-                        )}
-                      </div>
-                    </TabsContent>
-                    
-                    <TabsContent value="response" className="p-4">
-                      <h3 className="text-lg font-semibold mb-2">Official Response</h3>
-                      {scammer.official_response ? (
-                        <div className="bg-blue-50 p-3 rounded-md border border-blue-100">
-                          <p>{scammer.official_response}</p>
-                        </div>
-                      ) : (
-                        <p className="text-gray-500">No official response has been provided.</p>
-                      )}
-                    </TabsContent>
-                  </Tabs>
-                </div>
-
-                <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold flex items-center">
-                      <MessageSquare className="h-5 w-5 mr-2" />
-                      Comments
-                    </h2>
-                    <span className="text-sm text-gray-500">
-                      {comments?.length || 0} comments
-                    </span>
-                  </div>
-                  
-                  <form onSubmit={handleSubmitComment} className="mb-6">
-                    <div className="mb-2">
-                      <Input
-                        placeholder="Share your thoughts about this scammer..."
-                        value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
-                        className="w-full"
-                      />
-                    </div>
-                    <div className="flex justify-end">
-                      <Button type="submit" variant="secondary">
-                        Post Comment
-                      </Button>
-                    </div>
-                  </form>
-
-                  {isCommentsLoading ? (
-                    <div className="text-center py-4">Loading comments...</div>
-                  ) : comments && comments.length > 0 ? (
-                    <div className="space-y-4">
-                      {comments.map((comment) => (
-                        <div key={comment.id} className="p-3 bg-gray-50 rounded-lg">
-                          <div className="flex items-start space-x-3">
-                            <Link to={`/${comment.author}`} className="hover:opacity-80 transition-opacity">
-                              <Avatar>
-                                <AvatarImage src={comment.author_profile_pic || '/placeholder.svg'} alt={comment.author_name} />
-                                <AvatarFallback>{comment.author_name.charAt(0).toUpperCase()}</AvatarFallback>
-                              </Avatar>
-                            </Link>
-                            <div className="flex-1">
-                              <div className="flex justify-between">
-                                <Link to={`/${comment.author}`} className="font-medium hover:text-blue-600">
-                                  {comment.author_name}
-                                </Link>
-                                <div className="text-xs text-gray-500">
-                                  {new Date(comment.created_at).toLocaleDateString()}
-                                </div>
-                              </div>
-                              <p className="mt-1">{comment.content}</p>
-                              <div className="flex items-center space-x-3 mt-2">
-                                <button className="flex items-center text-xs text-gray-500 hover:text-blue-600">
-                                  <ThumbsUp className="h-3 w-3 mr-1" />
-                                  {comment.likes || 0}
-                                </button>
-                                <button className="flex items-center text-xs text-gray-500 hover:text-blue-600">
-                                  <ThumbsDown className="h-3 w-3 mr-1" />
-                                  {comment.dislikes || 0}
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      No comments yet. Be the first to comment!
-                    </div>
-                  )}
                 </div>
               </div>
 
-              <div className="md:col-span-1">
-                <Card className="bg-icc-blue/5 border-icc-gold mb-6">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-icc-blue text-xl font-serif">Contribute to Bounty</CardTitle>
-                    <p className="text-sm text-icc-blue-light">
-                      Add $SEC tokens to increase the bounty for {scammer.name}
-                    </p>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-icc-blue mb-1">
-                          Current Bounty
-                        </label>
-                        <div className="bg-white border border-icc-gold/50 rounded-md p-2 flex items-center">
-                          <span className="flex items-center text-icc-blue">
-                            <span className="inline-block w-4 h-4 bg-icc-gold rounded-full mr-1"></span>
-                            {scammer.bounty_amount || 0} $SEC
-                          </span>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-icc-blue mb-1">
-                          Developer Wallet
-                        </label>
-                        <div className="bg-white border border-icc-gold/50 rounded-md p-2 flex items-center justify-between">
-                          <div className="truncate text-icc-blue text-sm">
-                            {profile?.wallet_address 
-                              ? `${profile.wallet_address.substring(0, 4)}...${profile.wallet_address.substring(profile.wallet_address.length - 4)}`
-                              : 'Connect wallet to contribute'}
-                          </div>
-                          <Button variant="ghost" size="icon" className="h-6 w-6 text-icc-blue">
-                            <Copy className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-icc-blue mb-1">
-                          Contribution Amount
-                        </label>
-                        <div className="flex items-center">
-                          <Input
-                            type="number"
-                            placeholder="0.00"
-                            className="rounded-r-none border-r-0 bg-white border-icc-gold/50"
-                            value={bountyAmount}
-                            onChange={(e) => setBountyAmount(e.target.value)}
-                          />
-                          <div className="bg-icc-gold/20 border border-icc-gold/50 text-icc-blue py-2 px-3 rounded-r-md">
-                            $SEC
-                          </div>
-                        </div>
-                      </div>
-
-                      <Button 
-                        className="w-full bg-icc-blue hover:bg-icc-blue-light text-white"
-                        onClick={handleContributeToBounty}
-                      >
-                        Contribute to Bounty <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center text-green-600">
-                      <ThumbsUp className="h-4 w-4 mr-1" />
-                      <span>Agree ({localLikes})</span>
-                    </div>
-                    <div className="flex items-center text-red-600">
-                      <span>Disagree ({localDislikes})</span>
-                      <ThumbsDown className="h-4 w-4 ml-1" />
-                    </div>
-                  </div>
-                  <Progress value={agreePercentage} className="h-3" />
-                  <p className="text-center text-sm text-gray-500 mt-1">
-                    {agreePercentage}% of community members agree
-                  </p>
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold text-icc-blue mb-3">Take Action</h3>
+                <div className="flex flex-col space-y-3">
+                  <Toggle
+                    pressed={isLiked}
+                    onPressedChange={() => {}}
+                    onClick={handleLike}
+                    className={`${isLiked ? 'bg-green-100 text-green-700' : ''} border border-gray-200`}
+                  >
+                    <ThumbsUp className="h-3.5 w-3.5 mr-1" />
+                    Agree{likes > 0 ? ` ${likes}` : ''}
+                  </Toggle>
+                  <Toggle
+                    pressed={isDisliked}
+                    onPressedChange={() => {}}
+                    onClick={handleDislike}
+                    className={`${isDisliked ? 'bg-red-100 text-red-700' : ''} border border-gray-200`}
+                  >
+                    <ThumbsDown className="h-3.5 w-3.5 mr-1" />
+                    Disagree{dislikes > 0 ? ` ${dislikes}` : ''}
+                  </Toggle>
+                  <Button variant="outline">
+                    <DollarSign className="h-3.5 w-3.5 mr-1" />
+                    Add Bounty
+                  </Button>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </>
-    </HelmetProvider>
+      </section>
+
+      <section className="icc-section bg-gray-50">
+        <div className="icc-container">
+          <Tabs defaultValue="comments" className="w-full">
+            <TabsList className="w-full justify-start overflow-x-auto bg-background/60 backdrop-blur-sm rounded-lg border p-1 mb-6">
+              <TabsTrigger value="comments" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                Comments
+              </TabsTrigger>
+              <TabsTrigger value="evidence" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                Evidence
+              </TabsTrigger>
+              <TabsTrigger value="official" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                Official Response
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="comments" className="mt-2">
+              <div className="mb-4">
+                <Textarea
+                  placeholder="Write your comment here..."
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                />
+                <Button
+                  className="mt-2"
+                  onClick={handleAddComment}
+                  disabled={addCommentMutation.isLoading}
+                >
+                  {addCommentMutation.isLoading ? 'Adding...' : 'Add Comment'}
+                </Button>
+              </div>
+
+              {isLoadingComments ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((index) => (
+                    <div key={index} className="flex items-start space-x-4">
+                      <Skeleton className="h-10 w-10 rounded-full" />
+                      <div>
+                        <Skeleton className="h-4 w-32 mb-1" />
+                        <Skeleton className="h-4 w-64" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : errorComments ? (
+                <div className="text-red-500">Error loading comments.</div>
+              ) : comments && comments.length > 0 ? (
+                comments.map((comment) => (
+                  <div key={comment.id} className="flex items-start space-x-4 py-4 border-b">
+                    <Avatar>
+                      <AvatarImage src={comment.author_profile_pic || '/placeholder.svg'} alt={comment.author_name} />
+                      <AvatarFallback>{comment.author_name.substring(0, 2)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-medium">{comment.author_name}</div>
+                      <div className="text-sm text-gray-500">{formatDate(comment.created_at)}</div>
+                      <p className="mt-1">{comment.content}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div>No comments yet. Be the first to comment!</div>
+              )}
+            </TabsContent>
+            <TabsContent value="evidence" className="mt-2">
+              <div>No evidence provided.</div>
+            </TabsContent>
+            <TabsContent value="official" className="mt-2">
+              <div>No official response yet.</div>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </section>
+    </div>
   );
 };
 

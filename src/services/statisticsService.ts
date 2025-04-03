@@ -1,7 +1,14 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-export const getStatistics = async () => {
+interface Statistics {
+  totalBounty: number;
+  scammersCount: number;
+  reportersCount: number;
+  usersCount: number;
+}
+
+export const getStatistics = async (): Promise<Statistics> => {
   try {
     // Get total bounty amount
     const { data: bountyData, error: bountyError } = await supabase
