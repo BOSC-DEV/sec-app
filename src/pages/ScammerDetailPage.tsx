@@ -310,8 +310,8 @@ const ScammerDetailPage = () => {
   };
 
   const handleCopyWalletAddress = () => {
-    if (scammer?.wallet_address) {
-      navigator.clipboard.writeText(scammer.wallet_address);
+    if (scammer?.wallet_addresses && scammer.wallet_addresses.length > 0) {
+      navigator.clipboard.writeText(scammer.wallet_addresses[0]);
       toast({
         title: "Copied!",
         description: "Wallet address has been copied to clipboard.",
@@ -530,10 +530,10 @@ const ScammerDetailPage = () => {
                     
                     <TabsContent value="network" className="p-4">
                       <h3 className="text-lg font-semibold mb-2">Wallet Address</h3>
-                      {scammer.wallet_address ? (
+                      {scammer.wallet_addresses && scammer.wallet_addresses.length > 0 ? (
                         <div className="flex items-center space-x-2">
                           <code className="bg-gray-100 p-2 rounded text-sm flex-1 overflow-hidden text-ellipsis">
-                            {scammer.wallet_address}
+                            {scammer.wallet_addresses[0]}
                           </code>
                           <Button 
                             variant="ghost" 
