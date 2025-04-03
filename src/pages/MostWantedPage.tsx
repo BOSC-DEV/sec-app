@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import CompactHero from '@/components/common/CompactHero';
 import ScammerCard from '@/components/common/ScammerCard';
@@ -6,10 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getScammers } from '@/services/supabaseService';
-import { Grid, Globe, List, Search, SlidersHorizontal, User } from 'lucide-react';
+import { Grid, Globe, List, Search, SlidersHorizontal } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
-import { Scammer, Profile } from '@/types/dataTypes';
+import { Scammer } from '@/types/dataTypes';
 import { 
   Table, 
   TableBody, 
@@ -20,8 +19,6 @@ import {
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { getProfileByWallet } from '@/services/profileService';
 
 const MostWantedPage = () => {
   const [filteredScammers, setFilteredScammers] = useState<Scammer[]>([]);
@@ -30,7 +27,6 @@ const MostWantedPage = () => {
   const [sortBy, setSortBy] = useState('bounty');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [showFilters, setShowFilters] = useState(false);
-  const [reporterProfiles, setReporterProfiles] = useState<{[key: string]: Profile | null}>({});
   const navigate = useNavigate();
 
   const { 
@@ -41,34 +37,6 @@ const MostWantedPage = () => {
     queryKey: ['scammers'],
     queryFn: getScammers,
   });
-
-  // Fetch reporter profiles for all scammers
-  useEffect(() => {
-    const fetchReporterProfiles = async () => {
-      const uniqueReporters = [...new Set(scammers.map(s => s.added_by).filter(Boolean))];
-      
-      const profilesMap: {[key: string]: Profile | null} = {};
-      await Promise.all(
-        uniqueReporters.map(async (wallet) => {
-          if (wallet) {
-            try {
-              const profile = await getProfileByWallet(wallet);
-              profilesMap[wallet] = profile;
-            } catch (error) {
-              console.error(`Error fetching profile for wallet ${wallet}:`, error);
-              profilesMap[wallet] = null;
-            }
-          }
-        })
-      );
-      
-      setReporterProfiles(profilesMap);
-    };
-
-    if (scammers.length > 0) {
-      fetchReporterProfiles();
-    }
-  }, [scammers]);
 
   const handleSort = (column: string) => {
     if (sortBy === column) {
@@ -81,13 +49,6 @@ const MostWantedPage = () => {
 
   const handleRowClick = (scammerId: string) => {
     navigate(`/scammer/${scammerId}`);
-  };
-
-  // Helper function to get reporter display name
-  const getReporterName = (wallet: string | undefined) => {
-    if (!wallet) return 'Anonymous';
-    const profile = reporterProfiles[wallet];
-    return profile?.display_name || profile?.username || `${wallet.slice(0, 4)}...${wallet.slice(-4)}`;
   };
 
   useEffect(() => {
@@ -269,7 +230,6 @@ const MostWantedPage = () => {
                     <TableRow className="bg-amber-50">
                       <TableHead className="w-12 font-bold text-icc-primary">№</TableHead>
                       <TableHead className="font-bold text-icc-primary">Outlaw</TableHead>
-                      <TableHead className="font-bold text-icc-primary">Reporter</TableHead>
                       <TableHead className="font-bold text-icc-primary">Links</TableHead>
                       <TableHead className="font-bold text-icc-primary">Accused Of</TableHead>
                       <TableHead className="font-bold text-icc-primary">Aliases</TableHead>
@@ -296,12 +256,6 @@ const MostWantedPage = () => {
                           <div className="flex items-center gap-3">
                             <Skeleton className="h-10 w-10 rounded-full" />
                             <Skeleton className="h-4 w-32" />
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Skeleton className="h-8 w-8 rounded-full" />
-                            <Skeleton className="h-4 w-20" />
                           </div>
                         </TableCell>
                         <TableCell><Skeleton className="h-4 w-16" /></TableCell>
@@ -340,9 +294,6 @@ const MostWantedPage = () => {
                       onClick={() => handleSort('name')}
                     >
                       Outlaw{renderSortIndicator('name')}
-                    </TableHead>
-                    <TableHead className="font-bold text-icc-primary">
-                      Reporter
                     </TableHead>
                     <TableHead className="font-bold text-icc-primary">Links</TableHead>
                     <TableHead 
@@ -400,26 +351,6 @@ const MostWantedPage = () => {
                             className="w-10 h-10 rounded-full object-cover border border-amber-200"
                           />
                           <span className="font-medium">{scammer.name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-8 w-8 border border-amber-200">
-                            <AvatarImage 
-                              src={scammer.added_by ? reporterProfiles[scammer.added_by]?.profile_pic_url : undefined} 
-                              alt={getReporterName(scammer.added_by)} 
-                            />
-                            <AvatarFallback className="bg-amber-700 text-white">
-                              {scammer.added_by ? 
-                                (reporterProfiles[scammer.added_by]?.display_name?.charAt(0) || 
-                                reporterProfiles[scammer.added_by]?.username?.charAt(0) || 
-                                '?') : 
-                                '?'}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="text-sm">
-                            {getReporterName(scammer.added_by)}
-                          </span>
                         </div>
                       </TableCell>
                       <TableCell>

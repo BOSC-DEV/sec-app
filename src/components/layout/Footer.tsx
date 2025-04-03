@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Twitter, Globe } from 'lucide-react';
+import { Twitter } from 'lucide-react';
 import ICCLogo from '../common/ICCLogo';
 import TermsDialog from '../common/TermsDialog';
 import PrivacyDialog from '../common/PrivacyDialog';
@@ -39,19 +39,10 @@ const Footer = () => {
                 href="https://x.com/secdotdigital" 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors"
+                className="text-white hover:text-icc-gold"
                 aria-label="SEC on X"
               >
-                <Twitter className="h-5 w-5 text-icc-blue-light" />
-              </a>
-              <a 
-                href="#" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors"
-                aria-label="SEC Website"
-              >
-                <Globe className="h-5 w-5 text-icc-blue-light" />
+                <Twitter className="h-5 w-5" />
               </a>
             </div>
           </div>

@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import * as AvatarPrimitive from "@radix-ui/react-avatar"
 
@@ -25,15 +24,8 @@ const AvatarImage = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AvatarPrimitive.Image
     ref={ref}
-    className={cn("aspect-square h-full w-full object-cover", className)}
+    className={cn("aspect-square h-full w-full", className)}
     {...props}
-    onError={(e) => {
-      // Hide the image element on error and show the fallback
-      const target = e.target as HTMLImageElement;
-      if (target) {
-        target.style.display = 'none';
-      }
-    }}
   />
 ))
 AvatarImage.displayName = AvatarPrimitive.Image.displayName
