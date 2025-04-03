@@ -7,7 +7,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
 import ScammerInfoFields from '@/components/report/ScammerInfoFields';
@@ -17,6 +16,8 @@ import CompactHero from '@/components/common/CompactHero';
 import { useProfile } from '@/contexts/ProfileContext';
 import { supabase } from '@/integrations/supabase/client';
 import { generateScammerId } from '@/services/supabaseService';
+import { handleError } from '@/utils/errorHandling';
+import FallbackUI from '@/components/common/FallbackUI';
 
 const reportSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -38,6 +39,7 @@ const ReportPage = () => {
   const { profile } = useProfile();
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>('');
+  const [uploadError, setUploadError] = useState<string | null>(null);
   
   const form = useForm<ReportFormValues>({
     resolver: zodResolver(reportSchema),
@@ -54,7 +56,7 @@ const ReportPage = () => {
   
   const { control, handleSubmit, reset, setValue, watch, formState: { errors } } = form;
 
-  const { data: scammer, isLoading: isLoadingScammer } = useQuery({
+  const { data: scammer, isLoading: isLoadingScammer, error: scammerError } = useQuery({
     queryKey: ['edit-scammer', id],
     queryFn: async () => {
       if (!id) return null;
@@ -102,24 +104,35 @@ const ReportPage = () => {
     }
     
     setIsSubmitting(true);
+    setUploadError(null);
     
     try {
       let photoUrl = data.photo_url;
       
       if (photoFile) {
-        const fileName = `scammer_photos/${Date.now()}_${photoFile.name}`;
-        
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('media')
-          .upload(fileName, photoFile);
+        try {
+          const fileName = `scammer_photos/${Date.now()}_${photoFile.name}`;
           
-        if (uploadError) throw uploadError;
-        
-        const { data: publicUrlData } = supabase.storage
-          .from('media')
-          .getPublicUrl(fileName);
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('media')
+            .upload(fileName, photoFile);
+            
+          if (uploadError) {
+            console.error("Photo upload error:", uploadError);
+            setUploadError("Failed to upload photo. Please try again or skip adding a photo.");
+            throw new Error(`Photo upload failed: ${uploadError.message}`);
+          }
           
-        photoUrl = publicUrlData.publicUrl;
+          const { data: publicUrlData } = supabase.storage
+            .from('media')
+            .getPublicUrl(fileName);
+            
+          photoUrl = publicUrlData.publicUrl;
+        } catch (uploadErr) {
+          console.error("Photo upload exception:", uploadErr);
+          setUploadError("Failed to upload photo. Please try again or skip adding a photo.");
+          throw uploadErr;
+        }
       }
       
       const aliases = data.aliases?.filter(item => item !== '') || [];
@@ -183,15 +196,31 @@ const ReportPage = () => {
       }
     } catch (error) {
       console.error('Error submitting scammer report:', error);
+      
+      // Use a more specific error message if we have one
+      const errorMessage = uploadError || 
+        (error instanceof Error ? error.message : "There was an error submitting your report. Please try again.");
+      
       toast({
         variant: "destructive",
         title: "Failed to submit report",
-        description: "There was an error submitting your report. Please try again.",
+        description: errorMessage,
       });
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (scammerError) {
+    return (
+      <FallbackUI 
+        title="Error Loading Scammer Data"
+        message="We couldn't load the scammer information. Please try again."
+        onRetry={() => window.location.reload()}
+        variant="error"
+      />
+    );
+  }
 
   return (
     <>
@@ -253,6 +282,12 @@ const ReportPage = () => {
                     setValue={setValue}
                     control={control}
                   />
+                  
+                  {uploadError && (
+                    <div className="text-red-500 text-sm mt-2">
+                      {uploadError}
+                    </div>
+                  )}
                 </div>
               </form>
             </Form>
