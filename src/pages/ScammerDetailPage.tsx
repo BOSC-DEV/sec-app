@@ -102,26 +102,29 @@ const ScammerDetailPage = () => {
   }, [scammer?.added_by]);
 
   // Mutation to add a comment
-  const addCommentMutation = useMutation(
-    async (newComment: { scammer_id: string; content: string; author: string; author_name: string; author_profile_pic?: string }) => {
+  const addCommentMutation = useMutation({
+    mutationFn: (newComment: { 
+      scammer_id: string; 
+      content: string; 
+      author: string; 
+      author_name: string; 
+      author_profile_pic?: string 
+    }) => {
       return addComment(newComment);
     },
-    {
-      onSuccess: () => {
-        // Invalidate and refetch comments
-        queryClient.invalidateQueries(['comments', id]);
-        setCommentText('');
-      },
-      onError: (error) => {
-        console.error('Error adding comment:', error);
-        toast({
-          title: "Error",
-          description: "Failed to add comment. Please try again.",
-          variant: "destructive"
-        });
-      },
-    }
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['comments', id] });
+      setCommentText('');
+    },
+    onError: (error) => {
+      console.error('Error adding comment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add comment. Please try again.",
+        variant: "destructive"
+      });
+    },
+  });
 
   // Handlers for like and dislike
   const handleLike = async () => {
@@ -145,7 +148,6 @@ const ScammerDetailPage = () => {
         setIsLiked(!isLiked);
         setIsDisliked(false);
         
-        // Optimistically update the scammer data in the cache
         queryClient.setQueryData(['scammer', id], (oldScammer: Scammer | undefined) => {
           if (oldScammer) {
             return { ...oldScammer, likes: result.likes || 0, dislikes: result.dislikes || 0 };
@@ -186,7 +188,6 @@ const ScammerDetailPage = () => {
         setIsDisliked(!isDisliked);
         setIsLiked(false);
         
-        // Optimistically update the scammer data in the cache
         queryClient.setQueryData(['scammer', id], (oldScammer: Scammer | undefined) => {
           if (oldScammer) {
             return { ...oldScammer, likes: result.likes || 0, dislikes: result.dislikes || 0 };
@@ -239,7 +240,7 @@ const ScammerDetailPage = () => {
   if (isLoadingScammer) {
     return (
       <div>
-        <CompactHero title={<Skeleton />} />
+        <CompactHero title="Loading..." />
         <section className="icc-section bg-white">
           <div className="icc-container">
             <Skeleton className="h-8 w-1/2 mb-4" />
@@ -445,9 +446,9 @@ const ScammerDetailPage = () => {
                 <Button
                   className="mt-2"
                   onClick={handleAddComment}
-                  disabled={addCommentMutation.isLoading}
+                  disabled={addCommentMutation.isPending}
                 >
-                  {addCommentMutation.isLoading ? 'Adding...' : 'Add Comment'}
+                  {addCommentMutation.isPending ? 'Adding...' : 'Add Comment'}
                 </Button>
               </div>
 
