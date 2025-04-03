@@ -112,14 +112,18 @@ const ScammerDetailPage = () => {
   }, [scammer]);
 
   useEffect(() => {
-    if (scammer?.added_by) {
-      try {
-        const profile = await getProfileByWallet(scammer.added_by);
-        setCreatorProfile(profile);
-      } catch (error) {
-        console.error("Error fetching creator profile:", error);
+    const fetchCreatorProfile = async () => {
+      if (scammer?.added_by) {
+        try {
+          const profile = await getProfileByWallet(scammer.added_by);
+          setCreatorProfile(profile);
+        } catch (error) {
+          console.error("Error fetching creator profile:", error);
+        }
       }
-    }
+    };
+    
+    fetchCreatorProfile();
   }, [scammer?.added_by]);
 
   const handleEditScammer = () => {
