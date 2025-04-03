@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -54,6 +55,16 @@ const ScammerDetailPage = () => {
   } = useQuery({
     queryKey: ['scammer', id],
     queryFn: () => getScammerById(id || ''),
+    enabled: !!id
+  });
+  
+  const {
+    data: comments,
+    isLoading: isLoadingComments,
+    error: errorComments
+  } = useQuery({
+    queryKey: ['comments', id],
+    queryFn: () => getScammerComments(id || ''),
     enabled: !!id
   });
 
