@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import Hero from '@/components/common/Hero';
 import ScammerCard from '@/components/common/ScammerCard';
@@ -8,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { getScammers } from '@/services/supabaseService';
 import { Grid, Globe, List, Search, SlidersHorizontal } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Scammer } from '@/types/dataTypes';
 import { 
   Table, 
@@ -28,6 +27,7 @@ const MostWantedPage = () => {
   const [sortBy, setSortBy] = useState('bounty');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [showFilters, setShowFilters] = useState(false);
+  const navigate = useNavigate();
 
   const { 
     data: scammers = [], 
@@ -47,15 +47,17 @@ const MostWantedPage = () => {
     }
   };
 
+  const handleRowClick = (scammerId: string) => {
+    navigate(`/scammer/${scammerId}`);
+  };
+
   useEffect(() => {
-    // Filter scammers based on search query
     const filtered = scammers.filter(scammer => 
       scammer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (scammer.accused_of && scammer.accused_of.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (scammer.aliases && scammer.aliases.some(alias => alias.toLowerCase().includes(searchQuery.toLowerCase())))
     );
     
-    // Sort filtered scammers
     const sorted = [...filtered].sort((a, b) => {
       let compareResult = 0;
       
@@ -98,7 +100,6 @@ const MostWantedPage = () => {
     console.error('Failed to load scammers', error);
   }
 
-  // Helper function to render sort indicator
   const renderSortIndicator = (columnName: string) => {
     if (sortBy === columnName) {
       return <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>;
@@ -116,7 +117,6 @@ const MostWantedPage = () => {
 
       <section className="icc-section bg-white">
         <div className="icc-container">
-          {/* Search and Filters */}
           <div className="mb-8">
             <div className="flex flex-col md:flex-row gap-4 mb-4">
               <div className="relative flex-grow">
@@ -206,14 +206,12 @@ const MostWantedPage = () => {
             )}
           </div>
 
-          {/* Results Count */}
           <div className="mb-6">
             <p className="text-icc-gray">
               Showing <span className="font-semibold">{filteredScammers.length}</span> results
             </p>
           </div>
 
-          {/* Scammers List */}
           {isLoading ? (
             viewMode === 'grid' ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -340,7 +338,11 @@ const MostWantedPage = () => {
                 </TableHeader>
                 <TableBody>
                   {filteredScammers.map((scammer, index) => (
-                    <TableRow key={scammer.id} className="bg-amber-50/30 hover:bg-amber-50/50">
+                    <TableRow 
+                      key={scammer.id} 
+                      className="bg-amber-50/30 hover:bg-amber-50/50 cursor-pointer"
+                      onClick={() => handleRowClick(scammer.id)}
+                    >
                       <TableCell className="font-medium">{index + 1}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-3">
@@ -362,6 +364,7 @@ const MostWantedPage = () => {
                                 target="_blank" 
                                 rel="noopener noreferrer"
                                 className="inline-block p-1 rounded-full bg-amber-100 hover:bg-amber-200"
+                                onClick={(e) => e.stopPropagation()}
                               >
                                 <Globe className="h-4 w-4 text-amber-800" />
                               </a>
@@ -408,8 +411,12 @@ const MostWantedPage = () => {
                           asChild 
                           size="sm" 
                           className="rounded-full w-8 h-8 p-0 bg-amber-800 hover:bg-amber-900"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/scammer/${scammer.id}`);
+                          }}
                         >
-                          <Link to={`/scammer/${scammer.id}`}>?</Link>
+                          <div>?</div>
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -419,7 +426,6 @@ const MostWantedPage = () => {
             </div>
           )}
 
-          {/* Empty State */}
           {!isLoading && filteredScammers.length === 0 && (
             <div className="text-center py-12">
               <div className="mb-4">
