@@ -14,6 +14,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { Scammer, Profile } from '@/types/dataTypes';
 import { Button } from '@/components/ui/button';
+import { DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface GlobalSearchProps {
   isOpen: boolean;
@@ -95,6 +96,11 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, setIsOpen }) => {
 
   return (
     <CommandDialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTitle className="sr-only">Global Search</DialogTitle>
+      <DialogDescription className="sr-only">
+        Search for scammers or reporters in the database
+      </DialogDescription>
+      
       <Command className="rounded-lg border shadow-md">
         <CommandInput 
           placeholder="Search for scammers or reporters..." 
