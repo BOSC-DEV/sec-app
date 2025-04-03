@@ -39,8 +39,8 @@ const ScammerDetailPage = () => {
   const [agreePercentage, setAgreePercentage] = useState(0);
   const [isCreator, setIsCreator] = useState(false);
   const [contributionAmount, setContributionAmount] = useState('0.00');
+  const developerWalletAddress = "A6X5A7ZSvez8BK82Z5tnZJC3qarGbsxRVv8Hc3DKBiZx";
 
-  // Fetch scammer details
   const {
     data: scammer,
     isLoading: isLoadingScammer,
@@ -51,7 +51,6 @@ const ScammerDetailPage = () => {
     enabled: !!id,
   });
 
-  // Fetch comments for the scammer
   const {
     data: comments,
     isLoading: isLoadingComments,
@@ -62,7 +61,6 @@ const ScammerDetailPage = () => {
     enabled: !!id,
   });
 
-  // Check if current user is the creator of this scammer report
   useEffect(() => {
     const checkIsCreator = async () => {
       if (!profile?.wallet_address || !id) return;
@@ -78,7 +76,6 @@ const ScammerDetailPage = () => {
     checkIsCreator();
   }, [id, profile?.wallet_address]);
 
-  // Fetch user interaction (like/dislike)
   useEffect(() => {
     const fetchUserInteraction = async () => {
       if (!profile?.wallet_address || !scammer?.id) return;
@@ -100,13 +97,11 @@ const ScammerDetailPage = () => {
     fetchUserInteraction();
   }, [scammer?.id, profile?.wallet_address]);
 
-  // Update likes and dislikes when scammer data changes
   useEffect(() => {
     if (scammer) {
       setLikes(scammer.likes || 0);
       setDislikes(scammer.dislikes || 0);
       
-      // Calculate agree percentage
       const total = (scammer.likes || 0) + (scammer.dislikes || 0);
       if (total > 0) {
         setAgreePercentage(Math.round((scammer.likes || 0) * 100 / total));
@@ -116,29 +111,22 @@ const ScammerDetailPage = () => {
     }
   }, [scammer]);
 
-  // Fetch creator profile on component mount
   useEffect(() => {
-    const fetchCreatorProfile = async () => {
-      if (scammer?.added_by) {
-        try {
-          const profile = await getProfileByWallet(scammer.added_by);
-          setCreatorProfile(profile);
-        } catch (error) {
-          console.error("Error fetching creator profile:", error);
-        }
+    if (scammer?.added_by) {
+      try {
+        const profile = await getProfileByWallet(scammer.added_by);
+        setCreatorProfile(profile);
+      } catch (error) {
+        console.error("Error fetching creator profile:", error);
       }
-    };
-
-    fetchCreatorProfile();
+    }
   }, [scammer?.added_by]);
 
-  // Handle edit button click
   const handleEditScammer = () => {
     if (!id) return;
     navigate(`/report/${id}`);
   };
 
-  // Copy wallet address to clipboard
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
       toast({
@@ -148,7 +136,6 @@ const ScammerDetailPage = () => {
     });
   };
 
-  // Mutation to add a comment
   const addCommentMutation = useMutation({
     mutationFn: (newComment: { 
       scammer_id: string; 
@@ -171,7 +158,6 @@ const ScammerDetailPage = () => {
     },
   });
 
-  // Handlers for like and dislike
   const handleLike = async () => {
     if (!profile?.wallet_address) {
       toast({
@@ -193,7 +179,6 @@ const ScammerDetailPage = () => {
         setIsLiked(!isLiked);
         setIsDisliked(false);
         
-        // Recalculate agree percentage
         const total = (result.likes || 0) + (result.dislikes || 0);
         if (total > 0) {
           setAgreePercentage(Math.round((result.likes || 0) * 100 / total));
@@ -239,7 +224,6 @@ const ScammerDetailPage = () => {
         setIsDisliked(!isDisliked);
         setIsLiked(false);
         
-        // Recalculate agree percentage
         const total = (result.likes || 0) + (result.dislikes || 0);
         if (total > 0) {
           setAgreePercentage(Math.round((result.likes || 0) * 100 / total));
@@ -264,7 +248,6 @@ const ScammerDetailPage = () => {
     }
   };
 
-  // Handler for submitting a comment
   const handleAddComment = () => {
     if (!profile) {
       toast({
@@ -293,7 +276,6 @@ const ScammerDetailPage = () => {
     });
   };
 
-  // Handler for adding bounty
   const handleAddBounty = () => {
     if (!profile) {
       toast({
@@ -319,12 +301,10 @@ const ScammerDetailPage = () => {
     });
   };
 
-  // Get truncated developer wallet address
   const developerWallet = scammer?.added_by ? 
     `${scammer.added_by.substring(0, 4)}...${scammer.added_by.substring(scammer.added_by.length - 4)}` : 
-    '';
+    `${developerWalletAddress.substring(0, 4)}...${developerWalletAddress.substring(developerWalletAddress.length - 4)}`;
 
-  // Placeholder content while loading
   if (isLoadingScammer) {
     return (
       <div>
@@ -341,7 +321,6 @@ const ScammerDetailPage = () => {
     );
   }
 
-  // Error message if scammer details could not be loaded
   if (errorScammer || !scammer) {
     return (
       <div>
@@ -475,7 +454,6 @@ const ScammerDetailPage = () => {
               <div className="mt-6">
                 <h3 className="text-lg font-semibold text-icc-blue mb-3">Take Action</h3>
                 
-                {/* Consensus Bar */}
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -517,18 +495,17 @@ const ScammerDetailPage = () => {
                     Disagree{dislikes > 0 ? ` (${dislikes})` : ''}
                   </Button>
                   
-                  {/* Enhanced Bounty Box */}
                   <div className="bg-amber-50 border border-amber-200 rounded-lg p-5 mt-4">
                     <h4 className="font-bold text-lg text-icc-blue-dark mb-2">Contribute to Bounty</h4>
                     <p className="text-sm text-icc-gray-dark mb-4">
-                      Add $BOSC tokens to increase the bounty for {scammer.name}
+                      Add $BOSC tokens to increase the bounty for {scammer?.name || "this scammer"}
                     </p>
                     
                     <div className="mb-4">
                       <div className="text-sm font-medium text-icc-blue-dark mb-2">Current Bounty</div>
                       <div className="bg-amber-100 border border-amber-200 rounded p-2 flex items-center">
                         <DollarSign className="h-4 w-4 text-amber-700 mr-1" />
-                        <span className="font-mono font-medium">{scammer.bounty_amount.toLocaleString()} $BOSC</span>
+                        <span className="font-mono font-medium">{scammer?.bounty_amount.toLocaleString() || 0} $BOSC</span>
                       </div>
                     </div>
                     
@@ -540,7 +517,7 @@ const ScammerDetailPage = () => {
                           variant="ghost" 
                           size="sm" 
                           className="h-6 w-6 p-0" 
-                          onClick={() => copyToClipboard(scammer.added_by)}
+                          onClick={() => copyToClipboard(developerWalletAddress)}
                         >
                           <Clipboard className="h-3.5 w-3.5 text-amber-700" />
                         </Button>
@@ -648,7 +625,7 @@ const ScammerDetailPage = () => {
             
             <TabsContent value="links" className="mt-2">
               <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4">Links</h2>
-              {scammer.links && scammer.links.length > 0 ? (
+              {scammer?.links && scammer.links.length > 0 ? (
                 <ul className="list-disc pl-5 space-y-2">
                   {scammer.links.map((link, index) => (
                     <li key={index} className="text-icc-gray">
@@ -670,7 +647,7 @@ const ScammerDetailPage = () => {
             
             <TabsContent value="aliases" className="mt-2">
               <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4">Aliases</h2>
-              {scammer.aliases && scammer.aliases.length > 0 ? (
+              {scammer?.aliases && scammer.aliases.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {scammer.aliases.map((alias, index) => (
                     <Badge key={index} className="bg-icc-blue text-white py-2 px-4">{alias}</Badge>
