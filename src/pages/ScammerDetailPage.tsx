@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -372,17 +371,20 @@ const ScammerDetailPage = () => {
 
               <div className="mt-6">
                 <h2 className="icc-title">{scammer.name} has been accused of</h2>
-                
+                <p className="text-lg text-icc-gray-dark mt-2">{scammer.accused_of}</p>
               </div>
 
               <div className="mt-6">
                 
                 {scammer.wallet_addresses && scammer.wallet_addresses.length > 0 ? <ul className="list-disc pl-5 text-icc-gray">
                     {scammer.wallet_addresses.map((address, index) => <li key={index} className="flex items-center">
-                        
+                        <span className="font-mono mr-2">{address}</span>
+                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => copyToClipboard(address)}>
+                          <Copy className="h-3.5 w-3.5 text-icc-blue" />
+                        </Button>
                         
                       </li>)}
-                  </ul> : <p className="text-icc-gray"></p>}
+                  </ul> : <p className="text-icc-gray">No wallet addresses provided.</p>}
               </div>
             </div>
 
@@ -424,7 +426,12 @@ const ScammerDetailPage = () => {
 
               <div className="mt-6">
                 <h3 className="text-lg font-semibold text-icc-blue mb-3">Take Action</h3>
-                
+                <div className="bg-icc-blue-light/10 rounded-lg p-4 mb-4">
+                  <div className="flex items-center space-x-2 text-sm text-icc-blue-dark">
+                    <Shield className="h-4 w-4" />
+                    <span>This report has not been verified by the ICC DAO.</span>
+                  </div>
+                </div>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -445,31 +452,26 @@ const ScammerDetailPage = () => {
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-                
                 <div className="flex flex-col space-y-3">
                   <Button variant={isLiked ? "iccblue" : "outline"} onClick={handleLike} className="w-full justify-center">
                     <ThumbsUp className="h-3.5 w-3.5 mr-1" />
                     Agree{likes > 0 ? ` (${likes})` : ''}
                   </Button>
-                  
                   <Button variant={isDisliked ? "destructive" : "outline"} onClick={handleDislike} className="w-full justify-center">
                     <ThumbsDown className="h-3.5 w-3.5 mr-1" />
                     Disagree{dislikes > 0 ? ` (${dislikes})` : ''}
                   </Button>
-                  
                   <div className="bg-icc-gold-light/20 border border-icc-gold rounded-lg p-5 mt-4">
                     <h4 className="font-bold text-xl text-icc-blue mb-2">Contribute to Bounty</h4>
                     <p className="text-sm text-icc-gray-dark mb-4">
                       Add $SEC tokens to increase the bounty for {scammer?.name || "this scammer"}
                     </p>
-                    
                     <div className="mb-4">
                       <div className="text-sm font-medium text-icc-blue mb-2">Current Bounty</div>
                       <div className="bg-icc-gold-light/30 border border-icc-gold/30 rounded p-3 flex items-center">
                         <span className="font-mono font-medium text-icc-blue-dark">{scammer?.bounty_amount.toLocaleString() || 0} $SEC</span>
                       </div>
                     </div>
-                    
                     <div className="mb-4">
                       <div className="text-sm font-medium text-icc-blue mb-2">Developer Wallet</div>
                       <div className="bg-icc-gold-light/30 border border-icc-gold/30 rounded p-3 flex items-center justify-between">
@@ -479,7 +481,6 @@ const ScammerDetailPage = () => {
                         </Button>
                       </div>
                     </div>
-                    
                     <div className="mb-4">
                       <div className="text-sm font-medium text-icc-blue mb-2">Contribution Amount</div>
                       <div className="flex items-center space-x-2">
@@ -487,7 +488,6 @@ const ScammerDetailPage = () => {
                         <span className="text-icc-gold-dark font-medium">$SEC</span>
                       </div>
                     </div>
-                    
                     <Button className="w-full bg-icc-gold hover:bg-icc-gold-dark text-icc-blue-dark border-icc-gold-dark font-medium" onClick={handleAddBounty}>
                       {profile ? "Contribute to Bounty" : "Connect your wallet to contribute"}
                     </Button>
