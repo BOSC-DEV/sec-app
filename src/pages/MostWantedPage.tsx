@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from 'react';
-import Hero from '@/components/common/Hero';
+import CompactHero from '@/components/common/CompactHero';
 import ScammerCard from '@/components/common/ScammerCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -109,10 +110,9 @@ const MostWantedPage = () => {
 
   return (
     <div>
-      <Hero 
+      <CompactHero 
         title="Most Wanted"
         subtitle="Browse the database of reported cryptocurrency scammers and fraudsters."
-        showCta={false}
       />
 
       <section className="icc-section bg-white">
