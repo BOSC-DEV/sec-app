@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { 
-  getScammerById,
-  deleteScammer 
-} from '@/services/scammerService';
+import { getScammerById, deleteScammer } from '@/services/scammerService';
 import { getScammerComments, addComment } from '@/services/commentService';
 import { likeScammer, dislikeScammer, getUserScammerInteraction } from '@/services/interactionService';
 import { isScammerCreator } from '@/services/reportService';
@@ -17,16 +14,7 @@ import { Toggle } from '@/components/ui/toggle';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from '@/hooks/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDate } from '@/lib/utils';
@@ -36,7 +24,6 @@ import { Scammer, Comment, Profile } from '@/types/dataTypes';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
-
 const ScammerDetailPage = () => {
   const {
     id
@@ -60,7 +47,6 @@ const ScammerDetailPage = () => {
   const [contributionAmount, setContributionAmount] = useState('0.00');
   const developerWalletAddress = "A6X5A7ZSvez8BK82Z5tnZJC3qarGbsxRVv8Hc3DKBiZx";
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-
   const deleteScammerMutation = useMutation({
     mutationFn: () => {
       if (!id) throw new Error("Scammer ID is required");
@@ -69,11 +55,11 @@ const ScammerDetailPage = () => {
     onSuccess: () => {
       toast({
         title: "Success",
-        description: "The scammer report has been deleted successfully.",
+        description: "The scammer report has been deleted successfully."
       });
       navigate('/most-wanted');
     },
-    onError: (error) => {
+    onError: error => {
       console.error("Error deleting scammer:", error);
       toast({
         title: "Error",
@@ -82,7 +68,6 @@ const ScammerDetailPage = () => {
       });
     }
   });
-
   const {
     data: scammer,
     isLoading: isLoadingScammer,
@@ -92,7 +77,6 @@ const ScammerDetailPage = () => {
     queryFn: () => getScammerById(id || ''),
     enabled: !!id
   });
-  
   const {
     data: comments,
     isLoading: isLoadingComments,
@@ -102,7 +86,6 @@ const ScammerDetailPage = () => {
     queryFn: () => getScammerComments(id || ''),
     enabled: !!id
   });
-
   useEffect(() => {
     const checkIsCreator = async () => {
       if (!profile?.wallet_address || !id) return;
@@ -115,7 +98,6 @@ const ScammerDetailPage = () => {
     };
     checkIsCreator();
   }, [id, profile?.wallet_address]);
-
   useEffect(() => {
     const fetchUserInteraction = async () => {
       if (!profile?.wallet_address || !scammer?.id) return;
@@ -134,7 +116,6 @@ const ScammerDetailPage = () => {
     };
     fetchUserInteraction();
   }, [scammer?.id, profile?.wallet_address]);
-
   useEffect(() => {
     if (scammer) {
       setLikes(scammer.likes || 0);
@@ -147,7 +128,6 @@ const ScammerDetailPage = () => {
       }
     }
   }, [scammer]);
-
   useEffect(() => {
     const fetchCreatorProfile = async () => {
       if (scammer?.added_by) {
@@ -161,12 +141,10 @@ const ScammerDetailPage = () => {
     };
     fetchCreatorProfile();
   }, [scammer?.added_by]);
-
   const handleEditScammer = () => {
     if (!id) return;
     navigate(`/report/${id}`);
   };
-
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
       toast({
@@ -175,7 +153,6 @@ const ScammerDetailPage = () => {
       });
     });
   };
-
   const addCommentMutation = useMutation({
     mutationFn: (newComment: {
       scammer_id: string;
@@ -199,7 +176,6 @@ const ScammerDetailPage = () => {
       });
     }
   });
-
   const handleLike = async () => {
     if (!profile?.wallet_address) {
       toast({
@@ -244,7 +220,6 @@ const ScammerDetailPage = () => {
       setIsLoading(false);
     }
   };
-
   const handleDislike = async () => {
     if (!profile?.wallet_address) {
       toast({
@@ -289,7 +264,6 @@ const ScammerDetailPage = () => {
       setIsLoading(false);
     }
   };
-
   const handleAddComment = () => {
     if (!profile) {
       toast({
@@ -315,7 +289,6 @@ const ScammerDetailPage = () => {
       author_profile_pic: profile.profile_pic_url
     });
   };
-
   const handleAddBounty = () => {
     if (!profile) {
       toast({
@@ -338,17 +311,13 @@ const ScammerDetailPage = () => {
       description: `Thank you for contributing ${contributionAmount} $SEC to this bounty!`
     });
   };
-
   const handleDeleteScammer = () => {
     setShowDeleteDialog(true);
   };
-
   const confirmDelete = () => {
     deleteScammerMutation.mutate();
   };
-
   const developerWallet = scammer?.added_by ? `${scammer.added_by.substring(0, 4)}...${scammer.added_by.substring(scammer.added_by.length - 4)}` : `${developerWalletAddress.substring(0, 4)}...${developerWalletAddress.substring(developerWalletAddress.length - 4)}`;
-
   if (isLoadingScammer) {
     return <div>
         <CompactHero title="Loading..." />
@@ -362,7 +331,6 @@ const ScammerDetailPage = () => {
         </section>
       </div>;
   }
-
   if (errorScammer || !scammer) {
     return <div>
         <CompactHero title="Error" />
@@ -379,7 +347,6 @@ const ScammerDetailPage = () => {
         </section>
       </div>;
   }
-
   return <div>
       <CompactHero title={scammer.name} />
 
@@ -391,8 +358,7 @@ const ScammerDetailPage = () => {
               Back to Most Wanted
             </Button>
             <div className="flex items-center space-x-3">
-              {isCreator && (
-                <>
+              {isCreator && <>
                   <Button variant="outline" size="sm" onClick={handleEditScammer}>
                     <Edit className="h-3.5 w-3.5 mr-1" />
                     Edit Report
@@ -401,8 +367,7 @@ const ScammerDetailPage = () => {
                     <Trash2 className="h-3.5 w-3.5 mr-1" />
                     Delete Report
                   </Button>
-                </>
-              )}
+                </>}
               <Button variant="outline" size="sm">
                 <DollarSign className="h-3.5 w-3.5 mr-1" />
                 Add Bounty
@@ -467,12 +432,7 @@ const ScammerDetailPage = () => {
 
               <div className="mt-6">
                 <h3 className="text-lg font-semibold text-icc-blue mb-3">Take Action</h3>
-                <div className="bg-icc-blue-light/10 rounded-lg p-4 mb-4">
-                  <div className="flex items-center space-x-2 text-sm text-icc-blue-dark">
-                    <Shield className="h-4 w-4" />
-                    <span>This report has not been verified by the ICC DAO.</span>
-                  </div>
-                </div>
+                
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -646,10 +606,7 @@ const ScammerDetailPage = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              className="bg-red-600 text-white hover:bg-red-700"
-            >
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 text-white hover:bg-red-700">
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -657,5 +614,4 @@ const ScammerDetailPage = () => {
       </AlertDialog>
     </div>;
 };
-
 export default ScammerDetailPage;
