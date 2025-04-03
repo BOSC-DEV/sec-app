@@ -6,7 +6,7 @@ import { getScammerById } from '@/services/scammerService';
 import { getScammerComments, addComment } from '@/services/commentService';
 import { likeScammer, dislikeScammer, getUserScammerInteraction } from '@/services/interactionService';
 import CompactHero from '@/components/common/CompactHero';
-import { ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, Link2, Eye, AlertTriangle, Shield } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, Link2, Eye, AlertTriangle, Shield, TrendingUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
@@ -457,10 +457,26 @@ const ScammerDetailPage = () => {
                     Disagree{dislikes > 0 ? ` (${dislikes})` : ''}
                   </Button>
                   
-                  <Button variant="outline" className="w-full justify-center bg-icc-gold/20 text-icc-blue border-icc-gold/50">
-                    <DollarSign className="h-3.5 w-3.5 mr-1" />
-                    Add Bounty
-                  </Button>
+                  <div className="bg-icc-gold/20 border border-icc-gold/50 rounded-lg p-4 mt-4">
+                    <div className="flex justify-between items-center mb-3">
+                      <h4 className="font-medium text-icc-blue">Current Bounty</h4>
+                      <span className="text-xl font-bold text-icc-blue">{scammer.bounty_amount.toLocaleString()} $SEC</span>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2 text-sm text-icc-gray mb-3">
+                      <TrendingUp className="h-4 w-4" />
+                      <span>Top 5% of all bounties</span>
+                    </div>
+                    
+                    <div className="text-sm text-icc-gray mb-4">
+                      Add to this bounty to increase visibility and encourage information sharing about this scammer.
+                    </div>
+                    
+                    <Button variant="outline" className="w-full justify-center bg-icc-gold/20 text-icc-blue border-icc-gold/50 hover:bg-icc-gold/30">
+                      <DollarSign className="h-3.5 w-3.5 mr-1" />
+                      Add Bounty
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
