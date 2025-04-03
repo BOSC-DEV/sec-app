@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Instagram } from 'lucide-react';
@@ -138,7 +137,7 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p>&copy; {new Date().getFullYear()} Scams & E-crimes Commission. All rights reserved.</p>
             <p className="mt-2 md:mt-0">
-              This site does not constitute investment advice, governmental association or solicitation.
+              
               <span className="block md:inline md:ml-1">Not affiliated with any government entity.</span>
             </p>
           </div>
