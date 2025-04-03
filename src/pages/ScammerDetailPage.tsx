@@ -359,7 +359,7 @@ const ScammerDetailPage = () => {
               </div>
 
               <div className="mt-6">
-                <h2 className="icc-title">Wallet Addresses</h2>
+                
                 {scammer.wallet_addresses && scammer.wallet_addresses.length > 0 ? <ul className="list-disc pl-5 text-icc-gray">
                     {scammer.wallet_addresses.map((address, index) => <li key={index} className="flex items-center">
                         <span className="mr-2">{address}</span>
