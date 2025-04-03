@@ -3,14 +3,16 @@ import React from 'react';
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Control, FieldErrors } from 'react-hook-form';
+import { UseFormReturn } from 'react-hook-form';
+import DynamicFieldArray from './DynamicFieldArray';
 
 interface ScammerInfoFieldsProps {
-  control: Control<any>;
-  errors: FieldErrors;
+  form: UseFormReturn<any>;
 }
 
-const ScammerInfoFields = ({ control, errors }: ScammerInfoFieldsProps) => {
+const ScammerInfoFields = ({ form }: ScammerInfoFieldsProps) => {
+  const { control, formState: { errors } } = form;
+  
   return (
     <>
       <FormField
@@ -49,6 +51,39 @@ const ScammerInfoFields = ({ control, errors }: ScammerInfoFieldsProps) => {
             <FormMessage />
           </FormItem>
         )}
+      />
+      
+      {/* Dynamic form arrays for wallet addresses, aliases, links, and accomplices */}
+      <DynamicFieldArray 
+        name="wallet_addresses" 
+        label="Wallet Addresses" 
+        control={control} 
+        errors={errors} 
+        setValue={form.setValue} 
+      />
+      
+      <DynamicFieldArray 
+        name="aliases" 
+        label="Known Aliases" 
+        control={control} 
+        errors={errors} 
+        setValue={form.setValue} 
+      />
+      
+      <DynamicFieldArray 
+        name="links" 
+        label="Related Links" 
+        control={control} 
+        errors={errors} 
+        setValue={form.setValue} 
+      />
+      
+      <DynamicFieldArray 
+        name="accomplices" 
+        label="Known Accomplices" 
+        control={control} 
+        errors={errors} 
+        setValue={form.setValue} 
       />
     </>
   );

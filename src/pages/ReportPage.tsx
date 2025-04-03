@@ -115,6 +115,8 @@ const ReportPage = () => {
                     setPhotoFile={setPhotoFile}
                     photoPreview={photoPreview}
                     setPhotoPreview={setPhotoPreview}
+                    setValue={form.setValue}
+                    control={form.control}
                   />
                 </TabsContent>
               </Tabs>

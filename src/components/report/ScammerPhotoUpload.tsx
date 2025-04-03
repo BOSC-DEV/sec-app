@@ -12,8 +12,8 @@ interface ScammerPhotoUploadProps {
   setPhotoPreview: React.Dispatch<React.SetStateAction<string>>;
   photoFile: File | null;
   setPhotoFile: React.Dispatch<React.SetStateAction<File | null>>;
-  setValue: UseFormSetValue<any>;
-  control: Control<any>;
+  setValue?: UseFormSetValue<any>;
+  control?: Control<any>;
 }
 
 const ScammerPhotoUpload = ({
@@ -62,58 +62,53 @@ const ScammerPhotoUpload = ({
     reader.onloadend = () => {
       const preview = reader.result as string;
       setPhotoPreview(preview);
-      setValue('photo_url', preview);
+      if (setValue) {
+        setValue('photo_url', preview);
+      }
     };
     reader.readAsDataURL(file);
   };
 
   return (
-    <FormField
-      control={control}
-      name="photo_url"
-      render={({ field }) => (
-        <FormItem className="mb-4">
-          <FormLabel>Scammer's Photo</FormLabel>
-          <div className="mt-2 flex items-center gap-x-3">
-            <div 
-              onClick={handlePhotoClick}
-              className="relative group cursor-pointer"
-            >
-              <Avatar className="h-20 w-20 border border-gray-200">
-                {photoPreview ? (
-                  <AvatarImage src={photoPreview} alt="Preview" />
-                ) : (
-                  <AvatarFallback className="bg-gray-100 text-gray-400">
-                    <Image className="h-8 w-8" />
-                  </AvatarFallback>
-                )}
-              </Avatar>
-              <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <Upload className="h-6 w-6 text-white" />
-              </div>
-            </div>
-            <Button 
-              type="button" 
-              variant="outline" 
-              size="sm"
-              onClick={handlePhotoClick}
-            >
-              {photoPreview ? 'Change Photo' : 'Upload Photo'}
-            </Button>
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              className="hidden" 
-              accept="image/*"
-              onChange={handleFileChange}
-            />
+    <div className="mb-4">
+      <div className="mt-2 flex items-center gap-x-3">
+        <div 
+          onClick={handlePhotoClick}
+          className="relative group cursor-pointer"
+        >
+          <Avatar className="h-20 w-20 border border-gray-200">
+            {photoPreview ? (
+              <AvatarImage src={photoPreview} alt="Preview" />
+            ) : (
+              <AvatarFallback className="bg-gray-100 text-gray-400">
+                <Image className="h-8 w-8" />
+              </AvatarFallback>
+            )}
+          </Avatar>
+          <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <Upload className="h-6 w-6 text-white" />
           </div>
-          <FormDescription>
-            Upload a photo of the scammer, if available.
-          </FormDescription>
-        </FormItem>
-      )}
-    />
+        </div>
+        <Button 
+          type="button" 
+          variant="outline" 
+          size="sm"
+          onClick={handlePhotoClick}
+        >
+          {photoPreview ? 'Change Photo' : 'Upload Photo'}
+        </Button>
+        <input 
+          type="file" 
+          ref={fileInputRef} 
+          className="hidden" 
+          accept="image/*"
+          onChange={handleFileChange}
+        />
+      </div>
+      <FormDescription>
+        Upload a photo of the scammer, if available.
+      </FormDescription>
+    </div>
   );
 };
 
