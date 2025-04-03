@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -456,7 +455,11 @@ const ScammerDetailPage = () => {
                 </div>
               </div>
 
-              {/* Tabs moved up here */}
+              <div className="mt-4 mb-6">
+                <h2 className="icc-title">{scammer.name} has been accused of</h2>
+                <p className="text-lg text-icc-gray-dark mt-2">{scammer.accused_of}</p>
+              </div>
+
               <Tabs defaultValue="comments" className="w-full mb-6">
                 <TabsList className="w-full justify-start overflow-x-auto bg-background/60 backdrop-blur-sm rounded-lg border p-1 mb-4">
                   <TabsTrigger value="comments" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
@@ -549,11 +552,6 @@ const ScammerDetailPage = () => {
                   <div className="text-icc-gray">No official response yet.</div>
                 </TabsContent>
               </Tabs>
-
-              <div className="mt-4">
-                <h2 className="icc-title">{scammer.name} has been accused of</h2>
-                <p className="text-lg text-icc-gray-dark mt-2">{scammer.accused_of}</p>
-              </div>
             </div>
 
             <div>
