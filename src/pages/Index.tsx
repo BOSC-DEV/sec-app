@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Hero from '@/components/common/Hero';
 import ScammerCard from '@/components/common/ScammerCard';
 import { Button } from '@/components/ui/button';
@@ -8,8 +8,11 @@ import { getTopScammers, getStatistics } from '@/services/supabaseService';
 import { Shield, AlertTriangle, ExternalLink, DollarSign } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { formatNumber } from '@/lib/utils';
+import DisclaimerDialog from '@/components/common/DisclaimerDialog';
 
 const Index = () => {
+  const [disclaimerOpen, setDisclaimerOpen] = useState(false);
+
   // Query for top scammers
   const {
     data: topScammers = [],
@@ -121,11 +124,13 @@ const Index = () => {
                 <p className="text-gray-100 max-w-2xl">This platform is for informational purposes only. Always verify and follow all legal channels for reporting crimes.</p>
               </div>
             </div>
-            <Button asChild variant="outline" className="border-white text-black hover:bg-white/10 hover:text-white">
-              <Link to="/disclaimer">
-                Read Disclaimer
-                <ExternalLink className="ml-2 h-4 w-4" />
-              </Link>
+            <Button 
+              variant="outline" 
+              className="border-white text-black hover:bg-white/10 hover:text-white"
+              onClick={() => setDisclaimerOpen(true)}
+            >
+              Read Disclaimer
+              <ExternalLink className="ml-2 h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -168,6 +173,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Disclaimer Dialog */}
+      <DisclaimerDialog open={disclaimerOpen} onOpenChange={setDisclaimerOpen} />
     </div>;
 };
 export default Index;
