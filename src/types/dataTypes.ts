@@ -51,3 +51,14 @@ export interface Comment {
   dislikes: number;
   views: number;
 }
+
+export interface BountyContribution {
+  id: string;
+  scammer_id: string;
+  amount: number;
+  comment: string;
+  contributor_id: string;
+  contributor_name: string;
+  contributor_profile_pic?: string;
+  created_at: string;
+}

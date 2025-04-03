@@ -5,8 +5,10 @@ import { getScammerById, deleteScammer } from '@/services/scammerService';
 import { getScammerComments, addComment } from '@/services/commentService';
 import { likeScammer, dislikeScammer, getUserScammerInteraction } from '@/services/interactionService';
 import { isScammerCreator } from '@/services/reportService';
+import { addBountyContribution, getScammerBountyContributions } from '@/services/bountyService';
 import CompactHero from '@/components/common/CompactHero';
-import { ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, Link2, Eye, AlertTriangle, Shield, TrendingUp, Edit, Clipboard, Trash2 } from 'lucide-react';
+import BountyContributionList from '@/components/scammer/BountyContributionList';
+import { ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, Link2, Eye, AlertTriangle, Shield, TrendingUp, Edit, Clipboard, Trash2, MessageSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,24 +19,19 @@ import { Separator } from '@/components/ui/separator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from '@/hooks/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { formatDate } from '@/lib/utils';
+import { formatDate, formatCurrency } from '@/lib/utils';
 import { useProfile } from '@/contexts/ProfileContext';
 import { getProfileByWallet } from '@/services/profileService';
-import { Scammer, Comment, Profile } from '@/types/dataTypes';
+import { Scammer, Comment, Profile, BountyContribution } from '@/types/dataTypes';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
+
 const ScammerDetailPage = () => {
-  const {
-    id
-  } = useParams<{
-    id: string;
-  }>();
+  const { id } = useParams<{ id: string; }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const {
-    profile
-  } = useProfile();
+  const { profile } = useProfile();
   const [commentText, setCommentText] = useState('');
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
@@ -45,8 +42,10 @@ const ScammerDetailPage = () => {
   const [agreePercentage, setAgreePercentage] = useState(0);
   const [isCreator, setIsCreator] = useState(false);
   const [contributionAmount, setContributionAmount] = useState('0.00');
+  const [bountyComment, setBountyComment] = useState('');
   const developerWalletAddress = "A6X5A7ZSvez8BK82Z5tnZJC3qarGbsxRVv8Hc3DKBiZx";
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  
   const deleteScammerMutation = useMutation({
     mutationFn: () => {
       if (!id) throw new Error("Scammer ID is required");
@@ -68,6 +67,7 @@ const ScammerDetailPage = () => {
       });
     }
   });
+
   const {
     data: scammer,
     isLoading: isLoadingScammer,
@@ -77,6 +77,7 @@ const ScammerDetailPage = () => {
     queryFn: () => getScammerById(id || ''),
     enabled: !!id
   });
+
   const {
     data: comments,
     isLoading: isLoadingComments,
@@ -86,6 +87,16 @@ const ScammerDetailPage = () => {
     queryFn: () => getScammerComments(id || ''),
     enabled: !!id
   });
+  
+  const {
+    data: bountyContributions,
+    isLoading: isLoadingBountyContributions,
+  } = useQuery({
+    queryKey: ['bountyContributions', id],
+    queryFn: () => getScammerBountyContributions(id || ''),
+    enabled: !!id
+  });
+
   useEffect(() => {
     const checkIsCreator = async () => {
       if (!profile?.wallet_address || !id) return;
@@ -98,6 +109,7 @@ const ScammerDetailPage = () => {
     };
     checkIsCreator();
   }, [id, profile?.wallet_address]);
+
   useEffect(() => {
     const fetchUserInteraction = async () => {
       if (!profile?.wallet_address || !scammer?.id) return;
@@ -116,6 +128,7 @@ const ScammerDetailPage = () => {
     };
     fetchUserInteraction();
   }, [scammer?.id, profile?.wallet_address]);
+
   useEffect(() => {
     if (scammer) {
       setLikes(scammer.likes || 0);
@@ -128,6 +141,7 @@ const ScammerDetailPage = () => {
       }
     }
   }, [scammer]);
+
   useEffect(() => {
     const fetchCreatorProfile = async () => {
       if (scammer?.added_by) {
@@ -141,10 +155,12 @@ const ScammerDetailPage = () => {
     };
     fetchCreatorProfile();
   }, [scammer?.added_by]);
+
   const handleEditScammer = () => {
     if (!id) return;
     navigate(`/report/${id}`);
   };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
       toast({
@@ -153,6 +169,7 @@ const ScammerDetailPage = () => {
       });
     });
   };
+
   const addCommentMutation = useMutation({
     mutationFn: (newComment: {
       scammer_id: string;
@@ -176,6 +193,40 @@ const ScammerDetailPage = () => {
       });
     }
   });
+
+  const addBountyContributionMutation = useMutation({
+    mutationFn: (contribution: {
+      scammer_id: string;
+      amount: number;
+      comment?: string;
+      contributor_id: string;
+      contributor_name: string;
+      contributor_profile_pic?: string;
+    }) => addBountyContribution(contribution),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['bountyContributions', id]
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['scammer', id]
+      });
+      setContributionAmount('0.00');
+      setBountyComment('');
+      toast({
+        title: "Bounty contribution",
+        description: `Thank you for contributing to this bounty!`
+      });
+    },
+    onError: error => {
+      console.error('Error adding bounty contribution:', error);
+      toast({
+        title: "Error",
+        description: "Failed to contribute to the bounty. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
   const handleLike = async () => {
     if (!profile?.wallet_address) {
       toast({
@@ -220,6 +271,7 @@ const ScammerDetailPage = () => {
       setIsLoading(false);
     }
   };
+
   const handleDislike = async () => {
     if (!profile?.wallet_address) {
       toast({
@@ -264,6 +316,7 @@ const ScammerDetailPage = () => {
       setIsLoading(false);
     }
   };
+
   const handleAddComment = () => {
     if (!profile) {
       toast({
@@ -289,6 +342,7 @@ const ScammerDetailPage = () => {
       author_profile_pic: profile.profile_pic_url
     });
   };
+
   const handleAddBounty = () => {
     if (!profile) {
       toast({
@@ -298,7 +352,9 @@ const ScammerDetailPage = () => {
       });
       return;
     }
-    if (!contributionAmount || parseFloat(contributionAmount) <= 0) {
+    
+    const amount = parseFloat(contributionAmount);
+    if (!amount || amount <= 0) {
       toast({
         title: "Invalid amount",
         description: "Please enter a valid contribution amount.",
@@ -306,18 +362,27 @@ const ScammerDetailPage = () => {
       });
       return;
     }
-    toast({
-      title: "Bounty contribution",
-      description: `Thank you for contributing ${contributionAmount} $SEC to this bounty!`
+    
+    addBountyContributionMutation.mutate({
+      scammer_id: scammer?.id || '',
+      amount: amount,
+      comment: bountyComment,
+      contributor_id: profile.wallet_address,
+      contributor_name: profile.display_name,
+      contributor_profile_pic: profile.profile_pic_url
     });
   };
+
   const handleDeleteScammer = () => {
     setShowDeleteDialog(true);
   };
+
   const confirmDelete = () => {
     deleteScammerMutation.mutate();
   };
+
   const developerWallet = scammer?.added_by ? `${scammer.added_by.substring(0, 4)}...${scammer.added_by.substring(scammer.added_by.length - 4)}` : `${developerWalletAddress.substring(0, 4)}...${developerWalletAddress.substring(developerWalletAddress.length - 4)}`;
+
   if (isLoadingScammer) {
     return <div>
         <CompactHero title="Loading..." />
@@ -331,6 +396,7 @@ const ScammerDetailPage = () => {
         </section>
       </div>;
   }
+
   if (errorScammer || !scammer) {
     return <div>
         <CompactHero title="Error" />
@@ -347,6 +413,7 @@ const ScammerDetailPage = () => {
         </section>
       </div>;
   }
+
   return <div>
       <CompactHero title={scammer.name} />
 
@@ -485,13 +552,42 @@ const ScammerDetailPage = () => {
                     <div className="mb-4">
                       <div className="text-sm font-medium text-icc-blue mb-2">Contribution Amount</div>
                       <div className="flex items-center space-x-2">
-                        <Input type="number" value={contributionAmount} onChange={e => setContributionAmount(e.target.value)} className="bg-icc-gold-light/30 border-icc-gold/30 text-icc-blue-dark" min="0" step="0.01" />
+                        <Input
+                          type="number"
+                          value={contributionAmount}
+                          onChange={e => setContributionAmount(e.target.value)}
+                          className="bg-icc-gold-light/30 border-icc-gold/30 text-icc-blue-dark"
+                          min="0"
+                          step="0.01"
+                        />
                         <span className="text-icc-gold-dark font-medium">$SEC</span>
                       </div>
                     </div>
-                    <Button className="w-full bg-icc-gold hover:bg-icc-gold-dark text-icc-blue-dark border-icc-gold-dark font-medium" onClick={handleAddBounty}>
-                      {profile ? "Contribute to Bounty" : "Connect your wallet to contribute"}
+                    
+                    <div className="mb-4">
+                      <div className="text-sm font-medium text-icc-blue mb-2">Add a Comment (Optional)</div>
+                      <Textarea
+                        value={bountyComment}
+                        onChange={e => setBountyComment(e.target.value)}
+                        placeholder="Why are you contributing to this bounty?"
+                        className="bg-icc-gold-light/30 border-icc-gold/30 text-icc-blue-dark"
+                      />
+                    </div>
+                    
+                    <Button 
+                      className="w-full bg-icc-gold hover:bg-icc-gold-dark text-icc-blue-dark border-icc-gold-dark font-medium"
+                      onClick={handleAddBounty}
+                      disabled={addBountyContributionMutation.isPending}
+                    >
+                      {addBountyContributionMutation.isPending ? "Processing..." : profile ? "Contribute to Bounty" : "Connect your wallet to contribute"}
                     </Button>
+                    
+                    <div className="mt-4">
+                      <BountyContributionList
+                        contributions={bountyContributions || []}
+                        isLoading={isLoadingBountyContributions}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -614,4 +710,5 @@ const ScammerDetailPage = () => {
       </AlertDialog>
     </div>;
 };
+
 export default ScammerDetailPage;
