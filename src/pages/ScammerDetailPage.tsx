@@ -355,17 +355,15 @@ const ScammerDetailPage = () => {
 
               <div className="mt-6">
                 <h2 className="icc-title">Accusations</h2>
-                <p className="text-icc-gray">{scammer.accused_of}</p>
+                
               </div>
 
               <div className="mt-6">
                 
                 {scammer.wallet_addresses && scammer.wallet_addresses.length > 0 ? <ul className="list-disc pl-5 text-icc-gray">
                     {scammer.wallet_addresses.map((address, index) => <li key={index} className="flex items-center">
-                        <span className="mr-2">{address}</span>
-                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => copyToClipboard(address)}>
-                          <Copy className="h-3.5 w-3.5" />
-                        </Button>
+                        
+                        
                       </li>)}
                   </ul> : <p className="text-icc-gray"></p>}
               </div>
