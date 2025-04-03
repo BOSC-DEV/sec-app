@@ -50,23 +50,6 @@ const ScammerInfoFields = ({ control, errors }: ScammerInfoFieldsProps) => {
           </FormItem>
         )}
       />
-      
-      <FormField
-        control={control}
-        name="wallet_address"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Wallet Address</FormLabel>
-            <FormControl>
-              <Input placeholder="Enter the wallet address if known" {...field} />
-            </FormControl>
-            <FormDescription>
-              The blockchain wallet address associated with the scammer.
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
     </>
   );
 };

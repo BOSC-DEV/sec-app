@@ -176,7 +176,7 @@ export type Database = {
           photo_url: string | null
           shares: number | null
           views: number | null
-          wallet_address: string | null
+          wallet_addresses: string[] | null
         }
         Insert: {
           accomplices?: string[] | null
@@ -196,7 +196,7 @@ export type Database = {
           photo_url?: string | null
           shares?: number | null
           views?: number | null
-          wallet_address?: string | null
+          wallet_addresses?: string[] | null
         }
         Update: {
           accomplices?: string[] | null
@@ -216,7 +216,7 @@ export type Database = {
           photo_url?: string | null
           shares?: number | null
           views?: number | null
-          wallet_address?: string | null
+          wallet_addresses?: string[] | null
         }
         Relationships: []
       }

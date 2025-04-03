@@ -20,7 +20,7 @@ import { generateScammerId } from '@/services/supabaseService';
 const reportSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   accused_of: z.string().optional(),
-  wallet_address: z.string().optional(),
+  wallet_addresses: z.array(z.string()).optional(),
   photo_url: z.string().optional(),
   aliases: z.array(z.string()).optional(),
   links: z.array(z.string()).optional(),
@@ -43,7 +43,7 @@ const ReportPage = () => {
     defaultValues: {
       name: '',
       accused_of: '',
-      wallet_address: '',
+      wallet_addresses: [''],
       photo_url: '',
       aliases: [''],
       links: [''],
@@ -77,7 +77,7 @@ const ReportPage = () => {
       reset({
         name: scammer.name || '',
         accused_of: scammer.accused_of || '',
-        wallet_address: scammer.wallet_address || '',
+        wallet_addresses: scammer.wallet_addresses?.length ? scammer.wallet_addresses : [''],
         photo_url: scammer.photo_url || '',
         aliases: scammer.aliases?.length ? scammer.aliases : [''],
         links: scammer.links?.length ? scammer.links : [''],
@@ -124,6 +124,7 @@ const ReportPage = () => {
       const aliases = data.aliases?.filter(item => item !== '') || [];
       const links = data.links?.filter(item => item !== '') || [];
       const accomplices = data.accomplices?.filter(item => item !== '') || [];
+      const wallet_addresses = data.wallet_addresses?.filter(item => item !== '') || [];
       
       if (isEditMode && id) {
         const { error } = await supabase
@@ -131,7 +132,7 @@ const ReportPage = () => {
           .update({
             name: data.name,
             accused_of: data.accused_of,
-            wallet_address: data.wallet_address,
+            wallet_addresses,
             photo_url: photoUrl,
             aliases,
             links,
@@ -156,7 +157,7 @@ const ReportPage = () => {
             id: newId,
             name: data.name,
             accused_of: data.accused_of,
-            wallet_address: data.wallet_address,
+            wallet_addresses,
             photo_url: photoUrl,
             aliases,
             links,
@@ -205,6 +206,14 @@ const ReportPage = () => {
             <form onSubmit={handleSubmit(onSubmit)} id="report-form" className="space-y-6">
               <div className="space-y-6">
                 <ScammerInfoFields control={control} errors={errors} />
+
+                <DynamicFieldArray
+                  name="wallet_addresses"
+                  label="Wallet Addresses"
+                  control={control}
+                  errors={errors}
+                  setValue={setValue}
+                />
 
                 <DynamicFieldArray
                   name="aliases"

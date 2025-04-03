@@ -9,7 +9,7 @@ export interface Scammer {
   accomplices: string[];
   official_response: string;
   bounty_amount: number;
-  wallet_address: string;
+  wallet_addresses: string[];
   date_added: string;
   added_by: string;
   likes: number;
