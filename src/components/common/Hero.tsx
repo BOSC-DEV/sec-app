@@ -44,7 +44,7 @@ const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
               </Button>
               <Button 
                 asChild 
-                className="bg-icc-blue-dark border-2 border-white hover:bg-icc-blue-light hover:text-white text-white text-lg py-6 px-8 min-w-[200px] sm:min-w-[240px] font-medium"
+                className="bg-icc-blue-dark hover:bg-icc-blue-light hover:text-white text-white text-lg py-6 px-8 min-w-[200px] sm:min-w-[240px] font-medium"
               >
                 <Link to="/report">
                   <AlertCircle className="mr-2 h-5 w-5" />
