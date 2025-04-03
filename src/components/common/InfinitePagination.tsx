@@ -82,7 +82,7 @@ function InfinitePagination<T>({
   }
 
   // Get all items from all pages - fix for the pages property not existing
-  const allItems = data?.pages ? data.pages.flatMap(page => page.data) : (data ? [data.data].flat() : []);
+  const allItems = data?.pages?.flatMap(page => page.data) || [];
 
   // Handle empty state
   if (allItems.length === 0) {

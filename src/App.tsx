@@ -32,16 +32,16 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       retry: 1, // Limit retries on failure
       refetchOnReconnect: true,
-      onSettled: (data, error) => {
-        if (error) {
-          analyticsService.trackError(error as Error, 'query_error');
+      meta: {
+        onError: (error: Error) => {
+          analyticsService.trackError(error, 'query_error');
         }
       }
     },
     mutations: {
-      onSettled: (data, error) => {
-        if (error) {
-          analyticsService.trackError(error as Error, 'mutation_error');
+      meta: {
+        onError: (error: Error) => {
+          analyticsService.trackError(error, 'mutation_error');
         }
       }
     }
