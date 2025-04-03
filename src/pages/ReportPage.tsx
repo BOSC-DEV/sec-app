@@ -113,21 +113,27 @@ const ReportPage = () => {
         try {
           const fileName = `scammer_photos/${Date.now()}_${photoFile.name}`;
           
+          // Log the upload attempt
+          console.log("Uploading file to bucket 'media':", fileName);
+          
           const { data: uploadData, error: uploadError } = await supabase.storage
             .from('media')
             .upload(fileName, photoFile);
             
           if (uploadError) {
             console.error("Photo upload error:", uploadError);
-            setUploadError("Failed to upload photo. Please try again or skip adding a photo.");
+            setUploadError(`Failed to upload photo: ${uploadError.message}`);
             throw new Error(`Photo upload failed: ${uploadError.message}`);
           }
+          
+          console.log("File uploaded successfully, getting public URL");
           
           const { data: publicUrlData } = supabase.storage
             .from('media')
             .getPublicUrl(fileName);
             
           photoUrl = publicUrlData.publicUrl;
+          console.log("Generated public URL:", photoUrl);
         } catch (uploadErr) {
           console.error("Photo upload exception:", uploadErr);
           setUploadError("Failed to upload photo. Please try again or skip adding a photo.");
@@ -141,6 +147,8 @@ const ReportPage = () => {
       const wallet_addresses = data.wallet_addresses?.filter(item => item !== '') || [];
       
       if (isEditMode && id) {
+        console.log("Updating existing scammer:", id);
+        
         const { error } = await supabase
           .from('scammers')
           .update({
@@ -163,6 +171,8 @@ const ReportPage = () => {
         
         navigate(`/scammer/${id}`);
       } else {
+        console.log("Creating new scammer report");
+        
         const newId = await generateScammerId();
         
         const { error } = await supabase
