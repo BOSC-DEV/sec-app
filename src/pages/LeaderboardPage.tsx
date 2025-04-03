@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Trophy, Medal, ThumbsUp, Eye, MessageSquare, Clock, Link, FileText, ChevronUp, ChevronDown } from 'lucide-react';
@@ -243,9 +244,10 @@ const LeaderboardPage = () => {
                                 href={profile.x_link} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className="bg-amber-50 hover:bg-amber-100 p-2 rounded-full transition-colors"
+                                className="bg-icc-blue-light hover:bg-icc-blue p-2 rounded-full transition-colors"
+                                aria-label={`${profile.display_name} on X`}
                               >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-800">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
                                   <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
                                 </svg>
                               </a>
@@ -255,9 +257,10 @@ const LeaderboardPage = () => {
                                 href={profile.website_link} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className="bg-amber-50 hover:bg-amber-100 p-2 rounded-full transition-colors"
+                                className="bg-icc-blue-light hover:bg-icc-blue p-2 rounded-full transition-colors"
+                                aria-label={`${profile.display_name}'s website`}
                               >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-800">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
                                   <circle cx="12" cy="12" r="10" />
                                   <line x1="2" y1="12" x2="22" y2="12" />
                                   <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
