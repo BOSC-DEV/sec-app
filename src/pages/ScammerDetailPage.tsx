@@ -1,13 +1,15 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { getScammerById } from '@/services/scammerService';
+import { 
+  getScammerById,
+  deleteScammer 
+} from '@/services/scammerService';
 import { getScammerComments, addComment } from '@/services/commentService';
 import { likeScammer, dislikeScammer, getUserScammerInteraction } from '@/services/interactionService';
 import { isScammerCreator } from '@/services/reportService';
 import CompactHero from '@/components/common/CompactHero';
-import { ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, Link2, Eye, AlertTriangle, Shield, TrendingUp, Edit, Clipboard } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, Link2, Eye, AlertTriangle, Shield, TrendingUp, Edit, Clipboard, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
@@ -15,6 +17,16 @@ import { Toggle } from '@/components/ui/toggle';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from '@/hooks/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDate } from '@/lib/utils';
@@ -47,6 +59,7 @@ const ScammerDetailPage = () => {
   const [isCreator, setIsCreator] = useState(false);
   const [contributionAmount, setContributionAmount] = useState('0.00');
   const developerWalletAddress = "A6X5A7ZSvez8BK82Z5tnZJC3qarGbsxRVv8Hc3DKBiZx";
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const {
     data: scammer,
@@ -304,6 +317,14 @@ const ScammerDetailPage = () => {
     });
   };
 
+  const handleDeleteScammer = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = () => {
+    deleteScammerMutation.mutate();
+  };
+
   const developerWallet = scammer?.added_by ? `${scammer.added_by.substring(0, 4)}...${scammer.added_by.substring(scammer.added_by.length - 4)}` : `${developerWalletAddress.substring(0, 4)}...${developerWalletAddress.substring(developerWalletAddress.length - 4)}`;
 
   if (isLoadingScammer) {
@@ -348,10 +369,18 @@ const ScammerDetailPage = () => {
               Back to Most Wanted
             </Button>
             <div className="flex items-center space-x-3">
-              {isCreator && <Button variant="outline" size="sm" onClick={handleEditScammer}>
-                  <Edit className="h-3.5 w-3.5 mr-1" />
-                  Edit Report
-                </Button>}
+              {isCreator && (
+                <>
+                  <Button variant="outline" size="sm" onClick={handleEditScammer}>
+                    <Edit className="h-3.5 w-3.5 mr-1" />
+                    Edit Report
+                  </Button>
+                  <Button variant="danger" size="sm" onClick={handleDeleteScammer}>
+                    <Trash2 className="h-3.5 w-3.5 mr-1" />
+                    Delete Report
+                  </Button>
+                </>
+              )}
               <Button variant="outline" size="sm">
                 <DollarSign className="h-3.5 w-3.5 mr-1" />
                 Add Bounty
@@ -583,6 +612,27 @@ const ScammerDetailPage = () => {
           </Tabs>
         </div>
       </section>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this report?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the scammer report
+              and remove it from the platform.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-600 text-white hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>;
 };
 

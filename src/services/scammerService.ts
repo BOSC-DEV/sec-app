@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Scammer } from '@/types/dataTypes';
 import { handleError } from '@/utils/errorHandling';
@@ -163,5 +162,27 @@ export const getLikedScammersByUser = async (walletAddress: string): Promise<Sca
   } catch (error) {
     console.error('Error in getLikedScammersByUser:', error);
     return [];
+  }
+};
+
+/**
+ * Soft deletes a scammer report by setting the deleted_at timestamp
+ */
+export const deleteScammer = async (id: string): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('scammers')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Error deleting scammer:', error);
+      throw error;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Exception deleting scammer:', error);
+    throw error;
   }
 };
