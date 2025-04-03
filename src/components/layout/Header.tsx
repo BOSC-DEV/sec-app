@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Search, User, Shield, Wallet, LogOut, LogIn } from 'lucide-react';
+import { Menu, X, User, Shield, Wallet, LogOut, LogIn } from 'lucide-react';
 import ICCLogo from '../common/ICCLogo';
 import { useProfile } from '@/contexts/ProfileContext';
 
@@ -57,9 +57,7 @@ const Header = () => {
 
           {/* Search & Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light">
-              <Search className="h-5 w-5" />
-            </Button>
+            {/* Search button removed */}
             
             {isConnected ? (
               <div className="flex items-center space-x-3">
@@ -113,9 +111,7 @@ const Header = () => {
               <Link to="/leaderboard" className="text-white hover:text-icc-gold transition-colors px-2 py-1">Leaderboard</Link>
               
               <div className="flex items-center justify-between pt-2">
-                <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue">
-                  <Search className="h-5 w-5" />
-                </Button>
+                {/* Search button removed from mobile menu as well */}
                 
                 {isConnected ? (
                   <div className="flex items-center space-x-2">
