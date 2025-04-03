@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import CompactHero from '@/components/common/CompactHero';
 import ScammerCard from '@/components/common/ScammerCard';
@@ -367,7 +368,7 @@ const MostWantedPage = () => {
                     >
                       Posted{renderSortIndicator('date')}
                     </TableHead>
-                    <TableHead className="font-bold text-icc-primary text-center">Reporter</TableHead>
+                    <TableHead className="font-bold text-icc-primary text-center">By</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
