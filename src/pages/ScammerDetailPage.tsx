@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -448,14 +449,108 @@ const ScammerDetailPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="md:col-span-2">
-              <div className="relative aspect-square overflow-hidden rounded-lg shadow-md">
+              <div className="relative aspect-square overflow-hidden rounded-lg shadow-md mb-6">
                 <img src={scammer.photo_url || '/placeholder.svg'} alt={scammer.name} className="w-full h-full object-cover" />
                 <div className="absolute top-0 left-0 bg-icc-gold text-icc-blue-dark px-4 py-2 text-sm font-bold rounded-br-lg">
                   {scammer.bounty_amount.toLocaleString()} $SEC Bounty
                 </div>
               </div>
 
-              <div className="mt-6">
+              {/* Tabs moved up here */}
+              <Tabs defaultValue="comments" className="w-full mb-6">
+                <TabsList className="w-full justify-start overflow-x-auto bg-background/60 backdrop-blur-sm rounded-lg border p-1 mb-4">
+                  <TabsTrigger value="comments" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                    Comments
+                  </TabsTrigger>
+                  <TabsTrigger value="links" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                    Links
+                  </TabsTrigger>
+                  <TabsTrigger value="aliases" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                    Aliases
+                  </TabsTrigger>
+                  <TabsTrigger value="evidence" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                    Evidence
+                  </TabsTrigger>
+                  <TabsTrigger value="wallet-addresses" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                    Wallets
+                  </TabsTrigger>
+                  <TabsTrigger value="official" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                    Official Response
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="comments" className="mt-2">
+                  <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4">Comments</h2>
+                  <div className="mb-4">
+                    <Textarea placeholder="Write your comment here..." value={commentText} onChange={e => setCommentText(e.target.value)} />
+                    <Button className="mt-2" onClick={handleAddComment} disabled={addCommentMutation.isPending}>
+                      {addCommentMutation.isPending ? 'Adding...' : 'Add Comment'}
+                    </Button>
+                  </div>
+
+                  {isLoadingComments ? <div className="space-y-4">
+                      {[1, 2, 3].map(index => <div key={index} className="flex items-start space-x-4">
+                          <Skeleton className="h-10 w-10 rounded-full" />
+                          <div>
+                            <Skeleton className="h-4 w-32 mb-1" />
+                            <Skeleton className="h-4 w-64" />
+                          </div>
+                        </div>)}
+                    </div> : errorComments ? <div className="text-red-500">Error loading comments.</div> : comments && comments.length > 0 ? comments.map(comment => <div key={comment.id} className="flex items-start space-x-4 py-4 border-b">
+                        <Avatar>
+                          <AvatarImage src={comment.author_profile_pic || '/placeholder.svg'} alt={comment.author_name} />
+                          <AvatarFallback>{comment.author_name.substring(0, 2)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium">{comment.author_name}</div>
+                          <div className="text-sm text-gray-500">{formatDate(comment.created_at)}</div>
+                          <p className="mt-1">{comment.content}</p>
+                        </div>
+                      </div>) : <div>No comments yet. Be the first to comment!</div>}
+                </TabsContent>
+                
+                <TabsContent value="links" className="mt-2">
+                  <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4">Links</h2>
+                  {scammer?.links && scammer.links.length > 0 ? <ul className="list-disc pl-5 space-y-2">
+                      {scammer.links.map((link, index) => <li key={index} className="text-icc-gray">
+                          <a href={link.startsWith('http') ? link : `https://${link}`} target="_blank" rel="noopener noreferrer" className="text-icc-blue hover:underline">
+                            {link}
+                          </a>
+                        </li>)}
+                    </ul> : <p className="text-icc-gray">No links provided.</p>}
+                </TabsContent>
+                
+                <TabsContent value="aliases" className="mt-2">
+                  <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4">Aliases</h2>
+                  {scammer?.aliases && scammer.aliases.length > 0 ? <div className="flex flex-wrap gap-2">
+                      {scammer.aliases.map((alias, index) => <Badge key={index} className="bg-icc-blue text-white py-2 px-4">{alias}</Badge>)}
+                    </div> : <p className="text-icc-gray">No aliases provided.</p>}
+                </TabsContent>
+                
+                <TabsContent value="evidence" className="mt-2">
+                  <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4">Evidence</h2>
+                  <div className="text-icc-gray">No evidence provided.</div>
+                </TabsContent>
+                
+                <TabsContent value="wallet-addresses" className="mt-2">
+                  <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4">Wallet Addresses</h2>
+                  {scammer?.wallet_addresses && scammer.wallet_addresses.length > 0 ? <ul className="list-disc pl-5 space-y-2 text-icc-gray">
+                      {scammer.wallet_addresses.map((address, index) => <li key={index} className="flex items-center">
+                          <span className="font-mono mr-2">{address}</span>
+                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => copyToClipboard(address)}>
+                            <Copy className="h-3.5 w-3.5 text-icc-blue" />
+                          </Button>
+                        </li>)}
+                    </ul> : <p className="text-icc-gray">No wallet addresses provided.</p>}
+                </TabsContent>
+                
+                <TabsContent value="official" className="mt-2">
+                  <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4">Official Response</h2>
+                  <div className="text-icc-gray">No official response yet.</div>
+                </TabsContent>
+              </Tabs>
+
+              <div className="mt-4">
                 <h2 className="icc-title">{scammer.name} has been accused of</h2>
                 <p className="text-lg text-icc-gray-dark mt-2">{scammer.accused_of}</p>
               </div>
@@ -593,101 +688,6 @@ const ScammerDetailPage = () => {
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section className="icc-section bg-gray-50">
-        <div className="icc-container">
-          <Tabs defaultValue="comments" className="w-full">
-            <TabsList className="w-full justify-start overflow-x-auto bg-background/60 backdrop-blur-sm rounded-lg border p-1 mb-6">
-              <TabsTrigger value="comments" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                Comments
-              </TabsTrigger>
-              <TabsTrigger value="links" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                Links
-              </TabsTrigger>
-              <TabsTrigger value="aliases" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                Aliases
-              </TabsTrigger>
-              <TabsTrigger value="evidence" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                Evidence
-              </TabsTrigger>
-              <TabsTrigger value="wallet-addresses" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">Wallets</TabsTrigger>
-              <TabsTrigger value="official" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                Official Response
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="comments" className="mt-2">
-              <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4">Comments</h2>
-              <div className="mb-4">
-                <Textarea placeholder="Write your comment here..." value={commentText} onChange={e => setCommentText(e.target.value)} />
-                <Button className="mt-2" onClick={handleAddComment} disabled={addCommentMutation.isPending}>
-                  {addCommentMutation.isPending ? 'Adding...' : 'Add Comment'}
-                </Button>
-              </div>
-
-              {isLoadingComments ? <div className="space-y-4">
-                  {[1, 2, 3].map(index => <div key={index} className="flex items-start space-x-4">
-                      <Skeleton className="h-10 w-10 rounded-full" />
-                      <div>
-                        <Skeleton className="h-4 w-32 mb-1" />
-                        <Skeleton className="h-4 w-64" />
-                      </div>
-                    </div>)}
-                </div> : errorComments ? <div className="text-red-500">Error loading comments.</div> : comments && comments.length > 0 ? comments.map(comment => <div key={comment.id} className="flex items-start space-x-4 py-4 border-b">
-                    <Avatar>
-                      <AvatarImage src={comment.author_profile_pic || '/placeholder.svg'} alt={comment.author_name} />
-                      <AvatarFallback>{comment.author_name.substring(0, 2)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="font-medium">{comment.author_name}</div>
-                      <div className="text-sm text-gray-500">{formatDate(comment.created_at)}</div>
-                      <p className="mt-1">{comment.content}</p>
-                    </div>
-                  </div>) : <div>No comments yet. Be the first to comment!</div>}
-            </TabsContent>
-            
-            <TabsContent value="links" className="mt-2">
-              <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4">Links</h2>
-              {scammer?.links && scammer.links.length > 0 ? <ul className="list-disc pl-5 space-y-2">
-                  {scammer.links.map((link, index) => <li key={index} className="text-icc-gray">
-                      <a href={link.startsWith('http') ? link : `https://${link}`} target="_blank" rel="noopener noreferrer" className="text-icc-blue hover:underline">
-                        {link}
-                      </a>
-                    </li>)}
-                </ul> : <p className="text-icc-gray">No links provided.</p>}
-            </TabsContent>
-            
-            <TabsContent value="aliases" className="mt-2">
-              <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4">Aliases</h2>
-              {scammer?.aliases && scammer.aliases.length > 0 ? <div className="flex flex-wrap gap-2">
-                  {scammer.aliases.map((alias, index) => <Badge key={index} className="bg-icc-blue text-white py-2 px-4">{alias}</Badge>)}
-                </div> : <p className="text-icc-gray">No aliases provided.</p>}
-            </TabsContent>
-            
-            <TabsContent value="evidence" className="mt-2">
-              <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4">Evidence</h2>
-              <div className="text-icc-gray">No evidence provided.</div>
-            </TabsContent>
-            
-            <TabsContent value="wallet-addresses" className="mt-2">
-              <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4">Wallet Addresses</h2>
-              {scammer?.wallet_addresses && scammer.wallet_addresses.length > 0 ? <ul className="list-disc pl-5 space-y-2 text-icc-gray">
-                  {scammer.wallet_addresses.map((address, index) => <li key={index} className="flex items-center">
-                      <span className="font-mono mr-2">{address}</span>
-                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => copyToClipboard(address)}>
-                        <Copy className="h-3.5 w-3.5 text-icc-blue" />
-                      </Button>
-                    </li>)}
-                </ul> : <p className="text-icc-gray">No wallet addresses provided.</p>}
-            </TabsContent>
-            
-            <TabsContent value="official" className="mt-2">
-              <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4">Official Response</h2>
-              <div className="text-icc-gray">No official response yet.</div>
-            </TabsContent>
-          </Tabs>
         </div>
       </section>
 

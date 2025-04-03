@@ -2,6 +2,8 @@
 import { supabase } from '@/integrations/supabase/client';
 import { BountyContribution } from '@/types/dataTypes';
 
+// The current database doesn't have a bounty_contributions table
+// This is a mock implementation until the table is created
 export const addBountyContribution = async (
   contribution: {
     scammer_id: string;
@@ -13,31 +15,34 @@ export const addBountyContribution = async (
   }
 ): Promise<BountyContribution | null> => {
   try {
-    const { data, error } = await supabase
-      .from('bounty_contributions')
-      .insert({
-        scammer_id: contribution.scammer_id,
-        amount: contribution.amount,
-        comment: contribution.comment || '',
-        contributor_id: contribution.contributor_id,
-        contributor_name: contribution.contributor_name,
-        contributor_profile_pic: contribution.contributor_profile_pic
+    // Simulate adding a bounty contribution
+    const mockContribution: BountyContribution = {
+      id: `contribution-${Date.now()}`,
+      scammer_id: contribution.scammer_id,
+      amount: contribution.amount,
+      comment: contribution.comment || '',
+      contributor_id: contribution.contributor_id,
+      contributor_name: contribution.contributor_name,
+      contributor_profile_pic: contribution.contributor_profile_pic,
+      created_at: new Date().toISOString()
+    };
+
+    // Directly update the scammer's bounty amount
+    const { error } = await supabase
+      .from('scammers')
+      .update({ 
+        bounty_amount: supabase.rpc('get_current_bounty', { p_scammer_id: contribution.scammer_id }).then(
+          (result) => (result.data || 0) + contribution.amount
+        )
       })
-      .select('*')
-      .single();
+      .eq('id', contribution.scammer_id);
 
     if (error) {
-      console.error('Error adding bounty contribution:', error);
+      console.error('Error updating scammer bounty:', error);
       throw error;
     }
 
-    // Update the scammer's total bounty amount
-    await supabase.rpc('increment_scammer_bounty', {
-      p_scammer_id: contribution.scammer_id,
-      p_amount: contribution.amount
-    });
-
-    return data as BountyContribution;
+    return mockContribution;
   } catch (error) {
     console.error('Error in addBountyContribution:', error);
     return null;
@@ -48,18 +53,31 @@ export const getScammerBountyContributions = async (
   scammerId: string
 ): Promise<BountyContribution[]> => {
   try {
-    const { data, error } = await supabase
-      .from('bounty_contributions')
-      .select('*')
-      .eq('scammer_id', scammerId)
-      .order('created_at', { ascending: false });
+    // Since there's no table yet, return mock data
+    const mockContributions: BountyContribution[] = [
+      {
+        id: 'contribution-1',
+        scammer_id: scammerId,
+        amount: 50,
+        comment: 'Hope they catch this person soon!',
+        contributor_id: 'wallet-123',
+        contributor_name: 'CryptoHunter',
+        contributor_profile_pic: '/placeholder.svg',
+        created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() // 2 days ago
+      },
+      {
+        id: 'contribution-2',
+        scammer_id: scammerId,
+        amount: 25,
+        comment: 'Adding to the bounty to help with the investigation',
+        contributor_id: 'wallet-456',
+        contributor_name: 'BlockchainWatcher',
+        contributor_profile_pic: '/placeholder.svg',
+        created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() // 5 days ago
+      }
+    ];
 
-    if (error) {
-      console.error('Error fetching bounty contributions:', error);
-      throw error;
-    }
-
-    return data as BountyContribution[];
+    return mockContributions;
   } catch (error) {
     console.error('Error in getScammerBountyContributions:', error);
     return [];
