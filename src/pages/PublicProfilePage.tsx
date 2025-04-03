@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -10,20 +10,25 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import { getProfileByUsername } from '@/services/profileService';
-import { Twitter, Globe, Copy, ExternalLink, Share2, ThumbsUp } from 'lucide-react';
+import { Twitter, Globe, Copy, ExternalLink, Share2, ThumbsUp, Edit } from 'lucide-react';
 import { getScammersByReporter, getLikedScammersByUser } from '@/services/supabaseService';
 import { Profile, Scammer } from '@/types/dataTypes';
 import ScammerCard from '@/components/common/ScammerCard';
+import { useProfile } from '@/contexts/ProfileContext';
 
 const PublicProfilePage = () => {
   const { username } = useParams<{ username: string }>();
   const [activeTab, setActiveTab] = useState("reports");
+  const navigate = useNavigate();
+  const { profile: currentUserProfile } = useProfile();
   
   const { data: profile, isLoading, error } = useQuery({
     queryKey: ['profile', username],
     queryFn: () => getProfileByUsername(username || ''),
     enabled: !!username,
   });
+
+  const isOwnProfile = currentUserProfile?.wallet_address === profile?.wallet_address;
 
   const { data: scammerReports, isLoading: isLoadingReports } = useQuery({
     queryKey: ['scammerReports', profile?.wallet_address],
@@ -66,6 +71,10 @@ const PublicProfilePage = () => {
       title: "Link Copied!",
       description: "Profile link copied to clipboard",
     });
+  };
+
+  const handleEditProfile = () => {
+    navigate('/profile');
   };
 
   if (error) {
@@ -155,15 +164,28 @@ const PublicProfilePage = () => {
                         <h1 className="text-3xl font-bold text-icc-gold">{profile?.display_name}</h1>
                         <p className="text-muted-foreground">@{profile?.username}</p>
                       </div>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="flex items-center gap-1"
-                        onClick={shareProfile}
-                      >
-                        <Share2 size={16} />
-                        Share Profile
-                      </Button>
+                      <div className="flex flex-wrap gap-2">
+                        {isOwnProfile && (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex items-center gap-1 border-purple-300 text-purple-600 hover:bg-purple-50 hover:text-purple-700"
+                            onClick={handleEditProfile}
+                          >
+                            <Edit size={16} />
+                            Edit Profile
+                          </Button>
+                        )}
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex items-center gap-1"
+                          onClick={shareProfile}
+                        >
+                          <Share2 size={16} />
+                          Share Profile
+                        </Button>
+                      </div>
                     </div>
                     
                     <p className="text-base max-w-2xl">{profile?.bio}</p>
