@@ -499,55 +499,55 @@ const ScammerDetailPage = () => {
                     Disagree{dislikes > 0 ? ` (${dislikes})` : ''}
                   </Button>
                   
-                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-5 mt-4">
-                    <h4 className="font-bold text-lg text-icc-blue-dark mb-2">Contribute to Bounty</h4>
+                  <div className="bg-icc-gold-light/20 border border-icc-gold rounded-lg p-5 mt-4">
+                    <h4 className="font-bold text-xl text-icc-blue mb-2">Contribute to Bounty</h4>
                     <p className="text-sm text-icc-gray-dark mb-4">
                       Add $BOSC tokens to increase the bounty for {scammer?.name || "this scammer"}
                     </p>
                     
                     <div className="mb-4">
-                      <div className="text-sm font-medium text-icc-blue-dark mb-2">Current Bounty</div>
-                      <div className="bg-amber-100 border border-amber-200 rounded p-2 flex items-center">
-                        <DollarSign className="h-4 w-4 text-amber-700 mr-1" />
-                        <span className="font-mono font-medium">{scammer?.bounty_amount.toLocaleString() || 0} $BOSC</span>
+                      <div className="text-sm font-medium text-icc-blue mb-2">Current Bounty</div>
+                      <div className="bg-icc-gold-light/30 border border-icc-gold/30 rounded p-3 flex items-center">
+                        <DollarSign className="h-5 w-5 text-icc-gold-dark mr-2" />
+                        <span className="font-mono font-medium text-icc-blue-dark">{scammer?.bounty_amount.toLocaleString() || 0} $BOSC</span>
                       </div>
                     </div>
                     
                     <div className="mb-4">
-                      <div className="text-sm font-medium text-icc-blue-dark mb-2">Developer Wallet</div>
-                      <div className="bg-amber-100 border border-amber-200 rounded p-2 flex items-center justify-between">
-                        <span className="font-mono text-sm">{developerWallet}</span>
+                      <div className="text-sm font-medium text-icc-blue mb-2">Developer Wallet</div>
+                      <div className="bg-icc-gold-light/30 border border-icc-gold/30 rounded p-3 flex items-center justify-between">
+                        <span className="font-mono text-sm text-icc-blue-dark">{developerWallet}</span>
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          className="h-6 w-6 p-0" 
+                          className="h-7 w-7 p-0 text-icc-gold-dark hover:text-icc-blue hover:bg-icc-gold-light/50" 
                           onClick={() => copyToClipboard(developerWalletAddress)}
                         >
-                          <Clipboard className="h-3.5 w-3.5 text-amber-700" />
+                          <Clipboard className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
                     
                     <div className="mb-4">
-                      <div className="text-sm font-medium text-icc-blue-dark mb-2">Contribution Amount</div>
+                      <div className="text-sm font-medium text-icc-blue mb-2">Contribution Amount</div>
                       <div className="flex items-center space-x-2">
                         <Input
                           type="number"
                           value={contributionAmount}
                           onChange={(e) => setContributionAmount(e.target.value)}
-                          className="bg-amber-100 border-amber-200"
+                          className="bg-icc-gold-light/30 border-icc-gold/30 text-icc-blue-dark"
                           min="0"
                           step="0.01"
                         />
-                        <span className="text-amber-800 font-medium">$BOSC</span>
+                        <span className="text-icc-gold-dark font-medium">$BOSC</span>
                       </div>
                     </div>
                     
                     <Button
-                      className="w-full bg-amber-500 hover:bg-amber-600 text-amber-950 border-amber-600"
+                      className="w-full bg-icc-gold hover:bg-icc-gold-dark text-icc-blue-dark border-icc-gold-dark font-medium"
                       onClick={handleAddBounty}
                     >
-                      {profile ? "Contribute to Bounty" : "Connect your wallet to contribute"}
+                      {profile ? "Connect your wallet to contribute" : "Contribute to Bounty"}
                     </Button>
                   </div>
                 </div>
