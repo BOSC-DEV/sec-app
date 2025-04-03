@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -370,7 +371,7 @@ const ScammerDetailPage = () => {
               </div>
 
               <div className="mt-6">
-                <h2 className="icc-title">{scammer.name} Has been accused of</h2>
+                <h2 className="icc-title">{scammer.name} has been accused of</h2>
                 
               </div>
 
