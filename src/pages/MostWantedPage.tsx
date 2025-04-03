@@ -5,10 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getScammers } from '@/services/supabaseService';
+import { getProfileByWallet } from '@/services/profileService';
 import { Grid, Globe, List, Search, SlidersHorizontal } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
-import { Scammer } from '@/types/dataTypes';
+import { Scammer, Profile } from '@/types/dataTypes';
 import { 
   Table, 
   TableBody, 
@@ -19,6 +20,7 @@ import {
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 const MostWantedPage = () => {
   const [filteredScammers, setFilteredScammers] = useState<Scammer[]>([]);
@@ -27,6 +29,7 @@ const MostWantedPage = () => {
   const [sortBy, setSortBy] = useState('bounty');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [showFilters, setShowFilters] = useState(false);
+  const [reporterProfiles, setReporterProfiles] = useState<Record<string, Profile>>({});
   const navigate = useNavigate();
 
   const { 
@@ -37,6 +40,33 @@ const MostWantedPage = () => {
     queryKey: ['scammers'],
     queryFn: getScammers,
   });
+
+  useEffect(() => {
+    const fetchReporterProfiles = async () => {
+      const uniqueReporterIds = [...new Set(scammers.map(scammer => scammer.added_by).filter(Boolean))];
+      
+      const profilesMap: Record<string, Profile> = {};
+      
+      await Promise.all(uniqueReporterIds.map(async (walletAddress) => {
+        if (walletAddress) {
+          try {
+            const profile = await getProfileByWallet(walletAddress);
+            if (profile) {
+              profilesMap[walletAddress] = profile;
+            }
+          } catch (err) {
+            console.error(`Error fetching profile for ${walletAddress}:`, err);
+          }
+        }
+      }));
+      
+      setReporterProfiles(profilesMap);
+    };
+
+    if (scammers.length > 0) {
+      fetchReporterProfiles();
+    }
+  }, [scammers]);
 
   const handleSort = (column: string) => {
     if (sortBy === column) {
@@ -105,6 +135,11 @@ const MostWantedPage = () => {
       return <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>;
     }
     return null;
+  };
+
+  const getReporterProfile = (walletAddress: string | undefined) => {
+    if (!walletAddress) return null;
+    return reporterProfiles[walletAddress] || null;
   };
 
   return (
@@ -332,94 +367,111 @@ const MostWantedPage = () => {
                     >
                       Posted{renderSortIndicator('date')}
                     </TableHead>
-                    <TableHead></TableHead>
+                    <TableHead className="font-bold text-icc-primary text-center">Reporter</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredScammers.map((scammer, index) => (
-                    <TableRow 
-                      key={scammer.id} 
-                      className="bg-amber-50/30 hover:bg-amber-50/50 cursor-pointer"
-                      onClick={() => handleRowClick(scammer.id)}
-                    >
-                      <TableCell className="font-medium">{index + 1}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <img 
-                            src={scammer.photo_url || 'public/placeholder.svg'} 
-                            alt={scammer.name} 
-                            className="w-10 h-10 rounded-full object-cover border border-amber-200"
-                          />
-                          <span className="font-medium">{scammer.name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          {scammer.links && scammer.links.length > 0 ? (
-                            scammer.links.map((link, i) => (
-                              <a 
-                                key={i} 
-                                href={link.startsWith('http') ? link : `https://${link}`} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="inline-block p-1 rounded-full bg-amber-100 hover:bg-amber-200"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <Globe className="h-4 w-4 text-amber-800" />
-                              </a>
-                            ))
+                  {filteredScammers.map((scammer, index) => {
+                    const reporterProfile = getReporterProfile(scammer.added_by);
+                    
+                    return (
+                      <TableRow 
+                        key={scammer.id} 
+                        className="bg-amber-50/30 hover:bg-amber-50/50 cursor-pointer"
+                        onClick={() => handleRowClick(scammer.id)}
+                      >
+                        <TableCell className="font-medium">{index + 1}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <img 
+                              src={scammer.photo_url || 'public/placeholder.svg'} 
+                              alt={scammer.name} 
+                              className="w-10 h-10 rounded-full object-cover border border-amber-200"
+                            />
+                            <span className="font-medium">{scammer.name}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            {scammer.links && scammer.links.length > 0 ? (
+                              scammer.links.map((link, i) => (
+                                <a 
+                                  key={i} 
+                                  href={link.startsWith('http') ? link : `https://${link}`} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="inline-block p-1 rounded-full bg-amber-100 hover:bg-amber-200"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <Globe className="h-4 w-4 text-amber-800" />
+                                </a>
+                              ))
+                            ) : (
+                              <span className="text-gray-400">-</span>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="max-w-[200px] truncate">
+                          {scammer.accused_of || '-'}
+                        </TableCell>
+                        <TableCell>
+                          {scammer.aliases && scammer.aliases.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {scammer.aliases.map((alias, i) => (
+                                <Badge key={i} variant="outline" className="bg-amber-100 hover:bg-amber-200 text-amber-800 border-amber-300">
+                                  {alias}
+                                </Badge>
+                              ))}
+                            </div>
                           ) : (
                             <span className="text-gray-400">-</span>
                           )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="max-w-[200px] truncate">
-                        {scammer.accused_of || '-'}
-                      </TableCell>
-                      <TableCell>
-                        {scammer.aliases && scammer.aliases.length > 0 ? (
-                          <div className="flex flex-wrap gap-1">
-                            {scammer.aliases.map((alias, i) => (
-                              <Badge key={i} variant="outline" className="bg-amber-100 hover:bg-amber-200 text-amber-800 border-amber-300">
-                                {alias}
-                              </Badge>
-                            ))}
-                          </div>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-center font-semibold text-icc-primary">
-                        {scammer.bounty_amount ? `${scammer.bounty_amount} $SEC` : '0 $SEC'}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {scammer.likes || 0}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {scammer.views || 0}
-                      </TableCell>
-                      <TableCell>
-                        {new Date(scammer.date_added).toLocaleDateString('en-US', {
-                          month: '2-digit',
-                          day: '2-digit',
-                          year: '2-digit'
-                        })}
-                      </TableCell>
-                      <TableCell>
-                        <Button 
-                          asChild 
-                          size="sm" 
-                          className="rounded-full w-8 h-8 p-0 bg-amber-800 hover:bg-amber-900"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/scammer/${scammer.id}`);
-                          }}
-                        >
-                          <div>?</div>
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                        </TableCell>
+                        <TableCell className="text-center font-semibold text-icc-primary">
+                          {scammer.bounty_amount ? `${scammer.bounty_amount} $SEC` : '0 $SEC'}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {scammer.likes || 0}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {scammer.views || 0}
+                        </TableCell>
+                        <TableCell>
+                          {new Date(scammer.date_added).toLocaleDateString('en-US', {
+                            month: '2-digit',
+                            day: '2-digit',
+                            year: '2-digit'
+                          })}
+                        </TableCell>
+                        <TableCell>
+                          <Avatar 
+                            className="w-8 h-8 bg-icc-blue-light cursor-pointer"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (reporterProfile) {
+                                navigate(`/profile/${reporterProfile.username || reporterProfile.wallet_address}`);
+                              }
+                            }}
+                          >
+                            {reporterProfile?.profile_pic_url ? (
+                              <AvatarImage 
+                                src={reporterProfile.profile_pic_url} 
+                                alt={reporterProfile.display_name}
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            ) : null}
+                            <AvatarFallback className="bg-icc-blue text-white">
+                              {reporterProfile ? 
+                                reporterProfile.display_name.substring(0, 2).toUpperCase() : 
+                                '?'}
+                            </AvatarFallback>
+                          </Avatar>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
