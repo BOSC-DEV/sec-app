@@ -8,6 +8,7 @@ import { getTopScammers, getStatistics } from '@/services/supabaseService';
 import { Shield, AlertTriangle, ExternalLink, DollarSign } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { formatNumber } from '@/lib/utils';
+import ICCLogo from '@/components/common/ICCLogo';
 
 const Index = () => {
   // Query for top scammers
@@ -38,7 +39,12 @@ const Index = () => {
     console.error('Failed to load statistics', statsError);
   }
 
+  // Adding an additional logo at the top of the page for visibility testing
   return <div>
+      <div className="flex justify-center my-6">
+        <ICCLogo size={120} className="flex-shrink-0" />
+      </div>
+      
       <Hero />
 
       {/* Featured Scammers Section */}
