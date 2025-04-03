@@ -1,8 +1,7 @@
 
 import { render, screen, fireEvent } from '@testing-library/react';
-import { vi } from 'vitest';
+import { describe, expect, test, vi, beforeEach } from 'vitest';
 import ScammerPhotoUpload from './ScammerPhotoUpload';
-import { ToastProvider } from '@/components/ui/toast';
 
 // Mock the toast function
 vi.mock('@/hooks/use-toast', () => ({
