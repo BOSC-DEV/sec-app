@@ -32,6 +32,7 @@ const queryClient = new QueryClient({
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
+      {/* Ensure TooltipProvider is used properly as a wrapper component */}
       <TooltipProvider>
         <ProfileProvider>
           <Toaster />
