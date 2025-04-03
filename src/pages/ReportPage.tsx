@@ -9,7 +9,6 @@ import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Form } from '@/components/ui/form';
 import ScammerInfoFields from '@/components/report/ScammerInfoFields';
 import DynamicFieldArray from '@/components/report/DynamicFieldArray';
@@ -201,52 +200,45 @@ const ReportPage = () => {
             {isEditMode ? "Update the scammer's information." : "Fill out the form below to report a scammer."}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <Form {...form}>
-            <form onSubmit={handleSubmit(onSubmit)} id="report-form">
-              <Tabs defaultValue="info" className="space-y-4">
-                <TabsList>
-                  <TabsTrigger value="info">Info</TabsTrigger>
-                  <TabsTrigger value="details">Details</TabsTrigger>
-                  <TabsTrigger value="media">Media</TabsTrigger>
-                </TabsList>
-                <TabsContent value="info">
-                  <ScammerInfoFields control={control} errors={errors} />
-                </TabsContent>
-                <TabsContent value="details">
-                  <DynamicFieldArray
-                    name="aliases"
-                    label="Aliases"
-                    control={control}
-                    errors={errors}
-                    setValue={setValue}
-                  />
-                  <DynamicFieldArray
-                    name="links"
-                    label="Links"
-                    control={control}
-                    errors={errors}
-                    setValue={setValue}
-                  />
-                  <DynamicFieldArray
-                    name="accomplices"
-                    label="Accomplices"
-                    control={control}
-                    errors={errors}
-                    setValue={setValue}
-                  />
-                </TabsContent>
-                <TabsContent value="media">
-                  <ScammerPhotoUpload
-                    photoPreview={photoPreview}
-                    setPhotoPreview={setPhotoPreview}
-                    photoFile={photoFile}
-                    setPhotoFile={setPhotoFile}
-                    setValue={setValue}
-                    control={control}
-                  />
-                </TabsContent>
-              </Tabs>
+            <form onSubmit={handleSubmit(onSubmit)} id="report-form" className="space-y-6">
+              <div className="space-y-6">
+                <ScammerInfoFields control={control} errors={errors} />
+
+                <DynamicFieldArray
+                  name="aliases"
+                  label="Aliases"
+                  control={control}
+                  errors={errors}
+                  setValue={setValue}
+                />
+
+                <DynamicFieldArray
+                  name="links"
+                  label="Links"
+                  control={control}
+                  errors={errors}
+                  setValue={setValue}
+                />
+
+                <DynamicFieldArray
+                  name="accomplices"
+                  label="Accomplices"
+                  control={control}
+                  errors={errors}
+                  setValue={setValue}
+                />
+
+                <ScammerPhotoUpload
+                  photoPreview={photoPreview}
+                  setPhotoPreview={setPhotoPreview}
+                  photoFile={photoFile}
+                  setPhotoFile={setPhotoFile}
+                  setValue={setValue}
+                  control={control}
+                />
+              </div>
             </form>
           </Form>
         </CardContent>
