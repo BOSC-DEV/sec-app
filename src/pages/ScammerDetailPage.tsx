@@ -367,7 +367,7 @@ const ScammerDetailPage = () => {
                           <Copy className="h-3.5 w-3.5" />
                         </Button>
                       </li>)}
-                  </ul> : <p className="text-icc-gray">No wallet addresses provided.</p>}
+                  </ul> : <p className="text-icc-gray"></p>}
               </div>
             </div>
 
