@@ -17,8 +17,8 @@ const toggleVariants = cva(
           "border border-icc-gold bg-icc-gold/10 hover:bg-icc-gold/20 hover:text-icc-blue-dark data-[state=on]:bg-icc-gold data-[state=on]:text-icc-blue-dark",
       },
       size: {
-        default: "h-10 px-3",
-        sm: "h-7 px-2.5 py-1 text-xs",
+        default: "h-10 px-4",
+        sm: "h-8 px-3 py-1.5 text-xs",
         lg: "h-11 px-5",
       },
     },
