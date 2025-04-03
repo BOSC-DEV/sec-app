@@ -1,51 +1,12 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Scammer } from '@/types/dataTypes';
-import { handleError } from '@/utils/errorHandling';
-
-// Get scammers liked by a user
-export const getLikedScammersByUser = async (walletAddress: string): Promise<Scammer[]> => {
-  if (!walletAddress) {
-    return [];
-  }
-  
-  try {
-    // Get all the scammer IDs that this user has liked
-    const { data: interactions, error: interactionsError } = await supabase
-      .from('user_scammer_interactions')
-      .select('scammer_id')
-      .eq('user_id', walletAddress)
-      .eq('liked', true);
-    
-    if (interactionsError) throw interactionsError;
-    
-    if (!interactions || interactions.length === 0) {
-      return [];
-    }
-    
-    // Extract the scammer IDs from the interactions
-    const scammerIds = interactions.map(interaction => interaction.scammer_id);
-    
-    // Fetch the full scammer details for each ID
-    const { data: scammers, error: scammersError } = await supabase
-      .from('scammers')
-      .select('*')
-      .in('id', scammerIds)
-      .is('deleted_at', null);
-    
-    if (scammersError) throw scammersError;
-    
-    return scammers || [];
-  } catch (error) {
-    handleError(error, 'Error fetching liked scammers');
-    return [];
-  }
-};
 
 export const getUserScammerInteraction = async (scammerId: string, walletAddress: string): Promise<{ liked: boolean, disliked: boolean } | null> => {
-  if (!walletAddress || !scammerId) return null;
+  if (!walletAddress) return null;
   
   try {
+    console.log(`Fetching interaction for scammer ${scammerId} by user ${walletAddress}`);
+    
     const { data, error } = await supabase
       .from('user_scammer_interactions')
       .select('liked, disliked')
@@ -53,31 +14,40 @@ export const getUserScammerInteraction = async (scammerId: string, walletAddress
       .eq('user_id', walletAddress)
       .maybeSingle();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching user interaction:', error);
+      return null;
+    }
 
+    console.log('Found interaction:', data);
     return data;
-  } catch (error) {
-    handleError(error, 'Error fetching user interaction');
+  } catch (err) {
+    console.error('Exception in getUserScammerInteraction:', err);
     return null;
   }
 };
 
-export const likeScammer = async (scammerId: string, walletAddress: string): Promise<{ likes: number; dislikes: number } | null> => {
-  if (!walletAddress || !scammerId) return null;
+export const likeScammer = async (scammerId: string, walletAddress: string): Promise<{ likes: number; dislikes: number } | void> => {
+  console.log(`Processing like for scammer ${scammerId} by user ${walletAddress}`);
   
+  // Get existing interaction if any
+  const { data: existingInteraction, error: fetchError } = await supabase
+    .from('user_scammer_interactions')
+    .select('*')
+    .eq('scammer_id', scammerId)
+    .eq('user_id', walletAddress)
+    .maybeSingle();
+
+  if (fetchError) {
+    console.error('Error fetching interaction:', fetchError);
+    throw fetchError;
+  }
+
   try {
-    // Get existing interaction if any
-    const { data: existingInteraction, error: fetchError } = await supabase
-      .from('user_scammer_interactions')
-      .select('*')
-      .eq('scammer_id', scammerId)
-      .eq('user_id', walletAddress)
-      .maybeSingle();
-
-    if (fetchError) throw fetchError;
-
     // Using a transaction to ensure atomic operations
     if (existingInteraction) {
+      console.log('Existing interaction found:', existingInteraction);
+      
       // Toggle like - if already liked, unlike it; if disliked, switch to like
       const liked = !existingInteraction.liked;
       const disliked = liked ? false : existingInteraction.disliked; // Can't be both liked and disliked
@@ -91,9 +61,16 @@ export const likeScammer = async (scammerId: string, walletAddress: string): Pro
         })
         .eq('id', existingInteraction.id);
         
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Error updating interaction:', updateError);
+        throw updateError;
+      }
+      
+      console.log(`Updated interaction: liked=${liked}, disliked=${disliked}`);
     } else {
       // No existing interaction, create new with liked=true
+      console.log('No existing interaction, creating new one with liked=true');
+      
       const { error: insertError } = await supabase
         .from('user_scammer_interactions')
         .insert({ 
@@ -103,20 +80,24 @@ export const likeScammer = async (scammerId: string, walletAddress: string): Pro
           disliked: false 
         });
         
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('Error inserting interaction:', insertError);
+        throw insertError;
+      }
     }
 
     // Always update scammer like/dislike counts and return the updated counts
-    return await updateScammerLikes(scammerId);
+    const updatedCounts = await updateScammerLikes(scammerId);
+    
+    console.log('Updated scammer counts:', updatedCounts);
+    return updatedCounts;
   } catch (error) {
-    handleError(error, 'Error updating scammer like');
-    return null;
+    console.error('Error in likeScammer:', error);
+    throw error;
   }
 };
 
-export const dislikeScammer = async (scammerId: string, walletAddress: string): Promise<{ likes: number; dislikes: number } | null> => {
-  if (!walletAddress || !scammerId) return null;
-  
+export const dislikeScammer = async (scammerId: string, walletAddress: string): Promise<{ likes: number; dislikes: number } | void> => {
   try {
     // Get existing interaction if any
     const { data: existingInteraction, error: fetchError } = await supabase
@@ -126,7 +107,10 @@ export const dislikeScammer = async (scammerId: string, walletAddress: string): 
       .eq('user_id', walletAddress)
       .maybeSingle();
 
-    if (fetchError) throw fetchError;
+    if (fetchError) {
+      console.error('Error fetching interaction:', fetchError);
+      throw fetchError;
+    }
 
     // Using a transaction to ensure atomic operations
     if (existingInteraction) {
@@ -143,7 +127,10 @@ export const dislikeScammer = async (scammerId: string, walletAddress: string): 
         })
         .eq('id', existingInteraction.id);
         
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Error updating interaction:', updateError);
+        throw updateError;
+      }
     } else {
       // No existing interaction, create new with disliked=true
       const { error: insertError } = await supabase
@@ -155,18 +142,26 @@ export const dislikeScammer = async (scammerId: string, walletAddress: string): 
           liked: false 
         });
         
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('Error inserting interaction:', insertError);
+        throw insertError;
+      }
     }
 
     // Always update scammer like/dislike counts
-    return await updateScammerLikes(scammerId);
+    const updatedCounts = await updateScammerLikes(scammerId);
+    
+    console.log('Updated scammer counts:', updatedCounts);
+    return updatedCounts;
   } catch (error) {
-    handleError(error, 'Error updating scammer dislike');
-    return null;
+    console.error('Error in dislikeScammer:', error);
+    throw error;
   }
 };
 
 const updateScammerLikes = async (scammerId: string): Promise<{ likes: number; dislikes: number }> => {
+  console.log(`Updating like counts for scammer ${scammerId}`);
+  
   try {
     // Count likes
     const { count: likeCount, error: likeError } = await supabase
@@ -175,7 +170,10 @@ const updateScammerLikes = async (scammerId: string): Promise<{ likes: number; d
       .eq('scammer_id', scammerId)
       .eq('liked', true);
 
-    if (likeError) throw likeError;
+    if (likeError) {
+      console.error('Error counting likes:', likeError);
+      throw likeError;
+    }
 
     // Count dislikes
     const { count: dislikeCount, error: dislikeError } = await supabase
@@ -184,23 +182,36 @@ const updateScammerLikes = async (scammerId: string): Promise<{ likes: number; d
       .eq('scammer_id', scammerId)
       .eq('disliked', true);
 
-    if (dislikeError) throw dislikeError;
+    if (dislikeError) {
+      console.error('Error counting dislikes:', dislikeError);
+      throw dislikeError;
+    }
 
     // Make sure counts are actual numbers, not null
     const likes = likeCount || 0;
     const dislikes = dislikeCount || 0;
 
+    console.log(`New like count: ${likes}, new dislike count: ${dislikes}`);
+
     // Update scammer with new counts
     const { error: updateError } = await supabase
       .from('scammers')
-      .update({ likes, dislikes })
+      .update({ 
+        likes, 
+        dislikes 
+      })
       .eq('id', scammerId);
 
-    if (updateError) throw updateError;
+    if (updateError) {
+      console.error('Error updating scammer like/dislike counts:', updateError);
+      throw updateError;
+    } else {
+      console.log(`Successfully updated scammer like/dislike counts`);
+    }
     
     return { likes, dislikes };
   } catch (error) {
-    handleError(error, 'Error updating scammer likes/dislikes');
+    console.error('Error in updateScammerLikes:', error);
     // Return default 0 counts in case of error
     return { likes: 0, dislikes: 0 };
   }

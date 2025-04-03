@@ -1,6 +1,5 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { handleError } from '@/utils/errorHandling';
 
 export const getStatistics = async () => {
   try {
@@ -31,9 +30,7 @@ export const getStatistics = async () => {
     if (reportersError) throw reportersError;
     
     // Filter out null values and count unique reporters
-    const uniqueReporters = new Set(reportersData
-      .filter(item => item.added_by)
-      .map(item => item.added_by));
+    const uniqueReporters = new Set(reportersData.filter(item => item.added_by).map(item => item.added_by));
     const reportersCount = uniqueReporters.size;
     
     // Get total users count
@@ -50,7 +47,7 @@ export const getStatistics = async () => {
       usersCount: usersCount || 0
     };
   } catch (error) {
-    handleError(error, 'Error fetching statistics');
+    console.error('Error fetching statistics:', error);
     // Return default values in case of error
     return {
       totalBounty: 0,
