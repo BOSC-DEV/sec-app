@@ -305,20 +305,6 @@ const ScammerDetailPage = () => {
     });
   };
 
-  const handleEditScammer = () => {
-    if (!id) return;
-    navigate(`/report/${id}`);
-  };
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      toast({
-        title: "Copied to clipboard",
-        description: "Wallet address copied!",
-      });
-    });
-  };
-
   const developerWallet = scammer?.added_by ? 
     `${scammer.added_by.substring(0, 4)}...${scammer.added_by.substring(scammer.added_by.length - 4)}` : 
     `${developerWalletAddress.substring(0, 4)}...${developerWalletAddress.substring(developerWalletAddress.length - 4)}`;
