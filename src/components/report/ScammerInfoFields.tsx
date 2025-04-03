@@ -5,12 +5,24 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { UseFormReturn } from 'react-hook-form';
 import DynamicFieldArray from './DynamicFieldArray';
+import ScammerPhotoUpload from './ScammerPhotoUpload';
+import { Separator } from '@/components/ui/separator';
 
 interface ScammerInfoFieldsProps {
   form: UseFormReturn<any>;
+  photoFile: File | null;
+  setPhotoFile: React.Dispatch<React.SetStateAction<File | null>>;
+  photoPreview: string;
+  setPhotoPreview: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const ScammerInfoFields = ({ form }: ScammerInfoFieldsProps) => {
+const ScammerInfoFields = ({
+  form,
+  photoFile,
+  setPhotoFile,
+  photoPreview,
+  setPhotoPreview
+}: ScammerInfoFieldsProps) => {
   const { control, formState: { errors } } = form;
   
   return (
@@ -52,6 +64,21 @@ const ScammerInfoFields = ({ form }: ScammerInfoFieldsProps) => {
           </FormItem>
         )}
       />
+      
+      {/* Photo upload section now directly after scam description */}
+      <div className="my-4">
+        <FormLabel>Scammer's Photo</FormLabel>
+        <ScammerPhotoUpload 
+          photoFile={photoFile}
+          setPhotoFile={setPhotoFile}
+          photoPreview={photoPreview}
+          setPhotoPreview={setPhotoPreview}
+          setValue={form.setValue}
+          control={form.control}
+        />
+      </div>
+      
+      <Separator className="my-6" />
       
       {/* Dynamic form arrays for wallet addresses, aliases, links, and accomplices */}
       <DynamicFieldArray 

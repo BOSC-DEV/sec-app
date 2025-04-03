@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { FormDescription } from '@/components/ui/form';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Upload, Image } from 'lucide-react';
@@ -38,9 +38,9 @@ const ScammerPhotoUpload = ({
     // Check file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast({
-        title: 'File too large',
-        description: 'Please upload an image smaller than 5MB',
-        variant: 'destructive',
+        title: "File too large",
+        description: "Please upload an image smaller than 5MB",
+        variant: "destructive",
       });
       return;
     }
@@ -48,9 +48,9 @@ const ScammerPhotoUpload = ({
     // Check file type
     if (!file.type.startsWith('image/')) {
       toast({
-        title: 'Invalid file type',
-        description: 'Please upload an image file',
-        variant: 'destructive',
+        title: "Invalid file type",
+        description: "Please upload an image file",
+        variant: "destructive",
       });
       return;
     }
@@ -70,8 +70,8 @@ const ScammerPhotoUpload = ({
   };
 
   return (
-    <div className="mb-4">
-      <div className="mt-2 flex items-center gap-x-3">
+    <div>
+      <div className="flex items-center gap-x-3">
         <div 
           onClick={handlePhotoClick}
           className="relative group cursor-pointer"
@@ -105,7 +105,7 @@ const ScammerPhotoUpload = ({
           onChange={handleFileChange}
         />
       </div>
-      <FormDescription>
+      <FormDescription className="mt-1">
         Upload a photo of the scammer, if available.
       </FormDescription>
     </div>

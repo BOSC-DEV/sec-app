@@ -5,9 +5,7 @@ import { useReportForm } from '@/hooks/useReportForm';
 import CompactHero from '@/components/common/CompactHero';
 import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ScammerInfoFields from '@/components/report/ScammerInfoFields';
-import ScammerPhotoUpload from '@/components/report/ScammerPhotoUpload';
 import { isScammerCreator } from '@/services/reportService';
 import { useProfile } from '@/contexts/ProfileContext';
 import { toast } from '@/hooks/use-toast';
@@ -99,27 +97,13 @@ const ReportPage = () => {
           
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <Tabs defaultValue="info" className="w-full">
-                <TabsList className="mb-4">
-                  <TabsTrigger value="info">Scammer Info</TabsTrigger>
-                  <TabsTrigger value="photo">Photo</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="info">
-                  <ScammerInfoFields form={form} />
-                </TabsContent>
-                
-                <TabsContent value="photo">
-                  <ScammerPhotoUpload 
-                    photoFile={photoFile}
-                    setPhotoFile={setPhotoFile}
-                    photoPreview={photoPreview}
-                    setPhotoPreview={setPhotoPreview}
-                    setValue={form.setValue}
-                    control={form.control}
-                  />
-                </TabsContent>
-              </Tabs>
+              <ScammerInfoFields 
+                form={form}
+                photoFile={photoFile}
+                setPhotoFile={setPhotoFile}
+                photoPreview={photoPreview}
+                setPhotoPreview={setPhotoPreview}
+              />
               
               <div className="flex justify-end space-x-4">
                 <Button 
