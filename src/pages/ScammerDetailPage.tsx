@@ -46,6 +46,7 @@ const ScammerDetailPage = () => {
   const [isCreator, setIsCreator] = useState(false);
   const [contributionAmount, setContributionAmount] = useState('0.00');
   const developerWalletAddress = "A6X5A7ZSvez8BK82Z5tnZJC3qarGbsxRVv8Hc3DKBiZx";
+
   const {
     data: scammer,
     isLoading: isLoadingScammer,
@@ -53,15 +54,6 @@ const ScammerDetailPage = () => {
   } = useQuery({
     queryKey: ['scammer', id],
     queryFn: () => getScammerById(id || ''),
-    enabled: !!id
-  });
-  const {
-    data: comments,
-    isLoading: isLoadingComments,
-    error: errorComments
-  } = useQuery({
-    queryKey: ['comments', id],
-    queryFn: () => getScammerComments(id || ''),
     enabled: !!id
   });
 
@@ -372,19 +364,6 @@ const ScammerDetailPage = () => {
               <div className="mt-6">
                 <h2 className="icc-title">{scammer.name} has been accused of</h2>
                 <p className="text-lg text-icc-gray-dark mt-2">{scammer.accused_of}</p>
-              </div>
-
-              <div className="mt-6">
-                
-                {scammer.wallet_addresses && scammer.wallet_addresses.length > 0 ? <ul className="list-disc pl-5 text-icc-gray">
-                    {scammer.wallet_addresses.map((address, index) => <li key={index} className="flex items-center">
-                        <span className="font-mono mr-2">{address}</span>
-                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => copyToClipboard(address)}>
-                          <Copy className="h-3.5 w-3.5 text-icc-blue" />
-                        </Button>
-                        
-                      </li>)}
-                  </ul> : <p className="text-icc-gray">No wallet addresses provided.</p>}
               </div>
             </div>
 
