@@ -61,6 +61,28 @@ const ScammerDetailPage = () => {
   const developerWalletAddress = "A6X5A7ZSvez8BK82Z5tnZJC3qarGbsxRVv8Hc3DKBiZx";
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
+  const deleteScammerMutation = useMutation({
+    mutationFn: () => {
+      if (!id) throw new Error("Scammer ID is required");
+      return deleteScammer(id);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "The scammer report has been deleted successfully.",
+      });
+      navigate('/most-wanted');
+    },
+    onError: (error) => {
+      console.error("Error deleting scammer:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete the scammer report. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
   const {
     data: scammer,
     isLoading: isLoadingScammer,
