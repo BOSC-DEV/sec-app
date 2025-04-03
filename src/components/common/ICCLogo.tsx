@@ -5,7 +5,7 @@ interface ICCLogoProps {
   className?: string;
 }
 
-const ICCLogo: React.FC<ICCLogoProps> = ({ className = "h-10 w-10" }) => {
+const ICCLogo: React.FC<ICCLogoProps> = ({ className = "h-12 w-12" }) => {
   return (
     <div className={`flex items-center justify-center ${className}`}>
       <img 
