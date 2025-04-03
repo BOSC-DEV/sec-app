@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
@@ -173,36 +172,59 @@ const ReportPage = () => {
       } else {
         console.log("Creating new scammer report");
         
-        const newId = await generateScammerId();
-        
-        const { error } = await supabase
-          .from('scammers')
-          .insert({
-            id: newId,
-            name: data.name,
-            accused_of: data.accused_of,
-            wallet_addresses,
-            photo_url: photoUrl,
-            aliases,
-            links,
-            accomplices,
-            added_by: profile.wallet_address,
-            date_added: new Date().toISOString(),
-            views: 0,
-            likes: 0,
-            dislikes: 0,
-            shares: 0,
-            bounty_amount: 0,
+        try {
+          const newId = await generateScammerId();
+          console.log("Generated new scammer ID:", newId);
+          
+          const { error } = await supabase
+            .from('scammers')
+            .insert({
+              id: newId,
+              name: data.name,
+              accused_of: data.accused_of,
+              wallet_addresses,
+              photo_url: photoUrl,
+              aliases,
+              links,
+              accomplices,
+              added_by: profile.wallet_address,
+              date_added: new Date().toISOString(),
+              views: 0,
+              likes: 0,
+              dislikes: 0,
+              shares: 0,
+              bounty_amount: 0,
+            });
+            
+          if (error) {
+            console.error("Error inserting new scammer:", error);
+            
+            if (error.code === '23505') { // Duplicate key error
+              toast({
+                title: "Duplicate report",
+                description: "This scammer has already been reported. Please try with different information.",
+                variant: "destructive"
+              });
+            } else {
+              throw error;
+            }
+            return;
+          }
+          
+          toast({
+            title: "Scammer reported",
+            description: "Your report has been submitted successfully.",
           });
           
-        if (error) throw error;
-        
-        toast({
-          title: "Scammer reported",
-          description: "Your report has been submitted successfully.",
-        });
-        
-        navigate(`/scammer/${newId}`);
+          navigate(`/scammer/${newId}`);
+        } catch (idError) {
+          console.error("ID generation or insertion error:", idError);
+          toast({
+            title: "Failed to submit report",
+            description: "There was an error creating your report. Please try again.",
+            variant: "destructive"
+          });
+        }
       }
     } catch (error) {
       console.error('Error submitting scammer report:', error);

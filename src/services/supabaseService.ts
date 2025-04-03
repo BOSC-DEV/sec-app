@@ -68,40 +68,37 @@ export const getScammerById = async (id: string): Promise<Scammer | null> => {
 
 // Generate a sequential ID for a new scammer
 export const generateScammerId = async (): Promise<string> => {
-  // Get the highest scammer ID currently in the database
-  const { data, error } = await supabase
-    .from('scammers')
-    .select('id')
-    .order('id', { ascending: false })
-    .limit(1);
-  
-  if (error) {
-    console.error('Error getting latest scammer ID:', error);
-    throw error;
-  }
-  
-  // If there are no scammers yet, start with 1
-  if (!data || data.length === 0) {
-    return '1';
-  }
-  
   try {
-    // Extract the current highest ID and increment by 1
-    const currentHighestId = data[0].id;
-    // Handle both numeric and timestamp-based ids during transition
-    const isNumeric = /^\d+$/.test(currentHighestId);
+    // Get the highest scammer ID currently in the database
+    const { data, error } = await supabase
+      .from('scammers')
+      .select('id')
+      .order('id', { ascending: false })
+      .limit(1);
     
-    if (isNumeric) {
-      const nextId = (parseInt(currentHighestId, 10) + 1).toString();
-      return nextId;
-    } else {
-      // If we still have old timestamp-based IDs, start the sequence from 1
-      return '1';
+    if (error) {
+      console.error('Error getting latest scammer ID:', error);
+      throw error;
     }
+    
+    // If there are no scammers yet, start with 'scammer-1'
+    if (!data || data.length === 0) {
+      return 'scammer-1';
+    }
+    
+    // Extract the current highest ID
+    const currentHighestId = data[0].id;
+    
+    // Generate a unique ID based on timestamp to avoid collisions
+    const timestamp = Date.now();
+    const randomSuffix = Math.floor(Math.random() * 1000);
+    return `scammer-${timestamp}-${randomSuffix}`;
   } catch (e) {
-    console.error('Error parsing scammer ID:', e);
-    // Fallback to 1 if parsing fails
-    return '1';
+    console.error('Error generating scammer ID:', e);
+    // Fallback to a timestamp-based ID if any error occurs
+    const timestamp = Date.now();
+    const randomSuffix = Math.floor(Math.random() * 1000);
+    return `scammer-${timestamp}-${randomSuffix}`;
   }
 };
 
