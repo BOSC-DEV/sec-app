@@ -27,14 +27,25 @@ export const addBountyContribution = async (
       created_at: new Date().toISOString()
     };
 
-    // Directly update the scammer's bounty amount
+    // First get the current bounty amount
+    const { data: currentBounty, error: fetchError } = await supabase
+      .from('scammers')
+      .select('bounty_amount')
+      .eq('id', contribution.scammer_id)
+      .single();
+
+    if (fetchError) {
+      console.error('Error fetching current bounty amount:', fetchError);
+      throw fetchError;
+    }
+
+    // Calculate the new bounty amount
+    const newBountyAmount = (currentBounty?.bounty_amount || 0) + contribution.amount;
+
+    // Then update the scammer's bounty amount
     const { error } = await supabase
       .from('scammers')
-      .update({ 
-        bounty_amount: supabase.rpc('get_current_bounty', { p_scammer_id: contribution.scammer_id }).then(
-          (result) => (result.data || 0) + contribution.amount
-        )
-      })
+      .update({ bounty_amount: newBountyAmount })
       .eq('id', contribution.scammer_id);
 
     if (error) {
