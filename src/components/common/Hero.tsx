@@ -35,7 +35,7 @@ const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
             <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
               <Button 
                 asChild 
-                className="bg-icc-gold hover:bg-icc-gold-light text-icc-blue-dark text-lg py-6 px-8 min-w-[240px] font-medium"
+                className="bg-icc-gold hover:bg-icc-gold-light text-icc-blue-dark text-lg py-6 px-8 min-w-[200px] sm:min-w-[240px] font-medium"
               >
                 <Link to="/most-wanted">
                   <Search className="mr-2 h-5 w-5" />
@@ -44,7 +44,7 @@ const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
               </Button>
               <Button 
                 asChild 
-                className="bg-icc-blue-dark border-2 border-icc-gold hover:bg-icc-blue-light hover:text-white text-white text-lg py-6 px-8 min-w-[240px] font-medium"
+                className="bg-icc-blue-dark border-2 border-white hover:bg-icc-blue-light hover:text-white text-white text-lg py-6 px-8 min-w-[200px] sm:min-w-[240px] font-medium"
               >
                 <Link to="/report">
                   <AlertCircle className="mr-2 h-5 w-5" />
