@@ -54,7 +54,7 @@ const WalletInfo = () => {
             </CardDescription>
           </div>
           {isPhantomAvailable && (
-            <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-200">
+            <Badge variant="outline" className="bg-icc-blue-light/20 text-icc-blue border-icc-blue-light/30">
               Phantom
             </Badge>
           )}
@@ -98,7 +98,7 @@ const WalletInfo = () => {
             <div className="pt-4">
               <Button 
                 variant="outline" 
-                className="w-full border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 flex items-center justify-center gap-2"
+                className="w-full border-icc-red text-icc-red hover:bg-icc-red-light/10 hover:text-icc-red flex items-center justify-center gap-2"
                 onClick={handleDisconnect}
               >
                 <LogOut className="h-4 w-4" /> Disconnect Wallet

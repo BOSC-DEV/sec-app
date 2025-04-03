@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -39,14 +38,12 @@ const ProfilePage = () => {
     },
   });
 
-  // Redirect if not connected
   useEffect(() => {
     if (!isConnected && !isLoading) {
       navigate('/');
     }
   }, [isConnected, isLoading, navigate]);
 
-  // Load profile data into form
   useEffect(() => {
     if (profile) {
       setAvatarUrl(profile.profile_pic_url || null);
@@ -77,7 +74,6 @@ const ProfilePage = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Check file size (max 2MB)
     if (file.size > 2 * 1024 * 1024) {
       toast({
         title: 'File too large',
@@ -87,7 +83,6 @@ const ProfilePage = () => {
       return;
     }
 
-    // Check file type
     if (!file.type.startsWith('image/')) {
       toast({
         title: 'Invalid file type',
@@ -133,7 +128,6 @@ const ProfilePage = () => {
         description: 'Your profile has been updated successfully',
       });
       
-      // Navigate to public profile page if username is available
       if (data.username) {
         navigate(`/${data.username}`);
       }
@@ -190,7 +184,7 @@ const ProfilePage = () => {
             <Button 
               variant="outline" 
               size="sm"
-              className="text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700 flex items-center gap-2"
+              className="text-icc-red border-icc-red-light hover:bg-icc-red-light/10 hover:text-icc-red flex items-center gap-2"
               onClick={handleDisconnect}
             >
               <LogOut className="h-4 w-4" /> Disconnect

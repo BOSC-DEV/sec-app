@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import { getProfileByUsername } from '@/services/profileService';
-import { Twitter, Globe, Copy, ExternalLink, Share2, ThumbsUp, Edit } from 'lucide-react';
+import { Twitter, Globe, Copy, ExternalLink, Share2, ThumbsUp, Edit, LogOut } from 'lucide-react';
 import { getScammersByReporter, getLikedScammersByUser } from '@/services/supabaseService';
 import { Profile, Scammer } from '@/types/dataTypes';
 import ScammerCard from '@/components/common/ScammerCard';
@@ -75,6 +75,10 @@ const PublicProfilePage = () => {
 
   const handleEditProfile = () => {
     navigate('/profile');
+  };
+
+  const disconnectWallet = () => {
+    // Implement wallet disconnection logic here
   };
 
   if (error) {
@@ -166,15 +170,29 @@ const PublicProfilePage = () => {
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {isOwnProfile && (
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="flex items-center gap-1 border-purple-300 text-purple-600 hover:bg-purple-50 hover:text-purple-700"
-                            onClick={handleEditProfile}
-                          >
-                            <Edit size={16} />
-                            Edit Profile
-                          </Button>
+                          <>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="flex items-center gap-1 border-icc-blue text-icc-blue hover:bg-icc-blue-light/10 hover:text-icc-blue-light"
+                              onClick={handleEditProfile}
+                            >
+                              <Edit size={16} />
+                              Edit Profile
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="flex items-center gap-1 border-icc-red text-icc-red hover:bg-icc-red-light/10 hover:text-icc-red-light"
+                              onClick={() => {
+                                disconnectWallet();
+                                navigate('/');
+                              }}
+                            >
+                              <LogOut size={16} />
+                              Disconnect
+                            </Button>
+                          </>
                         )}
                         <Button 
                           variant="outline" 

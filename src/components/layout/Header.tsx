@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Search, User, Shield, Wallet, LogOut } from 'lucide-react';
+import { Menu, X, Search, User, Shield, Wallet, LogOut, LogIn } from 'lucide-react';
 import ICCLogo from '../common/ICCLogo';
 import { useProfile } from '@/contexts/ProfileContext';
 
@@ -85,8 +85,8 @@ const Header = () => {
                 className="bg-icc-gold text-icc-blue hover:bg-icc-gold-light flex items-center gap-2"
                 onClick={connectWallet}
               >
-                <Wallet className="h-4 w-4" />
-                {isPhantomAvailable ? 'Connect Phantom' : 'Connect Wallet'}
+                <LogIn className="h-4 w-4" />
+                Log In
               </Button>
             )}
           </div>
@@ -143,8 +143,8 @@ const Header = () => {
                     onClick={connectWallet}
                     size="sm"
                   >
-                    <Wallet className="h-3 w-3" />
-                    {isPhantomAvailable ? 'Connect' : 'Connect Wallet'}
+                    <LogIn className="h-3 w-3" />
+                    Log In
                   </Button>
                 )}
               </div>
