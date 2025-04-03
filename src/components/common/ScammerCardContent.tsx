@@ -74,7 +74,7 @@ const ScammerCardContent: React.FC<ScammerCardContentProps> = ({
           label="Reported"
           value={
             <div className="flex items-center">
-              <span className="mr-1">{scammer.reports || 1} time{(scammer.reports || 1) > 1 ? 's' : ''}</span>
+              <span className="mr-1">1 time</span>
             </div>
           }
         />

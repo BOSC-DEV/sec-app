@@ -13,8 +13,7 @@ import { Scammer } from '@/types/dataTypes';
 import { handleError } from '@/utils/errorHandling';
 import { 
   likeScammer, 
-  dislikeScammer, 
-  incrementScammerView 
+  dislikeScammer
 } from '@/services/interactionService';
 import { useProfile } from '@/contexts/ProfileContext';
 

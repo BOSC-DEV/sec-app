@@ -22,6 +22,19 @@ interface TrackEventProps {
   };
 }
 
+// Define gtag for TypeScript
+declare global {
+  interface Window {
+    gtag?: (...args: any[]) => void;
+    mixpanel?: {
+      identify: (id: string) => void;
+      people: {
+        set: (properties: Record<string, any>) => void;
+      };
+    };
+  }
+}
+
 // Implement debug logging in development
 const debugLog = (message: string, data?: any) => {
   if (process.env.NODE_ENV === 'development') {
@@ -66,8 +79,8 @@ export const trackEvent = ({ name, properties = {}, user }: TrackEventProps) => 
   
   // In a real implementation, you would send this to your analytics provider
   // For example, with Google Analytics:
-  if (typeof gtag === 'function') {
-    (window as any).gtag('event', name, properties);
+  if (typeof window.gtag === 'function') {
+    window.gtag('event', name, properties);
   }
 };
 
@@ -83,9 +96,9 @@ export const identifyUser = (profile: Profile | null) => {
   
   // In a real implementation, you would identify the user in your analytics provider
   // For example, with Mixpanel:
-  if (typeof (window as any).mixpanel?.identify === 'function') {
-    (window as any).mixpanel.identify(profile.id);
-    (window as any).mixpanel.people.set({
+  if (window.mixpanel?.identify) {
+    window.mixpanel.identify(profile.id);
+    window.mixpanel.people.set({
       wallet: profile.wallet_address,
       username: profile.username,
       $name: profile.display_name,
