@@ -46,8 +46,10 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, setIsOpen }) => {
       }
 
       setIsLoading(true);
+      console.log("Searching for:", searchQuery);
+      
       try {
-        // Search for scammers
+        // Search for scammers with a broader query
         const { data: scammerData, error: scammerError } = await supabase
           .from('scammers')
           .select('*')
@@ -55,17 +57,27 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, setIsOpen }) => {
           .is('deleted_at', null)
           .limit(5);
 
-        if (scammerError) throw scammerError;
+        if (scammerError) {
+          console.error('Scammer search error:', scammerError);
+          throw scammerError;
+        }
+        
+        console.log("Scammer results:", scammerData);
         setScammers(scammerData || []);
 
-        // Search for reporters (profiles)
+        // Search for reporters (profiles) with a broader query
         const { data: reporterData, error: reporterError } = await supabase
           .from('profiles')
           .select('*')
           .or(`display_name.ilike.%${searchQuery}%,username.ilike.%${searchQuery}%`)
           .limit(5);
 
-        if (reporterError) throw reporterError;
+        if (reporterError) {
+          console.error('Reporter search error:', reporterError);
+          throw reporterError;
+        }
+        
+        console.log("Reporter results:", reporterData);
         setReporters(reporterData || []);
       } catch (error) {
         console.error('Search error:', error);
