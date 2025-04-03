@@ -13,6 +13,7 @@ import { Form } from '@/components/ui/form';
 import ScammerInfoFields from '@/components/report/ScammerInfoFields';
 import DynamicFieldArray from '@/components/report/DynamicFieldArray';
 import ScammerPhotoUpload from '@/components/report/ScammerPhotoUpload';
+import CompactHero from '@/components/common/CompactHero';
 import { useProfile } from '@/contexts/ProfileContext';
 import { supabase } from '@/integrations/supabase/client';
 import { generateScammerId } from '@/services/supabaseService';
@@ -193,71 +194,77 @@ const ReportPage = () => {
   };
 
   return (
-    <div className="container mx-auto py-8">
-      <Card className="max-w-3xl mx-auto">
-        <CardHeader>
-          <CardTitle>{isEditMode ? "Edit Scammer Report" : "Report a Scammer"}</CardTitle>
-          <CardDescription>
-            {isEditMode ? "Update the scammer's information." : "Fill out the form below to report a scammer."}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <Form {...form}>
-            <form onSubmit={handleSubmit(onSubmit)} id="report-form" className="space-y-6">
-              <div className="space-y-6">
-                <ScammerInfoFields control={control} errors={errors} />
+    <>
+      <CompactHero 
+        title={isEditMode ? "Edit Scammer Report" : "Report a Scammer"} 
+        subtitle={isEditMode ? "Update scammer details to help keep the community informed" : "Fill out the form below to report a scammer to the $SEC database"} 
+      />
+      <div className="container mx-auto py-8">
+        <Card className="max-w-3xl mx-auto">
+          <CardHeader>
+            <CardTitle>{isEditMode ? "Edit Scammer Report" : "Report a Scammer"}</CardTitle>
+            <CardDescription>
+              {isEditMode ? "Update the scammer's information." : "Fill out the form below to report a scammer."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <Form {...form}>
+              <form onSubmit={handleSubmit(onSubmit)} id="report-form" className="space-y-6">
+                <div className="space-y-6">
+                  <ScammerInfoFields control={control} errors={errors} />
 
-                <DynamicFieldArray
-                  name="wallet_addresses"
-                  label="Wallet Addresses"
-                  control={control}
-                  errors={errors}
-                  setValue={setValue}
-                />
+                  <DynamicFieldArray
+                    name="wallet_addresses"
+                    label="Wallet Addresses"
+                    control={control}
+                    errors={errors}
+                    setValue={setValue}
+                  />
 
-                <DynamicFieldArray
-                  name="aliases"
-                  label="Aliases"
-                  control={control}
-                  errors={errors}
-                  setValue={setValue}
-                />
+                  <DynamicFieldArray
+                    name="aliases"
+                    label="Aliases"
+                    control={control}
+                    errors={errors}
+                    setValue={setValue}
+                  />
 
-                <DynamicFieldArray
-                  name="links"
-                  label="Links"
-                  control={control}
-                  errors={errors}
-                  setValue={setValue}
-                />
+                  <DynamicFieldArray
+                    name="links"
+                    label="Links"
+                    control={control}
+                    errors={errors}
+                    setValue={setValue}
+                  />
 
-                <DynamicFieldArray
-                  name="accomplices"
-                  label="Accomplices"
-                  control={control}
-                  errors={errors}
-                  setValue={setValue}
-                />
+                  <DynamicFieldArray
+                    name="accomplices"
+                    label="Accomplices"
+                    control={control}
+                    errors={errors}
+                    setValue={setValue}
+                  />
 
-                <ScammerPhotoUpload
-                  photoPreview={photoPreview}
-                  setPhotoPreview={setPhotoPreview}
-                  photoFile={photoFile}
-                  setPhotoFile={setPhotoFile}
-                  setValue={setValue}
-                  control={control}
-                />
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-        <CardFooter>
-          <Button form="report-form" disabled={isSubmitting}>
-            {isSubmitting ? "Submitting..." : isEditMode ? "Update Report" : "Submit Report"}
-          </Button>
-        </CardFooter>
-      </Card>
-    </div>
+                  <ScammerPhotoUpload
+                    photoPreview={photoPreview}
+                    setPhotoPreview={setPhotoPreview}
+                    photoFile={photoFile}
+                    setPhotoFile={setPhotoFile}
+                    setValue={setValue}
+                    control={control}
+                  />
+                </div>
+              </form>
+            </Form>
+          </CardContent>
+          <CardFooter>
+            <Button form="report-form" disabled={isSubmitting}>
+              {isSubmitting ? "Submitting..." : isEditMode ? "Update Report" : "Submit Report"}
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    </>
   );
 };
 
