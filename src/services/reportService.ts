@@ -55,6 +55,31 @@ export const fetchScammerById = async (id: string) => {
 };
 
 /**
+ * Checks if the current user is the creator of a scammer report
+ */
+export const isScammerCreator = async (scammerId: string, walletAddress: string): Promise<boolean> => {
+  if (!scammerId || !walletAddress) return false;
+  
+  try {
+    const { data, error } = await supabase
+      .from('scammers')
+      .select('added_by')
+      .eq('id', scammerId)
+      .single();
+      
+    if (error) {
+      console.error("Error checking scammer creator:", error);
+      return false;
+    }
+    
+    return data.added_by === walletAddress;
+  } catch (error) {
+    console.error("Exception checking scammer creator:", error);
+    return false;
+  }
+};
+
+/**
  * Updates an existing scammer report
  */
 export const updateScammerReport = async (

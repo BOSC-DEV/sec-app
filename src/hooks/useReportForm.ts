@@ -1,12 +1,17 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { useProfile } from '@/contexts/ProfileContext';
-import { uploadScammerPhoto, updateScammerReport, createScammerReport } from '@/services/reportService';
+import { 
+  uploadScammerPhoto, 
+  updateScammerReport, 
+  createScammerReport, 
+  fetchScammerById 
+} from '@/services/reportService';
 
 // Validation schema for the report form
 export const reportSchema = z.object({
@@ -25,6 +30,7 @@ export const useReportForm = (id?: string) => {
   const navigate = useNavigate();
   const [isEditMode] = useState(!!id);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { profile } = useProfile();
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>('');
@@ -42,6 +48,45 @@ export const useReportForm = (id?: string) => {
       accomplices: [''],
     }
   });
+  
+  // Fetch existing scammer data for edit mode
+  useEffect(() => {
+    const fetchScammerData = async () => {
+      if (isEditMode && id) {
+        setIsLoading(true);
+        try {
+          const scammerData = await fetchScammerById(id);
+          if (scammerData) {
+            // Populate form with existing data
+            form.reset({
+              name: scammerData.name,
+              accused_of: scammerData.accused_of || '',
+              wallet_addresses: scammerData.wallet_addresses?.length ? scammerData.wallet_addresses : [''],
+              photo_url: scammerData.photo_url || '',
+              aliases: scammerData.aliases?.length ? scammerData.aliases : [''],
+              links: scammerData.links?.length ? scammerData.links : [''],
+              accomplices: scammerData.accomplices?.length ? scammerData.accomplices : [''],
+            });
+            
+            if (scammerData.photo_url) {
+              setPhotoPreview(scammerData.photo_url);
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching scammer data:', error);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to load scammer data for editing.",
+          });
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+    
+    fetchScammerData();
+  }, [id, isEditMode, form]);
   
   const onSubmit = async (data: ReportFormValues) => {
     if (!profile?.wallet_address) {
@@ -109,6 +154,7 @@ export const useReportForm = (id?: string) => {
     form,
     isEditMode,
     isSubmitting,
+    isLoading,
     photoFile,
     setPhotoFile,
     photoPreview,

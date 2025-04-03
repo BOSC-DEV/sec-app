@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { getScammerById } from '@/services/scammerService';
 import { getScammerComments, addComment } from '@/services/commentService';
 import { likeScammer, dislikeScammer, getUserScammerInteraction } from '@/services/interactionService';
+import { isScammerCreator } from '@/services/reportService';
 import CompactHero from '@/components/common/CompactHero';
-import { ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, Link2, Eye, AlertTriangle, Shield, TrendingUp } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, Link2, Eye, AlertTriangle, Shield, TrendingUp, Edit } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
@@ -36,6 +37,7 @@ const ScammerDetailPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [creatorProfile, setCreatorProfile] = useState<Profile | null>(null);
   const [agreePercentage, setAgreePercentage] = useState(0);
+  const [isCreator, setIsCreator] = useState(false);
 
   // Fetch scammer details
   const {
@@ -58,6 +60,22 @@ const ScammerDetailPage = () => {
     queryFn: () => getScammerComments(id || ''),
     enabled: !!id,
   });
+
+  // Check if current user is the creator of this scammer report
+  useEffect(() => {
+    const checkIsCreator = async () => {
+      if (!profile?.wallet_address || !id) return;
+      
+      try {
+        const result = await isScammerCreator(id, profile.wallet_address);
+        setIsCreator(result);
+      } catch (error) {
+        console.error('Error checking if user is creator:', error);
+      }
+    };
+    
+    checkIsCreator();
+  }, [id, profile?.wallet_address]);
 
   // Fetch user interaction (like/dislike)
   useEffect(() => {
@@ -112,6 +130,12 @@ const ScammerDetailPage = () => {
 
     fetchCreatorProfile();
   }, [scammer?.added_by]);
+
+  // Handle edit button click
+  const handleEditScammer = () => {
+    if (!id) return;
+    navigate(`/report/${id}`);
+  };
 
   // Mutation to add a comment
   const addCommentMutation = useMutation({
@@ -307,6 +331,12 @@ const ScammerDetailPage = () => {
               Back to Most Wanted
             </Button>
             <div className="flex items-center space-x-3">
+              {isCreator && (
+                <Button variant="outline" size="sm" onClick={handleEditScammer}>
+                  <Edit className="h-3.5 w-3.5 mr-1" />
+                  Edit Report
+                </Button>
+              )}
               <Button variant="outline" size="sm">
                 <DollarSign className="h-3.5 w-3.5 mr-1" />
                 Add Bounty
