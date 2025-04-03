@@ -28,7 +28,7 @@ const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
             {title || "Scams & E-crimes Commission"}
           </h1>
           <p className="text-xl md:text-2xl text-gray-100 mb-8 max-w-2xl mx-auto">
-            {subtitle || "A decentralized crime registry to bring accountability and self governance to the new digital world."}
+            {subtitle || "A decentralized crime registry bringing accountability and self governance to the new digital world."}
           </p>
           
           {showCta && (
