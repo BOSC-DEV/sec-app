@@ -81,8 +81,19 @@ function InfinitePagination<T>({
     );
   }
 
-  // Get all items from all pages - fix for the pages property not existing
-  const allItems = data?.pages?.flatMap(page => page.data) || [];
+  // Extract all items from pages safely
+  // Handle both infinite query format (with pages) and single query format
+  let allItems: T[] = [];
+  
+  if (data) {
+    // Check if data has a pages property (infinite query result)
+    if ('pages' in data && Array.isArray(data.pages)) {
+      allItems = data.pages.flatMap(page => page.data || []);
+    } else if ('data' in data && Array.isArray(data.data)) {
+      // Single query result with data property
+      allItems = data.data;
+    }
+  }
 
   // Handle empty state
   if (allItems.length === 0) {
