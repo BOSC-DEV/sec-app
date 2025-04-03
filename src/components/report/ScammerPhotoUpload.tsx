@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import { FormDescription } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { Control, UseFormSetValue } from 'react-hook-form';
@@ -15,6 +15,18 @@ interface ScammerPhotoUploadProps {
   control?: Control<any>;
 }
 
+/**
+ * ScammerPhotoUpload component allows users to upload a photo of a scammer.
+ * It handles file validation, preview generation, and form integration.
+ * 
+ * @param photoPreview - Current photo preview URL or base64 string
+ * @param setPhotoPreview - Function to update the photo preview
+ * @param photoFile - Current photo file object
+ * @param setPhotoFile - Function to update the photo file
+ * @param setValue - Optional React Hook Form setValue function
+ * @param control - Optional React Hook Form control object
+ * @returns A component for uploading and previewing scammer photos
+ */
 const ScammerPhotoUpload = ({
   photoPreview,
   setPhotoPreview,
@@ -26,11 +38,12 @@ const ScammerPhotoUpload = ({
   const { toast } = useToast();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  const handlePhotoClick = () => {
+  // Memoize handlers to prevent unnecessary re-renders
+  const handlePhotoClick = useCallback(() => {
     fileInputRef.current?.click();
-  };
+  }, []);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -66,10 +79,10 @@ const ScammerPhotoUpload = ({
       }
     };
     reader.readAsDataURL(file);
-  };
+  }, [setPhotoFile, setPhotoPreview, setValue, toast]);
 
   return (
-    <div>
+    <div className="photo-upload-container" role="region" aria-label="Photo upload section">
       <div className="flex items-center gap-x-3">
         <PhotoPreview photoPreview={photoPreview} onClick={handlePhotoClick} />
         <Button 
@@ -77,6 +90,7 @@ const ScammerPhotoUpload = ({
           variant="outline" 
           size="sm"
           onClick={handlePhotoClick}
+          aria-label={photoPreview ? "Change the uploaded photo" : "Upload a new photo"}
         >
           {photoPreview ? 'Change Photo' : 'Upload Photo'}
         </Button>
@@ -87,6 +101,8 @@ const ScammerPhotoUpload = ({
           accept="image/*"
           onChange={handleFileChange}
           aria-label="Upload photo"
+          aria-hidden="true"
+          tabIndex={-1}
         />
       </div>
       <FormDescription className="mt-1">
@@ -96,4 +112,5 @@ const ScammerPhotoUpload = ({
   );
 };
 
-export default ScammerPhotoUpload;
+// Memoize the component to prevent unnecessary re-renders
+export default memo(ScammerPhotoUpload);
