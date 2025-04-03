@@ -1,6 +1,7 @@
 
 import { toast } from "@/hooks/use-toast";
 import analyticsService from "@/services/analyticsService";
+import { sanitizeHtml, sanitizeInput } from "./securityUtils";
 
 // Error severity levels
 export enum ErrorSeverity {
@@ -19,6 +20,10 @@ interface ErrorHandlingOptions {
   onError?: (error: unknown) => void;
 }
 
+/**
+ * Centralized error handling function
+ * Handles logging, user notification, and error reporting
+ */
 export const handleError = (
   error: unknown, 
   fallbackMessageOrOptions: string | ErrorHandlingOptions = "An error occurred"
@@ -50,6 +55,10 @@ export const handleError = (
     errorMessage = String((error as { message: unknown }).message);
   }
   
+  // Sanitize error message before displaying to user
+  // This prevents potential XSS via error messages
+  errorMessage = sanitizeHtml(errorMessage);
+  
   // Track error in analytics
   analyticsService.trackError(
     error instanceof Error ? error : new Error(errorMessage),
@@ -73,10 +82,14 @@ export const handleError = (
   }
 };
 
-// Utility function to safely parse JSON
+/**
+ * Utility function to safely parse JSON with security precautions
+ */
 export const safeParse = <T>(jsonString: string, fallback: T): T => {
   try {
-    return JSON.parse(jsonString) as T;
+    // Sanitize the JSON string before parsing
+    const sanitizedJson = sanitizeInput(jsonString);
+    return JSON.parse(sanitizedJson) as T;
   } catch (error) {
     handleError(error, {
       fallbackMessage: "Failed to parse data",

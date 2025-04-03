@@ -1,11 +1,10 @@
 
 import React, { useState } from 'react';
 import { FormDescription } from '@/components/ui/form';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Upload, Image } from 'lucide-react';
 import { Control, UseFormSetValue } from 'react-hook-form';
 import { useToast } from '@/hooks/use-toast';
+import PhotoPreview from './PhotoPreview';
 
 interface ScammerPhotoUploadProps {
   photoPreview: string;
@@ -72,23 +71,7 @@ const ScammerPhotoUpload = ({
   return (
     <div>
       <div className="flex items-center gap-x-3">
-        <div 
-          onClick={handlePhotoClick}
-          className="relative group cursor-pointer"
-        >
-          <Avatar className="h-20 w-20 border border-gray-200">
-            {photoPreview ? (
-              <AvatarImage src={photoPreview} alt="Preview" />
-            ) : (
-              <AvatarFallback className="bg-gray-100 text-gray-400">
-                <Image className="h-8 w-8" />
-              </AvatarFallback>
-            )}
-          </Avatar>
-          <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <Upload className="h-6 w-6 text-white" />
-          </div>
-        </div>
+        <PhotoPreview photoPreview={photoPreview} onClick={handlePhotoClick} />
         <Button 
           type="button" 
           variant="outline" 
@@ -103,6 +86,7 @@ const ScammerPhotoUpload = ({
           className="hidden" 
           accept="image/*"
           onChange={handleFileChange}
+          aria-label="Upload photo"
         />
       </div>
       <FormDescription className="mt-1">

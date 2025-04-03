@@ -67,14 +67,34 @@ const ReportPage = () => {
     checkEditPermission();
   }, [id, profile?.wallet_address, navigate]);
 
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Submit form with Ctrl+Enter or Cmd+Enter
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        if (!isSubmitting && !isLoading && !checkingPermission) {
+          form.handleSubmit(onSubmit)();
+        }
+      }
+      
+      // Cancel with Escape
+      if (e.key === 'Escape') {
+        navigate(-1);
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [form, navigate, onSubmit, isSubmitting, isLoading, checkingPermission]);
+
   // If checking permission or loading data, show loading state
   if (checkingPermission || isLoading) {
     return (
       <div>
         <CompactHero title={isEditMode ? "Edit Scammer Report" : "Report a Scammer"} />
-        <div className="icc-section bg-white">
+        <div className="icc-section bg-white" role="status" aria-live="polite">
           <div className="icc-container flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-icc-blue" />
+            <Loader2 className="h-8 w-8 animate-spin text-icc-blue" aria-hidden="true" />
             <span className="ml-2 text-icc-blue">{isEditMode ? "Loading scammer data..." : "Preparing form..."}</span>
           </div>
         </div>
@@ -96,7 +116,11 @@ const ReportPage = () => {
           </p>
           
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form 
+              onSubmit={form.handleSubmit(onSubmit)} 
+              className="space-y-8"
+              aria-label={isEditMode ? "Edit scammer report form" : "Report a scammer form"}
+            >
               <ScammerInfoFields 
                 form={form}
                 photoFile={photoFile}
@@ -110,16 +134,22 @@ const ReportPage = () => {
                   type="button" 
                   variant="outline" 
                   onClick={() => navigate(-1)}
+                  aria-label="Cancel and return to previous page"
                 >
                   Cancel
                 </Button>
                 <Button 
                   type="submit" 
                   disabled={isSubmitting}
+                  aria-busy={isSubmitting}
+                  aria-label={isSubmitting ? 
+                    (isEditMode ? "Updating report, please wait" : "Submitting report, please wait") : 
+                    (isEditMode ? "Update report" : "Submit report")
+                  }
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                       {isEditMode ? "Updating..." : "Submitting..."}
                     </>
                   ) : (
