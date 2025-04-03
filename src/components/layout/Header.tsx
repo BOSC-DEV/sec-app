@@ -5,11 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Menu, X, Search, User, Shield, Wallet, LogOut, LogIn } from 'lucide-react';
 import ICCLogo from '../common/ICCLogo';
 import { useProfile } from '@/contexts/ProfileContext';
-import GlobalSearch from '../common/GlobalSearch';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { isConnected, connectWallet, profile, isPhantomAvailable } = useProfile();
   const navigate = useNavigate();
 
@@ -59,12 +57,7 @@ const Header = () => {
 
           {/* Search & Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="text-white hover:bg-icc-blue-light"
-              onClick={() => setIsSearchOpen(true)}
-            >
+            <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light">
               <Search className="h-5 w-5" />
             </Button>
             
@@ -120,15 +113,7 @@ const Header = () => {
               <Link to="/leaderboard" className="text-white hover:text-icc-gold transition-colors px-2 py-1">Leaderboard</Link>
               
               <div className="flex items-center justify-between pt-2">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="text-white hover:bg-icc-blue"
-                  onClick={() => {
-                    setIsSearchOpen(true);
-                    setIsMenuOpen(false);
-                  }}
-                >
+                <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue">
                   <Search className="h-5 w-5" />
                 </Button>
                 
@@ -167,9 +152,6 @@ const Header = () => {
           </div>
         </div>
       )}
-      
-      {/* Global Search Dialog */}
-      <GlobalSearch isOpen={isSearchOpen} setIsOpen={setIsSearchOpen} />
     </header>
   );
 };

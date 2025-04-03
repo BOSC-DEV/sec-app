@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import CompactHero from '@/components/common/CompactHero';
 import ScammerCard from '@/components/common/ScammerCard';
@@ -20,7 +19,6 @@ import {
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import GlobalSearch from '@/components/common/GlobalSearch';
 
 const MostWantedPage = () => {
   const [filteredScammers, setFilteredScammers] = useState<Scammer[]>([]);
@@ -29,7 +27,6 @@ const MostWantedPage = () => {
   const [sortBy, setSortBy] = useState('bounty');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [showFilters, setShowFilters] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const navigate = useNavigate();
 
   const { 
@@ -129,7 +126,6 @@ const MostWantedPage = () => {
                   className="pl-10"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => setIsSearchOpen(true)}
                 />
               </div>
               
@@ -449,9 +445,6 @@ const MostWantedPage = () => {
           )}
         </div>
       </section>
-      
-      {/* Global Search */}
-      <GlobalSearch isOpen={isSearchOpen} setIsOpen={setIsSearchOpen} />
     </div>
   );
 };
