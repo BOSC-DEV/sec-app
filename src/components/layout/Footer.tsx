@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Instagram } from 'lucide-react';
@@ -9,10 +8,10 @@ const Footer = () => {
       <div className="icc-container">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-1">
-            <Link to="/" className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-4 mb-4">
-              <ICCLogo size={80} className="flex-shrink-0" />
-              <div className="font-serif mt-2 md:mt-0">
-                <div className="text-lg font-bold leading-tight text-center md:text-left">Scams & E-crimes Commission</div>
+            <Link to="/" className="flex items-center space-x-2 mb-4">
+              <ICCLogo className="h-10 w-auto" />
+              <div className="font-serif">
+                <div className="text-base font-bold leading-tight">Scams & E-crimes Commission</div>
               </div>
             </Link>
             <p className="text-sm text-gray-300 mt-4">A decentralized crime registry to bring accountability and self govern the new digital world.</p>
