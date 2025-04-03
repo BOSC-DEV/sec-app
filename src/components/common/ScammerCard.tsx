@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, ThumbsUp, ThumbsDown, DollarSign, MessageSquare, Edit } from 'lucide-react';
@@ -28,7 +27,6 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
   const [creatorProfile, setCreatorProfile] = useState<Profile | null>(null);
   const [viewCount, setViewCount] = useState(scammer.views || 0);
 
-  // Fetch creator profile on component mount
   useEffect(() => {
     const fetchCreatorProfile = async () => {
       if (scammer.added_by) {
@@ -44,14 +42,12 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
     fetchCreatorProfile();
   }, [scammer.added_by]);
 
-  // Always update the local state when scammer prop changes
   useEffect(() => {
     setViewCount(scammer.views || 0);
     setLikes(scammer.likes || 0);
     setDislikes(scammer.dislikes || 0);
   }, [scammer.views, scammer.likes, scammer.dislikes]);
 
-  // Check if the current user has liked or disliked this scammer - run this on mount and when profile changes
   useEffect(() => {
     const checkUserInteraction = async () => {
       if (!profile?.wallet_address) return;
@@ -64,7 +60,6 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
           setIsLiked(interaction.liked);
           setIsDisliked(interaction.disliked);
         } else {
-          // Reset like/dislike state if no interaction found
           setIsLiked(false);
           setIsDisliked(false);
         }
@@ -77,8 +72,8 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
   }, [scammer.id, profile?.wallet_address]);
 
   const handleLike = async (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent navigation
-    e.stopPropagation(); // Prevent event bubbling
+    e.preventDefault();
+    e.stopPropagation();
     
     if (!profile?.wallet_address) {
       toast({
@@ -93,26 +88,20 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
     
     setIsLoading(true);
     try {
-      // Store current state for toast message
       const wasLiked = isLiked;
       
-      // Update UI optimistically
       let newLikes = likes;
       let newDislikes = dislikes;
       
-      // Toggle like state
       if (isLiked) {
-        // If already liked, unlike it
         newLikes = Math.max(likes - 1, 0);
         setLikes(newLikes);
         setIsLiked(false);
       } else {
-        // If not liked, like it
         newLikes = likes + 1;
         setLikes(newLikes);
         setIsLiked(true);
         
-        // If it was previously disliked, remove the dislike
         if (isDisliked) {
           newDislikes = Math.max(dislikes - 1, 0);
           setDislikes(newDislikes);
@@ -120,16 +109,12 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
         }
       }
 
-      // Call the likeScammer function to update the database
       const result = await likeScammer(scammer.id, profile.wallet_address);
       
-      // If we got a result back with updated counts, update the UI
       if (result && typeof result === 'object' && 'likes' in result) {
         console.log("Received updated counts from likeScammer:", result);
         setLikes(result.likes || 0);
         setDislikes(result.dislikes || 0);
-        
-        // Important: Update the scammer object itself so the UI stays consistent
         scammer.likes = result.likes || 0;
         scammer.dislikes = result.dislikes || 0;
       }
@@ -141,7 +126,6 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
       
     } catch (error) {
       console.error("Error liking scammer:", error);
-      // Revert UI changes on error and refetch the correct state
       const interaction = await getUserScammerInteraction(scammer.id, profile.wallet_address);
       setIsLiked(interaction?.liked || false);
       setIsDisliked(interaction?.disliked || false);
@@ -159,8 +143,8 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
   };
 
   const handleDislike = async (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent navigation
-    e.stopPropagation(); // Prevent event bubbling
+    e.preventDefault();
+    e.stopPropagation();
     
     if (!profile?.wallet_address) {
       toast({
@@ -175,26 +159,20 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
     
     setIsLoading(true);
     try {
-      // Store current state for toast message
       const wasDisliked = isDisliked;
       
-      // Update UI optimistically
       let newDislikes = dislikes;
       let newLikes = likes;
       
-      // Toggle dislike state
       if (isDisliked) {
-        // If already disliked, un-dislike it
         newDislikes = Math.max(dislikes - 1, 0);
         setDislikes(newDislikes);
         setIsDisliked(false);
       } else {
-        // If not disliked, dislike it
         newDislikes = dislikes + 1;
         setDislikes(newDislikes);
         setIsDisliked(true);
         
-        // If it was previously liked, remove the like
         if (isLiked) {
           newLikes = Math.max(likes - 1, 0);
           setLikes(newLikes);
@@ -202,16 +180,12 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
         }
       }
       
-      // Call the dislikeScammer function to update the database
       const result = await dislikeScammer(scammer.id, profile.wallet_address);
       
-      // If we got a result back with updated counts, update the UI
       if (result && typeof result === 'object' && 'likes' in result) {
         console.log("Received updated counts from dislikeScammer:", result);
         setLikes(result.likes || 0);
         setDislikes(result.dislikes || 0);
-        
-        // Important: Update the scammer object itself so the UI stays consistent
         scammer.likes = result.likes || 0;
         scammer.dislikes = result.dislikes || 0;
       }
@@ -223,7 +197,6 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
       
     } catch (error) {
       console.error("Error disliking scammer:", error);
-      // Revert UI changes on error and refetch the correct state
       const interaction = await getUserScammerInteraction(scammer.id, profile.wallet_address);
       setIsLiked(interaction?.liked || false);
       setIsDisliked(interaction?.disliked || false);
@@ -306,16 +279,16 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
           pressed={isLiked}
           onPressedChange={() => {}}
           onClick={handleLike}
-          className={`${isLiked ? 'bg-green-100 text-green-700' : ''} border border-gray-200`}
+          className={`${isLiked ? 'bg-green-100 text-green-700' : ''} border border-gray-200 text-xs`}
           size="sm"
         >
           <ThumbsUp className="h-3.5 w-3.5 mr-1" />
-          Agree{likes > 0 ? ` ${likes}` : ''}
+          Agree
         </Toggle>
         
-        <Button variant="outline" size="sm" className="text-xs">
+        <Button variant="outline" size="sm" className="text-xs px-2 mx-1">
           <DollarSign className="h-3.5 w-3.5 mr-1" />
-          Add Bounty
+          Bounty
         </Button>
         
         {isCreator ? (
@@ -330,11 +303,11 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
             pressed={isDisliked}
             onPressedChange={() => {}}
             onClick={handleDislike}
-            className={`${isDisliked ? 'bg-red-100 text-red-700' : ''} border border-gray-200`}
+            className={`${isDisliked ? 'bg-red-100 text-red-700' : ''} border border-gray-200 text-xs`}
             size="sm"
           >
             <ThumbsDown className="h-3.5 w-3.5 mr-1" />
-            Disagree{dislikes > 0 ? ` ${dislikes}` : ''}
+            Disagree
           </Toggle>
         )}
       </div>
