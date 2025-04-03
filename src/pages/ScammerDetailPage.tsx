@@ -23,6 +23,7 @@ import { Scammer, Comment, Profile } from '@/types/dataTypes';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
+
 const ScammerDetailPage = () => {
   const {
     id
@@ -63,6 +64,7 @@ const ScammerDetailPage = () => {
     queryFn: () => getScammerComments(id || ''),
     enabled: !!id
   });
+
   useEffect(() => {
     const checkIsCreator = async () => {
       if (!profile?.wallet_address || !id) return;
@@ -75,6 +77,7 @@ const ScammerDetailPage = () => {
     };
     checkIsCreator();
   }, [id, profile?.wallet_address]);
+
   useEffect(() => {
     const fetchUserInteraction = async () => {
       if (!profile?.wallet_address || !scammer?.id) return;
@@ -93,6 +96,7 @@ const ScammerDetailPage = () => {
     };
     fetchUserInteraction();
   }, [scammer?.id, profile?.wallet_address]);
+
   useEffect(() => {
     if (scammer) {
       setLikes(scammer.likes || 0);
@@ -105,6 +109,7 @@ const ScammerDetailPage = () => {
       }
     }
   }, [scammer]);
+
   useEffect(() => {
     const fetchCreatorProfile = async () => {
       if (scammer?.added_by) {
@@ -118,10 +123,12 @@ const ScammerDetailPage = () => {
     };
     fetchCreatorProfile();
   }, [scammer?.added_by]);
+
   const handleEditScammer = () => {
     if (!id) return;
     navigate(`/report/${id}`);
   };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
       toast({
@@ -130,6 +137,7 @@ const ScammerDetailPage = () => {
       });
     });
   };
+
   const addCommentMutation = useMutation({
     mutationFn: (newComment: {
       scammer_id: string;
@@ -153,6 +161,7 @@ const ScammerDetailPage = () => {
       });
     }
   });
+
   const handleLike = async () => {
     if (!profile?.wallet_address) {
       toast({
@@ -197,6 +206,7 @@ const ScammerDetailPage = () => {
       setIsLoading(false);
     }
   };
+
   const handleDislike = async () => {
     if (!profile?.wallet_address) {
       toast({
@@ -241,6 +251,7 @@ const ScammerDetailPage = () => {
       setIsLoading(false);
     }
   };
+
   const handleAddComment = () => {
     if (!profile) {
       toast({
@@ -266,6 +277,7 @@ const ScammerDetailPage = () => {
       author_profile_pic: profile.profile_pic_url
     });
   };
+
   const handleAddBounty = () => {
     if (!profile) {
       toast({
@@ -288,7 +300,9 @@ const ScammerDetailPage = () => {
       description: `Thank you for contributing ${contributionAmount} $SEC to this bounty!`
     });
   };
+
   const developerWallet = scammer?.added_by ? `${scammer.added_by.substring(0, 4)}...${scammer.added_by.substring(scammer.added_by.length - 4)}` : `${developerWalletAddress.substring(0, 4)}...${developerWalletAddress.substring(developerWalletAddress.length - 4)}`;
+
   if (isLoadingScammer) {
     return <div>
         <CompactHero title="Loading..." />
@@ -302,6 +316,7 @@ const ScammerDetailPage = () => {
         </section>
       </div>;
   }
+
   if (errorScammer || !scammer) {
     return <div>
         <CompactHero title="Error" />
@@ -318,6 +333,7 @@ const ScammerDetailPage = () => {
         </section>
       </div>;
   }
+
   return <div>
       <CompactHero title={scammer.name} />
 
@@ -354,7 +370,7 @@ const ScammerDetailPage = () => {
               </div>
 
               <div className="mt-6">
-                <h2 className="icc-title">Accusations</h2>
+                <h2 className="icc-title">{scammer.name} Has been accused of</h2>
                 
               </div>
 
@@ -578,4 +594,5 @@ const ScammerDetailPage = () => {
       </section>
     </div>;
 };
+
 export default ScammerDetailPage;
