@@ -13,8 +13,8 @@ interface HeroProps {
 
 const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
   return (
-    <div className="relative bg-icc-blue text-white">
-      <div className="absolute inset-0 bg-[url('/images/cyber-pattern.png')] opacity-10"></div>
+    <div className="relative bg-icc-blue text-white" role="banner">
+      <div className="absolute inset-0 bg-[url('/images/cyber-pattern.png')] opacity-10" aria-hidden="true"></div>
       <div className="icc-container py-16 md:py-24 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
           <div className="flex justify-center mb-6">
@@ -36,6 +36,7 @@ const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
               <Button 
                 asChild 
                 className="bg-icc-gold hover:bg-icc-gold-light text-icc-blue-dark text-lg py-6 px-8 min-w-[200px] sm:min-w-[240px] font-medium"
+                aria-label="View scammers list"
               >
                 <Link to="/most-wanted">
                   <Search className="mr-2 h-5 w-5" />
@@ -45,6 +46,7 @@ const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
               <Button 
                 asChild 
                 className="bg-icc-blue-dark hover:bg-icc-blue-light hover:text-white text-white text-lg py-6 px-8 min-w-[200px] sm:min-w-[240px] font-medium"
+                aria-label="Report a scammer"
               >
                 <Link to="/report">
                   <AlertCircle className="mr-2 h-5 w-5" />
@@ -56,7 +58,7 @@ const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
         </div>
       </div>
       
-      <div className="h-4 bg-gradient-to-r from-icc-gold-dark via-icc-gold to-icc-gold-dark"></div>
+      <div className="h-4 bg-gradient-to-r from-icc-gold-dark via-icc-gold to-icc-gold-dark" aria-hidden="true"></div>
     </div>
   );
 };

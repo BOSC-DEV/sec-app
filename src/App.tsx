@@ -16,53 +16,72 @@ import LegalPages from "./pages/LegalPages";
 import NotFound from "./pages/NotFound";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ProfileProvider } from "./contexts/ProfileContext";
+import ErrorBoundary from "./components/common/ErrorBoundary";
+import ProtectedRoute from "./components/common/ProtectedRoute";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
       refetchOnWindowFocus: false,
+      retry: 1, // Limit retries on failure
     },
   },
 });
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <ProfileProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/most-wanted" element={<MostWantedPage />} />
-              <Route path="/scammer/:id" element={<ScammerDetailPage />} />
-              <Route path="/report" element={<ReportPage />} />
-              <Route path="/report/:id" element={<ReportPage />} />
-              <Route path="/leaderboard" element={<LeaderboardPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/profile/:username" element={<PublicProfilePage />} />
-              <Route path="/:username" element={<PublicProfilePage />} />
-              
-              {/* Legal and Information Pages */}
-              <Route path="/terms" element={<LegalPages />} />
-              <Route path="/privacy" element={<LegalPages />} />
-              <Route path="/disclaimer" element={<LegalPages />} />
-              <Route path="/cookies" element={<LegalPages />} />
-              <Route path="/safety" element={<LegalPages />} />
-              <Route path="/faq" element={<LegalPages />} />
-              <Route path="/about" element={<LegalPages />} />
-              <Route path="/contact" element={<LegalPages />} />
-              
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Layout>
-        </BrowserRouter>
-      </ProfileProvider>
-    </TooltipProvider>
-    <ReactQueryDevtools initialIsOpen={false} />
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <ProfileProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Layout>
+              <ErrorBoundary>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/most-wanted" element={<MostWantedPage />} />
+                  <Route path="/scammer/:id" element={<ScammerDetailPage />} />
+                  <Route path="/report" element={
+                    <ProtectedRoute>
+                      <ReportPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/report/:id" element={
+                    <ProtectedRoute>
+                      <ReportPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/leaderboard" element={<LeaderboardPage />} />
+                  <Route path="/profile" element={
+                    <ProtectedRoute>
+                      <ProfilePage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/profile/:username" element={<PublicProfilePage />} />
+                  <Route path="/:username" element={<PublicProfilePage />} />
+                  
+                  {/* Legal and Information Pages */}
+                  <Route path="/terms" element={<LegalPages />} />
+                  <Route path="/privacy" element={<LegalPages />} />
+                  <Route path="/disclaimer" element={<LegalPages />} />
+                  <Route path="/cookies" element={<LegalPages />} />
+                  <Route path="/safety" element={<LegalPages />} />
+                  <Route path="/faq" element={<LegalPages />} />
+                  <Route path="/about" element={<LegalPages />} />
+                  <Route path="/contact" element={<LegalPages />} />
+                  
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </ErrorBoundary>
+            </Layout>
+          </BrowserRouter>
+        </ProfileProvider>
+      </TooltipProvider>
+      {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
