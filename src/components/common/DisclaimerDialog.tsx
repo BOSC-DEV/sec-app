@@ -1,28 +1,16 @@
-
 import React from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogClose
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
 interface DisclaimerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-const DisclaimerDialog: React.FC<DisclaimerDialogProps> = ({ 
-  open, 
-  onOpenChange 
+const DisclaimerDialog: React.FC<DisclaimerDialogProps> = ({
+  open,
+  onOpenChange
 }) => {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+  return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-serif text-icc-blue">Disclaimer</DialogTitle>
@@ -39,7 +27,7 @@ const DisclaimerDialog: React.FC<DisclaimerDialogProps> = ({
               We do not guarantee the accuracy, completeness, or reliability of any information presented.
             </p>
             
-            <h3 className="font-bold text-lg">2. Non-Governmental Entity</h3>
+            <h3 className="font-bold text-lg">2. NGO</h3>
             <p>
               SEC is not affiliated with, endorsed by, or connected to any governmental or law enforcement agency. 
               We are a community-based platform that allows users to report suspected fraudulent activities. 
@@ -127,8 +115,6 @@ const DisclaimerDialog: React.FC<DisclaimerDialogProps> = ({
           </DialogClose>
         </DialogFooter>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
-
 export default DisclaimerDialog;
