@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -330,7 +331,7 @@ const ScammerDetailPage = () => {
 
     toast({
       title: "Thank you!",
-      description: `You've contributed ${bountyAmount} $BOSC to the bounty.`,
+      description: `You've contributed ${bountyAmount} $SEC to the bounty.`,
     });
   };
 
@@ -647,63 +648,63 @@ const ScammerDetailPage = () => {
               </div>
 
               <div className="md:col-span-1">
-                <Card className="bg-amber-50 border-amber-200 mb-6">
-                  <CardHeader>
-                    <CardTitle className="text-amber-900 text-xl">Contribute to Bounty</CardTitle>
-                    <p className="text-sm text-amber-800">
-                      Add $BOSC tokens to increase the bounty for {scammer.name}
+                <Card className="bg-icc-blue/5 border-icc-gold mb-6">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-icc-blue text-xl font-serif">Contribute to Bounty</CardTitle>
+                    <p className="text-sm text-icc-blue-light">
+                      Add $SEC tokens to increase the bounty for {scammer.name}
                     </p>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-amber-800 mb-1">
+                        <label className="block text-sm font-medium text-icc-blue mb-1">
                           Current Bounty
                         </label>
-                        <div className="bg-white border border-amber-200 rounded-md p-2 flex items-center">
-                          <span className="flex items-center text-amber-900">
-                            <span className="inline-block w-4 h-4 bg-amber-400 rounded-full mr-1"></span>
-                            {scammer.bounty_amount || 0} $BOSC
+                        <div className="bg-white border border-icc-gold/50 rounded-md p-2 flex items-center">
+                          <span className="flex items-center text-icc-blue">
+                            <span className="inline-block w-4 h-4 bg-icc-gold rounded-full mr-1"></span>
+                            {scammer.bounty_amount || 0} $SEC
                           </span>
                         </div>
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-amber-800 mb-1">
+                        <label className="block text-sm font-medium text-icc-blue mb-1">
                           Developer Wallet
                         </label>
-                        <div className="bg-white border border-amber-200 rounded-md p-2 flex items-center justify-between">
-                          <div className="truncate text-amber-900 text-sm">
+                        <div className="bg-white border border-icc-gold/50 rounded-md p-2 flex items-center justify-between">
+                          <div className="truncate text-icc-blue text-sm">
                             {profile?.wallet_address 
                               ? `${profile.wallet_address.substring(0, 4)}...${profile.wallet_address.substring(profile.wallet_address.length - 4)}`
                               : 'Connect wallet to contribute'}
                           </div>
-                          <Button variant="ghost" size="icon" className="h-6 w-6">
+                          <Button variant="ghost" size="icon" className="h-6 w-6 text-icc-blue">
                             <Copy className="h-3 w-3" />
                           </Button>
                         </div>
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-amber-800 mb-1">
+                        <label className="block text-sm font-medium text-icc-blue mb-1">
                           Contribution Amount
                         </label>
                         <div className="flex items-center">
                           <Input
                             type="number"
                             placeholder="0.00"
-                            className="rounded-r-none border-r-0 bg-white border-amber-200"
+                            className="rounded-r-none border-r-0 bg-white border-icc-gold/50"
                             value={bountyAmount}
                             onChange={(e) => setBountyAmount(e.target.value)}
                           />
-                          <div className="bg-amber-100 border border-amber-200 text-amber-900 py-2 px-3 rounded-r-md">
-                            $BOSC
+                          <div className="bg-icc-gold/20 border border-icc-gold/50 text-icc-blue py-2 px-3 rounded-r-md">
+                            $SEC
                           </div>
                         </div>
                       </div>
 
                       <Button 
-                        className="w-full bg-amber-800 text-white hover:bg-amber-900"
+                        className="w-full bg-icc-blue hover:bg-icc-blue-light text-white"
                         onClick={handleContributeToBounty}
                       >
                         Contribute to Bounty <ArrowRight className="ml-2 h-4 w-4" />
