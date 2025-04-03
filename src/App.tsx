@@ -3,7 +3,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import Layout from "./components/layout/Layout";
 import Index from "./pages/Index";
 import MostWantedPage from "./pages/MostWantedPage";
@@ -15,31 +16,63 @@ import PublicProfilePage from "./pages/PublicProfilePage";
 import LegalPages from "./pages/LegalPages";
 import NotFound from "./pages/NotFound";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { ProfileProvider } from "./contexts/ProfileContext";
-import ErrorBoundary from "./components/common/ErrorBoundary";
+import { ProfileProvider, useProfile } from "./contexts/ProfileContext";
+import EnhancedErrorBoundary from "./components/common/EnhancedErrorBoundary";
 import ProtectedRoute from "./components/common/ProtectedRoute";
+import analyticsService from "./services/analyticsService";
 
+// Initialize analytics service
+analyticsService.initAnalytics();
+
+// Create query client with improved error handling
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
       refetchOnWindowFocus: false,
       retry: 1, // Limit retries on failure
+      refetchOnReconnect: true,
+      onError: (error) => {
+        analyticsService.trackError(error as Error, 'query_error');
+      }
     },
+    mutations: {
+      onError: (error) => {
+        analyticsService.trackError(error as Error, 'mutation_error');
+      }
+    }
   },
 });
 
+// Analytics tracker component
+const AnalyticsTracker = () => {
+  const location = useLocation();
+  const { profile } = useProfile();
+  
+  // Track page views
+  useEffect(() => {
+    analyticsService.trackPageView();
+  }, [location.pathname]);
+  
+  // Identify user when profile changes
+  useEffect(() => {
+    analyticsService.identifyUser(profile);
+  }, [profile]);
+  
+  return null;
+};
+
 const App = () => (
-  <ErrorBoundary>
+  <EnhancedErrorBoundary>
     <QueryClientProvider client={queryClient}>
-      {/* Ensure TooltipProvider is used properly as a wrapper component */}
       <TooltipProvider>
         <ProfileProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <AnalyticsTracker />
             <Layout>
-              <ErrorBoundary>
+              <EnhancedErrorBoundary>
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/most-wanted" element={<MostWantedPage />} />
@@ -75,14 +108,14 @@ const App = () => (
                   
                   <Route path="*" element={<NotFound />} />
                 </Routes>
-              </ErrorBoundary>
+              </EnhancedErrorBoundary>
             </Layout>
           </BrowserRouter>
         </ProfileProvider>
       </TooltipProvider>
       {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
-  </ErrorBoundary>
+  </EnhancedErrorBoundary>
 );
 
 export default App;

@@ -9,6 +9,11 @@ interface SEOProps {
   ogImage?: string; 
   ogType?: 'website' | 'article' | 'profile';
   twitterCard?: 'summary' | 'summary_large_image';
+  keywords?: string[];
+  author?: string;
+  noIndex?: boolean;
+  schema?: Record<string, any>;
+  children?: React.ReactNode;
 }
 
 const SEO: React.FC<SEOProps> = ({
@@ -17,32 +22,75 @@ const SEO: React.FC<SEOProps> = ({
   canonical,
   ogImage = "/lovable-uploads/3f23090d-4e36-43fc-b230-a8f898d7edd2.png",
   ogType = "website",
-  twitterCard = "summary_large_image"
+  twitterCard = "summary_large_image",
+  keywords = ["scams", "crypto scams", "scammer database", "fraud prevention", "scammer tracking"],
+  author = "Scams & E-crimes Commission",
+  noIndex = false,
+  schema,
+  children
 }) => {
   const siteTitle = title 
     ? `${title} | Scams & E-crimes Commission` 
     : "Scams & E-crimes Commission";
+    
+  const absoluteCanonical = canonical ? 
+    (canonical.startsWith('http') ? canonical : `${window.location.origin}${canonical}`) : 
+    window.location.href;
+    
+  const absoluteOgImage = ogImage ? 
+    (ogImage.startsWith('http') ? ogImage : `${window.location.origin}${ogImage}`) : 
+    `${window.location.origin}/lovable-uploads/3f23090d-4e36-43fc-b230-a8f898d7edd2.png`;
+
+  // Create structured data for schema.org
+  const defaultSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Scams & E-crimes Commission",
+    url: window.location.origin,
+    description,
+    ...(schema || {})
+  };
 
   return (
     <Helmet>
       {/* Basic Metadata */}
       <title>{siteTitle}</title>
       <meta name="description" content={description} />
-      {canonical && <link rel="canonical" href={canonical} />}
+      <link rel="canonical" href={absoluteCanonical} />
+      <meta name="author" content={author} />
+      <meta name="keywords" content={keywords.join(", ")} />
+      
+      {/* Robots directives */}
+      {noIndex ? 
+        <meta name="robots" content="noindex, nofollow" /> :
+        <meta name="robots" content="index, follow" />
+      }
 
       {/* Open Graph */}
       <meta property="og:title" content={siteTitle} />
       <meta property="og:description" content={description} />
       <meta property="og:type" content={ogType} />
-      <meta property="og:image" content={ogImage} />
-      {canonical && <meta property="og:url" content={canonical} />}
+      <meta property="og:image" content={absoluteOgImage} />
+      <meta property="og:url" content={absoluteCanonical} />
       <meta property="og:site_name" content="Scams & E-crimes Commission" />
-
+      
       {/* Twitter */}
       <meta name="twitter:card" content={twitterCard} />
       <meta name="twitter:title" content={siteTitle} />
       <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={ogImage} />
+      <meta name="twitter:image" content={absoluteOgImage} />
+      
+      {/* Mobile optimizations */}
+      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+      <meta name="theme-color" content="#13294B" />
+      
+      {/* Schema.org JSON-LD */}
+      <script type="application/ld+json">
+        {JSON.stringify(defaultSchema)}
+      </script>
+      
+      {/* Additional child elements */}
+      {children}
     </Helmet>
   );
 };
