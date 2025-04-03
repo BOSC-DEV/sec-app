@@ -4,11 +4,11 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Button } from '@/components/ui/button';
-import { Wallet, ExternalLink, Copy } from 'lucide-react';
+import { Wallet, ExternalLink, Copy, LogOut } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 const WalletInfo = () => {
-  const { walletAddress, isPhantomAvailable } = useProfile();
+  const { walletAddress, isPhantomAvailable, disconnectWallet } = useProfile();
 
   const copyWalletAddress = () => {
     if (walletAddress) {
@@ -24,6 +24,14 @@ const WalletInfo = () => {
     if (walletAddress) {
       window.open(`https://explorer.solana.com/address/${walletAddress}`, '_blank');
     }
+  };
+
+  const handleDisconnect = () => {
+    disconnectWallet();
+    toast({
+      title: 'Wallet Disconnected',
+      description: 'Your wallet has been disconnected',
+    });
   };
 
   const formatWalletAddress = (address: string) => {
@@ -85,6 +93,16 @@ const WalletInfo = () => {
                   {isPhantomAvailable ? 'Phantom' : 'Mock Wallet'}
                 </div>
               </div>
+            </div>
+
+            <div className="pt-4">
+              <Button 
+                variant="outline" 
+                className="w-full border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 flex items-center justify-center gap-2"
+                onClick={handleDisconnect}
+              >
+                <LogOut className="h-4 w-4" /> Disconnect Wallet
+              </Button>
             </div>
           </div>
         ) : (

@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProfile } from '@/contexts/ProfileContext';
 import { saveProfile } from '@/services/profileService';
-import { Twitter, Globe, Camera, Upload } from 'lucide-react';
+import { Twitter, Globe, Camera, Upload, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,7 +23,7 @@ interface ProfileFormValues {
 }
 
 const ProfilePage = () => {
-  const { isConnected, walletAddress, profile, isLoading, refreshProfile, uploadAvatar } = useProfile();
+  const { isConnected, walletAddress, profile, isLoading, refreshProfile, uploadAvatar, disconnectWallet } = useProfile();
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -61,6 +62,15 @@ const ProfilePage = () => {
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
+  };
+
+  const handleDisconnect = () => {
+    disconnectWallet();
+    navigate('/');
+    toast({
+      title: 'Wallet Disconnected',
+      description: 'Your wallet has been disconnected',
+    });
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -166,14 +176,26 @@ const ProfilePage = () => {
     <div className="container py-10">
       <Card className="max-w-3xl mx-auto">
         <CardHeader>
-          <CardTitle className="text-2xl">
-            {isNewProfile ? 'Create Your Profile' : 'Edit Your Profile'}
-          </CardTitle>
-          <CardDescription>
-            {isNewProfile 
-              ? 'Complete your profile to start participating in the community' 
-              : 'Update your profile information'}
-          </CardDescription>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle className="text-2xl">
+                {isNewProfile ? 'Create Your Profile' : 'Edit Your Profile'}
+              </CardTitle>
+              <CardDescription>
+                {isNewProfile 
+                  ? 'Complete your profile to start participating in the community' 
+                  : 'Update your profile information'}
+              </CardDescription>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700 flex items-center gap-2"
+              onClick={handleDisconnect}
+            >
+              <LogOut className="h-4 w-4" /> Disconnect
+            </Button>
+          </div>
           {walletAddress && (
             <div className="mt-2">
               <Badge variant="outline" className="text-xs">
