@@ -46,7 +46,7 @@ const DynamicFieldArray = ({
           size="sm" 
           onClick={addField}
         >
-          <Plus className="h-4 w-4 mr-1" /> Add {label}
+          <Plus className="h-4 w-4 mr-1" /> {name === 'wallet_addresses' ? 'Add Address' : `Add ${label}`}
         </Button>
       </div>
       
