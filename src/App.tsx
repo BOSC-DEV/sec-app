@@ -12,6 +12,7 @@ import ReportPage from "./pages/ReportPage";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import ProfilePage from "./pages/ProfilePage";
 import PublicProfilePage from "./pages/PublicProfilePage";
+import LegalPages from "./pages/LegalPages";
 import NotFound from "./pages/NotFound";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ProfileProvider } from "./contexts/ProfileContext";
@@ -43,6 +44,17 @@ const App = () => (
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/profile/:username" element={<PublicProfilePage />} />
               <Route path="/:username" element={<PublicProfilePage />} />
+              
+              {/* Legal and Information Pages */}
+              <Route path="/terms" element={<LegalPages />} />
+              <Route path="/privacy" element={<LegalPages />} />
+              <Route path="/disclaimer" element={<LegalPages />} />
+              <Route path="/cookies" element={<LegalPages />} />
+              <Route path="/safety" element={<LegalPages />} />
+              <Route path="/faq" element={<LegalPages />} />
+              <Route path="/about" element={<LegalPages />} />
+              <Route path="/contact" element={<LegalPages />} />
+              
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>

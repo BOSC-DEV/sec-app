@@ -1,10 +1,29 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Instagram } from 'lucide-react';
 import ICCLogo from '../common/ICCLogo';
+import TermsDialog from '../common/TermsDialog';
+import PrivacyDialog from '../common/PrivacyDialog';
+import DisclaimerDialog from '../common/DisclaimerDialog';
+import CookieDialog from '../common/CookieDialog';
+import SafetyDialog from '../common/SafetyDialog';
+import FAQDialog from '../common/FAQDialog';
+import AboutDialog from '../common/AboutDialog';
+import ContactDialog from '../common/ContactDialog';
 
 const Footer = () => {
-  return <footer className="icc-footer">
+  const [termsOpen, setTermsOpen] = useState(false);
+  const [privacyOpen, setPrivacyOpen] = useState(false);
+  const [disclaimerOpen, setDisclaimerOpen] = useState(false);
+  const [cookiesOpen, setCookiesOpen] = useState(false);
+  const [safetyOpen, setSafetyOpen] = useState(false);
+  const [faqOpen, setFaqOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
+
+  return (
+    <footer className="icc-footer">
       <div className="icc-container">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-1">
@@ -41,20 +60,76 @@ const Footer = () => {
           <div>
             <h4 className="text-white font-serif font-bold mb-4">Resources</h4>
             <ul className="space-y-2">
-              <li><Link to="/about" className="text-gray-300 hover:text-icc-gold text-sm">About SEC</Link></li>
-              <li><Link to="/faq" className="text-gray-300 hover:text-icc-gold text-sm">FAQ</Link></li>
-              <li><Link to="/contact" className="text-gray-300 hover:text-icc-gold text-sm">Contact Us</Link></li>
-              <li><Link to="/safety" className="text-gray-300 hover:text-icc-gold text-sm">Safety Guidelines</Link></li>
+              <li>
+                <button 
+                  onClick={() => setAboutOpen(true)} 
+                  className="text-gray-300 hover:text-icc-gold text-sm text-left"
+                >
+                  About SEC
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={() => setFaqOpen(true)} 
+                  className="text-gray-300 hover:text-icc-gold text-sm text-left"
+                >
+                  FAQ
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={() => setContactOpen(true)} 
+                  className="text-gray-300 hover:text-icc-gold text-sm text-left"
+                >
+                  Contact Us
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={() => setSafetyOpen(true)} 
+                  className="text-gray-300 hover:text-icc-gold text-sm text-left"
+                >
+                  Safety Guidelines
+                </button>
+              </li>
             </ul>
           </div>
           
           <div>
             <h4 className="text-white font-serif font-bold mb-4">Legal</h4>
             <ul className="space-y-2">
-              <li><Link to="/terms" className="text-gray-300 hover:text-icc-gold text-sm">Terms of Service</Link></li>
-              <li><Link to="/privacy" className="text-gray-300 hover:text-icc-gold text-sm">Privacy Policy</Link></li>
-              <li><Link to="/disclaimer" className="text-gray-300 hover:text-icc-gold text-sm">Disclaimer</Link></li>
-              <li><Link to="/cookies" className="text-gray-300 hover:text-icc-gold text-sm">Cookie Policy</Link></li>
+              <li>
+                <button 
+                  onClick={() => setTermsOpen(true)} 
+                  className="text-gray-300 hover:text-icc-gold text-sm text-left"
+                >
+                  Terms of Service
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={() => setPrivacyOpen(true)} 
+                  className="text-gray-300 hover:text-icc-gold text-sm text-left"
+                >
+                  Privacy Policy
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={() => setDisclaimerOpen(true)} 
+                  className="text-gray-300 hover:text-icc-gold text-sm text-left"
+                >
+                  Disclaimer
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={() => setCookiesOpen(true)} 
+                  className="text-gray-300 hover:text-icc-gold text-sm text-left"
+                >
+                  Cookie Policy
+                </button>
+              </li>
             </ul>
           </div>
         </div>
@@ -69,7 +144,18 @@ const Footer = () => {
           </div>
         </div>
       </div>
-    </footer>;
+
+      {/* Legal Dialogs */}
+      <TermsDialog open={termsOpen} onOpenChange={setTermsOpen} />
+      <PrivacyDialog open={privacyOpen} onOpenChange={setPrivacyOpen} />
+      <DisclaimerDialog open={disclaimerOpen} onOpenChange={setDisclaimerOpen} />
+      <CookieDialog open={cookiesOpen} onOpenChange={setCookiesOpen} />
+      <SafetyDialog open={safetyOpen} onOpenChange={setSafetyOpen} />
+      <FAQDialog open={faqOpen} onOpenChange={setFaqOpen} />
+      <AboutDialog open={aboutOpen} onOpenChange={setAboutOpen} />
+      <ContactDialog open={contactOpen} onOpenChange={setContactOpen} />
+    </footer>
+  );
 };
 
 export default Footer;
