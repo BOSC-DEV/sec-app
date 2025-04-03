@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Facebook, Twitter, Instagram } from 'lucide-react';
+import { Twitter } from 'lucide-react';
 import ICCLogo from '../common/ICCLogo';
 import TermsDialog from '../common/TermsDialog';
 import PrivacyDialog from '../common/PrivacyDialog';
@@ -35,14 +35,14 @@ const Footer = () => {
             </Link>
             <p className="text-sm text-gray-300 mt-4">A decentralized crime registry to bring accountability and self govern the new digital world.</p>
             <div className="flex space-x-4 mt-6">
-              <a href="#" className="text-white hover:text-icc-gold">
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-white hover:text-icc-gold">
+              <a 
+                href="https://x.com/secdotdigital" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-white hover:text-icc-gold"
+                aria-label="SEC on X"
+              >
                 <Twitter className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-white hover:text-icc-gold">
-                <Instagram className="h-5 w-5" />
               </a>
             </div>
           </div>
