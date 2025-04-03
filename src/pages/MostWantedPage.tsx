@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import CompactHero from '@/components/common/CompactHero';
 import ScammerCard from '@/components/common/ScammerCard';
@@ -391,7 +390,7 @@ const MostWantedPage = () => {
                         )}
                       </TableCell>
                       <TableCell className="text-center font-semibold text-icc-primary">
-                        {scammer.bounty_amount ? `${scammer.bounty_amount} $BOSC` : '0 $BOSC'}
+                        {scammer.bounty_amount ? `${scammer.bounty_amount} $SEC` : '0 $SEC'}
                       </TableCell>
                       <TableCell className="text-center">
                         {scammer.likes || 0}

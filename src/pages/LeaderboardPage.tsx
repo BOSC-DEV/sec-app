@@ -283,8 +283,8 @@ const LeaderboardPage = () => {
                           {profile.comments_count || 0}
                         </TableCell>
                         
-                        <TableCell className="text-center font-medium text-amber-800">
-                          {profile.bounty_amount ? `${formatNumber(profile.bounty_amount)} BOSC` : '0 BOSC'}
+                        <TableCell className="text-center font-semibold text-icc-primary">
+                          {profile.bounty_amount ? `${profile.bounty_amount} $SEC` : '0 $SEC'}
                         </TableCell>
                         
                         <TableCell className="text-center text-gray-500">
