@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,8 @@ import { formatDate } from '@/lib/utils';
 import { useProfile } from '@/contexts/ProfileContext';
 import { getProfileByWallet } from '@/services/profileService';
 import { Scammer, Comment, Profile } from '@/types/dataTypes';
+import { Progress } from '@/components/ui/progress';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const ScammerDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -32,6 +35,7 @@ const ScammerDetailPage = () => {
   const [dislikes, setDislikes] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [creatorProfile, setCreatorProfile] = useState<Profile | null>(null);
+  const [agreePercentage, setAgreePercentage] = useState(0);
 
   // Fetch scammer details
   const {
@@ -82,6 +86,14 @@ const ScammerDetailPage = () => {
     if (scammer) {
       setLikes(scammer.likes || 0);
       setDislikes(scammer.dislikes || 0);
+      
+      // Calculate agree percentage
+      const total = (scammer.likes || 0) + (scammer.dislikes || 0);
+      if (total > 0) {
+        setAgreePercentage(Math.round((scammer.likes || 0) * 100 / total));
+      } else {
+        setAgreePercentage(0);
+      }
     }
   }, [scammer]);
 
@@ -109,9 +121,7 @@ const ScammerDetailPage = () => {
       author: string; 
       author_name: string; 
       author_profile_pic?: string 
-    }) => {
-      return addComment(newComment);
-    },
+    }) => addComment(newComment),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['comments', id] });
       setCommentText('');
@@ -147,6 +157,12 @@ const ScammerDetailPage = () => {
         setDislikes(result.dislikes || 0);
         setIsLiked(!isLiked);
         setIsDisliked(false);
+        
+        // Recalculate agree percentage
+        const total = (result.likes || 0) + (result.dislikes || 0);
+        if (total > 0) {
+          setAgreePercentage(Math.round((result.likes || 0) * 100 / total));
+        }
         
         queryClient.setQueryData(['scammer', id], (oldScammer: Scammer | undefined) => {
           if (oldScammer) {
@@ -187,6 +203,12 @@ const ScammerDetailPage = () => {
         setDislikes(result.dislikes || 0);
         setIsDisliked(!isDisliked);
         setIsLiked(false);
+        
+        // Recalculate agree percentage
+        const total = (result.likes || 0) + (result.dislikes || 0);
+        if (total > 0) {
+          setAgreePercentage(Math.round((result.likes || 0) * 100 / total));
+        }
         
         queryClient.setQueryData(['scammer', id], (oldScammer: Scammer | undefined) => {
           if (oldScammer) {
@@ -298,15 +320,15 @@ const ScammerDetailPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="md:col-span-2">
-              <div className="relative aspect-video overflow-hidden rounded-lg shadow-md">
+              <div className="relative aspect-square overflow-hidden rounded-lg shadow-md">
                 <img
                   src={scammer.photo_url || '/placeholder.svg'}
                   alt={scammer.name}
                   className="w-full h-full object-cover"
                 />
-                <Badge className="absolute top-2 right-2 bg-icc-gold text-icc-blue-dark">
+                <div className="absolute top-0 left-0 bg-icc-gold text-icc-blue-dark px-4 py-2 text-sm font-bold rounded-br-lg">
                   {scammer.bounty_amount.toLocaleString()} $SEC Bounty
-                </Badge>
+                </div>
               </div>
 
               <div className="mt-6">
@@ -392,26 +414,50 @@ const ScammerDetailPage = () => {
 
               <div className="mt-6">
                 <h3 className="text-lg font-semibold text-icc-blue mb-3">Take Action</h3>
+                
+                {/* Consensus Bar */}
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="mb-3">
+                        <div className="flex justify-between text-sm text-icc-gray mb-1">
+                          <span>Community Consensus</span>
+                          <span>{agreePercentage}% Agree</span>
+                        </div>
+                        <Progress value={agreePercentage} className="h-2 bg-red-100">
+                          <div 
+                            className="h-full bg-green-500 transition-all" 
+                            style={{ width: `${agreePercentage}%` }}
+                          />
+                        </Progress>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Based on {likes + dislikes} community votes</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                
                 <div className="flex flex-col space-y-3">
-                  <Toggle
-                    pressed={isLiked}
-                    onPressedChange={() => {}}
+                  <Button 
+                    variant={isLiked ? "iccblue" : "outline"}
                     onClick={handleLike}
-                    className={`${isLiked ? 'bg-green-100 text-green-700' : ''} border border-gray-200`}
+                    className="w-full justify-center"
                   >
                     <ThumbsUp className="h-3.5 w-3.5 mr-1" />
-                    Agree{likes > 0 ? ` ${likes}` : ''}
-                  </Toggle>
-                  <Toggle
-                    pressed={isDisliked}
-                    onPressedChange={() => {}}
+                    Agree{likes > 0 ? ` (${likes})` : ''}
+                  </Button>
+                  
+                  <Button 
+                    variant={isDisliked ? "destructive" : "outline"}
                     onClick={handleDislike}
-                    className={`${isDisliked ? 'bg-red-100 text-red-700' : ''} border border-gray-200`}
+                    className="w-full justify-center"
                   >
                     <ThumbsDown className="h-3.5 w-3.5 mr-1" />
-                    Disagree{dislikes > 0 ? ` ${dislikes}` : ''}
-                  </Toggle>
-                  <Button variant="outline">
+                    Disagree{dislikes > 0 ? ` (${dislikes})` : ''}
+                  </Button>
+                  
+                  <Button variant="outline" className="w-full justify-center bg-icc-gold/20 text-icc-blue border-icc-gold/50">
                     <DollarSign className="h-3.5 w-3.5 mr-1" />
                     Add Bounty
                   </Button>
