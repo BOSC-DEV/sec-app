@@ -301,7 +301,21 @@ const ScammerDetailPage = () => {
 
     toast({
       title: "Bounty contribution",
-      description: `Thank you for contributing ${contributionAmount} $BOSC to this bounty!`,
+      description: `Thank you for contributing ${contributionAmount} $SEC to this bounty!`,
+    });
+  };
+
+  const handleEditScammer = () => {
+    if (!id) return;
+    navigate(`/report/${id}`);
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      toast({
+        title: "Copied to clipboard",
+        description: "Wallet address copied!",
+      });
     });
   };
 
@@ -382,7 +396,7 @@ const ScammerDetailPage = () => {
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute top-0 left-0 bg-icc-gold text-icc-blue-dark px-4 py-2 text-sm font-bold rounded-br-lg">
-                  {scammer.bounty_amount.toLocaleString()} $BOSC Bounty
+                  {scammer.bounty_amount.toLocaleString()} $SEC Bounty
                 </div>
               </div>
 
@@ -502,14 +516,13 @@ const ScammerDetailPage = () => {
                   <div className="bg-icc-gold-light/20 border border-icc-gold rounded-lg p-5 mt-4">
                     <h4 className="font-bold text-xl text-icc-blue mb-2">Contribute to Bounty</h4>
                     <p className="text-sm text-icc-gray-dark mb-4">
-                      Add $BOSC tokens to increase the bounty for {scammer?.name || "this scammer"}
+                      Add $SEC tokens to increase the bounty for {scammer?.name || "this scammer"}
                     </p>
                     
                     <div className="mb-4">
                       <div className="text-sm font-medium text-icc-blue mb-2">Current Bounty</div>
                       <div className="bg-icc-gold-light/30 border border-icc-gold/30 rounded p-3 flex items-center">
-                        <DollarSign className="h-5 w-5 text-icc-gold-dark mr-2" />
-                        <span className="font-mono font-medium text-icc-blue-dark">{scammer?.bounty_amount.toLocaleString() || 0} $BOSC</span>
+                        <span className="font-mono font-medium text-icc-blue-dark">{scammer?.bounty_amount.toLocaleString() || 0} $SEC</span>
                       </div>
                     </div>
                     
@@ -539,7 +552,7 @@ const ScammerDetailPage = () => {
                           min="0"
                           step="0.01"
                         />
-                        <span className="text-icc-gold-dark font-medium">$BOSC</span>
+                        <span className="text-icc-gold-dark font-medium">$SEC</span>
                       </div>
                     </div>
                     
@@ -547,7 +560,7 @@ const ScammerDetailPage = () => {
                       className="w-full bg-icc-gold hover:bg-icc-gold-dark text-icc-blue-dark border-icc-gold-dark font-medium"
                       onClick={handleAddBounty}
                     >
-                      {profile ? "Connect your wallet to contribute" : "Contribute to Bounty"}
+                      {profile ? "Contribute to Bounty" : "Connect your wallet to contribute"}
                     </Button>
                   </div>
                 </div>
@@ -573,12 +586,16 @@ const ScammerDetailPage = () => {
               <TabsTrigger value="evidence" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
                 Evidence
               </TabsTrigger>
+              <TabsTrigger value="wallet-addresses" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                Wallet Addresses
+              </TabsTrigger>
               <TabsTrigger value="official" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
                 Official Response
               </TabsTrigger>
             </TabsList>
             
             <TabsContent value="comments" className="mt-2">
+              <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4">Comments</h2>
               <div className="mb-4">
                 <Textarea
                   placeholder="Write your comment here..."
@@ -663,11 +680,36 @@ const ScammerDetailPage = () => {
             </TabsContent>
             
             <TabsContent value="evidence" className="mt-2">
-              <div>No evidence provided.</div>
+              <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4">Evidence</h2>
+              <div className="text-icc-gray">No evidence provided.</div>
+            </TabsContent>
+            
+            <TabsContent value="wallet-addresses" className="mt-2">
+              <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4">Wallet Addresses</h2>
+              {scammer?.wallet_addresses && scammer.wallet_addresses.length > 0 ? (
+                <ul className="list-disc pl-5 space-y-2 text-icc-gray">
+                  {scammer.wallet_addresses.map((address, index) => (
+                    <li key={index} className="flex items-center">
+                      <span className="font-mono mr-2">{address}</span>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-6 w-6 p-0" 
+                        onClick={() => copyToClipboard(address)}
+                      >
+                        <Copy className="h-3.5 w-3.5 text-icc-blue" />
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-icc-gray">No wallet addresses provided.</p>
+              )}
             </TabsContent>
             
             <TabsContent value="official" className="mt-2">
-              <div>No official response yet.</div>
+              <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4">Official Response</h2>
+              <div className="text-icc-gray">No official response yet.</div>
             </TabsContent>
           </Tabs>
         </div>
