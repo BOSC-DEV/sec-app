@@ -60,5 +60,12 @@ export interface BountyContribution {
   contributor_id: string;
   contributor_name: string;
   contributor_profile_pic?: string;
+  transaction_signature?: string;
   created_at: string;
+  // Joined data
+  scammers?: {
+    id: string;
+    name: string;
+    photo_url: string;
+  };
 }

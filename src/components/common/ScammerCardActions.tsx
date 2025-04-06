@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -7,7 +7,7 @@ import {
   ThumbsDown, 
   Share2, 
   Eye,
-  Check
+  DollarSign
 } from 'lucide-react';
 import { Scammer } from '@/types/dataTypes';
 import { handleError } from '@/utils/errorHandling';
@@ -16,6 +16,15 @@ import {
   dislikeScammer
 } from '@/services/interactionService';
 import { useProfile } from '@/contexts/ProfileContext';
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import BountyForm from '@/components/scammer/BountyForm';
 
 interface ScammerActionButtonProps {
   icon: React.ReactNode;
@@ -51,15 +60,21 @@ interface ScammerCardActionsProps {
     disliked: boolean;
   };
   onUpdateInteraction?: () => void;
+  showBountyDialog?: boolean;
+  developerWalletAddress?: string;
 }
 
 const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
   scammer,
   userInteraction,
   onUpdateInteraction,
+  showBountyDialog = false,
+  developerWalletAddress = "A6X5A7ZSvez8BK82Z5tnZJC3qarGbsxRVv8Hc3DKBiZx",
 }) => {
   const { toast } = useToast();
   const { profile } = useProfile();
+  const [isLoading, setIsLoading] = useState(false);
+  const [bountyDialogOpen, setBountyDialogOpen] = useState(false);
 
   const handleShare = async () => {
     try {
@@ -85,6 +100,9 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
       return;
     }
 
+    if (isLoading) return;
+    setIsLoading(true);
+
     try {
       console.log(`Attempting to like scammer ${scammer.id} with wallet ${profile.wallet_address}`);
       const result = await likeScammer(scammer.id, profile.wallet_address);
@@ -102,6 +120,8 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
     } catch (error) {
       console.error("Error in handleLike:", error);
       handleError(error, "Failed to like scammer");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -114,6 +134,9 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
       });
       return;
     }
+
+    if (isLoading) return;
+    setIsLoading(true);
 
     try {
       console.log(`Attempting to dislike scammer ${scammer.id} with wallet ${profile.wallet_address}`);
@@ -132,6 +155,17 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
     } catch (error) {
       console.error("Error in handleDislike:", error);
       handleError(error, "Failed to dislike scammer");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleBountyClick = () => {
+    if (showBountyDialog) {
+      setBountyDialogOpen(true);
+    } else {
+      // Navigate to scammer detail page and scroll to bounty section
+      window.location.href = `/scammer/${scammer.id}#bounty-section`;
     }
   };
 
@@ -154,6 +188,35 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
         />
       </div>
       <div className="flex space-x-1">
+        <Dialog open={bountyDialogOpen} onOpenChange={setBountyDialogOpen}>
+          <DialogTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="flex items-center gap-1 text-muted-foreground"
+              onClick={handleBountyClick}
+              title="Add Bounty"
+            >
+              <DollarSign size={16} />
+              <span>{scammer.bounty_amount || 0}</span>
+            </Button>
+          </DialogTrigger>
+          {showBountyDialog && (
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Add Bounty for {scammer.name}</DialogTitle>
+                <DialogDescription>
+                  Contribute to the bounty for this scammer. All funds go to the developer wallet.
+                </DialogDescription>
+              </DialogHeader>
+              <BountyForm 
+                scammerId={scammer.id} 
+                scammerName={scammer.name}
+                developerWalletAddress={developerWalletAddress}
+              />
+            </DialogContent>
+          )}
+        </Dialog>
         <ScammerActionButton
           icon={<Eye size={16} />}
           count={scammer.views || 0}
