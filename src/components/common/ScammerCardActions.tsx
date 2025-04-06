@@ -86,14 +86,21 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
     }
 
     try {
-      await likeScammer(scammer.id, profile.wallet_address);
-      if (onUpdateInteraction) onUpdateInteraction();
+      console.log(`Attempting to like scammer ${scammer.id} with wallet ${profile.wallet_address}`);
+      const result = await likeScammer(scammer.id, profile.wallet_address);
+      console.log("Like result:", result);
+      
+      if (onUpdateInteraction) {
+        console.log("Calling onUpdateInteraction after like");
+        onUpdateInteraction();
+      }
       
       toast({
         title: "Success",
         description: "Your feedback has been recorded",
       });
     } catch (error) {
+      console.error("Error in handleLike:", error);
       handleError(error, "Failed to like scammer");
     }
   };
@@ -109,14 +116,21 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
     }
 
     try {
-      await dislikeScammer(scammer.id, profile.wallet_address);
-      if (onUpdateInteraction) onUpdateInteraction();
+      console.log(`Attempting to dislike scammer ${scammer.id} with wallet ${profile.wallet_address}`);
+      const result = await dislikeScammer(scammer.id, profile.wallet_address);
+      console.log("Dislike result:", result);
+      
+      if (onUpdateInteraction) {
+        console.log("Calling onUpdateInteraction after dislike");
+        onUpdateInteraction();
+      }
       
       toast({
         title: "Success",
         description: "Your feedback has been recorded",
       });
     } catch (error) {
+      console.error("Error in handleDislike:", error);
       handleError(error, "Failed to dislike scammer");
     }
   };

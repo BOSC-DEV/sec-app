@@ -88,6 +88,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
     
     setIsLoading(true);
     try {
+      console.log(`ScammerCard: Trying to like scammer ${scammer.id} by user ${profile.wallet_address}`);
       const wasLiked = isLiked;
       
       let newLikes = likes;
@@ -159,6 +160,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
     
     setIsLoading(true);
     try {
+      console.log(`ScammerCard: Trying to dislike scammer ${scammer.id} by user ${profile.wallet_address}`);
       const wasDisliked = isDisliked;
       
       let newDislikes = dislikes;
