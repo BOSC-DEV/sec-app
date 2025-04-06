@@ -9,6 +9,47 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      bounty_contributions: {
+        Row: {
+          amount: number
+          comment: string | null
+          contributor_id: string
+          contributor_name: string
+          contributor_profile_pic: string | null
+          created_at: string
+          id: string
+          scammer_id: string
+        }
+        Insert: {
+          amount: number
+          comment?: string | null
+          contributor_id: string
+          contributor_name: string
+          contributor_profile_pic?: string | null
+          created_at?: string
+          id?: string
+          scammer_id: string
+        }
+        Update: {
+          amount?: number
+          comment?: string | null
+          contributor_id?: string
+          contributor_name?: string
+          contributor_profile_pic?: string | null
+          created_at?: string
+          id?: string
+          scammer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bounty_contributions_scammer_id_fkey"
+            columns: ["scammer_id"]
+            isOneToOne: false
+            referencedRelation: "scammers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comments: {
         Row: {
           author: string
