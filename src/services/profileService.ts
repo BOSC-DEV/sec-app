@@ -1,17 +1,13 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Profile } from '@/types/dataTypes';
 import { handleError } from '@/utils/errorHandling';
+import { getProfileStatistics } from './statisticsService';
 
 export const getProfiles = async (): Promise<Profile[]> => {
   try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*');
-    
-    if (error) throw error;
-    
-    return data || [];
+    // Use the enhanced getProfileStatistics function to get profiles with counts
+    const profilesWithStats = await getProfileStatistics();
+    return profilesWithStats || [];
   } catch (error) {
     handleError(error, 'Error fetching profiles');
     return [];
@@ -36,8 +32,6 @@ export const getProfileByWallet = async (walletAddress: string): Promise<Profile
     return null;
   }
 };
-
-// Adding the missing functions below
 
 export const saveProfile = async (profile: Profile): Promise<Profile | null> => {
   try {

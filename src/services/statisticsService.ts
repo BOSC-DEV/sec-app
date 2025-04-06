@@ -64,3 +64,90 @@ export const getStatistics = async (): Promise<Statistics> => {
     };
   }
 };
+
+// Add a function to get profile statistics for the leaderboard
+export const getProfileStatistics = async (): Promise<any[]> => {
+  try {
+    // Get all profiles
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('*');
+    
+    if (profilesError) throw profilesError;
+    
+    if (!profiles || profiles.length === 0) return [];
+    
+    // Get reports count for each profile (where they are listed as added_by)
+    const { data: scammers, error: scammersError } = await supabase
+      .from('scammers')
+      .select('added_by, likes, views')
+      .is('deleted_at', null);
+    
+    if (scammersError) throw scammersError;
+    
+    // Get comments count for each profile
+    const { data: comments, error: commentsError } = await supabase
+      .from('comments')
+      .select('author, likes, views');
+    
+    if (commentsError) throw commentsError;
+    
+    // Get bounty contributions for each profile
+    const { data: bountyContributions, error: bountyError } = await supabase
+      .from('bounty_contributions')
+      .select('contributor_id, amount');
+    
+    if (bountyError) throw bountyError;
+    
+    // Calculate statistics for each profile
+    return profiles.map(profile => {
+      // Count reports by this profile
+      const reportsCount = scammers.filter(scammer => 
+        scammer.added_by === profile.wallet_address
+      ).length;
+      
+      // Sum likes on scammers reported by this profile
+      const scammerLikes = scammers
+        .filter(scammer => scammer.added_by === profile.wallet_address)
+        .reduce((sum, scammer) => sum + (scammer.likes || 0), 0);
+      
+      // Sum views on scammers reported by this profile
+      const scammerViews = scammers
+        .filter(scammer => scammer.added_by === profile.wallet_address)
+        .reduce((sum, scammer) => sum + (scammer.views || 0), 0);
+      
+      // Count comments by this profile
+      const commentsCount = comments.filter(comment => 
+        comment.author === profile.wallet_address
+      ).length;
+      
+      // Sum likes on comments by this profile
+      const commentLikes = comments
+        .filter(comment => comment.author === profile.wallet_address)
+        .reduce((sum, comment) => sum + (comment.likes || 0), 0);
+      
+      // Sum views on comments by this profile
+      const commentViews = comments
+        .filter(comment => comment.author === profile.wallet_address)
+        .reduce((sum, comment) => sum + (comment.views || 0), 0);
+      
+      // Sum total bounty contributed by this profile
+      const bountyAmount = bountyContributions
+        .filter(contribution => contribution.contributor_id === profile.wallet_address)
+        .reduce((sum, contribution) => sum + (contribution.amount || 0), 0);
+      
+      // Add up all statistics
+      return {
+        ...profile,
+        reports_count: reportsCount,
+        likes_count: scammerLikes + commentLikes,
+        views_count: scammerViews + commentViews,
+        comments_count: commentsCount,
+        bounty_amount: bountyAmount
+      };
+    });
+  } catch (error) {
+    console.error('Error fetching profile statistics:', error);
+    return [];
+  }
+};

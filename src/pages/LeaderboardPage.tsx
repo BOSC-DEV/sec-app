@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Trophy, Medal, ThumbsUp, Eye, MessageSquare, Clock, Link, FileText, ChevronUp, ChevronDown } from 'lucide-react';
+import { Trophy, Medal, ThumbsUp, Eye, MessageSquare, Clock, FileText, ChevronUp, ChevronDown } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import CompactHero from '@/components/common/CompactHero';
 import { 
   Table, 
@@ -12,8 +13,8 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Separator } from "@/components/ui/separator";
-import { getProfiles } from '@/services/supabaseService';
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { getProfiles } from '@/services/profileService';
 import { Profile } from '@/types/dataTypes';
 import { formatNumber } from '@/lib/utils';
 
@@ -216,25 +217,23 @@ const LeaderboardPage = () => {
                         </TableCell>
                         
                         <TableCell>
-                          <div className="flex items-center">
-                            <div className="h-10 w-10 rounded-full bg-amber-800 flex items-center justify-center text-white mr-3 overflow-hidden">
-                              {profile.profile_pic_url ? (
-                                <img 
+                          <Link to={`/profile/${profile.username || profile.wallet_address}`} className="hover:opacity-80 transition-opacity">
+                            <div className="flex items-center">
+                              <Avatar className="mr-3">
+                                <AvatarImage 
                                   src={profile.profile_pic_url} 
-                                  alt={profile.display_name} 
-                                  className="h-full w-full object-cover"
+                                  alt={profile.display_name}
                                 />
-                              ) : (
-                                <div className="flex items-center justify-center h-full w-full">
+                                <AvatarFallback className="bg-amber-800 text-white">
                                   {profile.display_name.substring(0, 2).toUpperCase()}
-                                </div>
-                              )}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <div className="font-medium text-gray-900">{profile.display_name}</div>
+                                <div className="text-sm text-gray-500">@{profile.username || profile.display_name.toLowerCase().replace(/\s/g, '')}</div>
+                              </div>
                             </div>
-                            <div>
-                              <div className="font-medium text-gray-900">{profile.display_name}</div>
-                              <div className="text-sm text-gray-500">@{profile.username || profile.display_name.toLowerCase().replace(/\s/g, '')}</div>
-                            </div>
-                          </div>
+                          </Link>
                         </TableCell>
                         
                         <TableCell>
@@ -271,23 +270,33 @@ const LeaderboardPage = () => {
                         </TableCell>
                         
                         <TableCell className="text-center font-medium">
-                          {profile.reports_count || 0}
+                          <Link to={`/profile/${profile.username || profile.wallet_address}`} className="hover:underline">
+                            {profile.reports_count || 0}
+                          </Link>
                         </TableCell>
                         
                         <TableCell className="text-center">
-                          {profile.likes_count || 0}
+                          <Link to={`/profile/${profile.username || profile.wallet_address}`} className="hover:underline">
+                            {profile.likes_count || 0}
+                          </Link>
                         </TableCell>
                         
                         <TableCell className="text-center">
-                          {formatNumber(profile.views_count || 0)}
+                          <Link to={`/profile/${profile.username || profile.wallet_address}`} className="hover:underline">
+                            {formatNumber(profile.views_count || 0)}
+                          </Link>
                         </TableCell>
                         
                         <TableCell className="text-center">
-                          {profile.comments_count || 0}
+                          <Link to={`/profile/${profile.username || profile.wallet_address}`} className="hover:underline">
+                            {profile.comments_count || 0}
+                          </Link>
                         </TableCell>
                         
                         <TableCell className="text-center font-semibold text-icc-primary">
-                          {profile.bounty_amount ? `${profile.bounty_amount} $SEC` : '0 $SEC'}
+                          <Link to={`/profile/${profile.username || profile.wallet_address}`} className="hover:underline">
+                            {profile.bounty_amount ? `${profile.bounty_amount} $SEC` : '0 $SEC'}
+                          </Link>
                         </TableCell>
                         
                         <TableCell className="text-center text-gray-500">
