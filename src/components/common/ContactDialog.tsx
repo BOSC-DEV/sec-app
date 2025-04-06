@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ExternalLink, AlertTriangle } from 'lucide-react';
+import { ExternalLink, AlertTriangle, Copy, Check } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
 
 interface ContactDialogProps {
   open: boolean;
@@ -22,6 +23,33 @@ const ContactDialog: React.FC<ContactDialogProps> = ({
   open, 
   onOpenChange 
 }) => {
+  const { toast } = useToast();
+  const [copied, setCopied] = useState(false);
+  
+  const handleCopyEmail = () => {
+    navigator.clipboard.writeText("gov@sec.digital").then(() => {
+      setCopied(true);
+      toast({
+        title: "Email copied",
+        description: "Email address copied to clipboard",
+        duration: 2000,
+      });
+      
+      // Reset the copied state after 2 seconds
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    }).catch(err => {
+      console.error('Failed to copy email: ', err);
+      toast({
+        title: "Copy failed",
+        description: "Failed to copy email address",
+        variant: "destructive",
+        duration: 2000,
+      });
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
@@ -35,13 +63,18 @@ const ContactDialog: React.FC<ContactDialogProps> = ({
           <div className="space-y-6 text-sm">
             <div className="text-center my-6">
               <h3 className="font-bold text-lg mb-2">General Inquiries</h3>
-              <a 
-                href="mailto:gov@sec.digital" 
-                className="text-icc-blue hover:text-icc-blue-light text-xl font-bold flex items-center justify-center"
+              <button 
+                onClick={handleCopyEmail}
+                className="text-icc-blue hover:text-icc-blue-light text-xl font-bold flex items-center justify-center mx-auto transition-colors"
+                aria-label="Copy email address to clipboard"
               >
                 gov@sec.digital
-                <ExternalLink className="ml-2 h-4 w-4" />
-              </a>
+                {copied ? (
+                  <Check className="ml-2 h-4 w-4 text-green-500" />
+                ) : (
+                  <Copy className="ml-2 h-4 w-4" />
+                )}
+              </button>
               <p className="mt-2 text-gray-600">
                 For general questions, partnership opportunities, and other inquiries
               </p>
