@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -98,7 +97,7 @@ const ScammerDetailPage = () => {
     queryKey: ['bountyContributions', id, contributionsPage, contributionsPerPage],
     queryFn: () => getScammerBountyContributions(id || '', contributionsPage, contributionsPerPage),
     enabled: !!id,
-    keepPreviousData: true
+    placeholderData: (previousData) => previousData
   });
 
   const bountyContributions = bountyContributionsData?.contributions || [];

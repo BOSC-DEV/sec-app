@@ -1,206 +1,127 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import { BountyContribution } from '@/types/dataTypes';
-import { handleError, ErrorSeverity } from '@/utils/errorHandling';
-
-// Cache configuration
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes in milliseconds
-let contributionsCache: Map<string, { data: BountyContribution[], timestamp: number }> = new Map();
+import { supabase } from "@/integrations/supabase/client";
+import { BountyContribution } from "@/types/dataTypes";
+import { handleError, ErrorSeverity } from "@/utils/errorHandling";
 
 /**
- * Add a new bounty contribution for a scammer
- * @param contribution The contribution data
- * @returns The created contribution or null if there was an error
+ * Add a bounty contribution for a scammer
  */
-export const addBountyContribution = async (
-  contribution: {
-    scammer_id: string;
-    amount: number;
-    comment?: string;
-    contributor_id: string;
-    contributor_name: string;
-    contributor_profile_pic?: string;
-  }
-): Promise<BountyContribution | null> => {
+export const addBountyContribution = async (contribution: {
+  scammer_id: string;
+  amount: number;
+  comment?: string;
+  contributor_id: string;
+  contributor_name: string;
+  contributor_profile_pic?: string;
+}): Promise<BountyContribution> => {
   try {
-    // Validate input data
-    if (!contribution.scammer_id) throw new Error('Scammer ID is required');
-    if (!contribution.contributor_id) throw new Error('Contributor ID is required');
-    if (!contribution.amount || contribution.amount <= 0) throw new Error('Amount must be greater than 0');
-    
-    // Sanitize optional inputs
-    const sanitizedComment = contribution.comment ? String(contribution.comment).trim() : null;
-    
-    // First get the current bounty amount
-    const { data: currentBounty, error: fetchError } = await supabase
-      .from('scammers')
-      .select('bounty_amount')
-      .eq('id', contribution.scammer_id)
-      .single();
-
-    if (fetchError) {
-      handleError(fetchError, {
-        fallbackMessage: 'Error fetching current bounty amount',
-        severity: ErrorSeverity.MEDIUM,
-        context: 'BOUNTY_FETCH'
-      });
-      return null;
-    }
-
-    // Calculate the new bounty amount
-    const newBountyAmount = (currentBounty?.bounty_amount || 0) + contribution.amount;
-
-    // Start a transaction using Supabase's upsert + update pattern
     // First, insert the contribution
-    const { data: newContribution, error: insertError } = await supabase
-      .from('bounty_contributions')
+    const { data, error } = await supabase
+      .from("bounty_contributions")
       .insert({
         scammer_id: contribution.scammer_id,
         amount: contribution.amount,
-        comment: sanitizedComment,
+        comment: contribution.comment || null,
         contributor_id: contribution.contributor_id,
         contributor_name: contribution.contributor_name,
-        contributor_profile_pic: contribution.contributor_profile_pic
+        contributor_profile_pic: contribution.contributor_profile_pic || null,
       })
       .select()
       .single();
 
-    if (insertError) {
-      handleError(insertError, {
-        fallbackMessage: 'Error creating bounty contribution',
-        severity: ErrorSeverity.MEDIUM,
-        context: 'BOUNTY_CREATE'
-      });
-      return null;
-    }
+    if (error) throw error;
 
-    // Then update the scammer's bounty amount
-    const { error: updateError } = await supabase
-      .from('scammers')
-      .update({ bounty_amount: newBountyAmount })
-      .eq('id', contribution.scammer_id);
+    // Then update the total bounty amount on the scammer
+    await updateScammerBountyAmount(contribution.scammer_id);
 
-    if (updateError) {
-      handleError(updateError, {
-        fallbackMessage: 'Error updating scammer bounty amount',
-        severity: ErrorSeverity.MEDIUM,
-        context: 'BOUNTY_UPDATE'
-      });
-      // We should handle this case better, perhaps with rollback logic
-      // For now, we'll return the contribution even though the total wasn't updated
-    }
-
-    // Clear the cache for this scammer
-    contributionsCache.delete(contribution.scammer_id);
-
-    return newContribution as BountyContribution;
+    return data as BountyContribution;
   } catch (error) {
     handleError(error, {
-      fallbackMessage: 'Error processing bounty contribution',
+      fallbackMessage: "Failed to add bounty contribution",
       severity: ErrorSeverity.MEDIUM,
-      context: 'BOUNTY_SERVICE'
+      context: "ADD_BOUNTY_CONTRIBUTION",
     });
-    return null;
+    throw error;
   }
 };
 
 /**
- * Get all bounty contributions for a scammer with pagination
- * @param scammerId The ID of the scammer
- * @param page The page number (1-based)
- * @param limit The number of items per page
- * @returns An array of contributions or an empty array if there was an error
+ * Update the total bounty amount for a scammer
+ */
+const updateScammerBountyAmount = async (scammerId: string): Promise<void> => {
+  try {
+    // Calculate total bounty amount
+    const { data: totalData, error: totalError } = await supabase
+      .from("bounty_contributions")
+      .select("amount")
+      .eq("scammer_id", scammerId);
+
+    if (totalError) throw totalError;
+
+    const totalAmount = totalData.reduce(
+      (sum, item) => sum + Number(item.amount),
+      0
+    );
+
+    // Update the scammer with the new total
+    const { error: updateError } = await supabase
+      .from("scammers")
+      .update({ bounty_amount: totalAmount })
+      .eq("id", scammerId);
+
+    if (updateError) throw updateError;
+  } catch (error) {
+    handleError(error, {
+      fallbackMessage: "Failed to update scammer bounty amount",
+      severity: ErrorSeverity.MEDIUM,
+      context: "UPDATE_SCAMMER_BOUNTY",
+    });
+    throw error;
+  }
+};
+
+/**
+ * Fetch a paginated list of bounty contributions for a scammer
  */
 export const getScammerBountyContributions = async (
   scammerId: string,
-  page = 1,
-  limit = 10
-): Promise<{ contributions: BountyContribution[], totalCount: number }> => {
+  page: number = 1,
+  perPage: number = 5
+): Promise<{ contributions: BountyContribution[]; totalCount: number }> => {
   try {
-    // Validate parameters
-    if (!scammerId) throw new Error('Scammer ID is required');
-    if (page < 1) page = 1;
-    if (limit < 1) limit = 10;
-    if (limit > 100) limit = 100; // Set a reasonable upper limit
-    
-    // Check cache first
-    const cacheKey = `${scammerId}-${page}-${limit}`;
-    const cachedData = contributionsCache.get(scammerId);
-    
-    if (cachedData && (Date.now() - cachedData.timestamp < CACHE_TTL)) {
-      // Calculate pagination from cached data
-      const start = (page - 1) * limit;
-      const end = start + limit;
-      const paginatedResults = cachedData.data.slice(start, end);
-      
-      return {
-        contributions: paginatedResults,
-        totalCount: cachedData.data.length
-      };
-    }
+    // Calculate pagination
+    const from = (page - 1) * perPage;
+    const to = from + perPage - 1;
 
-    // If not in cache or cache expired, fetch from database
-    // Get total count first (for pagination info)
+    // Get total count for pagination
     const { count, error: countError } = await supabase
-      .from('bounty_contributions')
-      .select('*', { count: 'exact', head: true })
-      .eq('scammer_id', scammerId);
-      
-    if (countError) {
-      handleError(countError, {
-        fallbackMessage: 'Error counting bounty contributions',
-        severity: ErrorSeverity.LOW,
-        context: 'BOUNTY_COUNT'
-      });
-    }
-    
-    // Calculate pagination values
-    const from = (page - 1) * limit;
-    
-    // Fetch the paginated data
-    const { data: contributions, error } = await supabase
-      .from('bounty_contributions')
-      .select('*')
-      .eq('scammer_id', scammerId)
-      .order('created_at', { ascending: false })
-      .range(from, from + limit - 1);
+      .from("bounty_contributions")
+      .select("*", { count: "exact", head: true })
+      .eq("scammer_id", scammerId);
 
-    if (error) {
-      handleError(error, {
-        fallbackMessage: 'Error fetching bounty contributions',
-        severity: ErrorSeverity.MEDIUM,
-        context: 'BOUNTY_FETCH'
-      });
-      return { contributions: [], totalCount: 0 };
-    }
+    if (countError) throw countError;
 
-    // If we're fetching the first page with a reasonable limit,
-    // store the results in cache to potentially reduce future database calls
-    if (page === 1 && limit >= 10) {
-      contributionsCache.set(scammerId, {
-        data: contributions as BountyContribution[],
-        timestamp: Date.now()
-      });
-    }
+    // Get the contributions for the current page
+    const { data, error } = await supabase
+      .from("bounty_contributions")
+      .select("*")
+      .eq("scammer_id", scammerId)
+      .order("created_at", { ascending: false })
+      .range(from, to);
+
+    if (error) throw error;
 
     return {
-      contributions: contributions as BountyContribution[],
-      totalCount: count || 0
+      contributions: data as BountyContribution[],
+      totalCount: count || 0,
     };
   } catch (error) {
     handleError(error, {
-      fallbackMessage: 'Error retrieving bounty contributions',
+      fallbackMessage: "Failed to fetch bounty contributions",
       severity: ErrorSeverity.MEDIUM,
-      context: 'BOUNTY_SERVICE'
+      context: "GET_SCAMMER_BOUNTY_CONTRIBUTIONS",
     });
+    // Return empty result on error
     return { contributions: [], totalCount: 0 };
   }
-};
-
-/**
- * Clear the contributions cache for testing purposes
- * or when data needs to be forcefully refreshed
- */
-export const clearBountyContributionsCache = (): void => {
-  contributionsCache.clear();
 };
