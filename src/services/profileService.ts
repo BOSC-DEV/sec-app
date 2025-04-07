@@ -67,7 +67,7 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
           website_link: profile.website_link
         })
         .eq('id', existingProfile.id)
-        .select()
+        .select('*')  // Changed from .select() to .select('*') to ensure we get all profile fields
         .single();
       
       if (error) {
@@ -93,7 +93,7 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
           website_link: profile.website_link,
           points: 0
         })
-        .select()
+        .select('*')  // Changed from .select() to .select('*') to ensure we get all profile fields
         .single();
       
       if (error) {
@@ -141,11 +141,12 @@ export const uploadProfilePicture = async (walletAddress: string, file: File): P
     
     // Create a unique file path for the avatar
     const fileExt = file.name.split('.').pop();
-    const filePath = `${walletAddress}/${Date.now()}.${fileExt}`;
+    const fileName = `${Date.now()}.${fileExt}`;
+    const filePath = `${walletAddress}/${fileName}`;
     
     console.log('Uploading file to path:', filePath);
     
-    // Upload the file with public-read access
+    // Upload the file with public-read access and specific content type
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('profiles')
       .upload(filePath, compressedFile, {
@@ -161,14 +162,18 @@ export const uploadProfilePicture = async (walletAddress: string, file: File): P
     
     console.log('File uploaded successfully, data:', uploadData);
     
-    // Get the public URL for the uploaded file
+    // Get the public URL for the uploaded file using the correct path
     const { data } = supabase.storage
       .from('profiles')
       .getPublicUrl(filePath);
     
     console.log('Generated public URL:', data.publicUrl);
     
-    return data.publicUrl;
+    // Return the URL with a cache buster to prevent browser caching issues
+    const urlWithCacheBuster = `${data.publicUrl}?t=${Date.now()}`;
+    console.log('URL with cache buster:', urlWithCacheBuster);
+    
+    return urlWithCacheBuster;
   } catch (error) {
     console.error('Profile picture upload error:', error);
     handleError(error, 'Error uploading profile picture');
