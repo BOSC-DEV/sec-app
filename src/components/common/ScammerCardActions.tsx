@@ -75,6 +75,18 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
   const { profile } = useProfile();
   const [isLoading, setIsLoading] = useState(false);
   const [bountyDialogOpen, setBountyDialogOpen] = useState(false);
+  const [localLikes, setLocalLikes] = useState(scammer.likes || 0);
+  const [localDislikes, setLocalDislikes] = useState(scammer.dislikes || 0);
+  const [isLiked, setIsLiked] = useState(userInteraction?.liked || false);
+  const [isDisliked, setIsDisliked] = useState(userInteraction?.disliked || false);
+
+  // Update local state when props change
+  React.useEffect(() => {
+    setLocalLikes(scammer.likes || 0);
+    setLocalDislikes(scammer.dislikes || 0);
+    setIsLiked(userInteraction?.liked || false);
+    setIsDisliked(userInteraction?.disliked || false);
+  }, [scammer, userInteraction]);
 
   const handleShare = async () => {
     try {
@@ -105,8 +117,35 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
 
     try {
       console.log(`Attempting to like scammer ${scammer.id} with wallet ${profile.wallet_address}`);
+      
+      // Optimistically update UI
+      const wasLiked = isLiked;
+      if (wasLiked) {
+        setLocalLikes(Math.max(localLikes - 1, 0));
+        setIsLiked(false);
+      } else {
+        setLocalLikes(localLikes + 1);
+        setIsLiked(true);
+        
+        if (isDisliked) {
+          setLocalDislikes(Math.max(localDislikes - 1, 0));
+          setIsDisliked(false);
+        }
+      }
+      
+      // Update database
       const result = await likeScammer(scammer.id, profile.wallet_address);
       console.log("Like result:", result);
+      
+      // Update UI with actual server data
+      if (result && typeof result === 'object' && 'likes' in result) {
+        setLocalLikes(result.likes);
+        setLocalDislikes(result.dislikes);
+        
+        // Update the scammer object
+        scammer.likes = result.likes;
+        scammer.dislikes = result.dislikes;
+      }
       
       if (onUpdateInteraction) {
         console.log("Calling onUpdateInteraction after like");
@@ -120,6 +159,11 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
     } catch (error) {
       console.error("Error in handleLike:", error);
       handleError(error, "Failed to like scammer");
+      // Revert to original state on error
+      setIsLiked(userInteraction?.liked || false);
+      setIsDisliked(userInteraction?.disliked || false);
+      setLocalLikes(scammer.likes || 0);
+      setLocalDislikes(scammer.dislikes || 0);
     } finally {
       setIsLoading(false);
     }
@@ -140,8 +184,35 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
 
     try {
       console.log(`Attempting to dislike scammer ${scammer.id} with wallet ${profile.wallet_address}`);
+      
+      // Optimistically update UI
+      const wasDisliked = isDisliked;
+      if (wasDisliked) {
+        setLocalDislikes(Math.max(localDislikes - 1, 0));
+        setIsDisliked(false);
+      } else {
+        setLocalDislikes(localDislikes + 1);
+        setIsDisliked(true);
+        
+        if (isLiked) {
+          setLocalLikes(Math.max(localLikes - 1, 0));
+          setIsLiked(false);
+        }
+      }
+      
+      // Update database
       const result = await dislikeScammer(scammer.id, profile.wallet_address);
       console.log("Dislike result:", result);
+      
+      // Update UI with actual server data
+      if (result && typeof result === 'object' && 'likes' in result) {
+        setLocalLikes(result.likes);
+        setLocalDislikes(result.dislikes);
+        
+        // Update the scammer object
+        scammer.likes = result.likes;
+        scammer.dislikes = result.dislikes;
+      }
       
       if (onUpdateInteraction) {
         console.log("Calling onUpdateInteraction after dislike");
@@ -155,6 +226,11 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
     } catch (error) {
       console.error("Error in handleDislike:", error);
       handleError(error, "Failed to dislike scammer");
+      // Revert to original state on error
+      setIsLiked(userInteraction?.liked || false);
+      setIsDisliked(userInteraction?.disliked || false);
+      setLocalLikes(scammer.likes || 0);
+      setLocalDislikes(scammer.dislikes || 0);
     } finally {
       setIsLoading(false);
     }
@@ -174,16 +250,16 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
       <div className="flex space-x-1">
         <ScammerActionButton
           icon={<ThumbsUp size={16} />}
-          count={scammer.likes || 0}
+          count={localLikes}
           onClick={handleLike}
-          isActive={userInteraction?.liked}
+          isActive={isLiked}
           label="Like"
         />
         <ScammerActionButton
           icon={<ThumbsDown size={16} />}
-          count={scammer.dislikes || 0}
+          count={localDislikes}
           onClick={handleDislike}
-          isActive={userInteraction?.disliked}
+          isActive={isDisliked}
           label="Dislike"
         />
       </div>
