@@ -1,7 +1,7 @@
 
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { Profile } from '@/types/dataTypes';
-import { getProfileByWallet, uploadProfilePicture } from '@/services/profileService';
+import { getProfileByWallet, uploadProfilePicture, saveProfile } from '@/services/profileService';
 import { toast } from '@/hooks/use-toast';
 import { 
   connectPhantomWallet, 
@@ -99,6 +99,44 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const createDefaultProfile = async (address: string) => {
+    try {
+      setIsLoading(true);
+      // Create a default profile for new users
+      const defaultProfile: Profile = {
+        id: crypto.randomUUID(),
+        wallet_address: address,
+        display_name: `User ${address.substring(0, 6)}`,
+        username: `user_${Date.now().toString(36)}`,
+        profile_pic_url: '',
+        created_at: new Date().toISOString(),
+        x_link: '',
+        website_link: '',
+        bio: '',
+        points: 0
+      };
+      
+      const savedProfile = await saveProfile(defaultProfile);
+      
+      if (savedProfile) {
+        setProfile(savedProfile);
+        toast({
+          title: 'Profile Created',
+          description: 'Default profile has been created. You can update it in your profile page.',
+        });
+      }
+    } catch (error) {
+      console.error('Error creating default profile:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to create profile',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const uploadAvatar = async (file: File): Promise<string | null> => {
     if (!walletAddress) {
       toast({
@@ -148,7 +186,15 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
           localStorage.setItem('walletAddress', publicKey);
           
           // Check if profile exists
-          await fetchProfile(publicKey);
+          const existingProfile = await getProfileByWallet(publicKey);
+          
+          if (existingProfile) {
+            // Profile exists, set it
+            setProfile(existingProfile);
+          } else {
+            // Profile doesn't exist, create a new one
+            await createDefaultProfile(publicKey);
+          }
         }
       } else {
         // Fallback to mock wallet for testing
@@ -158,7 +204,8 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         setWalletAddress(mockWalletAddress);
         setIsConnected(true);
         
-        await fetchProfile(mockWalletAddress);
+        // Create a mock profile
+        await createDefaultProfile(mockWalletAddress);
         
         toast({
           title: 'Mock Wallet Connected',

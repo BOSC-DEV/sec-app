@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Profile } from '@/types/dataTypes';
 import { handleError } from '@/utils/errorHandling';
@@ -35,6 +36,8 @@ export const getProfileByWallet = async (walletAddress: string): Promise<Profile
 
 export const saveProfile = async (profile: Profile): Promise<Profile | null> => {
   try {
+    console.log('Saving profile:', profile);
+    
     // Check if profile already exists
     const { data: existingProfile, error: checkError } = await supabase
       .from('profiles')
@@ -42,33 +45,65 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
       .eq('wallet_address', profile.wallet_address)
       .maybeSingle();
     
-    if (checkError) throw checkError;
+    if (checkError) {
+      console.error('Error checking existing profile:', checkError);
+      throw checkError;
+    }
     
     let result;
 
     if (existingProfile) {
+      console.log('Updating existing profile with ID:', existingProfile.id);
       // Update existing profile
       const { data, error } = await supabase
         .from('profiles')
-        .update(profile)
-        .eq('id', profile.id)
+        .update({
+          display_name: profile.display_name,
+          username: profile.username,
+          profile_pic_url: profile.profile_pic_url,
+          bio: profile.bio,
+          x_link: profile.x_link,
+          website_link: profile.website_link
+        })
+        .eq('id', existingProfile.id)
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating profile:', error);
+        throw error;
+      }
+      
       result = data;
     } else {
+      console.log('Inserting new profile');
       // Insert new profile
       const { data, error } = await supabase
         .from('profiles')
-        .insert(profile)
+        .insert({
+          id: profile.id,
+          wallet_address: profile.wallet_address,
+          display_name: profile.display_name,
+          username: profile.username,
+          profile_pic_url: profile.profile_pic_url,
+          created_at: new Date().toISOString(),
+          bio: profile.bio,
+          x_link: profile.x_link,
+          website_link: profile.website_link,
+          points: 0
+        })
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error inserting profile:', error);
+        throw error;
+      }
+      
       result = data;
     }
     
+    console.log('Profile saved successfully:', result);
     return result;
   } catch (error) {
     handleError(error, 'Error saving profile');
