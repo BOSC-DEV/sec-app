@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -12,6 +13,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import OptimizedImage from '@/components/common/OptimizedImage';
 
 interface ProfileFormValues {
   display_name: string;
@@ -26,6 +28,7 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarKey, setAvatarKey] = useState(Date.now()); // Add a key for forcing re-render
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<ProfileFormValues>({
@@ -96,9 +99,31 @@ const ProfilePage = () => {
       const publicUrl = await uploadAvatar(file);
       if (publicUrl) {
         setAvatarUrl(publicUrl);
+        setAvatarKey(Date.now()); // Update key to force re-render
+        
+        // Update the profile with new avatar URL to ensure it's saved
+        if (profile) {
+          await saveProfile({
+            ...profile,
+            profile_pic_url: publicUrl
+          });
+          
+          // Refresh profile to get the latest data
+          await refreshProfile();
+          
+          toast({
+            title: 'Avatar Updated',
+            description: 'Your profile picture has been updated',
+          });
+        }
       }
     } catch (error) {
       console.error('Error uploading avatar:', error);
+      toast({
+        title: 'Upload Failed',
+        description: 'Failed to upload profile picture',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -201,11 +226,17 @@ const ProfilePage = () => {
         <CardContent>
           <div className="flex justify-center mb-6">
             <div className="relative group">
-              <Avatar className="h-24 w-24 cursor-pointer">
-                <AvatarImage src={avatarUrl || undefined} alt="Profile" />
-                <AvatarFallback className="bg-icc-blue text-white text-xl">
-                  {getInitials(form.getValues().display_name)}
-                </AvatarFallback>
+              <Avatar className="h-24 w-24 cursor-pointer" key={avatarKey}>
+                {avatarUrl ? (
+                  <AvatarImage 
+                    src={`${avatarUrl}${avatarUrl.includes('?') ? '&' : '?'}v=${avatarKey}`} 
+                    alt="Profile" 
+                  />
+                ) : (
+                  <AvatarFallback className="bg-icc-blue text-white text-xl">
+                    {getInitials(form.getValues().display_name)}
+                  </AvatarFallback>
+                )}
               </Avatar>
               <div 
                 className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"

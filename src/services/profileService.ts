@@ -150,7 +150,7 @@ export const uploadProfilePicture = async (walletAddress: string, file: File): P
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('profiles')
       .upload(filePath, compressedFile, {
-        cacheControl: '3600',
+        cacheControl: '0', // Set cache control to 0 to prevent caching
         upsert: true,
         contentType: compressedFile.type
       });
@@ -169,7 +169,7 @@ export const uploadProfilePicture = async (walletAddress: string, file: File): P
     
     console.log('Generated public URL:', data.publicUrl);
     
-    // Return the URL with a cache buster to prevent browser caching issues
+    // Return the URL with a stronger cache buster to prevent browser caching issues
     const urlWithCacheBuster = `${data.publicUrl}?t=${Date.now()}`;
     console.log('URL with cache buster:', urlWithCacheBuster);
     
