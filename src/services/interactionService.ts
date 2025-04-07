@@ -229,20 +229,51 @@ const updateScammerLikes = async (scammerId: string): Promise<{ likes: number; d
 
     console.log(`New like count: ${likes}, new dislike count: ${dislikes}`);
 
-    // Update scammer with new counts
-    const { error: updateError } = await supabase
+    // Debug: Log the scammer ID and the update values for debugging
+    console.log(`Attempting to update scammer ID: ${scammerId} with likes: ${likes}, dislikes: ${dislikes}`);
+    
+    // Fetch the scammer first to verify it exists
+    const { data: existingScammer, error: fetchError } = await supabase
+      .from('scammers')
+      .select('id, likes, dislikes')
+      .eq('id', scammerId)
+      .single();
+    
+    if (fetchError) {
+      console.error(`Error fetching scammer with ID ${scammerId}:`, fetchError);
+      throw fetchError;
+    }
+    
+    console.log(`Found existing scammer:`, existingScammer);
+    
+    // Explicitly update likes and dislikes as numbers
+    const { data: updateData, error: updateError } = await supabase
       .from('scammers')
       .update({ 
-        likes, 
-        dislikes 
+        likes: likes, 
+        dislikes: dislikes 
       })
-      .eq('id', scammerId);
+      .eq('id', scammerId)
+      .select();
 
     if (updateError) {
       console.error('Error updating scammer like/dislike counts:', updateError);
       throw updateError;
+    } 
+    
+    console.log(`Successfully updated scammer like/dislike counts:`, updateData);
+    
+    // Verify the update
+    const { data: verifyData, error: verifyError } = await supabase
+      .from('scammers')
+      .select('likes, dislikes')
+      .eq('id', scammerId)
+      .single();
+      
+    if (verifyError) {
+      console.error('Error verifying update:', verifyError);
     } else {
-      console.log(`Successfully updated scammer like/dislike counts`);
+      console.log('Verified scammer data after update:', verifyData);
     }
     
     return { likes, dislikes };
