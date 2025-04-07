@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Profile } from '@/types/dataTypes';
 import { handleError } from '@/utils/errorHandling';
 import { getProfileStatistics } from './statisticsService';
+import { validateFile, compressImage } from '@/utils/fileUpload';
 
 export const getProfiles = async (): Promise<Profile[]> => {
   try {
@@ -115,27 +116,61 @@ export const uploadProfilePicture = async (walletAddress: string, file: File): P
   if (!walletAddress || !file) return null;
   
   try {
+    console.log('Starting profile picture upload for wallet:', walletAddress);
+    
+    // Validate the file first
+    const isValid = await validateFile(file, {
+      maxSize: 2 * 1024 * 1024, // 2MB
+      allowedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+    });
+    
+    if (!isValid) {
+      throw new Error('Invalid file');
+    }
+    
+    // Compress the image to reduce size while maintaining quality
+    const compressedFile = await compressImage(file, {
+      maxWidth: 800,
+      maxHeight: 800,
+      quality: 0.8
+    });
+    
+    if (!compressedFile) {
+      throw new Error('Failed to compress image');
+    }
+    
     // Create a unique file path for the avatar
     const fileExt = file.name.split('.').pop();
-    const filePath = `avatars/${walletAddress}/${Date.now()}.${fileExt}`;
+    const filePath = `${walletAddress}/${Date.now()}.${fileExt}`;
     
-    // Upload the file to Supabase storage
-    const { error: uploadError } = await supabase.storage
+    console.log('Uploading file to path:', filePath);
+    
+    // Upload the file with public-read access
+    const { data: uploadData, error: uploadError } = await supabase.storage
       .from('profiles')
-      .upload(filePath, file, {
+      .upload(filePath, compressedFile, {
         cacheControl: '3600',
-        upsert: true
+        upsert: true,
+        contentType: compressedFile.type
       });
     
-    if (uploadError) throw uploadError;
+    if (uploadError) {
+      console.error('Storage upload error:', uploadError);
+      throw uploadError;
+    }
+    
+    console.log('File uploaded successfully, data:', uploadData);
     
     // Get the public URL for the uploaded file
     const { data } = supabase.storage
       .from('profiles')
       .getPublicUrl(filePath);
     
+    console.log('Generated public URL:', data.publicUrl);
+    
     return data.publicUrl;
   } catch (error) {
+    console.error('Profile picture upload error:', error);
     handleError(error, 'Error uploading profile picture');
     return null;
   }
