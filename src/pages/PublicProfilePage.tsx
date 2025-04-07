@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -21,13 +21,19 @@ const PublicProfilePage = () => {
   const { username } = useParams<{ username: string }>();
   const [activeTab, setActiveTab] = useState("reports");
   const navigate = useNavigate();
+  const location = useLocation();
   const { profile: currentUserProfile } = useProfile();
   
-  const { data: profile, isLoading, error } = useQuery({
+  const { data: profile, isLoading, error, refetch } = useQuery({
     queryKey: ['profile', username],
     queryFn: () => getProfileByUsername(username || ''),
     enabled: !!username,
   });
+
+  // Add effect to refetch when location changes (coming back to this page)
+  useEffect(() => {
+    refetch();
+  }, [location, refetch]);
 
   const isOwnProfile = currentUserProfile?.wallet_address === profile?.wallet_address;
 

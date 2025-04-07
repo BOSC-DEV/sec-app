@@ -153,8 +153,9 @@ const ProfilePage = () => {
         description: 'Your profile has been updated successfully',
       });
       
+      // Navigate with a timestamp query parameter to force a refetch on the public profile page
       if (data.username) {
-        navigate(`/${data.username}`);
+        navigate(`/${data.username}?t=${Date.now()}`);
       }
       
     } catch (error) {

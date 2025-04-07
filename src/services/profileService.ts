@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Profile } from '@/types/dataTypes';
 import { handleError } from '@/utils/errorHandling';
@@ -7,7 +6,6 @@ import { validateFile, compressImage } from '@/utils/fileUpload';
 
 export const getProfiles = async (): Promise<Profile[]> => {
   try {
-    // Use the enhanced getProfileStatistics function to get profiles with counts
     const profilesWithStats = await getProfileStatistics();
     return profilesWithStats || [];
   } catch (error) {
@@ -39,7 +37,6 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
   try {
     console.log('Saving profile:', profile);
     
-    // Check if profile already exists
     const { data: existingProfile, error: checkError } = await supabase
       .from('profiles')
       .select('id')
@@ -55,7 +52,6 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
 
     if (existingProfile) {
       console.log('Updating existing profile with ID:', existingProfile.id);
-      // Update existing profile
       const { data, error } = await supabase
         .from('profiles')
         .update({
@@ -67,7 +63,7 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
           website_link: profile.website_link
         })
         .eq('id', existingProfile.id)
-        .select('*')  // Changed from .select() to .select('*') to ensure we get all profile fields
+        .select('*')
         .single();
       
       if (error) {
@@ -78,7 +74,6 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
       result = data;
     } else {
       console.log('Inserting new profile');
-      // Insert new profile
       const { data, error } = await supabase
         .from('profiles')
         .insert({
@@ -93,7 +88,7 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
           website_link: profile.website_link,
           points: 0
         })
-        .select('*')  // Changed from .select() to .select('*') to ensure we get all profile fields
+        .select('*')
         .single();
       
       if (error) {
@@ -118,9 +113,8 @@ export const uploadProfilePicture = async (walletAddress: string, file: File): P
   try {
     console.log('Starting profile picture upload for wallet:', walletAddress);
     
-    // Validate the file first
     const isValid = await validateFile(file, {
-      maxSize: 2 * 1024 * 1024, // 2MB
+      maxSize: 2 * 1024 * 1024,
       allowedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
     });
     
@@ -128,7 +122,6 @@ export const uploadProfilePicture = async (walletAddress: string, file: File): P
       throw new Error('Invalid file');
     }
     
-    // Compress the image to reduce size while maintaining quality
     const compressedFile = await compressImage(file, {
       maxWidth: 800,
       maxHeight: 800,
@@ -139,18 +132,16 @@ export const uploadProfilePicture = async (walletAddress: string, file: File): P
       throw new Error('Failed to compress image');
     }
     
-    // Create a unique file path for the avatar
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}.${fileExt}`;
     const filePath = `${walletAddress}/${fileName}`;
     
     console.log('Uploading file to path:', filePath);
     
-    // Upload the file with public-read access and specific content type
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('profiles')
       .upload(filePath, compressedFile, {
-        cacheControl: '0', // Set cache control to 0 to prevent caching
+        cacheControl: '0',
         upsert: true,
         contentType: compressedFile.type
       });
@@ -162,14 +153,12 @@ export const uploadProfilePicture = async (walletAddress: string, file: File): P
     
     console.log('File uploaded successfully, data:', uploadData);
     
-    // Get the public URL for the uploaded file using the correct path
     const { data } = supabase.storage
       .from('profiles')
       .getPublicUrl(filePath);
     
     console.log('Generated public URL:', data.publicUrl);
     
-    // Return the URL with a stronger cache buster to prevent browser caching issues
     const urlWithCacheBuster = `${data.publicUrl}?t=${Date.now()}`;
     console.log('URL with cache buster:', urlWithCacheBuster);
     
@@ -185,6 +174,7 @@ export const getProfileByUsername = async (username: string): Promise<Profile | 
   if (!username) return null;
   
   try {
+    const timestamp = new Date().getTime();
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
