@@ -43,15 +43,13 @@ const ScammerCardContent: React.FC<ScammerCardContentProps> = ({
           label="Aliases"
           value={
             scammer.aliases && scammer.aliases.length > 0 ? (
-              <div className="flex flex-wrap gap-1">
-                {scammer.aliases.slice(0, 2).map((alias, i) => (
-                  <Badge key={i} variant="outline" className="text-xs">
-                    {alias}
-                  </Badge>
-                ))}
-                {scammer.aliases.length > 2 && (
+              <div className="flex items-center gap-1">
+                <Badge variant="outline" className="text-xs">
+                  {scammer.aliases[0]}
+                </Badge>
+                {scammer.aliases.length > 1 && (
                   <Badge variant="outline" className="text-xs">
-                    +{scammer.aliases.length - 2} more
+                    +{scammer.aliases.length - 1}
                   </Badge>
                 )}
               </div>
@@ -94,14 +92,33 @@ const ScammerCardContent: React.FC<ScammerCardContentProps> = ({
             icon={Tag}
             label="Wallets"
             value={
-              <div className="flex flex-wrap gap-1">
+              <div className="flex items-center gap-1">
                 <Badge variant="outline" className="text-xs truncate max-w-[120px]">
                   {scammer.wallet_addresses[0].substring(0, 6)}...
                   {scammer.wallet_addresses[0].substring(scammer.wallet_addresses[0].length - 4)}
                 </Badge>
                 {scammer.wallet_addresses.length > 1 && (
                   <Badge variant="outline" className="text-xs">
-                    +{scammer.wallet_addresses.length - 1} more
+                    +{scammer.wallet_addresses.length - 1}
+                  </Badge>
+                )}
+              </div>
+            }
+          />
+        )}
+        
+        {scammer.accomplices && scammer.accomplices.length > 0 && (
+          <ScammerMetadata
+            icon={User}
+            label="Accomplices"
+            value={
+              <div className="flex items-center gap-1">
+                <Badge variant="outline" className="text-xs">
+                  {scammer.accomplices[0]}
+                </Badge>
+                {scammer.accomplices.length > 1 && (
+                  <Badge variant="outline" className="text-xs">
+                    +{scammer.accomplices.length - 1}
                   </Badge>
                 )}
               </div>
