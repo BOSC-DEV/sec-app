@@ -1,5 +1,6 @@
 
 import { toast } from '@/hooks/use-toast';
+import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL, sendAndConfirmTransaction } from '@solana/web3.js';
 
 export type PhantomEvent = "connect" | "disconnect";
 
@@ -13,6 +14,7 @@ export interface PhantomProvider {
   signTransaction: (transaction: any) => Promise<any>;
   signAllTransactions: (transactions: any[]) => Promise<any[]>;
   signMessage: (message: Uint8Array) => Promise<{ signature: Uint8Array }>;
+  sendTransaction: (transaction: Transaction, connection: Connection) => Promise<string>;
 }
 
 export type WindowWithPhantom = Window & { 
@@ -21,6 +23,9 @@ export type WindowWithPhantom = Window & {
     solana?: PhantomProvider;
   };
 };
+
+// Solana connection - using Mainnet Beta
+const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
 
 /**
  * Get the Phantom wallet provider if available
@@ -173,7 +178,7 @@ export const signMessageWithPhantom = async (message: string): Promise<string | 
 /**
  * Process a bounty transaction to the developer wallet
  * @param recipientAddress - Recipient wallet address
- * @param amount - Amount in $SEC tokens
+ * @param amount - Amount in $SEC tokens (or SOL for testing)
  * @returns Promise<string | null> - Transaction signature or null if transaction failed
  */
 export const sendTransactionToDevWallet = async (
@@ -203,34 +208,62 @@ export const sendTransactionToDevWallet = async (
   try {
     console.log(`Processing transaction to ${recipientAddress} for ${amount} $SEC tokens...`);
     
-    // For demonstration purposes, we'll simulate a transaction
-    // In a real implementation, we would use the Solana web3.js library to:
-    // 1. Create a transaction object
-    // 2. Add a transfer instruction for the specified amount
-    // 3. Sign the transaction with the user's wallet
-    // 4. Send the transaction to the network
-    // 5. Return the transaction signature
+    // For this implementation, we'll use SOL transfers since we don't have a real $SEC token
+    // In a production environment, you would use the SPL Token program for token transfers
     
-    // Simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    // Create a Solana transaction
+    const transaction = new Transaction();
     
-    // Generate a fake transaction signature for demo purposes
-    // In a real implementation, this would be the actual transaction signature
-    const transactionSignature = `tx_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+    // Get sender's public key
+    const fromPubkey = new PublicKey(provider.publicKey.toString());
     
-    console.log("Transaction processed successfully:", transactionSignature);
+    // Get recipient's public key
+    const toPubkey = new PublicKey(recipientAddress);
+    
+    // Add transfer instruction to transaction
+    // We'll convert the amount to lamports (1 SOL = 1_000_000_000 lamports)
+    // For testing purposes, we'll use a smaller amount
+    // In production, you would convert from your token's decimals
+    const lamports = Math.floor(amount * LAMPORTS_PER_SOL / 1000); // Dividing by 1000 for testing, to use very small amounts
+    
+    transaction.add(
+      SystemProgram.transfer({
+        fromPubkey,
+        toPubkey,
+        lamports,
+      })
+    );
+    
+    // Set recent blockhash
+    const { blockhash } = await connection.getLatestBlockhash();
+    transaction.recentBlockhash = blockhash;
+    transaction.feePayer = fromPubkey;
+    
+    // Sign and send transaction
+    const signature = await provider.sendTransaction(transaction, connection);
+    
+    console.log("Transaction sent, signature:", signature);
+    
+    // Wait for confirmation
+    const confirmation = await connection.confirmTransaction(signature, 'confirmed');
+    
+    if (confirmation.value.err) {
+      throw new Error(`Transaction failed: ${confirmation.value.err.toString()}`);
+    }
+    
+    console.log("Transaction confirmed successfully");
     
     toast({
       title: "Transaction successful",
       description: `Successfully sent ${amount} $SEC tokens to the developer wallet`,
     });
     
-    return transactionSignature;
+    return signature;
   } catch (error) {
     console.error("Error processing transaction:", error);
     toast({
       title: "Transaction error",
-      description: "Failed to process transaction",
+      description: "Failed to process transaction. " + (error instanceof Error ? error.message : ""),
       variant: "destructive",
     });
     return null;
