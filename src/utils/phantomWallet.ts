@@ -1,6 +1,13 @@
-
 import { toast } from '@/hooks/use-toast';
-import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { 
+  Connection, 
+  PublicKey, 
+  Transaction, 
+  SystemProgram, 
+  LAMPORTS_PER_SOL,
+  TransactionSignature,
+  VersionedTransaction
+} from '@solana/web3.js';
 import { 
   getAssociatedTokenAddress, 
   createAssociatedTokenAccountInstruction,
@@ -21,10 +28,10 @@ export interface PhantomProvider {
   isPhantom: boolean;
   isConnected: boolean;
   publicKey: { toString: () => string } | null;
-  signTransaction: (transaction: any) => Promise<any>;
-  signAllTransactions: (transactions: any[]) => Promise<any[]>;
+  signTransaction: (transaction: Transaction | VersionedTransaction) => Promise<Transaction | VersionedTransaction>;
+  signAllTransactions: (transactions: (Transaction | VersionedTransaction)[]) => Promise<(Transaction | VersionedTransaction)[]>;
   signMessage: (message: Uint8Array) => Promise<{ signature: Uint8Array }>;
-  signAndSendTransaction: (transaction: Transaction, options?: any) => Promise<{ signature: string }>;
+  signAndSendTransaction: (transaction: Transaction | VersionedTransaction, options?: any) => Promise<{ signature: string }>;
 }
 
 export type WindowWithPhantom = Window & { 
@@ -36,10 +43,14 @@ export type WindowWithPhantom = Window & {
 
 const ALCHEMY_RPC_URL = 'https://solana-mainnet.g.alchemy.com/v2/ibmWfrUOabGJ9hN-Ugjtlb5MLdwlWx1d';
 const FALLBACK_RPC_URL = 'https://api.mainnet-beta.solana.com';
+const TRANSACTION_TIMEOUT = 60 * 1000; // 60 seconds in milliseconds
 
 const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump');
 
-const connection = new Connection(ALCHEMY_RPC_URL, 'confirmed');
+const connection = new Connection(ALCHEMY_RPC_URL, {
+  commitment: 'confirmed',
+  confirmTransactionInitialTimeout: TRANSACTION_TIMEOUT
+});
 
 let fallbackConnection: Connection | null = null;
 
@@ -50,7 +61,10 @@ const getConnection = (): Connection => {
 const getFallbackConnection = (): Connection => {
   if (!fallbackConnection) {
     console.log('Initializing fallback Solana connection');
-    fallbackConnection = new Connection(FALLBACK_RPC_URL, 'confirmed');
+    fallbackConnection = new Connection(FALLBACK_RPC_URL, {
+      commitment: 'confirmed',
+      confirmTransactionInitialTimeout: TRANSACTION_TIMEOUT
+    });
   }
   return fallbackConnection;
 };
@@ -291,10 +305,7 @@ export const sendTransactionToDevWallet = async (
         }
       }
       
-      // SEC token has 6 decimals, not 9
       const tokenDecimals = 6;
-      // Correct calculation to convert user-facing amount to token units
-      // For example, if user enters 5, we need to send 5 * 10^6 = 5,000,000 base units
       const tokenAmount = BigInt(Math.round(amount * 10 ** tokenDecimals));
       
       console.log(`Converting ${amount} SEC tokens to ${tokenAmount} base units (with ${tokenDecimals} decimals)`);
@@ -309,22 +320,25 @@ export const sendTransactionToDevWallet = async (
       );
       
       try {
-        const { blockhash } = await activeConnection.getLatestBlockhash();
+        const { blockhash, lastValidBlockHeight } = await activeConnection.getLatestBlockhash();
         transaction.recentBlockhash = blockhash;
         transaction.feePayer = fromPubkey;
         
         console.log("Sending SEC token transaction via Alchemy RPC...");
         const { signature } = await provider.signAndSendTransaction(transaction);
-        
         console.log("SEC token transaction sent, signature:", signature);
         
-        const confirmation = await activeConnection.confirmTransaction(signature, 'confirmed');
+        const confirmationResult = await activeConnection.confirmTransaction({
+          signature,
+          blockhash,
+          lastValidBlockHeight
+        }, 'confirmed');
         
-        if (confirmation.value.err) {
-          throw new Error(`Transaction failed: ${JSON.stringify(confirmation.value.err)}`);
+        if (confirmationResult.value.err) {
+          throw new Error(`Transaction failed: ${JSON.stringify(confirmationResult.value.err)}`);
         }
         
-        console.log("SEC token transaction confirmed successfully");
+        console.log("SEC token transaction confirmed successfully:", confirmationResult);
         
         toast({
           title: "Transaction successful",
@@ -338,7 +352,7 @@ export const sendTransactionToDevWallet = async (
         try {
           const fallbackConn = getFallbackConnection();
           
-          const { blockhash } = await fallbackConn.getLatestBlockhash();
+          const { blockhash, lastValidBlockHeight } = await fallbackConn.getLatestBlockhash();
           transaction.recentBlockhash = blockhash;
           
           console.log("Sending SEC token transaction via fallback RPC...");
@@ -346,10 +360,14 @@ export const sendTransactionToDevWallet = async (
           
           console.log("Fallback SEC token transaction sent, signature:", signature);
           
-          const confirmation = await fallbackConn.confirmTransaction(signature, 'confirmed');
+          const confirmationResult = await fallbackConn.confirmTransaction({
+            signature,
+            blockhash,
+            lastValidBlockHeight
+          }, 'confirmed');
           
-          if (confirmation.value.err) {
-            throw new Error(`Fallback transaction failed: ${JSON.stringify(confirmation.value.err)}`);
+          if (confirmationResult.value.err) {
+            throw new Error(`Fallback transaction failed: ${JSON.stringify(confirmationResult.value.err)}`);
           }
           
           console.log("Fallback SEC token transaction confirmed successfully");
