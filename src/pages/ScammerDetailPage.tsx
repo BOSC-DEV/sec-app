@@ -224,6 +224,7 @@ const ScammerDetailPage = () => {
       contributor_id: string;
       contributor_name: string;
       contributor_profile_pic?: string;
+      transaction_signature?: string;
     }) => addBountyContribution(contribution),
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -364,7 +365,7 @@ const ScammerDetailPage = () => {
 
   const handleAddBounty = async () => {
     if (!profile) {
-      await connectWallet();
+      await connectPhantomWallet();
       if (!profile) {
         toast({
           title: "Authentication required",
