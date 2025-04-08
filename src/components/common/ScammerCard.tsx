@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Eye, ThumbsUp, ThumbsDown, DollarSign, MessageSquare, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
@@ -17,6 +18,7 @@ interface ScammerCardProps {
 }
 
 const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
+  const navigate = useNavigate();
   const { profile } = useProfile();
   const isCreator = profile?.wallet_address === scammer.added_by;
   const [likes, setLikes] = useState(scammer.likes || 0);
@@ -215,6 +217,12 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
     }
   };
 
+  const handleBountyClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate(`/scammer/${scammer.id}#bounty-section`);
+  };
+
   return (
     <div className="icc-card overflow-hidden group">
       <Link to={`/scammer/${scammer.id}`} className="block">
@@ -288,7 +296,12 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
           Agree
         </Toggle>
         
-        <Button variant="outline" size="sm" className="text-xs px-2 mx-1">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="text-xs px-2 mx-1"
+          onClick={handleBountyClick}
+        >
           <DollarSign className="h-3.5 w-3.5 mr-1" />
           Bounty
         </Button>

@@ -19,6 +19,7 @@ export type Database = {
           created_at: string
           id: string
           scammer_id: string
+          transaction_signature: string | null
         }
         Insert: {
           amount: number
@@ -29,6 +30,7 @@ export type Database = {
           created_at?: string
           id?: string
           scammer_id: string
+          transaction_signature?: string | null
         }
         Update: {
           amount?: number
@@ -39,6 +41,7 @@ export type Database = {
           created_at?: string
           id?: string
           scammer_id?: string
+          transaction_signature?: string | null
         }
         Relationships: [
           {
