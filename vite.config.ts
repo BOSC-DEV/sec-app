@@ -27,4 +27,8 @@ export default defineConfig(({ mode }) => ({
       ],
     },
   },
+  define: {
+    // Make Buffer available globally for @solana/web3.js
+    global: {},
+  }
 }));
