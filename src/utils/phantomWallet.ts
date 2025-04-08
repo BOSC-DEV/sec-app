@@ -1,3 +1,4 @@
+
 import { toast } from '@/hooks/use-toast';
 import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { 
@@ -290,8 +291,13 @@ export const sendTransactionToDevWallet = async (
         }
       }
       
-      const tokenDecimals = 9;
-      const tokenAmount = BigInt(Math.floor(amount * 10 ** tokenDecimals));
+      // SEC token has 6 decimals, not 9
+      const tokenDecimals = 6;
+      // Correct calculation to convert user-facing amount to token units
+      // For example, if user enters 5, we need to send 5 * 10^6 = 5,000,000 base units
+      const tokenAmount = BigInt(Math.round(amount * 10 ** tokenDecimals));
+      
+      console.log(`Converting ${amount} SEC tokens to ${tokenAmount} base units (with ${tokenDecimals} decimals)`);
       
       transaction.add(
         createTransferInstruction(
