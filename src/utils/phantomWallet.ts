@@ -1,6 +1,14 @@
-
 import { toast } from '@/hooks/use-toast';
 import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { 
+  getAssociatedTokenAddress, 
+  createAssociatedTokenAccountInstruction,
+  getAccount,
+  TokenAccountNotFoundError,
+  TokenInvalidAccountOwnerError,
+  createTransferInstruction,
+  TOKEN_PROGRAM_ID
+} from '@solana/spl-token';
 import { handleError, ErrorSeverity } from '@/utils/errorHandling';
 
 export type PhantomEvent = "connect" | "disconnect";
@@ -15,9 +23,7 @@ export interface PhantomProvider {
   signTransaction: (transaction: any) => Promise<any>;
   signAllTransactions: (transactions: any[]) => Promise<any[]>;
   signMessage: (message: Uint8Array) => Promise<{ signature: Uint8Array }>;
-  // Update interface to match actual Phantom API
   signAndSendTransaction: (transaction: Transaction, options?: any) => Promise<{ signature: string }>;
-  // Remove sendTransaction since it's not available
 }
 
 export type WindowWithPhantom = Window & { 
@@ -27,22 +33,19 @@ export type WindowWithPhantom = Window & {
   };
 };
 
-// Configuration constants
 const ALCHEMY_RPC_URL = 'https://solana-mainnet.g.alchemy.com/v2/ibmWfrUOabGJ9hN-Ugjtlb5MLdwlWx1d';
 const FALLBACK_RPC_URL = 'https://api.mainnet-beta.solana.com';
 
-// Create primary connection with Alchemy
+const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump');
+
 const connection = new Connection(ALCHEMY_RPC_URL, 'confirmed');
 
-// Fallback connection in case the primary fails
 let fallbackConnection: Connection | null = null;
 
-// Function to get an active connection, with fallback logic
 const getConnection = (): Connection => {
   return connection;
 };
 
-// Function to initialize fallback connection if needed
 const getFallbackConnection = (): Connection => {
   if (!fallbackConnection) {
     console.log('Initializing fallback Solana connection');
@@ -51,14 +54,9 @@ const getFallbackConnection = (): Connection => {
   return fallbackConnection;
 };
 
-/**
- * Get the Phantom wallet provider if available
- * @returns PhantomProvider | null
- */
 export const getPhantomProvider = (): PhantomProvider | null => {
   const windowWithPhantom = window as WindowWithPhantom;
   
-  // Check if Phantom wallet is available
   const provider = windowWithPhantom.solana || windowWithPhantom.phantom?.solana;
   
   if (provider?.isPhantom) {
@@ -68,10 +66,6 @@ export const getPhantomProvider = (): PhantomProvider | null => {
   return null;
 };
 
-/**
- * Connect to Phantom wallet
- * @returns Promise<string | null> - Public key of the wallet or null if connection failed
- */
 export const connectPhantomWallet = async (): Promise<string | null> => {
   const provider = getPhantomProvider();
   
@@ -82,7 +76,6 @@ export const connectPhantomWallet = async (): Promise<string | null> => {
       variant: "destructive",
     });
     
-    // Open Phantom website in a new tab
     window.open("https://phantom.app/", "_blank");
     return null;
   }
@@ -111,9 +104,6 @@ export const connectPhantomWallet = async (): Promise<string | null> => {
   }
 };
 
-/**
- * Disconnect from Phantom wallet
- */
 export const disconnectPhantomWallet = async (): Promise<void> => {
   const provider = getPhantomProvider();
   
@@ -139,10 +129,6 @@ export const disconnectPhantomWallet = async (): Promise<void> => {
   }
 };
 
-/**
- * Get the public key of the connected wallet
- * @returns string | null - Public key or null if not connected
- */
 export const getWalletPublicKey = (): string | null => {
   const provider = getPhantomProvider();
   
@@ -153,19 +139,10 @@ export const getWalletPublicKey = (): string | null => {
   return null;
 };
 
-/**
- * Check if Phantom wallet is installed
- * @returns boolean
- */
 export const isPhantomInstalled = (): boolean => {
   return getPhantomProvider() !== null;
 };
 
-/**
- * Sign a message with Phantom wallet
- * @param message - Message to sign
- * @returns Promise<string | null> - Base64 encoded signature or null if signing failed
- */
 export const signMessageWithPhantom = async (message: string): Promise<string | null> => {
   const provider = getPhantomProvider();
   
@@ -183,7 +160,6 @@ export const signMessageWithPhantom = async (message: string): Promise<string | 
     const encodedMessage = new TextEncoder().encode(message);
     const { signature } = await provider.signMessage(encodedMessage);
     
-    // Convert signature to base64
     const signatureBase64 = btoa(String.fromCharCode(...signature));
     console.log("Message signed successfully:", signatureBase64);
     
@@ -199,12 +175,33 @@ export const signMessageWithPhantom = async (message: string): Promise<string | 
   }
 };
 
-/**
- * Process a bounty transaction to the developer wallet using Alchemy RPC
- * @param recipientAddress - Recipient wallet address
- * @param amount - Amount in $SEC tokens (or SOL for testing)
- * @returns Promise<string | null> - Transaction signature or null if transaction failed
- */
+const getOrCreateAssociatedTokenAccount = async (
+  connection: Connection,
+  payer: PublicKey,
+  owner: PublicKey,
+  mint: PublicKey
+): Promise<PublicKey> => {
+  const associatedToken = await getAssociatedTokenAddress(
+    mint,
+    owner,
+    false
+  );
+  
+  try {
+    await getAccount(connection, associatedToken);
+    return associatedToken;
+  } catch (error) {
+    if (
+      error instanceof TokenAccountNotFoundError ||
+      error instanceof TokenInvalidAccountOwnerError
+    ) {
+      console.log(`Associated token account for ${owner.toString()} doesn't exist, creating...`);
+      return associatedToken;
+    }
+    throw error;
+  }
+};
+
 export const sendTransactionToDevWallet = async (
   recipientAddress: string,
   amount: number
@@ -230,92 +227,111 @@ export const sendTransactionToDevWallet = async (
   }
   
   try {
-    console.log(`Processing transaction to ${recipientAddress} for ${amount} $SEC tokens...`);
+    console.log(`Processing SEC token transaction to ${recipientAddress} for ${amount} $SEC tokens...`);
     
-    // For this implementation, we'll use SOL transfers since we don't have a real $SEC token
-    // In a production environment, you would use the SPL Token program for token transfers
-    
-    // Create a Solana transaction
     const transaction = new Transaction();
     
-    // Get sender's public key
     const fromPubkey = new PublicKey(provider.publicKey.toString());
-    
-    // Get recipient's public key
     const toPubkey = new PublicKey(recipientAddress);
     
-    // Add transfer instruction to transaction
-    // We'll convert the amount to lamports (1 SOL = 1_000_000_000 lamports)
-    // For testing purposes, we'll use a smaller amount
-    // In production, you would convert from your token's decimals
-    const lamports = Math.floor(amount * LAMPORTS_PER_SOL / 1000); // Dividing by 1000 for testing, to use very small amounts
+    const activeConnection = getConnection();
     
-    transaction.add(
-      SystemProgram.transfer({
-        fromPubkey,
-        toPubkey,
-        lamports,
-      })
+    const senderTokenAccount = await getOrCreateAssociatedTokenAccount(
+      activeConnection,
+      fromPubkey,
+      fromPubkey,
+      SEC_TOKEN_MINT
+    );
+    
+    const recipientTokenAccount = await getOrCreateAssociatedTokenAccount(
+      activeConnection,
+      fromPubkey,
+      toPubkey,
+      SEC_TOKEN_MINT
     );
     
     try {
-      // Get Alchemy connection
-      const activeConnection = getConnection();
-      
-      // Set recent blockhash
+      await getAccount(activeConnection, recipientTokenAccount);
+    } catch (error) {
+      if (
+        error instanceof TokenAccountNotFoundError ||
+        error instanceof TokenInvalidAccountOwnerError
+      ) {
+        console.log("Creating recipient's associated token account...");
+        transaction.add(
+          createAssociatedTokenAccountInstruction(
+            fromPubkey,
+            recipientTokenAccount,
+            toPubkey,
+            SEC_TOKEN_MINT
+          )
+        );
+      } else {
+        throw error;
+      }
+    }
+    
+    const tokenDecimals = 9;
+    const tokenAmount = BigInt(Math.floor(amount * 10 ** tokenDecimals));
+    
+    transaction.add(
+      createTransferInstruction(
+        senderTokenAccount,
+        recipientTokenAccount,
+        fromPubkey,
+        tokenAmount
+      )
+    );
+    
+    try {
       const { blockhash } = await activeConnection.getLatestBlockhash();
       transaction.recentBlockhash = blockhash;
       transaction.feePayer = fromPubkey;
       
-      // Sign and send transaction using signAndSendTransaction instead of sendTransaction
-      console.log("Sending transaction via Alchemy RPC using signAndSendTransaction...");
+      console.log("Sending SEC token transaction via Alchemy RPC...");
       const { signature } = await provider.signAndSendTransaction(transaction);
       
-      console.log("Transaction sent, signature:", signature);
+      console.log("SEC token transaction sent, signature:", signature);
       
-      // Wait for confirmation
       const confirmation = await activeConnection.confirmTransaction(signature, 'confirmed');
       
       if (confirmation.value.err) {
         throw new Error(`Transaction failed: ${JSON.stringify(confirmation.value.err)}`);
       }
       
-      console.log("Transaction confirmed successfully");
+      console.log("SEC token transaction confirmed successfully");
       
       toast({
         title: "Transaction successful",
-        description: `Successfully sent ${amount} $SEC tokens to the developer wallet`,
+        description: `Successfully sent ${amount} $SEC tokens to the wallet`,
       });
       
       return signature;
     } catch (error) {
       console.error("Primary RPC connection failed, trying fallback:", error);
       
-      // If primary connection fails, try with fallback
       try {
         const fallbackConn = getFallbackConnection();
         
-        // Get new blockhash from fallback connection
         const { blockhash } = await fallbackConn.getLatestBlockhash();
         transaction.recentBlockhash = blockhash;
         
-        console.log("Sending transaction via fallback RPC...");
+        console.log("Sending SEC token transaction via fallback RPC...");
         const { signature } = await provider.signAndSendTransaction(transaction);
         
-        console.log("Fallback transaction sent, signature:", signature);
+        console.log("Fallback SEC token transaction sent, signature:", signature);
         
-        // Wait for confirmation on fallback
         const confirmation = await fallbackConn.confirmTransaction(signature, 'confirmed');
         
         if (confirmation.value.err) {
           throw new Error(`Fallback transaction failed: ${JSON.stringify(confirmation.value.err)}`);
         }
         
-        console.log("Fallback transaction confirmed successfully");
+        console.log("Fallback SEC token transaction confirmed successfully");
         
         toast({
           title: "Transaction successful (fallback)",
-          description: `Successfully sent ${amount} $SEC tokens to the developer wallet`,
+          description: `Successfully sent ${amount} $SEC tokens to the wallet`,
         });
         
         return signature;
@@ -325,9 +341,9 @@ export const sendTransactionToDevWallet = async (
     }
   } catch (error) {
     handleError(error, {
-      fallbackMessage: "Failed to process transaction. Please try again later.",
+      fallbackMessage: "Failed to process SEC token transaction. Please try again later.",
       severity: ErrorSeverity.HIGH,
-      context: "PROCESS_TRANSACTION"
+      context: "PROCESS_TOKEN_TRANSACTION"
     });
     return null;
   }
