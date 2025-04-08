@@ -181,24 +181,32 @@ const getOrCreateAssociatedTokenAccount = async (
   owner: PublicKey,
   mint: PublicKey
 ): Promise<PublicKey> => {
-  const associatedToken = await getAssociatedTokenAddress(
-    mint,
-    owner,
-    false
-  );
-  
   try {
-    await getAccount(connection, associatedToken);
-    return associatedToken;
-  } catch (error) {
-    if (
-      error instanceof TokenAccountNotFoundError ||
-      error instanceof TokenInvalidAccountOwnerError
-    ) {
-      console.log(`Associated token account for ${owner.toString()} doesn't exist, creating...`);
+    const associatedToken = await getAssociatedTokenAddress(
+      mint,
+      owner,
+      false,
+      TOKEN_PROGRAM_ID,
+      TOKEN_PROGRAM_ID,
+      true
+    );
+    
+    try {
+      await getAccount(connection, associatedToken);
       return associatedToken;
+    } catch (error) {
+      if (
+        error instanceof TokenAccountNotFoundError ||
+        error instanceof TokenInvalidAccountOwnerError
+      ) {
+        console.log(`Associated token account for ${owner.toString()} doesn't exist, creating...`);
+        return associatedToken;
+      }
+      throw error;
     }
-    throw error;
+  } catch (error) {
+    console.error('Error in getOrCreateAssociatedTokenAccount:', error);
+    throw new Error(`Failed to get associated token account: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 };
 
@@ -232,112 +240,128 @@ export const sendTransactionToDevWallet = async (
     const transaction = new Transaction();
     
     const fromPubkey = new PublicKey(provider.publicKey.toString());
-    const toPubkey = new PublicKey(recipientAddress);
+    
+    let toPubkey: PublicKey;
+    try {
+      toPubkey = new PublicKey(recipientAddress);
+    } catch (error) {
+      toast({
+        title: "Invalid recipient address",
+        description: "The recipient address is not a valid Solana address",
+        variant: "destructive",
+      });
+      return null;
+    }
     
     const activeConnection = getConnection();
     
-    const senderTokenAccount = await getOrCreateAssociatedTokenAccount(
-      activeConnection,
-      fromPubkey,
-      fromPubkey,
-      SEC_TOKEN_MINT
-    );
-    
-    const recipientTokenAccount = await getOrCreateAssociatedTokenAccount(
-      activeConnection,
-      fromPubkey,
-      toPubkey,
-      SEC_TOKEN_MINT
-    );
-    
     try {
-      await getAccount(activeConnection, recipientTokenAccount);
-    } catch (error) {
-      if (
-        error instanceof TokenAccountNotFoundError ||
-        error instanceof TokenInvalidAccountOwnerError
-      ) {
-        console.log("Creating recipient's associated token account...");
-        transaction.add(
-          createAssociatedTokenAccountInstruction(
-            fromPubkey,
-            recipientTokenAccount,
-            toPubkey,
-            SEC_TOKEN_MINT
-          )
-        );
-      } else {
-        throw error;
-      }
-    }
-    
-    const tokenDecimals = 9;
-    const tokenAmount = BigInt(Math.floor(amount * 10 ** tokenDecimals));
-    
-    transaction.add(
-      createTransferInstruction(
-        senderTokenAccount,
-        recipientTokenAccount,
+      const senderTokenAccount = await getOrCreateAssociatedTokenAccount(
+        activeConnection,
         fromPubkey,
-        tokenAmount
-      )
-    );
-    
-    try {
-      const { blockhash } = await activeConnection.getLatestBlockhash();
-      transaction.recentBlockhash = blockhash;
-      transaction.feePayer = fromPubkey;
+        fromPubkey,
+        SEC_TOKEN_MINT
+      );
       
-      console.log("Sending SEC token transaction via Alchemy RPC...");
-      const { signature } = await provider.signAndSendTransaction(transaction);
-      
-      console.log("SEC token transaction sent, signature:", signature);
-      
-      const confirmation = await activeConnection.confirmTransaction(signature, 'confirmed');
-      
-      if (confirmation.value.err) {
-        throw new Error(`Transaction failed: ${JSON.stringify(confirmation.value.err)}`);
-      }
-      
-      console.log("SEC token transaction confirmed successfully");
-      
-      toast({
-        title: "Transaction successful",
-        description: `Successfully sent ${amount} $SEC tokens to the wallet`,
-      });
-      
-      return signature;
-    } catch (error) {
-      console.error("Primary RPC connection failed, trying fallback:", error);
+      const recipientTokenAccount = await getOrCreateAssociatedTokenAccount(
+        activeConnection,
+        fromPubkey,
+        toPubkey,
+        SEC_TOKEN_MINT
+      );
       
       try {
-        const fallbackConn = getFallbackConnection();
-        
-        const { blockhash } = await fallbackConn.getLatestBlockhash();
+        await getAccount(activeConnection, recipientTokenAccount);
+      } catch (error) {
+        if (
+          error instanceof TokenAccountNotFoundError ||
+          error instanceof TokenInvalidAccountOwnerError
+        ) {
+          console.log("Creating recipient's associated token account...");
+          transaction.add(
+            createAssociatedTokenAccountInstruction(
+              fromPubkey,
+              recipientTokenAccount,
+              toPubkey,
+              SEC_TOKEN_MINT
+            )
+          );
+        } else {
+          throw error;
+        }
+      }
+      
+      const tokenDecimals = 9;
+      const tokenAmount = BigInt(Math.floor(amount * 10 ** tokenDecimals));
+      
+      transaction.add(
+        createTransferInstruction(
+          senderTokenAccount,
+          recipientTokenAccount,
+          fromPubkey,
+          tokenAmount
+        )
+      );
+      
+      try {
+        const { blockhash } = await activeConnection.getLatestBlockhash();
         transaction.recentBlockhash = blockhash;
+        transaction.feePayer = fromPubkey;
         
-        console.log("Sending SEC token transaction via fallback RPC...");
+        console.log("Sending SEC token transaction via Alchemy RPC...");
         const { signature } = await provider.signAndSendTransaction(transaction);
         
-        console.log("Fallback SEC token transaction sent, signature:", signature);
+        console.log("SEC token transaction sent, signature:", signature);
         
-        const confirmation = await fallbackConn.confirmTransaction(signature, 'confirmed');
+        const confirmation = await activeConnection.confirmTransaction(signature, 'confirmed');
         
         if (confirmation.value.err) {
-          throw new Error(`Fallback transaction failed: ${JSON.stringify(confirmation.value.err)}`);
+          throw new Error(`Transaction failed: ${JSON.stringify(confirmation.value.err)}`);
         }
         
-        console.log("Fallback SEC token transaction confirmed successfully");
+        console.log("SEC token transaction confirmed successfully");
         
         toast({
-          title: "Transaction successful (fallback)",
+          title: "Transaction successful",
           description: `Successfully sent ${amount} $SEC tokens to the wallet`,
         });
         
         return signature;
-      } catch (fallbackError) {
-        throw new Error(`Both primary and fallback RPC failed: ${fallbackError instanceof Error ? fallbackError.message : 'Unknown error'}`);
+      } catch (error) {
+        console.error("Primary RPC connection failed, trying fallback:", error);
+        
+        try {
+          const fallbackConn = getFallbackConnection();
+          
+          const { blockhash } = await fallbackConn.getLatestBlockhash();
+          transaction.recentBlockhash = blockhash;
+          
+          console.log("Sending SEC token transaction via fallback RPC...");
+          const { signature } = await provider.signAndSendTransaction(transaction);
+          
+          console.log("Fallback SEC token transaction sent, signature:", signature);
+          
+          const confirmation = await fallbackConn.confirmTransaction(signature, 'confirmed');
+          
+          if (confirmation.value.err) {
+            throw new Error(`Fallback transaction failed: ${JSON.stringify(confirmation.value.err)}`);
+          }
+          
+          console.log("Fallback SEC token transaction confirmed successfully");
+          
+          toast({
+            title: "Transaction successful (fallback)",
+            description: `Successfully sent ${amount} $SEC tokens to the wallet`,
+          });
+          
+          return signature;
+        } catch (fallbackError) {
+          throw new Error(`Both primary and fallback RPC failed: ${fallbackError instanceof Error ? fallbackError.message : 'Unknown error'}`);
+        }
       }
+    } catch (error) {
+      console.error("Error while preparing transaction:", error);
+      throw error;
     }
   } catch (error) {
     handleError(error, {

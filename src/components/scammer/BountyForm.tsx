@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Clipboard, DollarSign } from 'lucide-react';
+import { Clipboard, DollarSign, Copy } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useProfile } from '@/contexts/ProfileContext';
 import { addBountyContribution } from '@/services/bountyService';
@@ -113,6 +113,14 @@ const BountyForm: React.FC<BountyFormProps> = ({
     try {
       // Process the transaction to the developer wallet
       console.log(`Processing bounty transaction of ${amount} $SEC to ${developerWalletAddress}`);
+      
+      // Add a more detailed log before the transaction
+      console.log('Developer wallet address type and value:', {
+        address: developerWalletAddress,
+        type: typeof developerWalletAddress,
+        length: developerWalletAddress.length
+      });
+      
       const transactionSignature = await sendTransactionToDevWallet(developerWalletAddress, amount);
       
       if (!transactionSignature) {
@@ -132,6 +140,7 @@ const BountyForm: React.FC<BountyFormProps> = ({
         transaction_signature: transactionSignature
       });
     } catch (error) {
+      console.error("Bounty contribution error:", error);
       handleError(error, {
         fallbackMessage: "Failed to process bounty contribution. Please try again.",
         severity: ErrorSeverity.MEDIUM,
