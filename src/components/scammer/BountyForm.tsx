@@ -7,7 +7,7 @@ import { Clipboard, DollarSign } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useProfile } from '@/contexts/ProfileContext';
 import { addBountyContribution } from '@/services/bountyService';
-import { sendTransactionToDevWallet } from '@/utils/phantomWallet';
+import { sendTransactionToDevWallet, connectPhantomWallet } from '@/utils/phantomWallet';
 import { handleError, ErrorSeverity } from '@/utils/errorHandling';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -22,7 +22,7 @@ const BountyForm: React.FC<BountyFormProps> = ({
   scammerName, 
   developerWalletAddress 
 }) => {
-  const { profile } = useProfile();
+  const { profile, connectWallet } = useProfile();
   const queryClient = useQueryClient();
   const [contributionAmount, setContributionAmount] = useState('0.00');
   const [bountyComment, setBountyComment] = useState('');
@@ -84,13 +84,18 @@ const BountyForm: React.FC<BountyFormProps> = ({
   });
 
   const handleAddBounty = async () => {
+    // Check if user is logged in
     if (!profile) {
-      toast({
-        title: "Authentication required",
-        description: "Please connect your wallet to contribute to this bounty.",
-        variant: "destructive"
-      });
-      return;
+      // Try to connect wallet first
+      await connectWallet();
+      if (!profile) {
+        toast({
+          title: "Authentication required",
+          description: "Please connect your wallet to contribute to this bounty.",
+          variant: "destructive"
+        });
+        return;
+      }
     }
     
     const amount = parseFloat(contributionAmount);
@@ -106,7 +111,7 @@ const BountyForm: React.FC<BountyFormProps> = ({
     setIsProcessing(true);
     
     try {
-      // Simulate sending a transaction to the developer wallet
+      // Process the transaction to the developer wallet
       console.log(`Processing bounty transaction of ${amount} $SEC to ${developerWalletAddress}`);
       const transactionSignature = await sendTransactionToDevWallet(developerWalletAddress, amount);
       
@@ -115,7 +120,7 @@ const BountyForm: React.FC<BountyFormProps> = ({
         return;
       }
       
-      // Record the contribution in the database
+      // Only proceed with database operation if transaction was successful
       console.log("Recording bounty contribution in database");
       addBountyContributionMutation.mutate({
         scammer_id: scammerId,
