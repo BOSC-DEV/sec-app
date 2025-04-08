@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import CompactHero from '@/components/common/CompactHero';
 import ScammerCard from '@/components/common/ScammerCard';
@@ -28,6 +27,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip';
+import { Plus } from 'lucide-react';
 
 const MostWantedPage = () => {
   const [filteredScammers, setFilteredScammers] = useState<Scammer[]>([]);
@@ -446,11 +446,15 @@ const MostWantedPage = () => {
                           <TableCell>
                             {scammer.aliases && scammer.aliases.length > 0 ? (
                               <div className="flex flex-wrap gap-1">
-                                {scammer.aliases.map((alias, i) => (
-                                  <Badge key={i} variant="outline" className="bg-icc-gold/20 hover:bg-icc-gold/40 text-icc-blue border-icc-gold/50">
-                                    {alias}
+                                <Badge variant="gold" className="text-xs">
+                                  {scammer.aliases[0]}
+                                </Badge>
+                                {scammer.aliases.length > 1 && (
+                                  <Badge variant="gold" className="text-xs flex items-center gap-0.5">
+                                    <Plus className="h-3 w-3" />
+                                    {scammer.aliases.length - 1}
                                   </Badge>
-                                ))}
+                                )}
                               </div>
                             ) : (
                               <span className="text-gray-400">-</span>

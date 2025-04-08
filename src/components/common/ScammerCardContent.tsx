@@ -3,7 +3,7 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { Scammer } from '@/types/dataTypes';
-import { LucideIcon, User, DollarSign, AlertTriangle, Calendar, Tag } from 'lucide-react';
+import { LucideIcon, User, DollarSign, AlertTriangle, Calendar, Tag, Plus } from 'lucide-react';
 
 interface ScammerMetadataProps {
   icon: LucideIcon;
@@ -48,8 +48,9 @@ const ScammerCardContent: React.FC<ScammerCardContentProps> = ({
                   {scammer.aliases[0]}
                 </Badge>
                 {scammer.aliases.length > 1 && (
-                  <Badge variant="outline" className="text-xs">
-                    +{scammer.aliases.length - 1}
+                  <Badge variant="outline" className="text-xs flex items-center gap-0.5">
+                    <Plus className="h-3 w-3" />
+                    {scammer.aliases.length - 1}
                   </Badge>
                 )}
               </div>
@@ -98,8 +99,9 @@ const ScammerCardContent: React.FC<ScammerCardContentProps> = ({
                   {scammer.wallet_addresses[0].substring(scammer.wallet_addresses[0].length - 4)}
                 </Badge>
                 {scammer.wallet_addresses.length > 1 && (
-                  <Badge variant="outline" className="text-xs">
-                    +{scammer.wallet_addresses.length - 1}
+                  <Badge variant="outline" className="text-xs flex items-center gap-0.5">
+                    <Plus className="h-3 w-3" />
+                    {scammer.wallet_addresses.length - 1}
                   </Badge>
                 )}
               </div>
@@ -117,8 +119,9 @@ const ScammerCardContent: React.FC<ScammerCardContentProps> = ({
                   {scammer.accomplices[0]}
                 </Badge>
                 {scammer.accomplices.length > 1 && (
-                  <Badge variant="outline" className="text-xs">
-                    +{scammer.accomplices.length - 1}
+                  <Badge variant="outline" className="text-xs flex items-center gap-0.5">
+                    <Plus className="h-3 w-3" />
+                    {scammer.accomplices.length - 1}
                   </Badge>
                 )}
               </div>
