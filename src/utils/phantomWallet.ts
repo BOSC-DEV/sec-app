@@ -1,5 +1,6 @@
+
 import { toast } from '@/hooks/use-toast';
-import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL, sendAndConfirmTransaction } from '@solana/web3.js';
+import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { handleError, ErrorSeverity } from '@/utils/errorHandling';
 
 export type PhantomEvent = "connect" | "disconnect";
@@ -14,7 +15,9 @@ export interface PhantomProvider {
   signTransaction: (transaction: any) => Promise<any>;
   signAllTransactions: (transactions: any[]) => Promise<any[]>;
   signMessage: (message: Uint8Array) => Promise<{ signature: Uint8Array }>;
-  sendTransaction: (transaction: Transaction, connection: Connection) => Promise<string>;
+  // Update interface to match actual Phantom API
+  signAndSendTransaction: (transaction: Transaction, options?: any) => Promise<{ signature: string }>;
+  // Remove sendTransaction since it's not available
 }
 
 export type WindowWithPhantom = Window & { 
@@ -264,9 +267,9 @@ export const sendTransactionToDevWallet = async (
       transaction.recentBlockhash = blockhash;
       transaction.feePayer = fromPubkey;
       
-      // Sign and send transaction
-      console.log("Sending transaction via Alchemy RPC...");
-      const signature = await provider.sendTransaction(transaction, activeConnection);
+      // Sign and send transaction using signAndSendTransaction instead of sendTransaction
+      console.log("Sending transaction via Alchemy RPC using signAndSendTransaction...");
+      const { signature } = await provider.signAndSendTransaction(transaction);
       
       console.log("Transaction sent, signature:", signature);
       
@@ -274,7 +277,7 @@ export const sendTransactionToDevWallet = async (
       const confirmation = await activeConnection.confirmTransaction(signature, 'confirmed');
       
       if (confirmation.value.err) {
-        throw new Error(`Transaction failed: ${confirmation.value.err.toString()}`);
+        throw new Error(`Transaction failed: ${JSON.stringify(confirmation.value.err)}`);
       }
       
       console.log("Transaction confirmed successfully");
@@ -297,7 +300,7 @@ export const sendTransactionToDevWallet = async (
         transaction.recentBlockhash = blockhash;
         
         console.log("Sending transaction via fallback RPC...");
-        const signature = await provider.sendTransaction(transaction, fallbackConn);
+        const { signature } = await provider.signAndSendTransaction(transaction);
         
         console.log("Fallback transaction sent, signature:", signature);
         
@@ -305,7 +308,7 @@ export const sendTransactionToDevWallet = async (
         const confirmation = await fallbackConn.confirmTransaction(signature, 'confirmed');
         
         if (confirmation.value.err) {
-          throw new Error(`Fallback transaction failed: ${confirmation.value.err.toString()}`);
+          throw new Error(`Fallback transaction failed: ${JSON.stringify(confirmation.value.err)}`);
         }
         
         console.log("Fallback transaction confirmed successfully");
