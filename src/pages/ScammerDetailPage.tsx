@@ -27,6 +27,7 @@ import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
 import { handleError, ErrorSeverity } from '@/utils/errorHandling';
+import { sendTransactionToDevWallet, connectPhantomWallet } from '@/utils/phantomWallet';
 
 const ScammerDetailPage = () => {
   const { id } = useParams<{ id: string; }>();
@@ -361,14 +362,17 @@ const ScammerDetailPage = () => {
     });
   };
 
-  const handleAddBounty = () => {
+  const handleAddBounty = async () => {
     if (!profile) {
-      toast({
-        title: "Authentication required",
-        description: "Please connect your wallet to contribute to this bounty.",
-        variant: "destructive"
-      });
-      return;
+      await connectWallet();
+      if (!profile) {
+        toast({
+          title: "Authentication required",
+          description: "Please connect your wallet to contribute to this bounty.",
+          variant: "destructive"
+        });
+        return;
+      }
     }
     
     const amount = parseFloat(contributionAmount);
@@ -380,15 +384,36 @@ const ScammerDetailPage = () => {
       });
       return;
     }
+
+    setIsLoading(true);
     
-    addBountyContributionMutation.mutate({
-      scammer_id: scammer?.id || '',
-      amount: amount,
-      comment: bountyComment || undefined,
-      contributor_id: profile.wallet_address,
-      contributor_name: profile.display_name,
-      contributor_profile_pic: profile.profile_pic_url
-    });
+    try {
+      console.log(`Processing bounty transaction of ${amount} $SEC to ${developerWalletAddress}`);
+      const transactionSignature = await sendTransactionToDevWallet(developerWalletAddress, amount);
+      
+      if (!transactionSignature) {
+        setIsLoading(false);
+        return;
+      }
+      
+      console.log("Recording bounty contribution in database");
+      addBountyContributionMutation.mutate({
+        scammer_id: scammer?.id || '',
+        amount: amount,
+        comment: bountyComment || undefined,
+        contributor_id: profile.wallet_address,
+        contributor_name: profile.display_name,
+        contributor_profile_pic: profile.profile_pic_url,
+        transaction_signature: transactionSignature
+      });
+    } catch (error) {
+      handleError(error, {
+        fallbackMessage: "Failed to process bounty contribution. Please try again.",
+        severity: ErrorSeverity.MEDIUM,
+        context: "PROCESS_BOUNTY"
+      });
+      setIsLoading(false);
+    }
   };
 
   const handlePageChange = (page: number) => {
