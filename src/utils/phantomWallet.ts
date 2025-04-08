@@ -1,6 +1,6 @@
-
 import { toast } from '@/hooks/use-toast';
 import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL, sendAndConfirmTransaction } from '@solana/web3.js';
+import { handleError, ErrorSeverity } from '@/utils/errorHandling';
 
 export type PhantomEvent = "connect" | "disconnect";
 
@@ -24,8 +24,29 @@ export type WindowWithPhantom = Window & {
   };
 };
 
-// Solana connection - using Mainnet Beta
-const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
+// Configuration constants
+const ALCHEMY_RPC_URL = 'https://solana-mainnet.g.alchemy.com/v2/ibmWfrUOabGJ9hN-Ugjtlb5MLdwlWx1d';
+const FALLBACK_RPC_URL = 'https://api.mainnet-beta.solana.com';
+
+// Create primary connection with Alchemy
+const connection = new Connection(ALCHEMY_RPC_URL, 'confirmed');
+
+// Fallback connection in case the primary fails
+let fallbackConnection: Connection | null = null;
+
+// Function to get an active connection, with fallback logic
+const getConnection = (): Connection => {
+  return connection;
+};
+
+// Function to initialize fallback connection if needed
+const getFallbackConnection = (): Connection => {
+  if (!fallbackConnection) {
+    console.log('Initializing fallback Solana connection');
+    fallbackConnection = new Connection(FALLBACK_RPC_URL, 'confirmed');
+  }
+  return fallbackConnection;
+};
 
 /**
  * Get the Phantom wallet provider if available
@@ -176,7 +197,7 @@ export const signMessageWithPhantom = async (message: string): Promise<string | 
 };
 
 /**
- * Process a bounty transaction to the developer wallet
+ * Process a bounty transaction to the developer wallet using Alchemy RPC
  * @param recipientAddress - Recipient wallet address
  * @param amount - Amount in $SEC tokens (or SOL for testing)
  * @returns Promise<string | null> - Transaction signature or null if transaction failed
@@ -234,37 +255,76 @@ export const sendTransactionToDevWallet = async (
       })
     );
     
-    // Set recent blockhash
-    const { blockhash } = await connection.getLatestBlockhash();
-    transaction.recentBlockhash = blockhash;
-    transaction.feePayer = fromPubkey;
-    
-    // Sign and send transaction
-    const signature = await provider.sendTransaction(transaction, connection);
-    
-    console.log("Transaction sent, signature:", signature);
-    
-    // Wait for confirmation
-    const confirmation = await connection.confirmTransaction(signature, 'confirmed');
-    
-    if (confirmation.value.err) {
-      throw new Error(`Transaction failed: ${confirmation.value.err.toString()}`);
+    try {
+      // Get Alchemy connection
+      const activeConnection = getConnection();
+      
+      // Set recent blockhash
+      const { blockhash } = await activeConnection.getLatestBlockhash();
+      transaction.recentBlockhash = blockhash;
+      transaction.feePayer = fromPubkey;
+      
+      // Sign and send transaction
+      console.log("Sending transaction via Alchemy RPC...");
+      const signature = await provider.sendTransaction(transaction, activeConnection);
+      
+      console.log("Transaction sent, signature:", signature);
+      
+      // Wait for confirmation
+      const confirmation = await activeConnection.confirmTransaction(signature, 'confirmed');
+      
+      if (confirmation.value.err) {
+        throw new Error(`Transaction failed: ${confirmation.value.err.toString()}`);
+      }
+      
+      console.log("Transaction confirmed successfully");
+      
+      toast({
+        title: "Transaction successful",
+        description: `Successfully sent ${amount} $SEC tokens to the developer wallet`,
+      });
+      
+      return signature;
+    } catch (error) {
+      console.error("Primary RPC connection failed, trying fallback:", error);
+      
+      // If primary connection fails, try with fallback
+      try {
+        const fallbackConn = getFallbackConnection();
+        
+        // Get new blockhash from fallback connection
+        const { blockhash } = await fallbackConn.getLatestBlockhash();
+        transaction.recentBlockhash = blockhash;
+        
+        console.log("Sending transaction via fallback RPC...");
+        const signature = await provider.sendTransaction(transaction, fallbackConn);
+        
+        console.log("Fallback transaction sent, signature:", signature);
+        
+        // Wait for confirmation on fallback
+        const confirmation = await fallbackConn.confirmTransaction(signature, 'confirmed');
+        
+        if (confirmation.value.err) {
+          throw new Error(`Fallback transaction failed: ${confirmation.value.err.toString()}`);
+        }
+        
+        console.log("Fallback transaction confirmed successfully");
+        
+        toast({
+          title: "Transaction successful (fallback)",
+          description: `Successfully sent ${amount} $SEC tokens to the developer wallet`,
+        });
+        
+        return signature;
+      } catch (fallbackError) {
+        throw new Error(`Both primary and fallback RPC failed: ${fallbackError instanceof Error ? fallbackError.message : 'Unknown error'}`);
+      }
     }
-    
-    console.log("Transaction confirmed successfully");
-    
-    toast({
-      title: "Transaction successful",
-      description: `Successfully sent ${amount} $SEC tokens to the developer wallet`,
-    });
-    
-    return signature;
   } catch (error) {
-    console.error("Error processing transaction:", error);
-    toast({
-      title: "Transaction error",
-      description: "Failed to process transaction. " + (error instanceof Error ? error.message : ""),
-      variant: "destructive",
+    handleError(error, {
+      fallbackMessage: "Failed to process transaction. Please try again later.",
+      severity: ErrorSeverity.HIGH,
+      context: "PROCESS_TRANSACTION"
     });
     return null;
   }
