@@ -515,6 +515,9 @@ const ScammerDetailPage = () => {
                   <TabsTrigger value="aliases" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
                     Aliases
                   </TabsTrigger>
+                  <TabsTrigger value="accomplices" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                    Accomplices
+                  </TabsTrigger>
                   <TabsTrigger value="evidence" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
                     Evidence
                   </TabsTrigger>
@@ -585,6 +588,13 @@ const ScammerDetailPage = () => {
                   {scammer?.aliases && scammer.aliases.length > 0 ? <div className="flex flex-wrap gap-2">
                       {scammer.aliases.map((alias, index) => <Badge key={index} className="bg-icc-blue text-white py-2 px-4">{alias}</Badge>)}
                     </div> : <p className="text-icc-gray">No aliases provided.</p>}
+                </TabsContent>
+                
+                <TabsContent value="accomplices" className="mt-2">
+                  <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="accomplices-section">Known Accomplices</h2>
+                  {scammer?.accomplices && scammer.accomplices.length > 0 ? <div className="flex flex-wrap gap-2">
+                      {scammer.accomplices.map((accomplice, index) => <Badge key={index} className="bg-icc-blue text-white py-2 px-4">{accomplice}</Badge>)}
+                    </div> : <p className="text-icc-gray">No accomplices listed.</p>}
                 </TabsContent>
                 
                 <TabsContent value="evidence" className="mt-2">
