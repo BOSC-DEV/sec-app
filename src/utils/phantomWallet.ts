@@ -185,10 +185,9 @@ const getOrCreateAssociatedTokenAccount = async (
     const associatedToken = await getAssociatedTokenAddress(
       mint,
       owner,
-      false,
+      true,
       TOKEN_PROGRAM_ID,
-      TOKEN_PROGRAM_ID,
-      true
+      TOKEN_PROGRAM_ID
     );
     
     try {
