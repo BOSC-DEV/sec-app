@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Card, 
@@ -26,6 +27,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Link } from 'react-router-dom';
 
 interface BountyTransactionHistoryProps {
   contributions: BountyContribution[];
@@ -105,17 +107,25 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
               <TableRow key={contribution.id}>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage 
-                        src={contribution.contributor_profile_pic || '/placeholder.svg'} 
-                        alt={contribution.contributor_name} 
-                      />
-                      <AvatarFallback>
-                        {contribution.contributor_name.substring(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
+                    <Link to={`/profile/${contribution.contributor_id}`} aria-label={`View ${contribution.contributor_name}'s profile`}>
+                      <Avatar className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-icc-gold transition-all">
+                        <AvatarImage 
+                          src={contribution.contributor_profile_pic || '/placeholder.svg'} 
+                          alt={contribution.contributor_name} 
+                        />
+                        <AvatarFallback>
+                          {contribution.contributor_name?.substring(0, 2).toUpperCase() || 'UN'}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Link>
                     <div>
-                      <p className="text-sm font-medium">{contribution.contributor_name}</p>
+                      <Link 
+                        to={`/profile/${contribution.contributor_id}`}
+                        className="text-sm font-medium hover:text-icc-gold hover:underline transition-colors"
+                        aria-label={`View ${contribution.contributor_name}'s profile`}
+                      >
+                        {contribution.contributor_name}
+                      </Link>
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -135,16 +145,24 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
                 {showScammerInfo && contribution.scammers && (
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage 
-                          src={contribution.scammers.photo_url || '/placeholder.svg'} 
-                          alt={contribution.scammers.name} 
-                        />
-                        <AvatarFallback>
-                          {contribution.scammers.name.substring(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <p className="text-sm">{contribution.scammers.name}</p>
+                      <Link to={`/scammer/${contribution.scammer_id}`} aria-label={`View ${contribution.scammers.name}'s profile`}>
+                        <Avatar className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-icc-gold transition-all">
+                          <AvatarImage 
+                            src={contribution.scammers.photo_url || '/placeholder.svg'} 
+                            alt={contribution.scammers.name} 
+                          />
+                          <AvatarFallback>
+                            {contribution.scammers.name.substring(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                      </Link>
+                      <Link 
+                        to={`/scammer/${contribution.scammer_id}`}
+                        className="text-sm hover:text-icc-gold hover:underline transition-colors"
+                        aria-label={`View ${contribution.scammers.name}'s profile`}
+                      >
+                        {contribution.scammers.name}
+                      </Link>
                     </div>
                   </TableCell>
                 )}

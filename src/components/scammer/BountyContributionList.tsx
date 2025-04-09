@@ -11,6 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Link } from 'react-router-dom';
 
 interface BountyContributionListProps {
   contributions: BountyContribution[];
@@ -80,18 +81,24 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
           >
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center space-x-2">
-                <Avatar className="h-6 w-6">
-                  <AvatarImage 
-                    src={contribution.contributor_profile_pic || '/placeholder.svg'} 
-                    alt={`${contribution.contributor_name}'s profile`} 
-                  />
-                  <AvatarFallback aria-hidden="true">
-                    {contribution.contributor_name.substring(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-sm font-medium text-icc-blue-dark">
+                <Link to={`/profile/${contribution.contributor_id}`} aria-label={`View ${contribution.contributor_name}'s profile`}>
+                  <Avatar className="h-6 w-6 cursor-pointer hover:ring-2 hover:ring-icc-gold transition-all">
+                    <AvatarImage 
+                      src={contribution.contributor_profile_pic || '/placeholder.svg'} 
+                      alt={`${contribution.contributor_name}'s profile`} 
+                    />
+                    <AvatarFallback aria-hidden="true">
+                      {contribution.contributor_name?.substring(0, 2).toUpperCase() || 'UN'}
+                    </AvatarFallback>
+                  </Avatar>
+                </Link>
+                <Link 
+                  to={`/profile/${contribution.contributor_id}`}
+                  className="text-sm font-medium text-icc-blue-dark hover:text-icc-gold hover:underline transition-colors"
+                  aria-label={`View ${contribution.contributor_name}'s profile`}
+                >
                   {contribution.contributor_name}
-                </span>
+                </Link>
               </div>
               <div className="flex items-center text-icc-gold-dark font-medium text-sm" aria-label={`Contributed ${formatCurrency(contribution.amount)} $SEC`}>
                 <DollarSign className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
