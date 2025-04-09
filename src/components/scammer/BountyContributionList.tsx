@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BountyContribution } from '@/types/dataTypes';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -11,6 +10,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Link } from 'react-router-dom';
+import { getProfileByUsername } from '@/services/profileService';
 
 interface BountyContributionListProps {
   contributions: BountyContribution[];
@@ -30,8 +31,36 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
   itemsPerPage = 10
 }) => {
   const [focused, setFocused] = useState<string | null>(null);
+  const [contributorUsernames, setContributorUsernames] = useState<Record<string, string>>({});
   
-  // Calculate pagination info
+  useEffect(() => {
+    const fetchContributorUsernames = async () => {
+      const usernamesMap: Record<string, string> = {};
+      
+      await Promise.all(
+        contributions.map(async (contribution) => {
+          try {
+            const profile = await getProfileByUsername(contribution.contributor_name);
+            if (profile && profile.username) {
+              usernamesMap[contribution.contributor_name] = profile.username;
+            } else {
+              usernamesMap[contribution.contributor_name] = contribution.contributor_name;
+            }
+          } catch (error) {
+            console.error(`Error fetching profile for ${contribution.contributor_name}:`, error);
+            usernamesMap[contribution.contributor_name] = contribution.contributor_name;
+          }
+        })
+      );
+      
+      setContributorUsernames(usernamesMap);
+    };
+
+    if (contributions.length > 0) {
+      fetchContributorUsernames();
+    }
+  }, [contributions]);
+  
   const totalPages = Math.max(1, Math.ceil(totalCount / itemsPerPage));
   const hasPreviousPage = currentPage > 1;
   const hasNextPage = currentPage < totalPages;
@@ -47,9 +76,11 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
     window.open(`https://solscan.io/tx/${transactionSignature}`, '_blank');
   };
 
+  const renderTimestamp = Date.now();
+
   if (isLoading) {
     return (
-      <div role="status" aria-live="polite" className="text-center py-4">
+      <div role="status" aria-live="polite" aria-busy="true" className="text-center py-4">
         <div className="animate-pulse h-4 bg-gray-200 rounded w-3/4 mx-auto mb-3" />
         <div className="animate-pulse h-4 bg-gray-200 rounded w-1/2 mx-auto" />
         <span className="sr-only">Loading bounty contributions...</span>
@@ -70,72 +101,87 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
       <h4 className="font-medium text-sm text-icc-blue" id="contributions-heading">Recent Contributors</h4>
       
       <div aria-labelledby="contributions-heading" className="space-y-3">
-        {contributions.map((contribution) => (
-          <div 
-            key={contribution.id} 
-            className={`border border-icc-gold-light/30 rounded-lg p-3 bg-icc-gold-light/10 transition ${focused === contribution.id ? 'ring-2 ring-icc-gold' : ''}`}
-            onFocus={() => setFocused(contribution.id)}
-            onBlur={() => setFocused(null)}
-            tabIndex={0}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center space-x-2">
-                <Avatar className="h-6 w-6">
-                  <AvatarImage 
-                    src={contribution.contributor_profile_pic || '/placeholder.svg'} 
-                    alt={`${contribution.contributor_name}'s profile`} 
-                  />
-                  <AvatarFallback aria-hidden="true">
-                    {contribution.contributor_name.substring(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-sm font-medium text-icc-blue-dark">
-                  {contribution.contributor_name}
-                </span>
-              </div>
-              <div className="flex items-center text-icc-gold-dark font-medium text-sm" aria-label={`Contributed ${formatCurrency(contribution.amount)} $SEC`}>
-                <DollarSign className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
-                <span>{formatCurrency(contribution.amount)} $SEC</span>
-              </div>
-            </div>
+        {contributions.map((contribution) => {
+          const profilePicUrl = contribution.contributor_profile_pic 
+            ? `${contribution.contributor_profile_pic}${contribution.contributor_profile_pic.includes('?') ? '&' : '?'}t=${renderTimestamp}`
+            : '/placeholder.svg';
+          
+          const profileLink = contributorUsernames[contribution.contributor_name] 
+            ? `/profile/${contributorUsernames[contribution.contributor_name]}` 
+            : `/profile/${contribution.contributor_name}`;
             
-            {contribution.comment && (
-              <p className="text-sm text-icc-gray-dark mb-2 italic">
-                "{contribution.comment}"
-              </p>
-            )}
-            
-            <div className="flex items-center justify-between">
-              <div className="text-xs text-icc-gray flex items-center" aria-label={`Contributed on ${formatDate(contribution.created_at)}`}>
-                <Calendar className="h-3 w-3 mr-1" aria-hidden="true" />
-                <span>{formatDate(contribution.created_at)}</span>
+          return (
+            <div 
+              key={`${contribution.id}-${contribution.contributor_name}-${renderTimestamp}`} 
+              className={`border border-icc-gold-light/30 rounded-lg p-3 bg-icc-gold-light/10 transition ${focused === contribution.id ? 'ring-2 ring-icc-gold' : ''}`}
+              onFocus={() => setFocused(contribution.id)}
+              onBlur={() => setFocused(null)}
+              tabIndex={0}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <Link to={profileLink} aria-label={`View ${contribution.contributor_name}'s profile`}>
+                    <Avatar className="h-6 w-6 cursor-pointer hover:ring-2 hover:ring-icc-gold transition-all">
+                      <AvatarImage 
+                        src={profilePicUrl} 
+                        alt={`${contribution.contributor_name}'s profile`} 
+                      />
+                      <AvatarFallback aria-hidden="true">
+                        {contribution.contributor_name?.substring(0, 2).toUpperCase() || 'UN'}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Link>
+                  <Link 
+                    to={profileLink}
+                    className="text-sm font-medium text-icc-blue-dark hover:text-icc-gold hover:underline transition-colors"
+                    aria-label={`View ${contribution.contributor_name}'s profile`}
+                  >
+                    {contribution.contributor_name}
+                  </Link>
+                </div>
+                <div className="flex items-center text-icc-gold-dark font-medium text-sm" aria-label={`Contributed ${formatCurrency(contribution.amount)} $SEC`}>
+                  <DollarSign className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
+                  <span>{formatCurrency(contribution.amount)} $SEC</span>
+                </div>
               </div>
               
-              {contribution.transaction_signature && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button 
-                        onClick={() => openTransactionInSolscan(contribution.transaction_signature!)}
-                        className="text-xs text-icc-blue flex items-center hover:underline"
-                        aria-label="View transaction on Solscan"
-                      >
-                        <ExternalLink className="h-3 w-3 mr-1" aria-hidden="true" />
-                        View on Solscan
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>View transaction details on Solscan</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+              {contribution.comment && (
+                <p className="text-sm text-icc-gray-dark mb-2 italic">
+                  "{contribution.comment}"
+                </p>
               )}
+              
+              <div className="flex items-center justify-between">
+                <div className="text-xs text-icc-gray flex items-center" aria-label={`Contributed on ${formatDate(contribution.created_at)}`}>
+                  <Calendar className="h-3 w-3 mr-1" aria-hidden="true" />
+                  <span>{formatDate(contribution.created_at)}</span>
+                </div>
+                
+                {contribution.transaction_signature && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button 
+                          onClick={() => openTransactionInSolscan(contribution.transaction_signature!)}
+                          className="text-xs text-icc-blue flex items-center hover:underline"
+                          aria-label="View transaction on Solscan"
+                        >
+                          <ExternalLink className="h-3 w-3 mr-1" aria-hidden="true" />
+                          View on Solscan
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>View transaction details on Solscan</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       
-      {/* Pagination controls - only show if pagination is in use */}
       {totalPages > 1 && onPageChange && (
         <div className="flex justify-between items-center pt-3">
           <Button 

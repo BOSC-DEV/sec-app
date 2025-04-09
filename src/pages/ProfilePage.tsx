@@ -1,8 +1,6 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProfile } from '@/contexts/ProfileContext';
-import { saveProfile } from '@/services/profileService';
 import { Twitter, Globe, Camera, Upload, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,7 +22,7 @@ interface ProfileFormValues {
 }
 
 const ProfilePage = () => {
-  const { isConnected, walletAddress, profile, isLoading, refreshProfile, uploadAvatar, disconnectWallet } = useProfile();
+  const { isConnected, walletAddress, profile, isLoading, refreshProfile, uploadAvatar, disconnectWallet, updateProfile } = useProfile();
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -100,22 +98,6 @@ const ProfilePage = () => {
       if (publicUrl) {
         setAvatarUrl(publicUrl);
         setAvatarKey(Date.now()); // Update key to force re-render
-        
-        // Update the profile with new avatar URL to ensure it's saved
-        if (profile) {
-          await saveProfile({
-            ...profile,
-            profile_pic_url: publicUrl
-          });
-          
-          // Refresh profile to get the latest data
-          await refreshProfile();
-          
-          toast({
-            title: 'Avatar Updated',
-            description: 'Your profile picture has been updated',
-          });
-        }
       }
     } catch (error) {
       console.error('Error uploading avatar:', error);
@@ -128,32 +110,21 @@ const ProfilePage = () => {
   };
 
   const onSubmit = async (data: ProfileFormValues) => {
-    if (!walletAddress) return;
+    if (!walletAddress || !profile) return;
     
     try {
       setIsSaving(true);
       
-      const updatedProfile = await saveProfile({
+      const updatedProfile = await updateProfile({
         ...profile,
-        id: profile?.id || crypto.randomUUID(),
-        wallet_address: walletAddress,
         display_name: data.display_name,
         username: data.username,
         bio: data.bio,
         x_link: data.x_link,
         website_link: data.website_link,
-        profile_pic_url: avatarUrl,
-        created_at: profile?.created_at || new Date().toISOString(),
+        profile_pic_url: avatarUrl || profile.profile_pic_url,
       });
       
-      await refreshProfile();
-      
-      toast({
-        title: 'Profile Saved',
-        description: 'Your profile has been updated successfully',
-      });
-      
-      // Navigate with a timestamp query parameter to force a refetch on the public profile page
       if (data.username) {
         navigate(`/${data.username}?t=${Date.now()}`);
       }
