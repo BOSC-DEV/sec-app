@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { BountyContribution } from "@/types/dataTypes";
 import { handleError, ErrorSeverity } from "@/utils/errorHandling";
@@ -272,5 +271,43 @@ export const getUserBountyContributions = async (
       context: "GET_USER_BOUNTY_CONTRIBUTIONS",
     });
     return { contributions: [], totalCount: 0 };
+  }
+};
+
+/**
+ * Get total contribution amount from a specific user for a specific scammer
+ */
+export const getUserContributionAmountForScammer = async (
+  scammerId: string,
+  userId: string
+): Promise<number> => {
+  try {
+    console.log(`Fetching user ${userId} total contribution amount for scammer ${scammerId}`);
+    
+    const { data, error } = await supabase
+      .from("bounty_contributions")
+      .select("amount")
+      .eq("scammer_id", scammerId)
+      .eq("contributor_id", userId);
+
+    if (error) {
+      console.error("Error fetching user contribution amount:", error);
+      throw error;
+    }
+
+    const totalAmount = data.reduce(
+      (sum, item) => sum + Number(item.amount),
+      0
+    );
+
+    console.log(`User has contributed a total of ${totalAmount} $SEC to this scammer bounty`);
+    return totalAmount;
+  } catch (error) {
+    handleError(error, {
+      fallbackMessage: "Failed to fetch user contribution amount",
+      severity: ErrorSeverity.LOW,
+      context: "GET_USER_CONTRIBUTION_AMOUNT"
+    });
+    return 0;
   }
 };

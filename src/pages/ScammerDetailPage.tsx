@@ -5,10 +5,17 @@ import { getScammerById, deleteScammer } from '@/services/scammerService';
 import { getScammerComments, addComment } from '@/services/commentService';
 import { likeScammer, dislikeScammer, getUserScammerInteraction } from '@/services/interactionService';
 import { isScammerCreator } from '@/services/reportService';
-import { addBountyContribution, getScammerBountyContributions } from '@/services/bountyService';
+import { 
+  addBountyContribution, 
+  getScammerBountyContributions, 
+  getUserContributionAmountForScammer 
+} from '@/services/bountyService';
 import CompactHero from '@/components/common/CompactHero';
 import BountyContributionList from '@/components/scammer/BountyContributionList';
-import { ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, Link2, Eye, AlertTriangle, Shield, TrendingUp, Edit, Clipboard, Trash2, MessageSquare } from 'lucide-react';
+import { 
+  ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, 
+  Link2, Eye, AlertTriangle, Shield, TrendingUp, Edit, Clipboard, Trash2, MessageSquare 
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
@@ -99,6 +106,15 @@ const ScammerDetailPage = () => {
     queryFn: () => getScammerBountyContributions(id || '', contributionsPage, contributionsPerPage),
     enabled: !!id,
     placeholderData: (previousData) => previousData
+  });
+
+  const {
+    data: userContributionAmount = 0,
+    isLoading: isLoadingUserContribution,
+  } = useQuery({
+    queryKey: ['userContribution', id, profile?.wallet_address],
+    queryFn: () => getUserContributionAmountForScammer(id || '', profile?.wallet_address || ''),
+    enabled: !!id && !!profile?.wallet_address
   });
 
   const bountyContributions = bountyContributionsData?.contributions || [];
@@ -726,6 +742,22 @@ const ScammerDetailPage = () => {
                         <span className="font-mono font-medium text-icc-blue-dark">{scammer?.bounty_amount.toLocaleString() || 0} $SEC</span>
                       </div>
                     </div>
+                    
+                    {profile && (
+                      <div className="mb-4">
+                        <div className="text-sm font-medium text-icc-blue mb-2">My Contribution</div>
+                        <div className="bg-icc-gold-light/30 border border-icc-gold/30 rounded p-3 flex items-center">
+                          {isLoadingUserContribution ? (
+                            <Skeleton className="h-6 w-24" />
+                          ) : (
+                            <span className="font-mono font-medium text-icc-blue-dark">
+                              {formatCurrency(userContributionAmount)} $SEC
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    
                     <div className="mb-4">
                       <div className="text-sm font-medium text-icc-blue mb-2">Developer Wallet</div>
                       <div className="bg-icc-gold-light/30 border border-icc-gold/30 rounded p-3 flex items-center justify-between">
