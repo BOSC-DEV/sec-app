@@ -1,3 +1,4 @@
+
 import { toast } from '@/hooks/use-toast';
 import { 
   Connection, 
@@ -87,7 +88,7 @@ const sleep = (ms: number): Promise<void> => {
   return new Promise(resolve => setTimeout(resolve, ms));
 };
 
-const getPhantomProvider = (): PhantomProvider | null => {
+export const getPhantomProvider = (): PhantomProvider | null => {
   const windowWithPhantom = window as WindowWithPhantom;
   
   const provider = windowWithPhantom.solana || windowWithPhantom.phantom?.solana;
@@ -99,7 +100,7 @@ const getPhantomProvider = (): PhantomProvider | null => {
   return null;
 };
 
-const connectPhantomWallet = async (): Promise<string | null> => {
+export const connectPhantomWallet = async (): Promise<string | null> => {
   const provider = getPhantomProvider();
   
   if (!provider) {
@@ -137,7 +138,7 @@ const connectPhantomWallet = async (): Promise<string | null> => {
   }
 };
 
-const disconnectPhantomWallet = async (): Promise<void> => {
+export const disconnectPhantomWallet = async (): Promise<void> => {
   const provider = getPhantomProvider();
   
   if (provider) {
@@ -162,7 +163,7 @@ const disconnectPhantomWallet = async (): Promise<void> => {
   }
 };
 
-const getWalletPublicKey = (): string | null => {
+export const getWalletPublicKey = (): string | null => {
   const provider = getPhantomProvider();
   
   if (provider && provider.isConnected && provider.publicKey) {
@@ -172,11 +173,11 @@ const getWalletPublicKey = (): string | null => {
   return null;
 };
 
-const isPhantomInstalled = (): boolean => {
+export const isPhantomInstalled = (): boolean => {
   return getPhantomProvider() !== null;
 };
 
-const signMessageWithPhantom = async (message: string): Promise<string | null> => {
+export const signMessageWithPhantom = async (message: string): Promise<string | null> => {
   const provider = getPhantomProvider();
   
   if (!provider || !provider.publicKey) {
@@ -208,7 +209,7 @@ const signMessageWithPhantom = async (message: string): Promise<string | null> =
   }
 };
 
-const getOrCreateAssociatedTokenAccount = async (
+export const getOrCreateAssociatedTokenAccount = async (
   connection: Connection,
   payer: PublicKey,
   owner: PublicKey,
@@ -318,7 +319,7 @@ const confirmTransactionWithRetry = async (
   throw new Error(`Failed to confirm transaction after ${MAX_RETRIES} attempts`);
 };
 
-const sendTransactionToDevWallet = async (
+export const sendTransactionToDevWallet = async (
   recipientAddress: string,
   amount: number
 ): Promise<string | null> => {
