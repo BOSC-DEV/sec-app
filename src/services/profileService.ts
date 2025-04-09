@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Profile } from '@/types/dataTypes';
 import { handleError } from '@/utils/errorHandling';
@@ -231,6 +230,25 @@ export const getProfileByUsername = async (username: string): Promise<Profile | 
     return data;
   } catch (error) {
     handleError(error, 'Error fetching profile by username');
+    return null;
+  }
+};
+
+export const getProfileByDisplayName = async (displayName: string): Promise<Profile | null> => {
+  if (!displayName) return null;
+  
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('display_name', displayName)
+      .maybeSingle();
+    
+    if (error) throw error;
+    
+    return data;
+  } catch (error) {
+    handleError(error, 'Error fetching profile by display name');
     return null;
   }
 };

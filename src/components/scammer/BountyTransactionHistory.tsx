@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Card, 
   CardContent, 
@@ -28,6 +28,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Link } from 'react-router-dom';
+import { getProfileByDisplayName } from '@/services/profileService';
 
 interface BountyTransactionHistoryProps {
   contributions: BountyContribution[];
@@ -42,6 +43,37 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
   title = "Bounty Transaction History",
   showScammerInfo = false
 }) => {
+  const [contributorUsernames, setContributorUsernames] = useState<Record<string, string>>({});
+  
+  useEffect(() => {
+    const fetchContributorUsernames = async () => {
+      const usernamesMap: Record<string, string> = {};
+      
+      await Promise.all(
+        contributions.map(async (contribution) => {
+          try {
+            // Use getProfileByDisplayName instead of directly using contributor_name
+            const profile = await getProfileByDisplayName(contribution.contributor_name);
+            if (profile && profile.username) {
+              usernamesMap[contribution.contributor_name] = profile.username;
+            } else {
+              usernamesMap[contribution.contributor_name] = contribution.contributor_name;
+            }
+          } catch (error) {
+            console.error(`Error fetching profile for ${contribution.contributor_name}:`, error);
+            usernamesMap[contribution.contributor_name] = contribution.contributor_name;
+          }
+        })
+      );
+      
+      setContributorUsernames(usernamesMap);
+    };
+
+    if (contributions.length > 0) {
+      fetchContributorUsernames();
+    }
+  }, [contributions]);
+
   const formatAmount = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       minimumFractionDigits: 2,
@@ -112,11 +144,15 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
                 ? `${contribution.contributor_profile_pic}${contribution.contributor_profile_pic.includes('?') ? '&' : '?'}t=${renderTimestamp}`
                 : '/placeholder.svg';
                 
+              const profileLink = contributorUsernames[contribution.contributor_name] 
+                ? `/profile/${contributorUsernames[contribution.contributor_name]}` 
+                : `/profile/${contribution.contributor_name}`;
+                
               return (
                 <TableRow key={`${contribution.id}-${contribution.contributor_name}-${renderTimestamp}`}>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <Link to={`/profile/${contribution.contributor_name}`} aria-label={`View ${contribution.contributor_name}'s profile`}>
+                      <Link to={profileLink} aria-label={`View ${contribution.contributor_name}'s profile`}>
                         <Avatar className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-icc-gold transition-all">
                           <AvatarImage 
                             src={profilePicUrl} 
@@ -129,7 +165,7 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
                       </Link>
                       <div>
                         <Link 
-                          to={`/profile/${contribution.contributor_name}`}
+                          to={profileLink}
                           className="text-sm font-medium hover:text-icc-gold hover:underline transition-colors"
                           aria-label={`View ${contribution.contributor_name}'s profile`}
                         >

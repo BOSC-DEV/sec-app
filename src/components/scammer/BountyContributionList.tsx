@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { BountyContribution } from '@/types/dataTypes';
 import { formatDate, formatCurrency } from '@/lib/utils';
@@ -11,7 +12,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Link } from 'react-router-dom';
-import { getProfileByUsername } from '@/services/profileService';
+import { getProfileByDisplayName } from '@/services/profileService';
 
 interface BountyContributionListProps {
   contributions: BountyContribution[];
@@ -40,7 +41,8 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
       await Promise.all(
         contributions.map(async (contribution) => {
           try {
-            const profile = await getProfileByUsername(contribution.contributor_name);
+            // Use getProfileByDisplayName instead of getProfileByUsername
+            const profile = await getProfileByDisplayName(contribution.contributor_name);
             if (profile && profile.username) {
               usernamesMap[contribution.contributor_name] = profile.username;
             } else {
