@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Profile } from '@/types/dataTypes';
 import { handleError } from '@/utils/errorHandling';
@@ -39,7 +40,7 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
     
     const { data: existingProfile, error: checkError } = await supabase
       .from('profiles')
-      .select('id')
+      .select('id, display_name')
       .eq('wallet_address', profile.wallet_address)
       .maybeSingle();
     
@@ -52,6 +53,10 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
 
     if (existingProfile) {
       console.log('Updating existing profile with ID:', existingProfile.id);
+      
+      // Check if display_name has changed
+      const displayNameChanged = existingProfile.display_name !== profile.display_name;
+      
       const { data, error } = await supabase
         .from('profiles')
         .update({
@@ -72,6 +77,12 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
       }
       
       result = data;
+      
+      // If display_name has changed, update bounty_contributions table
+      if (displayNameChanged) {
+        await updateBountyContributionsName(profile.wallet_address, profile.display_name);
+      }
+      
     } else {
       console.log('Inserting new profile');
       const { data, error } = await supabase
@@ -104,6 +115,27 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
   } catch (error) {
     handleError(error, 'Error saving profile');
     return null;
+  }
+};
+
+// Helper function to update the contributor_name in the bounty_contributions table
+const updateBountyContributionsName = async (walletAddress: string, newDisplayName: string): Promise<void> => {
+  try {
+    console.log(`Updating bounty contributions for ${walletAddress} with new name: ${newDisplayName}`);
+    
+    const { error } = await supabase
+      .from('bounty_contributions')
+      .update({ contributor_name: newDisplayName })
+      .eq('contributor_id', walletAddress);
+    
+    if (error) {
+      console.error('Error updating bounty contributions:', error);
+      throw error;
+    }
+    
+    console.log('Successfully updated contributor_name in bounty_contributions');
+  } catch (error) {
+    handleError(error, 'Error updating contributor name in bounty contributions');
   }
 };
 
