@@ -34,6 +34,9 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
   const [focused, setFocused] = useState<string | null>(null);
   const [contributorUsernames, setContributorUsernames] = useState<Record<string, string>>({});
   
+  // Create a single render timestamp for the entire component
+  const renderTimestamp = React.useMemo(() => Date.now(), [contributions]);
+  
   useEffect(() => {
     const fetchContributorUsernames = async () => {
       const usernamesMap: Record<string, string> = {};
@@ -78,8 +81,6 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
     window.open(`https://solscan.io/tx/${transactionSignature}`, '_blank');
   };
 
-  const renderTimestamp = Date.now();
-
   if (isLoading) {
     return (
       <div role="status" aria-live="polite" aria-busy="true" className="text-center py-4">
@@ -104,6 +105,10 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
       
       <div aria-labelledby="contributions-heading" className="space-y-3">
         {contributions.map((contribution) => {
+          // Use a stable key based on contribution ID only
+          const stableKey = `contribution-${contribution.id}`;
+          
+          // Apply cache busting to the URL string, not the component key
           const profilePicUrl = contribution.contributor_profile_pic 
             ? `${contribution.contributor_profile_pic}${contribution.contributor_profile_pic.includes('?') ? '&' : '?'}t=${renderTimestamp}`
             : '/placeholder.svg';
@@ -114,7 +119,7 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
             
           return (
             <div 
-              key={`${contribution.id}-${contribution.contributor_name}-${renderTimestamp}`} 
+              key={stableKey}
               className={`border border-icc-gold-light/30 rounded-lg p-3 bg-icc-gold-light/10 transition ${focused === contribution.id ? 'ring-2 ring-icc-gold' : ''}`}
               onFocus={() => setFocused(contribution.id)}
               onBlur={() => setFocused(null)}

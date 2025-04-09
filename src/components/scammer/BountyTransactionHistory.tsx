@@ -45,6 +45,9 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
 }) => {
   const [contributorUsernames, setContributorUsernames] = useState<Record<string, string>>({});
   
+  // Create a single render timestamp for the entire component
+  const renderTimestamp = React.useMemo(() => Date.now(), [contributions]);
+  
   useEffect(() => {
     const fetchContributorUsernames = async () => {
       const usernamesMap: Record<string, string> = {};
@@ -84,9 +87,6 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
   const openExplorer = (txSignature: string) => {
     window.open(`https://solscan.io/tx/${txSignature}`, '_blank');
   };
-
-  // Create a unique timestamp for this component render
-  const renderTimestamp = Date.now();
 
   if (isLoading) {
     return (
@@ -139,6 +139,9 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
           </TableHeader>
           <TableBody>
             {contributions.map((contribution) => {
+              // Use a stable key based on contribution ID
+              const stableKey = `transaction-${contribution.id}`;
+              
               // Add a cache busting parameter to the profile pic URL using the render timestamp
               const profilePicUrl = contribution.contributor_profile_pic 
                 ? `${contribution.contributor_profile_pic}${contribution.contributor_profile_pic.includes('?') ? '&' : '?'}t=${renderTimestamp}`
@@ -149,7 +152,7 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
                 : `/profile/${contribution.contributor_name}`;
                 
               return (
-                <TableRow key={`${contribution.id}-${contribution.contributor_name}-${renderTimestamp}`}>
+                <TableRow key={stableKey}>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Link to={profileLink} aria-label={`View ${contribution.contributor_name}'s profile`}>
