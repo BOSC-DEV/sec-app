@@ -3,8 +3,14 @@ import React, { useState } from 'react';
 import { BountyContribution } from '@/types/dataTypes';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { DollarSign, Calendar, ArrowLeftIcon, ArrowRightIcon } from 'lucide-react';
+import { DollarSign, Calendar, ArrowLeftIcon, ArrowRightIcon, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface BountyContributionListProps {
   contributions: BountyContribution[];
@@ -34,6 +40,11 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
     if (newPage >= 1 && newPage <= totalPages && onPageChange) {
       onPageChange(newPage);
     }
+  };
+
+  const openTransactionInSolscan = (transactionSignature: string) => {
+    if (!transactionSignature) return;
+    window.open(`https://solscan.io/tx/${transactionSignature}`, '_blank');
   };
 
   if (isLoading) {
@@ -94,9 +105,31 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
               </p>
             )}
             
-            <div className="flex items-center text-xs text-icc-gray" aria-label={`Contributed on ${formatDate(contribution.created_at)}`}>
-              <Calendar className="h-3 w-3 mr-1" aria-hidden="true" />
-              <span>{formatDate(contribution.created_at)}</span>
+            <div className="flex items-center justify-between">
+              <div className="text-xs text-icc-gray flex items-center" aria-label={`Contributed on ${formatDate(contribution.created_at)}`}>
+                <Calendar className="h-3 w-3 mr-1" aria-hidden="true" />
+                <span>{formatDate(contribution.created_at)}</span>
+              </div>
+              
+              {contribution.transaction_signature && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button 
+                        onClick={() => openTransactionInSolscan(contribution.transaction_signature!)}
+                        className="text-xs text-icc-blue flex items-center hover:underline"
+                        aria-label="View transaction on Solscan"
+                      >
+                        <ExternalLink className="h-3 w-3 mr-1" aria-hidden="true" />
+                        View on Solscan
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>View transaction details on Solscan</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
             </div>
           </div>
         ))}

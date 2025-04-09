@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Card, 
@@ -49,9 +48,7 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
   };
 
   const openExplorer = (txSignature: string) => {
-    // This would open the Solana explorer for the transaction
-    // For simulation, we'll just open a dummy URL
-    window.open(`https://explorer.solana.com/tx/${txSignature}`, '_blank');
+    window.open(`https://solscan.io/tx/${txSignature}`, '_blank');
   };
 
   if (isLoading) {
@@ -182,7 +179,7 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
                       onClick={() => openExplorer(contribution.transaction_signature!)}
                     >
                       <ExternalLink className="h-4 w-4 mr-1" />
-                      Explorer
+                      Solscan
                     </Button>
                   ) : (
                     <span className="text-xs text-muted-foreground">Not recorded</span>
