@@ -81,7 +81,7 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
           >
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center space-x-2">
-                <Link to={`/profile/${contribution.contributor_username || ''}`} aria-label={`View ${contribution.contributor_name}'s profile`}>
+                <Link to={`/profile/${contribution.contributor_name}`} aria-label={`View ${contribution.contributor_name}'s profile`}>
                   <Avatar className="h-6 w-6 cursor-pointer hover:ring-2 hover:ring-icc-gold transition-all">
                     <AvatarImage 
                       src={contribution.contributor_profile_pic || '/placeholder.svg'} 
@@ -93,7 +93,7 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
                   </Avatar>
                 </Link>
                 <Link 
-                  to={`/profile/${contribution.contributor_username || ''}`}
+                  to={`/profile/${contribution.contributor_name}`}
                   className="text-sm font-medium text-icc-blue-dark hover:text-icc-gold hover:underline transition-colors"
                   aria-label={`View ${contribution.contributor_name}'s profile`}
                 >

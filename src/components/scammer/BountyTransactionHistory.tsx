@@ -107,7 +107,7 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
               <TableRow key={contribution.id}>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <Link to={`/profile/${contribution.contributor_username || ''}`} aria-label={`View ${contribution.contributor_name}'s profile`}>
+                    <Link to={`/profile/${contribution.contributor_name}`} aria-label={`View ${contribution.contributor_name}'s profile`}>
                       <Avatar className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-icc-gold transition-all">
                         <AvatarImage 
                           src={contribution.contributor_profile_pic || '/placeholder.svg'} 
@@ -120,7 +120,7 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
                     </Link>
                     <div>
                       <Link 
-                        to={`/profile/${contribution.contributor_username || ''}`}
+                        to={`/profile/${contribution.contributor_name}`}
                         className="text-sm font-medium hover:text-icc-gold hover:underline transition-colors"
                         aria-label={`View ${contribution.contributor_name}'s profile`}
                       >

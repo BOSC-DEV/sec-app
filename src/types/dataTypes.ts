@@ -58,7 +58,6 @@ export interface BountyContribution {
   contributor_id: string;
   contributor_name: string;
   contributor_profile_pic?: string;
-  contributor_username?: string;
   amount: number;
   created_at: string;
   comment?: string;
