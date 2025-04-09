@@ -1,3 +1,4 @@
+
 import { toast } from '@/hooks/use-toast';
 import { 
   Connection, 
@@ -6,7 +7,8 @@ import {
   SystemProgram, 
   LAMPORTS_PER_SOL,
   TransactionSignature,
-  VersionedTransaction
+  VersionedTransaction,
+  Commitment
 } from '@solana/web3.js';
 import { 
   getAssociatedTokenAddress, 
@@ -41,23 +43,42 @@ export type WindowWithPhantom = Window & {
   };
 };
 
-const ALCHEMY_RPC_URL = 'https://solana-mainnet.g.alchemy.com/v2/ibmWfrUOabGJ9hN-Ugjtlb5MLdwlWx1d';
+// QuickNode RPC URLs
+const QUICKNODE_RPC_URL = 'https://old-hidden-sea.solana-mainnet.quiknode.pro/8451b71239184be1451907adce1e53d217c53cb4/';
+const QUICKNODE_WS_URL = 'wss://old-hidden-sea.solana-mainnet.quiknode.pro/8451b71239184be1451907adce1e53d217c53cb4/';
+
+// Public Solana RPC as backup
 const FALLBACK_RPC_URL = 'https://api.mainnet-beta.solana.com';
-const TRANSACTION_TIMEOUT = 60 * 1000; // 60 seconds in milliseconds
+
+// Transaction timeouts and retry configurations
+const TRANSACTION_TIMEOUT = 90 * 1000; // 90 seconds in milliseconds
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 2000; // 2 seconds
 
 const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump');
 
-const connection = new Connection(ALCHEMY_RPC_URL, {
-  commitment: 'confirmed',
-  confirmTransactionInitialTimeout: TRANSACTION_TIMEOUT
-});
+// Connection options
+const connectionConfig = {
+  commitment: 'confirmed' as Commitment,
+  confirmTransactionInitialTimeout: TRANSACTION_TIMEOUT,
+  wsEndpoint: QUICKNODE_WS_URL,
+  disableRetryOnRateLimit: false,
+  httpHeaders: {
+    'Content-Type': 'application/json',
+  }
+};
+
+// Initialize primary connection with QuickNode
+const connection = new Connection(QUICKNODE_RPC_URL, connectionConfig);
 
 let fallbackConnection: Connection | null = null;
 
+// Get the primary QuickNode connection
 const getConnection = (): Connection => {
   return connection;
 };
 
+// Get or initialize the fallback connection
 const getFallbackConnection = (): Connection => {
   if (!fallbackConnection) {
     console.log('Initializing fallback Solana connection');
@@ -69,6 +90,12 @@ const getFallbackConnection = (): Connection => {
   return fallbackConnection;
 };
 
+// Sleep utility for retry mechanisms
+const sleep = (ms: number): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};
+
+// Get Phantom provider
 export const getPhantomProvider = (): PhantomProvider | null => {
   const windowWithPhantom = window as WindowWithPhantom;
   
@@ -81,6 +108,7 @@ export const getPhantomProvider = (): PhantomProvider | null => {
   return null;
 };
 
+// Connect to Phantom wallet
 export const connectPhantomWallet = async (): Promise<string | null> => {
   const provider = getPhantomProvider();
   
@@ -119,6 +147,7 @@ export const connectPhantomWallet = async (): Promise<string | null> => {
   }
 };
 
+// Disconnect from Phantom wallet
 export const disconnectPhantomWallet = async (): Promise<void> => {
   const provider = getPhantomProvider();
   
@@ -144,6 +173,7 @@ export const disconnectPhantomWallet = async (): Promise<void> => {
   }
 };
 
+// Get wallet public key
 export const getWalletPublicKey = (): string | null => {
   const provider = getPhantomProvider();
   
@@ -154,10 +184,12 @@ export const getWalletPublicKey = (): string | null => {
   return null;
 };
 
+// Check if Phantom is installed
 export const isPhantomInstalled = (): boolean => {
   return getPhantomProvider() !== null;
 };
 
+// Sign message with Phantom wallet
 export const signMessageWithPhantom = async (message: string): Promise<string | null> => {
   const provider = getPhantomProvider();
   
@@ -190,6 +222,7 @@ export const signMessageWithPhantom = async (message: string): Promise<string | 
   }
 };
 
+// Get or create associated token account
 const getOrCreateAssociatedTokenAccount = async (
   connection: Connection,
   payer: PublicKey,
@@ -224,6 +257,51 @@ const getOrCreateAssociatedTokenAccount = async (
   }
 };
 
+// Confirm transaction with retry logic
+const confirmTransactionWithRetry = async (
+  connection: Connection,
+  signature: string,
+  blockhash: string,
+  lastValidBlockHeight: number
+): Promise<boolean> => {
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      console.log(`Confirming transaction, attempt ${attempt + 1}/${MAX_RETRIES}`);
+      
+      const confirmationResult = await connection.confirmTransaction({
+        signature,
+        blockhash,
+        lastValidBlockHeight
+      }, 'confirmed');
+      
+      if (confirmationResult.value.err) {
+        console.warn(`Transaction confirmation returned error on attempt ${attempt + 1}:`, confirmationResult.value.err);
+        
+        if (attempt < MAX_RETRIES - 1) {
+          await sleep(RETRY_DELAY);
+          continue;
+        }
+        
+        throw new Error(`Transaction failed: ${JSON.stringify(confirmationResult.value.err)}`);
+      }
+      
+      console.log("Transaction confirmed successfully:", signature);
+      return true;
+    } catch (error) {
+      console.error(`Error confirming transaction on attempt ${attempt + 1}:`, error);
+      
+      if (attempt < MAX_RETRIES - 1) {
+        await sleep(RETRY_DELAY);
+      } else {
+        throw error;
+      }
+    }
+  }
+  
+  throw new Error(`Failed to confirm transaction after ${MAX_RETRIES} attempts`);
+};
+
+// Send transaction to developer wallet
 export const sendTransactionToDevWallet = async (
   recipientAddress: string,
   amount: number
@@ -320,25 +398,22 @@ export const sendTransactionToDevWallet = async (
       );
       
       try {
-        const { blockhash, lastValidBlockHeight } = await activeConnection.getLatestBlockhash();
+        // Get latest blockhash with retry mechanism
+        let { blockhash, lastValidBlockHeight } = await activeConnection.getLatestBlockhash();
         transaction.recentBlockhash = blockhash;
         transaction.feePayer = fromPubkey;
         
-        console.log("Sending SEC token transaction via Alchemy RPC...");
+        console.log("Sending SEC token transaction via QuickNode RPC...");
         const { signature } = await provider.signAndSendTransaction(transaction);
         console.log("SEC token transaction sent, signature:", signature);
         
-        const confirmationResult = await activeConnection.confirmTransaction({
+        // Confirm the transaction with retry logic
+        await confirmTransactionWithRetry(
+          activeConnection,
           signature,
           blockhash,
           lastValidBlockHeight
-        }, 'confirmed');
-        
-        if (confirmationResult.value.err) {
-          throw new Error(`Transaction failed: ${JSON.stringify(confirmationResult.value.err)}`);
-        }
-        
-        console.log("SEC token transaction confirmed successfully:", confirmationResult);
+        );
         
         toast({
           title: "Transaction successful",
@@ -347,11 +422,12 @@ export const sendTransactionToDevWallet = async (
         
         return signature;
       } catch (error) {
-        console.error("Primary RPC connection failed, trying fallback:", error);
+        console.error("Primary QuickNode connection failed, trying fallback:", error);
         
         try {
           const fallbackConn = getFallbackConnection();
           
+          // Get fresh blockhash from fallback connection
           const { blockhash, lastValidBlockHeight } = await fallbackConn.getLatestBlockhash();
           transaction.recentBlockhash = blockhash;
           
@@ -360,17 +436,13 @@ export const sendTransactionToDevWallet = async (
           
           console.log("Fallback SEC token transaction sent, signature:", signature);
           
-          const confirmationResult = await fallbackConn.confirmTransaction({
+          // Confirm with fallback connection
+          await confirmTransactionWithRetry(
+            fallbackConn,
             signature,
             blockhash,
             lastValidBlockHeight
-          }, 'confirmed');
-          
-          if (confirmationResult.value.err) {
-            throw new Error(`Fallback transaction failed: ${JSON.stringify(confirmationResult.value.err)}`);
-          }
-          
-          console.log("Fallback SEC token transaction confirmed successfully");
+          );
           
           toast({
             title: "Transaction successful (fallback)",

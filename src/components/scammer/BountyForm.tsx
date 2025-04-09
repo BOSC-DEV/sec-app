@@ -8,7 +8,7 @@ import { toast } from '@/hooks/use-toast';
 import { useProfile } from '@/contexts/ProfileContext';
 import { addBountyContribution } from '@/services/bountyService';
 import { sendTransactionToDevWallet, connectPhantomWallet } from '@/utils/phantomWallet';
-import { handleError, ErrorSeverity } from '@/utils/errorHandling';
+import { handleError, ErrorSeverity, retryWithBackoff } from '@/utils/errorHandling';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface BountyFormProps {
