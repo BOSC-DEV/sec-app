@@ -69,6 +69,7 @@ const connection = new Connection(QUICKNODE_RPC_URL, connectionConfig);
 
 let fallbackConnection: Connection | null = null;
 
+// Export these utility functions
 const getConnection = (): Connection => {
   return connection;
 };
@@ -216,6 +217,7 @@ export const getOrCreateAssociatedTokenAccount = async (
   mint: PublicKey
 ): Promise<PublicKey> => {
   try {
+    // Use the correct program ID for the associatedTokenProgramId parameter (5th parameter)
     const associatedToken = await getAssociatedTokenAddress(
       mint,
       owner,
