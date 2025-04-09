@@ -1,14 +1,13 @@
-
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Clipboard, DollarSign, Copy } from 'lucide-react';
+import { Clipboard, DollarSign } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useProfile } from '@/contexts/ProfileContext';
 import { addBountyContribution } from '@/services/bountyService';
 import { sendTransactionToDevWallet, connectPhantomWallet } from '@/utils/phantomWallet';
-import { handleError, ErrorSeverity, retryWithBackoff } from '@/utils/errorHandling';
+import { handleError, ErrorSeverity } from '@/utils/errorHandling';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface BountyFormProps {
@@ -111,10 +110,19 @@ const BountyForm: React.FC<BountyFormProps> = ({
     setIsProcessing(true);
     
     try {
-      // Process the transaction to the developer wallet
-      console.log(`Processing bounty transaction of ${amount} $SEC to ${developerWalletAddress}`);
+      // Ensure the wallet address is valid
+      if (!developerWalletAddress || developerWalletAddress.trim() === '') {
+        toast({
+          title: "Invalid wallet address",
+          description: "Developer wallet address is not specified.",
+          variant: "destructive"
+        });
+        setIsProcessing(false);
+        return;
+      }
       
-      // Add a more detailed log before the transaction
+      // Log address for debugging
+      console.log(`Processing bounty transaction of ${amount} $SEC to ${developerWalletAddress}`);
       console.log('Developer wallet address type and value:', {
         address: developerWalletAddress,
         type: typeof developerWalletAddress,

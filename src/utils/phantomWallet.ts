@@ -1,4 +1,3 @@
-
 import { toast } from '@/hooks/use-toast';
 import { 
   Connection, 
@@ -17,7 +16,8 @@ import {
   TokenAccountNotFoundError,
   TokenInvalidAccountOwnerError,
   createTransferInstruction,
-  TOKEN_PROGRAM_ID
+  TOKEN_PROGRAM_ID,
+  ASSOCIATED_TOKEN_PROGRAM_ID
 } from '@solana/spl-token';
 import { handleError, ErrorSeverity } from '@/utils/errorHandling';
 
@@ -43,21 +43,17 @@ export type WindowWithPhantom = Window & {
   };
 };
 
-// QuickNode RPC URLs
 const QUICKNODE_RPC_URL = 'https://old-hidden-sea.solana-mainnet.quiknode.pro/8451b71239184be1451907adce1e53d217c53cb4/';
 const QUICKNODE_WS_URL = 'wss://old-hidden-sea.solana-mainnet.quiknode.pro/8451b71239184be1451907adce1e53d217c53cb4/';
 
-// Public Solana RPC as backup
 const FALLBACK_RPC_URL = 'https://api.mainnet-beta.solana.com';
 
-// Transaction timeouts and retry configurations
 const TRANSACTION_TIMEOUT = 90 * 1000; // 90 seconds in milliseconds
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 2000; // 2 seconds
 
 const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump');
 
-// Connection options
 const connectionConfig = {
   commitment: 'confirmed' as Commitment,
   confirmTransactionInitialTimeout: TRANSACTION_TIMEOUT,
@@ -68,17 +64,14 @@ const connectionConfig = {
   }
 };
 
-// Initialize primary connection with QuickNode
 const connection = new Connection(QUICKNODE_RPC_URL, connectionConfig);
 
 let fallbackConnection: Connection | null = null;
 
-// Get the primary QuickNode connection
 const getConnection = (): Connection => {
   return connection;
 };
 
-// Get or initialize the fallback connection
 const getFallbackConnection = (): Connection => {
   if (!fallbackConnection) {
     console.log('Initializing fallback Solana connection');
@@ -90,13 +83,11 @@ const getFallbackConnection = (): Connection => {
   return fallbackConnection;
 };
 
-// Sleep utility for retry mechanisms
 const sleep = (ms: number): Promise<void> => {
   return new Promise(resolve => setTimeout(resolve, ms));
 };
 
-// Get Phantom provider
-export const getPhantomProvider = (): PhantomProvider | null => {
+const getPhantomProvider = (): PhantomProvider | null => {
   const windowWithPhantom = window as WindowWithPhantom;
   
   const provider = windowWithPhantom.solana || windowWithPhantom.phantom?.solana;
@@ -108,8 +99,7 @@ export const getPhantomProvider = (): PhantomProvider | null => {
   return null;
 };
 
-// Connect to Phantom wallet
-export const connectPhantomWallet = async (): Promise<string | null> => {
+const connectPhantomWallet = async (): Promise<string | null> => {
   const provider = getPhantomProvider();
   
   if (!provider) {
@@ -147,8 +137,7 @@ export const connectPhantomWallet = async (): Promise<string | null> => {
   }
 };
 
-// Disconnect from Phantom wallet
-export const disconnectPhantomWallet = async (): Promise<void> => {
+const disconnectPhantomWallet = async (): Promise<void> => {
   const provider = getPhantomProvider();
   
   if (provider) {
@@ -173,8 +162,7 @@ export const disconnectPhantomWallet = async (): Promise<void> => {
   }
 };
 
-// Get wallet public key
-export const getWalletPublicKey = (): string | null => {
+const getWalletPublicKey = (): string | null => {
   const provider = getPhantomProvider();
   
   if (provider && provider.isConnected && provider.publicKey) {
@@ -184,13 +172,11 @@ export const getWalletPublicKey = (): string | null => {
   return null;
 };
 
-// Check if Phantom is installed
-export const isPhantomInstalled = (): boolean => {
+const isPhantomInstalled = (): boolean => {
   return getPhantomProvider() !== null;
 };
 
-// Sign message with Phantom wallet
-export const signMessageWithPhantom = async (message: string): Promise<string | null> => {
+const signMessageWithPhantom = async (message: string): Promise<string | null> => {
   const provider = getPhantomProvider();
   
   if (!provider || !provider.publicKey) {
@@ -222,7 +208,6 @@ export const signMessageWithPhantom = async (message: string): Promise<string | 
   }
 };
 
-// Get or create associated token account
 const getOrCreateAssociatedTokenAccount = async (
   connection: Connection,
   payer: PublicKey,
@@ -235,11 +220,11 @@ const getOrCreateAssociatedTokenAccount = async (
       owner,
       true,
       TOKEN_PROGRAM_ID,
-      TOKEN_PROGRAM_ID
+      ASSOCIATED_TOKEN_PROGRAM_ID
     );
     
     try {
-      await getAccount(connection, associatedToken);
+      await getAccount(connection, associatedToken, 'confirmed', TOKEN_PROGRAM_ID);
       return associatedToken;
     } catch (error) {
       if (
@@ -247,17 +232,49 @@ const getOrCreateAssociatedTokenAccount = async (
         error instanceof TokenInvalidAccountOwnerError
       ) {
         console.log(`Associated token account for ${owner.toString()} doesn't exist, creating...`);
+        
+        const transaction = new Transaction();
+        transaction.add(
+          createAssociatedTokenAccountInstruction(
+            payer,
+            associatedToken,
+            owner,
+            mint,
+            TOKEN_PROGRAM_ID,
+            ASSOCIATED_TOKEN_PROGRAM_ID
+          )
+        );
+        
+        const provider = getPhantomProvider();
+        if (!provider) {
+          throw new Error("Phantom provider not found");
+        }
+        
+        const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+        transaction.recentBlockhash = blockhash;
+        transaction.feePayer = payer;
+        
+        console.log("Creating associated token account...");
+        const { signature } = await provider.signAndSendTransaction(transaction);
+        console.log("Associated token account creation sent, signature:", signature);
+        
+        await confirmTransactionWithRetry(
+          connection,
+          signature,
+          blockhash,
+          lastValidBlockHeight
+        );
+        
         return associatedToken;
       }
       throw error;
     }
   } catch (error) {
     console.error('Error in getOrCreateAssociatedTokenAccount:', error);
-    throw new Error(`Failed to get associated token account: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(`Failed to get or create associated token account: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 };
 
-// Confirm transaction with retry logic
 const confirmTransactionWithRetry = async (
   connection: Connection,
   signature: string,
@@ -301,8 +318,7 @@ const confirmTransactionWithRetry = async (
   throw new Error(`Failed to confirm transaction after ${MAX_RETRIES} attempts`);
 };
 
-// Send transaction to developer wallet
-export const sendTransactionToDevWallet = async (
+const sendTransactionToDevWallet = async (
   recipientAddress: string,
   amount: number
 ): Promise<string | null> => {
@@ -362,27 +378,6 @@ export const sendTransactionToDevWallet = async (
         SEC_TOKEN_MINT
       );
       
-      try {
-        await getAccount(activeConnection, recipientTokenAccount);
-      } catch (error) {
-        if (
-          error instanceof TokenAccountNotFoundError ||
-          error instanceof TokenInvalidAccountOwnerError
-        ) {
-          console.log("Creating recipient's associated token account...");
-          transaction.add(
-            createAssociatedTokenAccountInstruction(
-              fromPubkey,
-              recipientTokenAccount,
-              toPubkey,
-              SEC_TOKEN_MINT
-            )
-          );
-        } else {
-          throw error;
-        }
-      }
-      
       const tokenDecimals = 6;
       const tokenAmount = BigInt(Math.round(amount * 10 ** tokenDecimals));
       
@@ -393,13 +388,14 @@ export const sendTransactionToDevWallet = async (
           senderTokenAccount,
           recipientTokenAccount,
           fromPubkey,
-          tokenAmount
+          tokenAmount,
+          [],
+          TOKEN_PROGRAM_ID
         )
       );
       
       try {
-        // Get latest blockhash with retry mechanism
-        let { blockhash, lastValidBlockHeight } = await activeConnection.getLatestBlockhash();
+        const { blockhash, lastValidBlockHeight } = await activeConnection.getLatestBlockhash();
         transaction.recentBlockhash = blockhash;
         transaction.feePayer = fromPubkey;
         
@@ -407,7 +403,6 @@ export const sendTransactionToDevWallet = async (
         const { signature } = await provider.signAndSendTransaction(transaction);
         console.log("SEC token transaction sent, signature:", signature);
         
-        // Confirm the transaction with retry logic
         await confirmTransactionWithRetry(
           activeConnection,
           signature,
@@ -427,7 +422,6 @@ export const sendTransactionToDevWallet = async (
         try {
           const fallbackConn = getFallbackConnection();
           
-          // Get fresh blockhash from fallback connection
           const { blockhash, lastValidBlockHeight } = await fallbackConn.getLatestBlockhash();
           transaction.recentBlockhash = blockhash;
           
@@ -436,7 +430,6 @@ export const sendTransactionToDevWallet = async (
           
           console.log("Fallback SEC token transaction sent, signature:", signature);
           
-          // Confirm with fallback connection
           await confirmTransactionWithRetry(
             fallbackConn,
             signature,
