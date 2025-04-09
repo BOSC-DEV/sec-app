@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Profile } from '@/types/dataTypes';
 import { handleError } from '@/utils/errorHandling';
@@ -78,7 +79,7 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
       
       result = data;
       
-      // If display_name has changed, update bounty_contributions table
+      // If display_name or username has changed, update bounty_contributions table
       if (displayNameChanged || usernameChanged) {
         await updateBountyContributions(profile.wallet_address, profile.display_name, profile.username);
       }
