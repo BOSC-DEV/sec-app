@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Card, 
@@ -27,7 +26,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Link } from 'react-router-dom';
 
 interface BountyTransactionHistoryProps {
   contributions: BountyContribution[];
@@ -52,9 +50,6 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
   const openExplorer = (txSignature: string) => {
     window.open(`https://solscan.io/tx/${txSignature}`, '_blank');
   };
-
-  // Create a unique timestamp for this component render
-  const renderTimestamp = Date.now();
 
   if (isLoading) {
     return (
@@ -106,115 +101,92 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {contributions.map((contribution) => {
-              // Add a cache busting parameter to the profile pic URL using the render timestamp
-              const profilePicUrl = contribution.contributor_profile_pic 
-                ? `${contribution.contributor_profile_pic}${contribution.contributor_profile_pic.includes('?') ? '&' : '?'}t=${renderTimestamp}`
-                : '/placeholder.svg';
+            {contributions.map((contribution) => (
+              <TableRow key={contribution.id}>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage 
+                        src={contribution.contributor_profile_pic || '/placeholder.svg'} 
+                        alt={contribution.contributor_name} 
+                      />
+                      <AvatarFallback>
+                        {contribution.contributor_name.substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-sm font-medium">{contribution.contributor_name}</p>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p className="text-xs text-muted-foreground truncate max-w-[100px]">
+                              {contribution.contributor_id}
+                            </p>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{contribution.contributor_id}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                  </div>
+                </TableCell>
                 
-              return (
-                <TableRow key={`${contribution.id}-${contribution.contributor_name}-${renderTimestamp}`}>
+                {showScammerInfo && contribution.scammers && (
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <Link to={`/profile/${contribution.contributor_name}`} aria-label={`View ${contribution.contributor_name}'s profile`}>
-                        <Avatar className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-icc-gold transition-all">
-                          <AvatarImage 
-                            src={profilePicUrl} 
-                            alt={contribution.contributor_name} 
-                          />
-                          <AvatarFallback>
-                            {contribution.contributor_name?.substring(0, 2).toUpperCase() || 'UN'}
-                          </AvatarFallback>
-                        </Avatar>
-                      </Link>
-                      <div>
-                        <Link 
-                          to={`/profile/${contribution.contributor_name}`}
-                          className="text-sm font-medium hover:text-icc-gold hover:underline transition-colors"
-                          aria-label={`View ${contribution.contributor_name}'s profile`}
-                        >
-                          {contribution.contributor_name}
-                        </Link>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <p className="text-xs text-muted-foreground truncate max-w-[100px]">
-                                {contribution.contributor_id}
-                              </p>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>{contribution.contributor_id}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage 
+                          src={contribution.scammers.photo_url || '/placeholder.svg'} 
+                          alt={contribution.scammers.name} 
+                        />
+                        <AvatarFallback>
+                          {contribution.scammers.name.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <p className="text-sm">{contribution.scammers.name}</p>
                     </div>
                   </TableCell>
-                  
-                  {showScammerInfo && contribution.scammers && (
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Link to={`/scammer/${contribution.scammer_id}`} aria-label={`View ${contribution.scammers.name}'s profile`}>
-                          <Avatar className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-icc-gold transition-all">
-                            <AvatarImage 
-                              src={contribution.scammers.photo_url || '/placeholder.svg'} 
-                              alt={contribution.scammers.name} 
-                            />
-                            <AvatarFallback>
-                              {contribution.scammers.name.substring(0, 2).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                        </Link>
-                        <Link 
-                          to={`/scammer/${contribution.scammer_id}`}
-                          className="text-sm hover:text-icc-gold hover:underline transition-colors"
-                          aria-label={`View ${contribution.scammers.name}'s profile`}
-                        >
-                          {contribution.scammers.name}
-                        </Link>
-                      </div>
-                    </TableCell>
+                )}
+                
+                <TableCell>
+                  <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
+                    {formatAmount(contribution.amount)} $SEC
+                  </Badge>
+                </TableCell>
+                
+                <TableCell>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <p className="text-sm text-muted-foreground">
+                          {formatDistanceToNow(new Date(contribution.created_at), { addSuffix: true })}
+                        </p>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{format(new Date(contribution.created_at), 'PPpp')}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </TableCell>
+                
+                <TableCell>
+                  {contribution.transaction_signature ? (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="px-2 h-8"
+                      onClick={() => openExplorer(contribution.transaction_signature!)}
+                    >
+                      <ExternalLink className="h-4 w-4 mr-1" />
+                      Solscan
+                    </Button>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">Not recorded</span>
                   )}
-                  
-                  <TableCell>
-                    <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
-                      {formatAmount(contribution.amount)} $SEC
-                    </Badge>
-                  </TableCell>
-                  
-                  <TableCell>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <p className="text-sm text-muted-foreground">
-                            {formatDistanceToNow(new Date(contribution.created_at), { addSuffix: true })}
-                          </p>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{format(new Date(contribution.created_at), 'PPpp')}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </TableCell>
-                  
-                  <TableCell>
-                    {contribution.transaction_signature ? (
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="px-2 h-8"
-                        onClick={() => openExplorer(contribution.transaction_signature!)}
-                      >
-                        <ExternalLink className="h-4 w-4 mr-1" />
-                        Solscan
-                      </Button>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">Not recorded</span>
-                    )}
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </CardContent>

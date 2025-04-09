@@ -8,13 +8,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import { getProfileByUsername } from '@/services/profileService';
-import { Twitter, Globe, Copy, ExternalLink, Share2, ThumbsUp, Edit, LogOut, ExternalLinkIcon } from 'lucide-react';
+import { Twitter, Globe, Copy, ExternalLink, Share2, ThumbsUp, Edit, LogOut } from 'lucide-react';
 import { getScammersByReporter, getLikedScammersByUser } from '@/services/scammerService';
-import { getUserBountyContributions } from '@/services/bountyService';
 import { Profile, Scammer } from '@/types/dataTypes';
 import ScammerCard from '@/components/common/ScammerCard';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -48,13 +46,6 @@ const PublicProfilePage = () => {
   const { data: likedScammers, isLoading: isLoadingLikedScammers } = useQuery({
     queryKey: ['likedScammers', profile?.wallet_address],
     queryFn: () => getLikedScammersByUser(profile?.wallet_address || ''),
-    enabled: !!profile?.wallet_address,
-  });
-
-  // New query to fetch bounty contributions
-  const { data: bountyContributions, isLoading: isLoadingBounties } = useQuery({
-    queryKey: ['userBounties', profile?.wallet_address],
-    queryFn: () => getUserBountyContributions(profile?.wallet_address || '', 1, 50),
     enabled: !!profile?.wallet_address,
   });
 
@@ -143,17 +134,6 @@ const PublicProfilePage = () => {
   const pageImage = profile?.profile_pic_url || defaultShareImage;
   const pageTitle = profile ? `${profile.display_name} (@${profile.username}) | SEC.digital` : 'Profile | SEC.digital';
   const pageDescription = profile?.bio || `Check out this profile on SEC.digital - The Scams & E-crimes Commission`;
-
-  // Format the date for display
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString();
-  };
-
-  // Format currency for display
-  const formatCurrency = (amount: number) => {
-    return amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  };
 
   return (
     <HelmetProvider>
@@ -335,88 +315,9 @@ const PublicProfilePage = () => {
               <TabsContent value="bounties" className="mt-0">
                 <div className="bg-background/60 backdrop-blur-sm rounded-lg p-6 border">
                   <h2 className="text-2xl font-bold text-icc-gold mb-6">Bounties</h2>
-                  
-                  {isLoadingBounties ? (
-                    <div className="space-y-4">
-                      {[1, 2, 3].map((i) => (
-                        <Skeleton key={i} className="h-20 w-full" />
-                      ))}
-                    </div>
-                  ) : bountyContributions && bountyContributions.contributions.length > 0 ? (
-                    <div className="overflow-hidden">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Date</TableHead>
-                            <TableHead>Scammer</TableHead>
-                            <TableHead>Amount</TableHead>
-                            <TableHead>Comment</TableHead>
-                            <TableHead>TX</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {bountyContributions.contributions.map((contribution) => (
-                            <TableRow key={contribution.id}>
-                              <TableCell>
-                                {formatDate(contribution.created_at)}
-                              </TableCell>
-                              <TableCell>
-                                {contribution.scammers ? (
-                                  <Link 
-                                    to={`/scammer/${contribution.scammer_id}`}
-                                    className="flex items-center gap-2 hover:text-icc-gold"
-                                  >
-                                    <Avatar className="h-6 w-6">
-                                      <AvatarImage src={contribution.scammers.photo_url} alt={contribution.scammers.name} />
-                                      <AvatarFallback className="text-xs">
-                                        {contribution.scammers.name.substring(0, 2).toUpperCase()}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                    <span className="font-medium">{contribution.scammers.name}</span>
-                                  </Link>
-                                ) : (
-                                  <span>Unknown Scammer</span>
-                                )}
-                              </TableCell>
-                              <TableCell className="font-mono font-medium text-icc-blue">
-                                {formatCurrency(contribution.amount)} $SEC
-                              </TableCell>
-                              <TableCell className="max-w-[200px] truncate">
-                                {contribution.comment || "-"}
-                              </TableCell>
-                              <TableCell>
-                                {contribution.transaction_signature ? (
-                                  <a 
-                                    href={`https://solscan.io/tx/${contribution.transaction_signature}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center text-icc-blue hover:text-icc-blue-light"
-                                  >
-                                    View
-                                    <ExternalLink className="ml-1 h-3 w-3" />
-                                  </a>
-                                ) : (
-                                  "-"
-                                )}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                      
-                      {bountyContributions.totalCount > bountyContributions.contributions.length && (
-                        <div className="text-center mt-6">
-                          <p className="text-sm text-muted-foreground">
-                            Showing {bountyContributions.contributions.length} of {bountyContributions.totalCount} contributions
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="text-center py-12">
-                      <p className="text-muted-foreground text-lg">No bounties available yet</p>
-                    </div>
-                  )}
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground text-lg">No bounties available yet</p>
+                  </div>
                 </div>
               </TabsContent>
                 

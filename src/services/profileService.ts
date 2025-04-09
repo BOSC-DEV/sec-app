@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Profile } from '@/types/dataTypes';
 import { handleError } from '@/utils/errorHandling';
@@ -40,7 +39,7 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
     
     const { data: existingProfile, error: checkError } = await supabase
       .from('profiles')
-      .select('id, display_name, username, profile_pic_url')
+      .select('id')
       .eq('wallet_address', profile.wallet_address)
       .maybeSingle();
     
@@ -53,11 +52,6 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
 
     if (existingProfile) {
       console.log('Updating existing profile with ID:', existingProfile.id);
-      
-      // Check if display_name or profile_pic has changed
-      const displayNameChanged = existingProfile.display_name !== profile.display_name;
-      const profilePicChanged = existingProfile.profile_pic_url !== profile.profile_pic_url;
-      
       const { data, error } = await supabase
         .from('profiles')
         .update({
@@ -78,22 +72,6 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
       }
       
       result = data;
-      
-      // If display_name or profile_pic has changed, update bounty_contributions table
-      if (displayNameChanged || profilePicChanged) {
-        const updateData: { contributor_name?: string; contributor_profile_pic?: string } = {};
-        
-        if (displayNameChanged) {
-          updateData.contributor_name = profile.display_name;
-        }
-        
-        if (profilePicChanged) {
-          updateData.contributor_profile_pic = profile.profile_pic_url;
-        }
-        
-        await updateBountyContributions(profile.wallet_address, updateData);
-      }
-      
     } else {
       console.log('Inserting new profile');
       const { data, error } = await supabase
@@ -126,29 +104,6 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
   } catch (error) {
     handleError(error, 'Error saving profile');
     return null;
-  }
-};
-
-const updateBountyContributions = async (
-  walletAddress: string, 
-  updateData: { contributor_name?: string; contributor_profile_pic?: string }
-): Promise<void> => {
-  try {
-    console.log(`Updating bounty contributions for ${walletAddress}:`, updateData);
-    
-    const { error } = await supabase
-      .from('bounty_contributions')
-      .update(updateData)
-      .eq('contributor_id', walletAddress);
-    
-    if (error) {
-      console.error('Error updating bounty contributions:', error);
-      throw error;
-    }
-    
-    console.log('Successfully updated contributor info in bounty_contributions');
-  } catch (error) {
-    handleError(error, 'Error updating contributor info in bounty_contributions');
   }
 };
 
