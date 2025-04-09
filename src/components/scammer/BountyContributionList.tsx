@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BountyContribution } from '@/types/dataTypes';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -12,6 +11,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Link } from 'react-router-dom';
+import { getProfileByUsername } from '@/services/profileService';
 
 interface BountyContributionListProps {
   contributions: BountyContribution[];
@@ -31,8 +31,36 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
   itemsPerPage = 10
 }) => {
   const [focused, setFocused] = useState<string | null>(null);
+  const [contributorUsernames, setContributorUsernames] = useState<Record<string, string>>({});
   
-  // Calculate pagination info
+  useEffect(() => {
+    const fetchContributorUsernames = async () => {
+      const usernamesMap: Record<string, string> = {};
+      
+      await Promise.all(
+        contributions.map(async (contribution) => {
+          try {
+            const profile = await getProfileByUsername(contribution.contributor_name);
+            if (profile && profile.username) {
+              usernamesMap[contribution.contributor_name] = profile.username;
+            } else {
+              usernamesMap[contribution.contributor_name] = contribution.contributor_name;
+            }
+          } catch (error) {
+            console.error(`Error fetching profile for ${contribution.contributor_name}:`, error);
+            usernamesMap[contribution.contributor_name] = contribution.contributor_name;
+          }
+        })
+      );
+      
+      setContributorUsernames(usernamesMap);
+    };
+
+    if (contributions.length > 0) {
+      fetchContributorUsernames();
+    }
+  }, [contributions]);
+  
   const totalPages = Math.max(1, Math.ceil(totalCount / itemsPerPage));
   const hasPreviousPage = currentPage > 1;
   const hasNextPage = currentPage < totalPages;
@@ -48,7 +76,6 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
     window.open(`https://solscan.io/tx/${transactionSignature}`, '_blank');
   };
 
-  // Create a unique timestamp for this component render
   const renderTimestamp = Date.now();
 
   if (isLoading) {
@@ -75,10 +102,13 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
       
       <div aria-labelledby="contributions-heading" className="space-y-3">
         {contributions.map((contribution) => {
-          // Add a cache busting parameter to the profile pic URL using the render timestamp
           const profilePicUrl = contribution.contributor_profile_pic 
             ? `${contribution.contributor_profile_pic}${contribution.contributor_profile_pic.includes('?') ? '&' : '?'}t=${renderTimestamp}`
             : '/placeholder.svg';
+          
+          const profileLink = contributorUsernames[contribution.contributor_name] 
+            ? `/profile/${contributorUsernames[contribution.contributor_name]}` 
+            : `/profile/${contribution.contributor_name}`;
             
           return (
             <div 
@@ -90,7 +120,7 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-2">
-                  <Link to={`/profile/${contribution.contributor_name}`} aria-label={`View ${contribution.contributor_name}'s profile`}>
+                  <Link to={profileLink} aria-label={`View ${contribution.contributor_name}'s profile`}>
                     <Avatar className="h-6 w-6 cursor-pointer hover:ring-2 hover:ring-icc-gold transition-all">
                       <AvatarImage 
                         src={profilePicUrl} 
@@ -102,7 +132,7 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
                     </Avatar>
                   </Link>
                   <Link 
-                    to={`/profile/${contribution.contributor_name}`}
+                    to={profileLink}
                     className="text-sm font-medium text-icc-blue-dark hover:text-icc-gold hover:underline transition-colors"
                     aria-label={`View ${contribution.contributor_name}'s profile`}
                   >
@@ -152,7 +182,6 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
         })}
       </div>
       
-      {/* Pagination controls - only show if pagination is in use */}
       {totalPages > 1 && onPageChange && (
         <div className="flex justify-between items-center pt-3">
           <Button 
