@@ -35,6 +35,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Input } from '@/components/ui/input';
 import { handleError, ErrorSeverity } from '@/utils/errorHandling';
 import { sendTransactionToDevWallet, connectPhantomWallet } from '@/utils/phantomWallet';
+import { PROFILE_UPDATED_EVENT } from '@/contexts/ProfileContext';
 
 const ScammerDetailPage = () => {
   const { id } = useParams<{ id: string; }>();
@@ -58,6 +59,23 @@ const ScammerDetailPage = () => {
   const contributionsPerPage = 5;
   const [profileChangeCounter, setProfileChangeCounter] = useState(0);
   
+  useEffect(() => {
+    const handleProfileUpdated = () => {
+      console.log("Profile updated event received, refreshing contributions");
+      setProfileChangeCounter(prev => prev + 1);
+      
+      queryClient.invalidateQueries({
+        queryKey: ['bountyContributions', id]
+      });
+    };
+    
+    window.addEventListener(PROFILE_UPDATED_EVENT, handleProfileUpdated);
+    
+    return () => {
+      window.removeEventListener(PROFILE_UPDATED_EVENT, handleProfileUpdated);
+    };
+  }, [id, queryClient]);
+
   const deleteScammerMutation = useMutation({
     mutationFn: () => {
       if (!id) throw new Error("Scammer ID is required");

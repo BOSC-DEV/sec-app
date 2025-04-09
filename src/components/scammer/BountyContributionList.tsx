@@ -48,6 +48,9 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
     window.open(`https://solscan.io/tx/${transactionSignature}`, '_blank');
   };
 
+  // Create a unique timestamp for this component render
+  const renderTimestamp = Date.now();
+
   if (isLoading) {
     return (
       <div role="status" aria-live="polite" aria-busy="true" className="text-center py-4">
@@ -72,14 +75,14 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
       
       <div aria-labelledby="contributions-heading" className="space-y-3">
         {contributions.map((contribution) => {
-          // Add a cache busting parameter to the profile pic URL
+          // Add a cache busting parameter to the profile pic URL using the render timestamp
           const profilePicUrl = contribution.contributor_profile_pic 
-            ? `${contribution.contributor_profile_pic}${contribution.contributor_profile_pic.includes('?') ? '&' : '?'}t=${Date.now()}`
+            ? `${contribution.contributor_profile_pic}${contribution.contributor_profile_pic.includes('?') ? '&' : '?'}t=${renderTimestamp}`
             : '/placeholder.svg';
             
           return (
             <div 
-              key={`${contribution.id}-${contribution.contributor_name}`} 
+              key={`${contribution.id}-${contribution.contributor_name}-${renderTimestamp}`} 
               className={`border border-icc-gold-light/30 rounded-lg p-3 bg-icc-gold-light/10 transition ${focused === contribution.id ? 'ring-2 ring-icc-gold' : ''}`}
               onFocus={() => setFocused(contribution.id)}
               onBlur={() => setFocused(null)}

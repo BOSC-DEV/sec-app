@@ -1,4 +1,3 @@
-
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { Profile } from '@/types/dataTypes';
 import { getProfileByWallet, uploadProfilePicture, saveProfile } from '@/services/profileService';
@@ -11,6 +10,13 @@ import {
   isPhantomInstalled 
 } from '@/utils/phantomWallet';
 
+export const PROFILE_UPDATED_EVENT = 'profile-updated';
+
+export const emitProfileUpdatedEvent = (profile: Profile) => {
+  const event = new CustomEvent(PROFILE_UPDATED_EVENT, { detail: profile });
+  window.dispatchEvent(event);
+};
+
 interface ProfileContextType {
   isConnected: boolean;
   walletAddress: string | null;
@@ -21,6 +27,7 @@ interface ProfileContextType {
   refreshProfile: () => Promise<void>;
   uploadAvatar: (file: File) => Promise<string | null>;
   isPhantomAvailable: boolean;
+  updateProfile: (updatedProfile: Profile) => Promise<Profile | null>;
 }
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
@@ -32,7 +39,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isPhantomAvailable, setIsPhantomAvailable] = useState<boolean>(false);
 
-  // Check for Phantom wallet and saved wallet on load
   useEffect(() => {
     const checkPhantomAvailability = () => {
       setIsPhantomAvailable(isPhantomInstalled());
@@ -40,7 +46,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
 
     checkPhantomAvailability();
 
-    // Check if wallet is already connected
     const savedWallet = localStorage.getItem('walletAddress');
     if (savedWallet) {
       setWalletAddress(savedWallet);
@@ -48,7 +53,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       fetchProfile(savedWallet);
     }
 
-    // Add event listener for when Phantom is installed
     window.addEventListener('DOMContentLoaded', checkPhantomAvailability);
     
     return () => {
@@ -56,12 +60,10 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  // Add event listeners for Phantom wallet connection changes
   useEffect(() => {
     const provider = getPhantomProvider();
     
     if (provider) {
-      // Handle connection events
       provider.on('connect', () => {
         const publicKey = getWalletPublicKey();
         if (publicKey) {
@@ -72,7 +74,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         }
       });
       
-      // Handle disconnection events
       provider.on('disconnect', () => {
         setWalletAddress(null);
         setIsConnected(false);
@@ -102,7 +103,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   const createDefaultProfile = async (address: string) => {
     try {
       setIsLoading(true);
-      // Create a default profile for new users
       const defaultProfile: Profile = {
         id: crypto.randomUUID(),
         wallet_address: address,
@@ -151,7 +151,19 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(true);
       const publicUrl = await uploadProfilePicture(walletAddress, file);
       
-      if (publicUrl) {
+      if (publicUrl && profile) {
+        const updatedProfile = {
+          ...profile,
+          profile_pic_url: publicUrl
+        };
+        
+        const savedProfile = await saveProfile(updatedProfile);
+        
+        if (savedProfile) {
+          setProfile(savedProfile);
+          emitProfileUpdatedEvent(savedProfile);
+        }
+        
         toast({
           title: 'Success',
           description: 'Profile picture uploaded successfully',
@@ -177,7 +189,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(true);
       
       if (isPhantomAvailable) {
-        // Connect to Phantom wallet
         const publicKey = await connectPhantomWallet();
         
         if (publicKey) {
@@ -185,26 +196,21 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
           setIsConnected(true);
           localStorage.setItem('walletAddress', publicKey);
           
-          // Check if profile exists
           const existingProfile = await getProfileByWallet(publicKey);
           
           if (existingProfile) {
-            // Profile exists, set it
             setProfile(existingProfile);
           } else {
-            // Profile doesn't exist, create a new one
             await createDefaultProfile(publicKey);
           }
         }
       } else {
-        // Fallback to mock wallet for testing
         const mockWalletAddress = `wallet_${Date.now().toString(36)}`;
         
         localStorage.setItem('walletAddress', mockWalletAddress);
         setWalletAddress(mockWalletAddress);
         setIsConnected(true);
         
-        // Create a mock profile
         await createDefaultProfile(mockWalletAddress);
         
         toast({
@@ -248,6 +254,36 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const updateProfile = async (updatedProfile: Profile): Promise<Profile | null> => {
+    try {
+      setIsLoading(true);
+      const savedProfile = await saveProfile(updatedProfile);
+      
+      if (savedProfile) {
+        setProfile(savedProfile);
+        
+        emitProfileUpdatedEvent(savedProfile);
+        
+        toast({
+          title: 'Profile Updated',
+          description: 'Your profile has been updated successfully',
+        });
+      }
+      
+      return savedProfile;
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update profile',
+        variant: 'destructive',
+      });
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const value = {
     isConnected,
     walletAddress,
@@ -257,7 +293,8 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     disconnectWallet,
     refreshProfile,
     uploadAvatar,
-    isPhantomAvailable
+    isPhantomAvailable,
+    updateProfile
   };
 
   return (

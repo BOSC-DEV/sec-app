@@ -53,6 +53,9 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
     window.open(`https://solscan.io/tx/${txSignature}`, '_blank');
   };
 
+  // Create a unique timestamp for this component render
+  const renderTimestamp = Date.now();
+
   if (isLoading) {
     return (
       <Card>
@@ -104,13 +107,13 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
           </TableHeader>
           <TableBody>
             {contributions.map((contribution) => {
-              // Add a cache busting parameter to the profile pic URL
+              // Add a cache busting parameter to the profile pic URL using the render timestamp
               const profilePicUrl = contribution.contributor_profile_pic 
-                ? `${contribution.contributor_profile_pic}${contribution.contributor_profile_pic.includes('?') ? '&' : '?'}t=${Date.now()}`
+                ? `${contribution.contributor_profile_pic}${contribution.contributor_profile_pic.includes('?') ? '&' : '?'}t=${renderTimestamp}`
                 : '/placeholder.svg';
                 
               return (
-                <TableRow key={`${contribution.id}-${contribution.contributor_name}`}>
+                <TableRow key={`${contribution.id}-${contribution.contributor_name}-${renderTimestamp}`}>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Link to={`/profile/${contribution.contributor_name}`} aria-label={`View ${contribution.contributor_name}'s profile`}>
