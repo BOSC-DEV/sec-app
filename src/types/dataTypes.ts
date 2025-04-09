@@ -1,4 +1,3 @@
-
 export interface Scammer {
   id: string;
   name: string;
@@ -55,17 +54,13 @@ export interface Comment {
 export interface BountyContribution {
   id: string;
   scammer_id: string;
-  amount: number;
-  comment: string;
   contributor_id: string;
   contributor_name: string;
   contributor_profile_pic?: string;
-  transaction_signature?: string;
+  contributor_username?: string;
+  amount: number;
   created_at: string;
-  // Joined data
-  scammers?: {
-    id: string;
-    name: string;
-    photo_url: string;
-  };
+  comment?: string;
+  transaction_signature?: string;
+  scammers?: Scammer;
 }
