@@ -29,6 +29,7 @@ export const addBountyContribution = async (contribution: {
         contributor_name: contribution.contributor_name,
         contributor_profile_pic: contribution.contributor_profile_pic || null,
         transaction_signature: contribution.transaction_signature || null,
+        is_active: true
       })
       .select()
       .single();
@@ -87,7 +88,7 @@ export const transferBountyContribution = async (
     }
     
     // Step 3: Check if the original contribution is active (not already transferred)
-    if (!originalContribution.is_active) {
+    if (originalContribution.is_active === false) {
       throw new Error("This contribution has already been transferred");
     }
     
@@ -478,7 +479,7 @@ export const getUserTransferableContributions = async (
       contribution => contribution.amount > 0
     );
 
-    return transferableContributions as unknown as BountyContribution[];
+    return transferableContributions as BountyContribution[];
   } catch (error) {
     handleError(error, {
       fallbackMessage: "Failed to fetch transferable contributions",

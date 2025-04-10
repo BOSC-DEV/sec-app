@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -225,10 +224,10 @@ const BountyForm: React.FC<BountyFormProps> = ({
       <Button 
         className="w-full bg-icc-gold hover:bg-icc-gold-dark text-icc-blue-dark border-icc-gold-dark font-medium"
         onClick={handleAddBounty}
-        disabled={isLoading || addBountyContributionMutation.isPending}
+        disabled={isProcessing || addBountyContributionMutation.isPending}
         aria-label="Contribute to bounty"
       >
-        {isLoading || addBountyContributionMutation.isPending ? (
+        {isProcessing || addBountyContributionMutation.isPending ? (
           <span className="flex items-center">
             <DollarSign className="h-4 w-4 mr-2 animate-spin" />
             Processing...
