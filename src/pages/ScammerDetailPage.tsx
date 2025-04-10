@@ -5,10 +5,13 @@ import { getScammerById, deleteScammer } from '@/services/scammerService';
 import { getScammerComments, addComment } from '@/services/commentService';
 import { likeScammer, dislikeScammer, getUserScammerInteraction } from '@/services/interactionService';
 import { isScammerCreator } from '@/services/reportService';
-import { getUserContributionAmountForScammer, getScammerBountyContributions } from '@/services/bountyService';
+import { 
+  addBountyContribution, 
+  getScammerBountyContributions, 
+  getUserContributionAmountForScammer 
+} from '@/services/bountyService';
 import CompactHero from '@/components/common/CompactHero';
 import BountyContributionList from '@/components/scammer/BountyContributionList';
-import BountyForm from '@/components/scammer/BountyForm';
 import { 
   ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, 
   Link2, Eye, AlertTriangle, Shield, TrendingUp, Edit, Clipboard, Trash2, MessageSquare 
@@ -26,10 +29,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import { useProfile } from '@/contexts/ProfileContext';
 import { getProfileByWallet } from '@/services/profileService';
-import { Scammer, Comment, Profile } from '@/types/dataTypes';
+import { Scammer, Comment, Profile, BountyContribution } from '@/types/dataTypes';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Input } from '@/components/ui/input';
 import { handleError, ErrorSeverity } from '@/utils/errorHandling';
+import { sendTransactionToDevWallet, connectPhantomWallet } from '@/utils/phantomWallet';
 import { PROFILE_UPDATED_EVENT } from '@/contexts/ProfileContext';
 
 const ScammerDetailPage = () => {
@@ -46,6 +51,8 @@ const ScammerDetailPage = () => {
   const [creatorProfile, setCreatorProfile] = useState<Profile | null>(null);
   const [agreePercentage, setAgreePercentage] = useState(0);
   const [isCreator, setIsCreator] = useState(false);
+  const [contributionAmount, setContributionAmount] = useState('0.00');
+  const [bountyComment, setBountyComment] = useState('');
   const developerWalletAddress = "A6X5A7ZSvez8BK82Z5tnZJC3qarGbsxRVv8Hc3DKBiZx";
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [contributionsPage, setContributionsPage] = useState(1);
@@ -250,6 +257,39 @@ const ScammerDetailPage = () => {
     }
   });
 
+  const addBountyContributionMutation = useMutation({
+    mutationFn: (contribution: {
+      scammer_id: string;
+      amount: number;
+      comment?: string;
+      contributor_id: string;
+      contributor_name: string;
+      contributor_profile_pic?: string;
+      transaction_signature?: string;
+    }) => addBountyContribution(contribution),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['bountyContributions', id]
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['scammer', id]
+      });
+      setContributionAmount('0.00');
+      setBountyComment('');
+      toast({
+        title: "Bounty contribution",
+        description: `Thank you for contributing to this bounty!`
+      });
+    },
+    onError: error => {
+      handleError(error, {
+        fallbackMessage: "Failed to contribute to the bounty. Please try again.",
+        severity: ErrorSeverity.MEDIUM,
+        context: "ADD_BOUNTY"
+      });
+    }
+  });
+
   const handleLike = async () => {
     if (!profile?.wallet_address) {
       toast({
@@ -362,6 +402,60 @@ const ScammerDetailPage = () => {
       author_name: profile.display_name,
       author_profile_pic: profile.profile_pic_url
     });
+  };
+
+  const handleAddBounty = async () => {
+    if (!profile) {
+      await connectPhantomWallet();
+      if (!profile) {
+        toast({
+          title: "Authentication required",
+          description: "Please connect your wallet to contribute to this bounty.",
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+    
+    const amount = parseFloat(contributionAmount);
+    if (!amount || amount <= 0) {
+      toast({
+        title: "Invalid amount",
+        description: "Please enter a valid contribution amount.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      console.log(`Processing bounty transaction of ${amount} $SEC to ${developerWalletAddress}`);
+      const transactionSignature = await sendTransactionToDevWallet(developerWalletAddress, amount);
+      
+      if (!transactionSignature) {
+        setIsLoading(false);
+        return;
+      }
+      
+      console.log("Recording bounty contribution in database");
+      addBountyContributionMutation.mutate({
+        scammer_id: scammer?.id || '',
+        amount: amount,
+        comment: bountyComment || undefined,
+        contributor_id: profile.wallet_address,
+        contributor_name: profile.display_name,
+        contributor_profile_pic: profile.profile_pic_url,
+        transaction_signature: transactionSignature
+      });
+    } catch (error) {
+      handleError(error, {
+        fallbackMessage: "Failed to process bounty contribution. Please try again.",
+        severity: ErrorSeverity.MEDIUM,
+        context: "PROCESS_BOUNTY"
+      });
+      setIsLoading(false);
+    }
   };
 
   const handlePageChange = (page: number) => {
@@ -662,16 +756,95 @@ const ScammerDetailPage = () => {
                     <ThumbsDown className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
                     Disagree{dislikes > 0 ? ` (${dislikes})` : ''}
                   </Button>
-                  
-                  {/* Replace direct bounty implementation with BountyForm component */}
-                  <div id="bounty-section">
-                    {scammer && (
-                      <BountyForm 
-                        scammerId={scammer.id} 
-                        scammerName={scammer.name} 
-                        developerWalletAddress={developerWalletAddress}
-                      />
+                  <div id="bounty-section" className="bg-icc-gold-light/20 border border-icc-gold rounded-lg p-5 mt-4">
+                    <h4 className="font-bold text-xl text-icc-blue mb-2">Contribute to Bounty</h4>
+                    <p className="text-sm text-icc-gray-dark mb-4">
+                      Add $SEC tokens to increase the bounty for {scammer?.name || "this scammer"}
+                    </p>
+                    <div className="mb-4">
+                      <div className="text-sm font-medium text-icc-blue mb-2">Current Bounty</div>
+                      <div className="bg-icc-gold-light/30 border border-icc-gold/30 rounded p-3 flex items-center">
+                        <span className="font-mono font-medium text-icc-blue-dark">{scammer?.bounty_amount.toLocaleString() || 0} $SEC</span>
+                      </div>
+                    </div>
+                    
+                    {profile && (
+                      <div className="mb-4">
+                        <div className="text-sm font-medium text-icc-blue mb-2">My Contribution</div>
+                        <div className="bg-icc-gold-light/30 border border-icc-gold/30 rounded p-3 flex items-center">
+                          {isLoadingUserContribution ? (
+                            <Skeleton className="h-6 w-24" />
+                          ) : (
+                            <span className="font-mono font-medium text-icc-blue-dark">
+                              {formatCurrency(userContributionAmount)} $SEC
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     )}
+                    
+                    <div className="mb-4">
+                      <div className="text-sm font-medium text-icc-blue mb-2">Developer Wallet</div>
+                      <div className="bg-icc-gold-light/30 border border-icc-gold/30 rounded p-3 flex items-center justify-between">
+                        <span className="font-mono text-sm text-icc-blue-dark">{developerWallet}</span>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-7 w-7 p-0 text-icc-gold-dark hover:text-icc-blue hover:bg-icc-gold-light/50" 
+                          onClick={() => copyToClipboard(developerWalletAddress)}
+                          aria-label="Copy developer wallet address"
+                        >
+                          <Clipboard className="h-4 w-4" aria-hidden="true" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="mb-4">
+                      <div className="text-sm font-medium text-icc-blue mb-2" id="contribution-amount-label">Contribution Amount</div>
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          type="number"
+                          value={contributionAmount}
+                          onChange={e => setContributionAmount(e.target.value)}
+                          className="bg-icc-gold-light/30 border-icc-gold/30 text-icc-blue-dark"
+                          min="0"
+                          step="0.01"
+                          aria-labelledby="contribution-amount-label"
+                          aria-describedby="contribution-amount-currency"
+                        />
+                        <span id="contribution-amount-currency" className="text-icc-gold-dark font-medium">$SEC</span>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-4">
+                      <div className="text-sm font-medium text-icc-blue mb-2" id="contribution-comment-label">Add a Comment (Optional)</div>
+                      <Textarea
+                        value={bountyComment}
+                        onChange={e => setBountyComment(e.target.value)}
+                        placeholder="Why are you contributing to this bounty?"
+                        className="bg-icc-gold-light/30 border-icc-gold/30 text-icc-blue-dark"
+                        aria-labelledby="contribution-comment-label"
+                      />
+                    </div>
+                    
+                    <Button 
+                      className="w-full bg-icc-gold hover:bg-icc-gold-dark text-icc-blue-dark border-icc-gold-dark font-medium"
+                      onClick={handleAddBounty}
+                      disabled={addBountyContributionMutation.isPending}
+                      aria-label="Contribute to bounty"
+                    >
+                      {addBountyContributionMutation.isPending ? "Processing..." : profile ? "Contribute to Bounty" : "Connect your wallet to contribute"}
+                    </Button>
+                    
+                    <div className="mt-4">
+                      <BountyContributionList
+                        contributions={bountyContributions}
+                        isLoading={isLoadingBountyContributions}
+                        totalCount={totalContributions}
+                        onPageChange={handlePageChange}
+                        currentPage={contributionsPage}
+                        itemsPerPage={contributionsPerPage}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
