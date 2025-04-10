@@ -12,6 +12,7 @@ import {
 } from '@/services/bountyService';
 import CompactHero from '@/components/common/CompactHero';
 import BountyContributionList from '@/components/scammer/BountyContributionList';
+import BountyTransferDialog from '@/components/scammer/BountyTransferDialog';
 import { 
   ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, 
   Link2, Eye, AlertTriangle, Shield, TrendingUp, Edit, Clipboard, Trash2, MessageSquare 
@@ -488,6 +489,15 @@ const ScammerDetailPage = () => {
     }
   };
 
+  const handleTransferComplete = () => {
+    queryClient.invalidateQueries({
+      queryKey: ['bountyContributions', id]
+    });
+    queryClient.invalidateQueries({
+      queryKey: ['scammer', id]
+    });
+  };
+
   const developerWallet = `${developerWalletAddress.substring(0, 4)}...${developerWalletAddress.substring(developerWalletAddress.length - 4)}`;
 
   if (isLoadingScammer) {
@@ -834,6 +844,21 @@ const ScammerDetailPage = () => {
                     >
                       {addBountyContributionMutation.isPending ? "Processing..." : profile ? "Contribute to Bounty" : "Connect your wallet to contribute"}
                     </Button>
+                    
+                    {profile && (
+                      <>
+                        <Separator className="my-4" />
+                        <div className="text-center text-sm text-icc-gray mb-3">
+                          Or transfer from an existing contribution
+                        </div>
+                        
+                        <BountyTransferDialog 
+                          scammerId={scammer?.id || ''}
+                          scammerName={scammer?.name || ''}
+                          onTransferComplete={handleTransferComplete}
+                        />
+                      </>
+                    )}
                     
                     <div className="mt-4">
                       <BountyContributionList
