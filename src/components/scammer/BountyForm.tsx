@@ -1,16 +1,15 @@
+
 import React, { useState } from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Clipboard, DollarSign } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
 import { useProfile } from '@/contexts/ProfileContext';
-import { addBountyContribution } from '@/services/bountyService';
-import { sendTransactionToDevWallet, connectPhantomWallet } from '@/utils/phantomWallet';
-import { handleError, ErrorSeverity } from '@/utils/errorHandling';
+import { toast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import BountyTransferDialog from './BountyTransferDialog';
+import { addBountyContribution } from '@/services/bountyService';
+import { sendTransactionToDevWallet } from '@/utils/phantomWallet';
+import { handleError, ErrorSeverity } from '@/utils/errorHandling';
 import { Separator } from '@/components/ui/separator';
+import DeveloperWalletDisplay from './DeveloperWalletDisplay';
+import ContributionForm from './ContributionForm';
+import BountyTransferDialog from './BountyTransferDialog';
 
 interface BountyFormProps {
   scammerId: string;
@@ -28,25 +27,6 @@ const BountyForm: React.FC<BountyFormProps> = ({
   const [contributionAmount, setContributionAmount] = useState('0.00');
   const [bountyComment, setBountyComment] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  
-  const developerWallet = developerWalletAddress ? 
-    `${developerWalletAddress.substring(0, 4)}...${developerWalletAddress.substring(developerWalletAddress.length - 4)}` : 
-    'Not specified';
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      toast({
-        title: "Copied to clipboard",
-        description: "Developer wallet address copied!"
-      });
-    }).catch((error) => {
-      handleError(error, {
-        fallbackMessage: "Failed to copy to clipboard",
-        severity: ErrorSeverity.LOW,
-        context: "COPY_WALLET"
-      });
-    });
-  };
 
   const addBountyContributionMutation = useMutation({
     mutationFn: (contribution: {
@@ -177,67 +157,18 @@ const BountyForm: React.FC<BountyFormProps> = ({
         Add $SEC tokens to increase the bounty for {scammerName}
       </p>
       
-      <div className="mb-4">
-        <div className="text-sm font-medium text-icc-blue mb-2">Developer Wallet</div>
-        <div className="bg-icc-gold-light/30 border border-icc-gold/30 rounded p-3 flex items-center justify-between">
-          <span className="font-mono text-sm text-icc-blue-dark">{developerWallet}</span>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-7 w-7 p-0 text-icc-gold-dark hover:text-icc-blue hover:bg-icc-gold-light/50" 
-            onClick={() => copyToClipboard(developerWalletAddress)}
-            aria-label="Copy developer wallet address"
-          >
-            <Clipboard className="h-4 w-4" aria-hidden="true" />
-          </Button>
-        </div>
-      </div>
+      <DeveloperWalletDisplay developerWalletAddress={developerWalletAddress} />
       
-      <div className="mb-4">
-        <div className="text-sm font-medium text-icc-blue mb-2" id="contribution-amount-label">Contribution Amount</div>
-        <div className="flex items-center space-x-2">
-          <Input
-            type="number"
-            value={contributionAmount}
-            onChange={e => setContributionAmount(e.target.value)}
-            className="bg-icc-gold-light/30 border-icc-gold/30 text-icc-blue-dark"
-            min="0"
-            step="0.01"
-            aria-labelledby="contribution-amount-label"
-            aria-describedby="contribution-amount-currency"
-          />
-          <span id="contribution-amount-currency" className="text-icc-gold-dark font-medium">$SEC</span>
-        </div>
-      </div>
-      
-      <div className="mb-4">
-        <div className="text-sm font-medium text-icc-blue mb-2" id="contribution-comment-label">Add a Comment (Optional)</div>
-        <Textarea
-          value={bountyComment}
-          onChange={e => setBountyComment(e.target.value)}
-          placeholder="Why are you contributing to this bounty?"
-          className="bg-icc-gold-light/30 border-icc-gold/30 text-icc-blue-dark"
-          aria-labelledby="contribution-comment-label"
-        />
-      </div>
-      
-      <Button 
-        className="w-full bg-icc-gold hover:bg-icc-gold-dark text-icc-blue-dark border-icc-gold-dark font-medium"
-        onClick={handleAddBounty}
-        disabled={isProcessing || addBountyContributionMutation.isPending}
-        aria-label="Contribute to bounty"
-      >
-        {isProcessing || addBountyContributionMutation.isPending ? (
-          <span className="flex items-center">
-            <DollarSign className="h-4 w-4 mr-2 animate-spin" />
-            Processing...
-          </span>
-        ) : profile ? (
-          "Contribute to Bounty"
-        ) : (
-          "Connect your wallet to contribute"
-        )}
-      </Button>
+      <ContributionForm 
+        contributionAmount={contributionAmount}
+        setContributionAmount={setContributionAmount}
+        bountyComment={bountyComment}
+        setBountyComment={setBountyComment}
+        isProcessing={isProcessing}
+        addBountyContributionMutation={addBountyContributionMutation}
+        handleAddBounty={handleAddBounty}
+        profile={profile}
+      />
       
       {profile && (
         <>
