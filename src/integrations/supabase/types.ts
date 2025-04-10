@@ -18,8 +18,11 @@ export type Database = {
           contributor_profile_pic: string | null
           created_at: string
           id: string
+          is_active: boolean
           scammer_id: string
           transaction_signature: string | null
+          transferred_from_id: string | null
+          transferred_to_id: string | null
         }
         Insert: {
           amount: number
@@ -29,8 +32,11 @@ export type Database = {
           contributor_profile_pic?: string | null
           created_at?: string
           id?: string
+          is_active?: boolean
           scammer_id: string
           transaction_signature?: string | null
+          transferred_from_id?: string | null
+          transferred_to_id?: string | null
         }
         Update: {
           amount?: number
@@ -40,8 +46,11 @@ export type Database = {
           contributor_profile_pic?: string | null
           created_at?: string
           id?: string
+          is_active?: boolean
           scammer_id?: string
           transaction_signature?: string | null
+          transferred_from_id?: string | null
+          transferred_to_id?: string | null
         }
         Relationships: [
           {

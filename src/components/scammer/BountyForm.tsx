@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,8 @@ import { addBountyContribution } from '@/services/bountyService';
 import { sendTransactionToDevWallet, connectPhantomWallet } from '@/utils/phantomWallet';
 import { handleError, ErrorSeverity } from '@/utils/errorHandling';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import BountyTransferDialog from './BountyTransferDialog';
+import { Separator } from '@/components/ui/separator';
 
 interface BountyFormProps {
   scammerId: string;
@@ -157,6 +160,16 @@ const BountyForm: React.FC<BountyFormProps> = ({
       setIsProcessing(false);
     }
   };
+  
+  const handleTransferComplete = () => {
+    // Refresh both queries to show updated data
+    queryClient.invalidateQueries({
+      queryKey: ['bountyContributions', scammerId]
+    });
+    queryClient.invalidateQueries({
+      queryKey: ['scammer', scammerId]
+    });
+  };
 
   return (
     <div id="bounty-section" className="bg-icc-gold-light/20 border border-icc-gold rounded-lg p-5 mt-4">
@@ -212,10 +225,10 @@ const BountyForm: React.FC<BountyFormProps> = ({
       <Button 
         className="w-full bg-icc-gold hover:bg-icc-gold-dark text-icc-blue-dark border-icc-gold-dark font-medium"
         onClick={handleAddBounty}
-        disabled={isProcessing || addBountyContributionMutation.isPending}
+        disabled={isLoading || addBountyContributionMutation.isPending}
         aria-label="Contribute to bounty"
       >
-        {isProcessing || addBountyContributionMutation.isPending ? (
+        {isLoading || addBountyContributionMutation.isPending ? (
           <span className="flex items-center">
             <DollarSign className="h-4 w-4 mr-2 animate-spin" />
             Processing...
@@ -226,6 +239,21 @@ const BountyForm: React.FC<BountyFormProps> = ({
           "Connect your wallet to contribute"
         )}
       </Button>
+      
+      {profile && (
+        <>
+          <Separator className="my-4" />
+          <div className="text-center text-sm text-icc-gray mb-3">
+            Or transfer from an existing contribution
+          </div>
+          
+          <BountyTransferDialog 
+            scammerId={scammerId}
+            scammerName={scammerName}
+            onTransferComplete={handleTransferComplete}
+          />
+        </>
+      )}
     </div>
   );
 };

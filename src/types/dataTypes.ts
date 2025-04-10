@@ -63,4 +63,7 @@ export interface BountyContribution {
   comment?: string;
   transaction_signature?: string;
   scammers?: Scammer;
+  is_active?: boolean;
+  transferred_from_id?: string;
+  transferred_to_id?: string;
 }
