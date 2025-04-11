@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import CompactHero from '@/components/common/CompactHero';
 import ScammerCard from '@/components/common/ScammerCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { searchScammers } from '@/services/scammerService';
+import { getScammers } from '@/services/scammerService';
 import { getProfileByWallet } from '@/services/profileService';
-import { Grid, List, Search, SlidersHorizontal, Globe, Plus } from 'lucide-react';
+import { Grid, Globe, List, Search, SlidersHorizontal } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Scammer, Profile } from '@/types/dataTypes';
 import { 
   Table, 
@@ -27,12 +27,11 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip';
+import { Plus } from 'lucide-react';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
-import InfinitePagination from '@/components/common/InfinitePagination';
-
-const ITEMS_PER_PAGE = 10;
 
 const MostWantedPage = () => {
+  const [filteredScammers, setFilteredScammers] = useState<Scammer[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('bounty');
@@ -42,22 +41,17 @@ const MostWantedPage = () => {
   const navigate = useNavigate();
 
   const { 
-    data: scammersData,
+    data: scammers = [], 
     isLoading,
-    error,
-    refetch
+    error 
   } = useQuery({
-    queryKey: ['scammers', searchQuery, sortBy, sortDirection],
-    queryFn: async () => {
-      const result = await searchScammers(
-        searchQuery,
-        sortBy,
-        sortDirection,
-        0,
-        100
-      );
-      
-      const uniqueReporterIds = [...new Set(result.data.map(scammer => scammer.added_by).filter(Boolean))];
+    queryKey: ['scammers'],
+    queryFn: getScammers,
+  });
+
+  useEffect(() => {
+    const fetchReporterProfiles = async () => {
+      const uniqueReporterIds = [...new Set(scammers.map(scammer => scammer.added_by).filter(Boolean))];
       
       const profilesMap: Record<string, Profile> = {};
       
@@ -75,10 +69,12 @@ const MostWantedPage = () => {
       }));
       
       setReporterProfiles(profilesMap);
-      
-      return result;
-    },
-  });
+    };
+
+    if (scammers.length > 0) {
+      fetchReporterProfiles();
+    }
+  }, [scammers]);
 
   const handleSort = (column: string) => {
     if (sortBy === column) {
@@ -93,10 +89,54 @@ const MostWantedPage = () => {
     navigate(`/scammer/${scammerId}`);
   };
 
-  const getReporterProfile = (walletAddress: string | undefined) => {
-    if (!walletAddress) return null;
-    return reporterProfiles[walletAddress] || null;
-  };
+  useEffect(() => {
+    const filtered = scammers.filter(scammer => 
+      scammer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (scammer.accused_of && scammer.accused_of.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (scammer.aliases && scammer.aliases.some(alias => alias.toLowerCase().includes(searchQuery.toLowerCase())))
+    );
+    
+    const sorted = [...filtered].sort((a, b) => {
+      let compareResult = 0;
+      
+      switch (sortBy) {
+        case 'rank':
+          compareResult = (filtered.indexOf(a) + 1) - (filtered.indexOf(b) + 1);
+          break;
+        case 'name':
+          compareResult = a.name.localeCompare(b.name);
+          break;
+        case 'bounty':
+          compareResult = (b.bounty_amount || 0) - (a.bounty_amount || 0);
+          break;
+        case 'accused_of':
+          compareResult = (a.accused_of || '').localeCompare(b.accused_of || '');
+          break;
+        case 'aliases':
+          compareResult = ((a.aliases || []).join(', ')).localeCompare((b.aliases || []).join(', '));
+          break;
+        case 'views':
+          compareResult = (b.views || 0) - (a.views || 0);
+          break;
+        case 'likes':
+          compareResult = (b.likes || 0) - (a.likes || 0);
+          break;
+        case 'date':
+          compareResult = new Date(b.date_added).getTime() - new Date(a.date_added).getTime();
+          break;
+        default:
+          compareResult = 0;
+      }
+      
+      return sortDirection === 'asc' ? compareResult * -1 : compareResult;
+    });
+    
+    setFilteredScammers(sorted);
+  }, [scammers, searchQuery, sortBy, sortDirection]);
+
+  if (error) {
+    console.error('Failed to load scammers', error);
+  }
 
   const renderSortIndicator = (columnName: string) => {
     if (sortBy === columnName) {
@@ -105,8 +145,10 @@ const MostWantedPage = () => {
     return null;
   };
 
-  const filteredScammers = scammersData?.data || [];
-  const totalCount = scammersData?.count || 0;
+  const getReporterProfile = (walletAddress: string | undefined) => {
+    if (!walletAddress) return null;
+    return reporterProfiles[walletAddress] || null;
+  };
 
   return (
     <div>
@@ -131,11 +173,7 @@ const MostWantedPage = () => {
               </div>
               
               <div className="flex gap-2">
-                <Select 
-                  defaultValue={sortBy} 
-                  value={sortBy}
-                  onValueChange={(value) => setSortBy(value)}
-                >
+                <Select defaultValue={sortBy} onValueChange={(value) => setSortBy(value)}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
@@ -203,7 +241,7 @@ const MostWantedPage = () => {
                   </div>
                   
                   <div className="flex items-end">
-                    <Button className="w-full" onClick={() => refetch()}>Apply Filters</Button>
+                    <Button className="w-full">Apply Filters</Button>
                   </div>
                 </div>
               </div>
@@ -212,8 +250,7 @@ const MostWantedPage = () => {
 
           <div className="mb-6">
             <p className="text-icc-gray">
-              Showing <span className="font-semibold">{filteredScammers.length}</span> 
-              {totalCount > filteredScammers.length ? ` of ${totalCount}` : ''} results
+              Showing <span className="font-semibold">{filteredScammers.length}</span> results
             </p>
           </div>
 

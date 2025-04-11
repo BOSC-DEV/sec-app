@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Scammer } from '@/types/dataTypes';
 import { handleError } from '@/utils/errorHandling';
@@ -50,65 +49,6 @@ export const getScammers = async (): Promise<Scammer[]> => {
   }
   
   return data || [];
-};
-
-export const searchScammers = async (
-  searchQuery: string = '',
-  sortBy: string = 'bounty',
-  sortDirection: 'asc' | 'desc' = 'desc',
-  page: number = 0,
-  pageSize: number = 10
-): Promise<{ data: Scammer[], count: number }> => {
-  const startIndex = page * pageSize;
-  
-  // Initialize the query
-  let query = supabase
-    .from('scammers')
-    .select('*', { count: 'exact' })
-    .is('deleted_at', null);
-  
-  // Add search functionality if a query is provided
-  if (searchQuery) {
-    query = query.or(
-      `name.ilike.%${searchQuery}%,accused_of.ilike.%${searchQuery}%,aliases.cs.{${searchQuery}}`
-    );
-  }
-  
-  // Add sorting
-  const sortColumn = getSortColumn(sortBy);
-  query = query.order(sortColumn, { ascending: sortDirection === 'asc' });
-  
-  // Add pagination
-  query = query.range(startIndex, startIndex + pageSize - 1);
-  
-  const { data, error, count } = await query;
-  
-  if (error) {
-    console.error('Error searching scammers:', error);
-    throw error;
-  }
-  
-  return { 
-    data: data || [], 
-    count: count || 0 
-  };
-};
-
-// Helper function to map sort option to database column
-const getSortColumn = (sortBy: string): string => {
-  switch (sortBy) {
-    case 'name':
-      return 'name';
-    case 'date':
-      return 'date_added';
-    case 'views':
-      return 'views';
-    case 'likes':
-      return 'likes';
-    case 'bounty':
-    default:
-      return 'bounty_amount';
-  }
 };
 
 export const getScammerById = async (id: string): Promise<Scammer | null> => {
