@@ -39,25 +39,25 @@
   }
 
   .dark {
-    --background: 215 76% 19%;
+    --background: 215 76% 10%;
     --foreground: 210 40% 98%;
 
-    --card: 215 76% 19%;
+    --card: 215 76% 12%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 215 76% 19%;
+    --popover: 215 76% 12%;
     --popover-foreground: 210 40% 98%;
 
     --primary: 210 40% 98%;
     --primary-foreground: 215 76% 19%;
 
-    --secondary: 43 44% 60%;
+    --secondary: 43 44% 40%;
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 43 44% 60%;
+    --accent: 43 44% 50%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62.8% 30.6%;
@@ -89,31 +89,31 @@
   }
 
   .icc-header {
-    @apply bg-icc-blue text-white shadow-md;
+    @apply bg-icc-blue text-white shadow-md dark:bg-icc-blue-dark;
   }
 
   .icc-footer {
-    @apply bg-icc-blue text-white py-8;
+    @apply bg-icc-blue text-white py-8 dark:bg-icc-blue-dark;
   }
 
   .icc-card {
-    @apply bg-white border border-gray-200 rounded-md shadow-sm hover:shadow-md transition-shadow duration-200;
+    @apply bg-white border border-gray-200 rounded-md shadow-sm hover:shadow-md transition-shadow duration-200 dark:bg-gray-800 dark:border-gray-700;
   }
 
   .icc-btn-primary {
-    @apply bg-icc-blue hover:bg-icc-blue-light text-white transition-colors duration-200;
+    @apply bg-icc-blue hover:bg-icc-blue-light text-white transition-colors duration-200 dark:bg-icc-blue-dark dark:hover:bg-icc-blue;
   }
 
   .icc-btn-secondary {
-    @apply bg-icc-gold hover:bg-icc-gold-light text-icc-blue-dark transition-colors duration-200;
+    @apply bg-icc-gold hover:bg-icc-gold-light text-icc-blue-dark transition-colors duration-200 dark:bg-icc-gold-dark dark:hover:bg-icc-gold;
   }
 
   .icc-btn-danger {
-    @apply bg-icc-red hover:bg-icc-red-light text-white transition-colors duration-200;
+    @apply bg-icc-red hover:bg-icc-red-light text-white transition-colors duration-200 dark:bg-icc-red-dark dark:hover:bg-icc-red;
   }
 
   .icc-section {
-    @apply py-12 md:py-16;
+    @apply py-12 md:py-16 dark:bg-icc-blue-dark;
   }
 
   .icc-title {

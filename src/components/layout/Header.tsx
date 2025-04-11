@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Menu, X, User, Shield, Wallet, LogOut, LogIn } from 'lucide-react';
 import ICCLogo from '../common/ICCLogo';
 import { useProfile } from '@/contexts/ProfileContext';
+import ThemeToggle from '@/components/common/ThemeToggle';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -12,7 +12,6 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Close mobile menu when route changes
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location.pathname]);
@@ -23,10 +22,8 @@ const Header = () => {
 
   const handleProfileClick = () => {
     if (profile?.username) {
-      // If user has a username, navigate to their public profile
       navigate(`/${profile.username}`);
     } else {
-      // If not, navigate to the profile edit page
       navigate('/profile');
     }
     setIsMenuOpen(false);
@@ -34,16 +31,13 @@ const Header = () => {
 
   const handleWalletButtonClick = () => {
     if (isConnected) {
-      // If connected, navigate to profile page instead of disconnecting
       navigate('/profile');
     } else {
-      // If not connected, connect wallet
       connectWallet();
     }
     setIsMenuOpen(false);
   };
 
-  // Navigation items for reuse in both desktop and mobile
   const navigationItems = [
     { label: 'Home', path: '/' },
     { label: 'Most Wanted', path: '/most-wanted' },
@@ -53,33 +47,33 @@ const Header = () => {
 
   return (
     <header className="icc-header sticky top-0 z-50">
-      <div className="icc-container">
-        <div className="flex items-center justify-between py-4">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <ICCLogo className="h-10 w-auto" />
-            <div className="font-serif max-w-[200px] md:max-w-none">
-              <div className="text-base md:text-xl font-bold leading-tight">Scams & E-crimes Commission</div>
-            </div>
-          </Link>
+      <div className="icc-container py-3">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center">
+            <Link to="/" className="flex items-center space-x-2">
+              <ICCLogo className="h-10 w-auto" />
+              <div className="font-serif max-w-[200px] md:max-w-none">
+                <div className="text-base md:text-xl font-bold leading-tight">Scams & E-crimes Commission</div>
+              </div>
+            </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
-            {navigationItems.map((item) => (
-              <Link 
-                key={item.path}
-                to={item.path} 
-                className={`text-white hover:text-icc-gold transition-colors ${
-                  location.pathname === item.path ? 'text-icc-gold font-medium' : ''
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+            <nav className="hidden md:flex items-center space-x-6">
+              {navigationItems.map((item) => (
+                <Link 
+                  key={item.path}
+                  to={item.path} 
+                  className={`text-white hover:text-icc-gold transition-colors ${
+                    location.pathname === item.path ? 'text-icc-gold font-medium' : ''
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
 
-          {/* Search & Actions */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <ThemeToggle />
             {isLoading ? (
               <Button variant="outline" size="sm" disabled className="opacity-75">
                 Loading...
@@ -114,20 +108,9 @@ const Header = () => {
               </Button>
             )}
           </div>
-
-          {/* Mobile Menu Button */}
-          <button 
-            className="md:hidden text-white p-2"
-            onClick={toggleMenu}
-            aria-label="Toggle menu"
-            aria-expanded={isMenuOpen}
-          >
-            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="md:hidden bg-icc-blue-light">
           <div className="icc-container py-4">
