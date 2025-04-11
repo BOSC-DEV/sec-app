@@ -344,7 +344,7 @@ const MostWantedPage = () => {
                         className="font-bold text-icc-blue cursor-pointer"
                         onClick={() => handleSort('accused_of')}
                       >
-                        Accused Of{renderSortIndicator('accused_of')}
+                        Accusations{renderSortIndicator('accused_of')}
                       </TableHead>
                       <TableHead 
                         className="font-bold text-icc-blue cursor-pointer"
