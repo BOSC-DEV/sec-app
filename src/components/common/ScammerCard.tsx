@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, ThumbsUp, ThumbsDown, MessageSquare, Edit } from 'lucide-react';
+import { Eye, ThumbsUp, ThumbsDown, MessageSquare, Edit, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { truncateText } from '@/lib/utils';
@@ -12,6 +13,7 @@ import { toast } from '@/hooks/use-toast';
 import { Profile } from '@/types/dataTypes';
 import { supabase } from '@/integrations/supabase/client';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ScammerCardProps {
   scammer: Scammer;
@@ -302,15 +304,23 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
           Agree
         </Toggle>
         
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="text-xs px-2 mx-1"
-          onClick={handleBountyClick}
-        >
-          <CurrencyIcon size="sm" className="h-3.5 w-3.5 mr-1" />
-          More
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-xs px-2 mx-1"
+                onClick={handleBountyClick}
+              >
+                <Info className="h-3.5 w-3.5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>View details</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         
         {isCreator ? (
           <Link to={`/report/${scammer.id}`} onClick={(e) => e.stopPropagation()}>
