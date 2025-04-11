@@ -1,3 +1,4 @@
+
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -35,4 +36,20 @@ export function formatCurrency(value: number): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   });
+}
+
+export function formatProfileAge(dateString: string): string {
+  if (!dateString) return '-';
+  
+  const profileDate = new Date(dateString);
+  const now = new Date();
+  const diffTime = Math.abs(now.getTime() - profileDate.getTime());
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays < 7) {
+    return `${diffDays}d`;
+  } else {
+    const diffWeeks = Math.floor(diffDays / 7);
+    return `${diffWeeks}w`;
+  }
 }

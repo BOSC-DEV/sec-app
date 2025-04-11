@@ -9,7 +9,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { getProfileStatistics } from '@/services/statisticsService';
 import { Profile } from '@/types/dataTypes';
-import { formatNumber } from '@/lib/utils';
+import { formatNumber, formatProfileAge } from '@/lib/utils';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
 
 type SortField = 'total_bounty' | 'rank' | 'name' | 'reports' | 'likes' | 'views' | 'comments' | 'bounty' | 'bounties_raised' | 'activity';
@@ -79,7 +79,9 @@ const LeaderboardPage = () => {
         comparison = (b.bounties_raised || 0) - (a.bounties_raised || 0);
         break;
       case 'activity':
-        comparison = 0;
+        if (a.created_at && b.created_at) {
+          comparison = new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        }
         break;
       default:
         comparison = 0;
@@ -347,7 +349,7 @@ const LeaderboardPage = () => {
                           </TableCell>
                           
                           <TableCell className="text-center text-gray-500">
-                            1w
+                            {profile.created_at ? formatProfileAge(profile.created_at) : '-'}
                           </TableCell>
                         </TableRow>
                       ))
