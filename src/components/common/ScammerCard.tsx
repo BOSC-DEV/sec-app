@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, ThumbsUp, ThumbsDown, MessageSquare, Edit, Info } from 'lucide-react';
@@ -246,13 +247,13 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
         </div>
         
         <div className="p-4">
-          <h3 className="text-lg font-serif font-bold text-icc-blue">{scammer.name}</h3>
-          <p className="text-sm text-icc-gray mt-1">{truncateText(scammer.accused_of, 100)}</p>
+          <h3 className="text-lg font-serif font-bold text-white dark:text-white">{scammer.name}</h3>
+          <p className="text-sm text-gray-300 dark:text-gray-300 mt-1">{truncateText(scammer.accused_of, 100)}</p>
           
           {creatorProfile && (
             <div className="mt-2 flex items-center">
               <span 
-                className="flex items-center text-xs text-icc-gray-dark"
+                className="flex items-center text-xs text-gray-400 dark:text-gray-400"
                 onClick={(e) => e.stopPropagation()}
               >
                 <img 
@@ -265,24 +266,24 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
             </div>
           )}
           
-          <div className="mt-4 text-xs text-icc-gray-dark flex justify-between items-center">
+          <div className="mt-4 text-xs text-gray-400 dark:text-gray-400 flex justify-between items-center">
             <div>
               Added: {new Date(scammer.date_added).toLocaleDateString()}
             </div>
             <div className="flex items-center space-x-3">
-              <span className="flex items-center">
+              <span className="flex items-center text-gray-300 dark:text-gray-300">
                 <Eye className="h-3.5 w-3.5 mr-1" />
                 {viewCount}
               </span>
-              <span className="flex items-center">
+              <span className="flex items-center text-gray-300 dark:text-gray-300">
                 <ThumbsUp className="h-3.5 w-3.5 mr-1" />
                 {likes}
               </span>
-              <span className="flex items-center">
+              <span className="flex items-center text-gray-300 dark:text-gray-300">
                 <ThumbsDown className="h-3.5 w-3.5 mr-1" />
                 {dislikes}
               </span>
-              <span className="flex items-center">
+              <span className="flex items-center text-gray-300 dark:text-gray-300">
                 <MessageSquare className="h-3.5 w-3.5 mr-1" />
                 {scammer.comments?.length || 0}
               </span>
@@ -296,7 +297,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
           pressed={isLiked}
           onPressedChange={() => {}}
           onClick={handleLike}
-          className={`${isLiked ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200' : 'dark:text-white'} text-xs`}
+          className={`${isLiked ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200' : 'text-white'} text-xs`}
           size="sm"
         >
           <ThumbsUp className="h-3.5 w-3.5 mr-1" />
@@ -309,7 +310,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="text-xs dark:text-white"
+                className="text-white dark:text-white"
                 onClick={handleBountyClick}
               >
                 <Info className="h-3.5 w-3.5 mr-1" />
@@ -324,7 +325,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
         
         {isCreator ? (
           <Link to={`/report/${scammer.id}`} onClick={(e) => e.stopPropagation()}>
-            <Button variant="outline" size="sm" className="text-xs dark:text-white">
+            <Button variant="outline" size="sm" className="text-white dark:text-white">
               <Edit className="h-3.5 w-3.5 mr-1" />
               Edit
             </Button>
@@ -334,7 +335,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
             pressed={isDisliked}
             onPressedChange={() => {}}
             onClick={handleDislike}
-            className={`${isDisliked ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200' : 'dark:text-white'} text-xs`}
+            className={`${isDisliked ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200' : 'text-white'} text-xs`}
             size="sm"
           >
             <ThumbsDown className="h-3.5 w-3.5 mr-1" />
