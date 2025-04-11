@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Hero from '@/components/common/Hero';
 import ScammerCard from '@/components/common/ScammerCard';
@@ -153,12 +154,12 @@ const Index = () => {
                   <div className="text-sm text-icc-gray">Total Bounty Value</div>
                 </div>
                 <div className="text-center p-6">
-                  <div className="text-4xl font-bold text-icc-blue mb-2">{formatNumber(statistics.scammersCount)}+</div>
+                  <div className="text-4xl font-bold text-icc-blue mb-2">{formatNumber(statistics.scammersCount)}</div>
                   <div className="text-sm text-icc-gray">Scammers Reported</div>
                 </div>
                 <div className="text-center p-6">
-                  <div className="text-4xl font-bold text-icc-blue mb-2">{formatNumber(statistics.reportersCount)}+</div>
-                  <div className="text-sm text-icc-gray">Total Reporters</div>
+                  <div className="text-4xl font-bold text-icc-blue mb-2">{formatNumber(statistics.reportersCount)}</div>
+                  <div className="text-sm text-icc-gray">Active Hunters</div>
                 </div>
                 <div className="text-center p-6">
                   <div className="text-4xl font-bold text-icc-blue mb-2">{formatNumber(statistics.usersCount)}</div>
