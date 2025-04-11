@@ -85,7 +85,7 @@ const ReportPage = () => {
   if (checkingPermission || isLoading) {
     return (
       <div>
-        <CompactHero title={isEditMode ? "Edit Scammer Report" : "Report a Scammer"} />
+        <CompactHero title={isEditMode ? "Edit Scammer Report" : "File a Report"} />
         <div className="icc-section bg-white" role="status" aria-live="polite">
           <div className="icc-container flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-icc-blue" aria-hidden="true" />
@@ -102,13 +102,9 @@ const ReportPage = () => {
       
       <div className="icc-section bg-white">
         <div className="icc-container">
-          {isEditMode ? (
+          {isEditMode && (
             <p className="text-icc-gray mb-8">
               Update information about this scammer. All fields are editable except the bounty amount.
-            </p>
-          ) : (
-            <p className="text-icc-gray mb-8">
-              Report a scammer to warn the community. Providing detailed information helps others recognize and avoid scams.
             </p>
           )}
           
