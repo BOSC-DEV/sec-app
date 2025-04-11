@@ -38,6 +38,7 @@ import { handleError, ErrorSeverity } from '@/utils/errorHandling';
 import { sendTransactionToDevWallet, connectPhantomWallet } from '@/utils/phantomWallet';
 import { PROFILE_UPDATED_EVENT } from '@/contexts/ProfileContext';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
+import { Link } from 'react-router-dom';
 
 const ScammerDetailPage = () => {
   const { id } = useParams<{ id: string; }>();
@@ -702,16 +703,21 @@ const ScammerDetailPage = () => {
             <div>
               <div className="bg-gray-50 rounded-lg shadow-md p-4">
                 <h3 className="text-lg font-semibold text-icc-blue mb-3">Reported By</h3>
-                {creatorProfile ? <div className="flex items-center space-x-3">
-                    <Avatar>
+                {creatorProfile ? (
+                  <Link 
+                    to={`/profile/${creatorProfile.username || creatorProfile.wallet_address}`}
+                    className="flex items-center space-x-3 group hover:bg-gray-100 p-2 rounded-md transition-colors"
+                  >
+                    <Avatar className="group-hover:ring-2 group-hover:ring-icc-gold transition-all">
                       <AvatarImage src={creatorProfile.profile_pic_url} alt={`${creatorProfile.display_name}'s profile`} />
                       <AvatarFallback>{creatorProfile.display_name.substring(0, 2)}</AvatarFallback>
                     </Avatar>
                     <div>
-                      <div className="text-sm font-medium leading-none">{creatorProfile.display_name}</div>
+                      <div className="text-sm font-medium leading-none group-hover:text-icc-gold transition-colors">{creatorProfile.display_name}</div>
                       <p className="text-sm text-gray-500">@{creatorProfile.username}</p>
                     </div>
-                  </div> : <p className="text-sm text-gray-500">Anonymous</p>}
+                  </Link>
+                ) : <p className="text-sm text-gray-500">Anonymous</p>}
                 <Separator className="my-4" />
                 <div className="flex justify-between items-center mb-3">
                   <div className="text-sm text-gray-500 flex items-center">
