@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getScammers } from '@/services/scammerService';
 import { getProfileByWallet } from '@/services/profileService';
-import { Grid, List, Search, SlidersHorizontal, Globe } from 'lucide-react';
+import { Grid, List, Search, SlidersHorizontal, Globe, ThumbsUp, Eye, FileText, DollarSign, ChevronUp, ChevronDown } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { Scammer, Profile } from '@/types/dataTypes';
@@ -140,7 +140,7 @@ const MostWantedPage = () => {
 
   const renderSortIndicator = (columnName: string) => {
     if (sortBy === columnName) {
-      return <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>;
+      return sortDirection === 'asc' ? <ChevronUp className="h-4 w-4 ml-1" /> : <ChevronDown className="h-4 w-4 ml-1" />;
     }
     return null;
   };
@@ -273,20 +273,34 @@ const MostWantedPage = () => {
                     <TableRow className="bg-icc-gold/30 border-b border-icc-gold">
                       <TableHead className="w-12 font-bold text-icc-blue">№</TableHead>
                       <TableHead className="font-bold text-icc-blue">Outlaw</TableHead>
-                      <TableHead className="font-bold text-icc-blue">Links</TableHead>
+                      <TableHead className="font-bold text-icc-blue text-center">
+                        <div className="flex items-center justify-center">
+                          <DollarSign className="h-4 w-4 text-gray-500" />
+                        </div>
+                      </TableHead>
                       <TableHead className="font-bold text-icc-blue">Accused Of</TableHead>
                       <TableHead className="font-bold text-icc-blue">Aliases</TableHead>
                       <TableHead className="font-bold text-icc-blue text-center">
-                        <span>💰</span>
+                        <div className="flex items-center justify-center">
+                          <Globe className="h-4 w-4 text-gray-500" />
+                        </div>
                       </TableHead>
                       <TableHead className="font-bold text-icc-blue text-center">
-                        <span>👍</span>
+                        <div className="flex items-center justify-center">
+                          <ThumbsUp className="h-4 w-4 text-gray-500" />
+                        </div>
                       </TableHead>
                       <TableHead className="font-bold text-icc-blue text-center">
-                        <span>👁️</span>
+                        <div className="flex items-center justify-center">
+                          <Eye className="h-4 w-4 text-gray-500" />
+                        </div>
                       </TableHead>
                       <TableHead className="font-bold text-icc-blue">Posted</TableHead>
-                      <TableHead></TableHead>
+                      <TableHead className="font-bold text-icc-blue text-center">
+                        <div className="flex items-center justify-center">
+                          By
+                        </div>
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -331,13 +345,19 @@ const MostWantedPage = () => {
                         className="w-12 font-bold text-icc-blue cursor-pointer"
                         onClick={() => handleSort('rank')}
                       >
-                        №{renderSortIndicator('rank')}
+                        <div className="flex items-center">
+                          <span>№</span>
+                          {renderSortIndicator('rank')}
+                        </div>
                       </TableHead>
                       <TableHead 
                         className="font-bold text-icc-blue cursor-pointer"
                         onClick={() => handleSort('name')}
                       >
-                        The Accused{renderSortIndicator('name')}
+                        <div className="flex items-center">
+                          <span>The Accused</span>
+                          {renderSortIndicator('name')}
+                        </div>
                       </TableHead>
                       <TableHead 
                         className="font-bold text-icc-blue text-center cursor-pointer"
@@ -345,7 +365,10 @@ const MostWantedPage = () => {
                       >
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <span className="cursor-pointer">💰{renderSortIndicator('bounty')}</span>
+                            <div className="flex items-center justify-center cursor-pointer">
+                              <DollarSign className="h-4 w-4 text-gray-500" />
+                              {renderSortIndicator('bounty')}
+                            </div>
                           </TooltipTrigger>
                           <TooltipContent>
                             <p>Bounty Amount</p>
@@ -356,19 +379,25 @@ const MostWantedPage = () => {
                         className="font-bold text-icc-blue cursor-pointer"
                         onClick={() => handleSort('accused_of')}
                       >
-                        Accusations{renderSortIndicator('accused_of')}
+                        <div className="flex items-center">
+                          <span>Accusations</span>
+                          {renderSortIndicator('accused_of')}
+                        </div>
                       </TableHead>
                       <TableHead 
                         className="font-bold text-icc-blue cursor-pointer"
                         onClick={() => handleSort('aliases')}
                       >
-                        Aliases{renderSortIndicator('aliases')}
+                        <div className="flex items-center">
+                          <span>Aliases</span>
+                          {renderSortIndicator('aliases')}
+                        </div>
                       </TableHead>
                       <TableHead className="font-bold text-icc-blue text-center">
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center cursor-pointer">
-                              <Globe className="h-4 w-4" />
+                              <Globe className="h-4 w-4 text-gray-500" />
                             </div>
                           </TooltipTrigger>
                           <TooltipContent>
@@ -382,7 +411,10 @@ const MostWantedPage = () => {
                       >
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <span className="cursor-pointer">👍{renderSortIndicator('likes')}</span>
+                            <div className="flex items-center justify-center cursor-pointer">
+                              <ThumbsUp className="h-4 w-4 text-gray-500" />
+                              {renderSortIndicator('likes')}
+                            </div>
                           </TooltipTrigger>
                           <TooltipContent>
                             <p>Likes</p>
@@ -395,7 +427,10 @@ const MostWantedPage = () => {
                       >
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <span className="cursor-pointer">👁️{renderSortIndicator('views')}</span>
+                            <div className="flex items-center justify-center cursor-pointer">
+                              <Eye className="h-4 w-4 text-gray-500" />
+                              {renderSortIndicator('views')}
+                            </div>
                           </TooltipTrigger>
                           <TooltipContent>
                             <p>Views</p>
@@ -406,7 +441,10 @@ const MostWantedPage = () => {
                         className="font-bold text-icc-blue cursor-pointer"
                         onClick={() => handleSort('date')}
                       >
-                        Posted{renderSortIndicator('date')}
+                        <div className="flex items-center">
+                          <span>Posted</span>
+                          {renderSortIndicator('date')}
+                        </div>
                       </TableHead>
                       <TableHead className="font-bold text-icc-blue text-center">
                         <div className="flex items-center justify-center">
@@ -436,7 +474,7 @@ const MostWantedPage = () => {
                               <span className="font-medium text-icc-blue">{scammer.name}</span>
                             </div>
                           </TableCell>
-                          <TableCell className="text-center font-semibold text-icc-blue">
+                          <TableCell className="text-center font-semibold text-icc-primary">
                             {scammer.bounty_amount ? (
                               <span className="flex items-center justify-center">
                                 {scammer.bounty_amount} <CurrencyIcon size="sm" className="ml-1" />
@@ -476,10 +514,10 @@ const MostWantedPage = () => {
                                     href={link.startsWith('http') ? link : `https://${link}`} 
                                     target="_blank" 
                                     rel="noopener noreferrer"
-                                    className="inline-block p-1 rounded-full bg-icc-gold/20 hover:bg-icc-gold/40"
+                                    className="inline-block p-1 rounded-full bg-icc-blue hover:bg-icc-blue-light transition-colors"
                                     onClick={(e) => e.stopPropagation()}
                                   >
-                                    <Globe className="h-4 w-4 text-icc-blue" />
+                                    <Globe className="h-4 w-4 text-white" />
                                   </a>
                                 ))
                               ) : (
