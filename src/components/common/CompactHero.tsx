@@ -28,3 +28,4 @@ const CompactHero: React.FC<CompactHeroProps> = ({ title, subtitle = "More detai
 };
 
 export default CompactHero;
+
