@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, ThumbsUp, ThumbsDown, DollarSign, MessageSquare, Edit } from 'lucide-react';
+import { Eye, ThumbsUp, ThumbsDown, MessageSquare, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { truncateText } from '@/lib/utils';
@@ -12,6 +11,7 @@ import { getProfileByWallet } from '@/services/profileService';
 import { toast } from '@/hooks/use-toast';
 import { Profile } from '@/types/dataTypes';
 import { supabase } from '@/integrations/supabase/client';
+import CurrencyIcon from '@/components/common/CurrencyIcon';
 
 interface ScammerCardProps {
   scammer: Scammer;
@@ -233,7 +233,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
           <div className="absolute top-0 right-0 bg-icc-gold text-icc-blue-dark px-3 py-1 text-sm font-bold flex items-center">
-            <DollarSign className="h-4 w-4 mr-1" />
+            <CurrencyIcon className="h-4 w-4 mr-1" />
             <span>{scammer.bounty_amount.toLocaleString()}</span>
           </div>
         </div>
@@ -302,7 +302,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
           className="text-xs px-2 mx-1"
           onClick={handleBountyClick}
         >
-          <DollarSign className="h-3.5 w-3.5 mr-1" />
+          <CurrencyIcon size="sm" className="h-3.5 w-3.5 mr-1" />
           Bounty
         </Button>
         
