@@ -1,7 +1,5 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { X } from 'lucide-react';
 import ICCLogo from '../common/ICCLogo';
 import TermsDialog from '../common/TermsDialog';
 import PrivacyDialog from '../common/PrivacyDialog';
@@ -42,7 +40,11 @@ const Footer = () => {
                 className="text-white hover:text-icc-gold"
                 aria-label="SEC on X"
               >
-                <X className="h-5 w-5" />
+                <img 
+                  src="/lovable-uploads/91abf77b-554f-410f-85a0-15dfdfcc77e4.png" 
+                  alt="X (Twitter)" 
+                  className="h-5 w-5" 
+                />
               </a>
             </div>
           </div>
