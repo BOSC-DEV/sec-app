@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import CompactHero from '@/components/common/CompactHero';
 import ScammerCard from '@/components/common/ScammerCard';
@@ -338,7 +337,7 @@ const MostWantedPage = () => {
                         className="font-bold text-icc-blue cursor-pointer"
                         onClick={() => handleSort('name')}
                       >
-                        Outlaw{renderSortIndicator('name')}
+                        The Accused{renderSortIndicator('name')}
                       </TableHead>
                       <TableHead className="font-bold text-icc-blue">Links</TableHead>
                       <TableHead 
