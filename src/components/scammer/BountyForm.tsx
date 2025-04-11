@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import DeveloperWalletDisplay from './DeveloperWalletDisplay';
 import ContributionForm from './ContributionForm';
 import BountyTransferDialog from './BountyTransferDialog';
+import CurrencyIcon from '@/components/common/CurrencyIcon';
 
 interface BountyFormProps {
   scammerId: string;
@@ -104,7 +105,7 @@ const BountyForm: React.FC<BountyFormProps> = ({
       }
       
       // Log address for debugging
-      console.log(`Processing bounty transaction of ${amount} $SEC to ${developerWalletAddress}`);
+      console.log(`Processing bounty transaction of ${amount} SEC to ${developerWalletAddress}`);
       console.log('Developer wallet address type and value:', {
         address: developerWalletAddress,
         type: typeof developerWalletAddress,
@@ -153,8 +154,8 @@ const BountyForm: React.FC<BountyFormProps> = ({
   return (
     <div id="bounty-section" className="bg-icc-gold-light/20 border border-icc-gold rounded-lg p-5 mt-4">
       <h4 className="font-bold text-xl text-icc-blue mb-2">Contribute to Bounty</h4>
-      <p className="text-sm text-icc-gray-dark mb-4">
-        Add $SEC tokens to increase the bounty for {scammerName}
+      <p className="text-sm text-icc-gray-dark mb-4 flex items-center">
+        Add <CurrencyIcon size="sm" className="mx-1" /> tokens to increase the bounty for {scammerName}
       </p>
       
       <DeveloperWalletDisplay developerWalletAddress={developerWalletAddress} />

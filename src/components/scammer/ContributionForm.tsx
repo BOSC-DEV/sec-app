@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { DollarSign } from 'lucide-react';
 import { UseMutationResult } from '@tanstack/react-query';
 import { Profile } from '@/types/dataTypes';
+import CurrencyIcon from '@/components/common/CurrencyIcon';
 
 interface ContributionFormProps {
   contributionAmount: string;
@@ -43,7 +44,9 @@ const ContributionForm = ({
             aria-labelledby="contribution-amount-label"
             aria-describedby="contribution-amount-currency"
           />
-          <span id="contribution-amount-currency" className="text-icc-gold-dark font-medium">$SEC</span>
+          <span id="contribution-amount-currency" className="text-icc-gold-dark font-medium flex items-center">
+            <CurrencyIcon />
+          </span>
         </div>
       </div>
       

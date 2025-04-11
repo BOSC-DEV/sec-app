@@ -1,45 +1,45 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { Clipboard } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
-import { handleError, ErrorSeverity } from '@/utils/errorHandling';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import CurrencyIcon from '@/components/common/CurrencyIcon';
 
 interface DeveloperWalletDisplayProps {
   developerWalletAddress: string;
 }
 
-const DeveloperWalletDisplay = ({ developerWalletAddress }: DeveloperWalletDisplayProps) => {
-  const displayWallet = developerWalletAddress ? 
-    `${developerWalletAddress.substring(0, 4)}...${developerWalletAddress.substring(developerWalletAddress.length - 4)}` : 
-    'Not specified';
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
+const DeveloperWalletDisplay: React.FC<DeveloperWalletDisplayProps> = ({ developerWalletAddress }) => {
+  const { toast } = useToast();
+  
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(developerWalletAddress).then(() => {
       toast({
-        title: "Copied to clipboard",
-        description: "Developer wallet address copied!"
-      });
-    }).catch((error) => {
-      handleError(error, {
-        fallbackMessage: "Failed to copy to clipboard",
-        severity: ErrorSeverity.LOW,
-        context: "COPY_WALLET"
+        title: "Copied",
+        description: "Wallet address copied to clipboard",
       });
     });
   };
-
+  
+  // Format the wallet address for display
+  const shortAddress = `${developerWalletAddress.substring(0, 4)}...${developerWalletAddress.substring(developerWalletAddress.length - 4)}`;
+  
   return (
     <div className="mb-4">
-      <div className="text-sm font-medium text-icc-blue mb-2">Developer Wallet</div>
+      <div className="flex justify-between items-center mb-1">
+        <div className="text-sm font-medium text-icc-blue">Developer Wallet</div>
+        <div className="text-xs text-icc-gray-dark flex items-center">
+          All <CurrencyIcon size="sm" className="mx-0.5" /> tokens go here
+        </div>
+      </div>
       <div className="bg-icc-gold-light/30 border border-icc-gold/30 rounded p-3 flex items-center justify-between">
-        <span className="font-mono text-sm text-icc-blue-dark">{displayWallet}</span>
+        <span className="font-mono text-sm text-icc-blue-dark">{shortAddress}</span>
         <Button 
           variant="ghost" 
           size="sm" 
-          className="h-7 w-7 p-0 text-icc-gold-dark hover:text-icc-blue hover:bg-icc-gold-light/50" 
-          onClick={() => copyToClipboard(developerWalletAddress)}
-          aria-label="Copy developer wallet address"
+          className="h-7 w-7 p-0 text-icc-gold-dark hover:text-icc-blue hover:bg-icc-gold-light/50"
+          onClick={copyToClipboard}
+          aria-label="Copy wallet address"
         >
           <Clipboard className="h-4 w-4" aria-hidden="true" />
         </Button>

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { 
   Card, 
@@ -29,6 +28,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Link } from 'react-router-dom';
 import { getProfileByDisplayName } from '@/services/profileService';
+import CurrencyIcon from '@/components/common/CurrencyIcon';
 
 interface BountyTransactionHistoryProps {
   contributions: BountyContribution[];
@@ -45,7 +45,6 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
 }) => {
   const [contributorUsernames, setContributorUsernames] = useState<Record<string, string>>({});
   
-  // Create a single render timestamp for the entire component
   const renderTimestamp = React.useMemo(() => Date.now(), [contributions]);
   
   useEffect(() => {
@@ -55,7 +54,6 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
       await Promise.all(
         contributions.map(async (contribution) => {
           try {
-            // Use getProfileByDisplayName instead of directly using contributor_name
             const profile = await getProfileByDisplayName(contribution.contributor_name);
             if (profile && profile.username) {
               usernamesMap[contribution.contributor_name] = profile.username;
@@ -139,10 +137,8 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
           </TableHeader>
           <TableBody>
             {contributions.map((contribution) => {
-              // Use a stable key based on contribution ID
               const stableKey = `transaction-${contribution.id}`;
               
-              // Add a cache busting parameter to the profile pic URL using the render timestamp
               const profilePicUrl = contribution.contributor_profile_pic 
                 ? `${contribution.contributor_profile_pic}${contribution.contributor_profile_pic.includes('?') ? '&' : '?'}t=${renderTimestamp}`
                 : '/placeholder.svg';
@@ -216,8 +212,8 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
                   )}
                   
                   <TableCell>
-                    <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
-                      {formatAmount(contribution.amount)} $SEC
+                    <Badge className="bg-green-100 text-green-800 hover:bg-green-200 flex items-center gap-1">
+                      {formatAmount(contribution.amount)} <CurrencyIcon size="sm" />
                     </Badge>
                   </TableCell>
                   

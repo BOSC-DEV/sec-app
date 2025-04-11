@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { BountyContribution } from '@/types/dataTypes';
 import { formatDate, formatCurrency } from '@/lib/utils';
@@ -13,6 +12,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Link } from 'react-router-dom';
 import { getProfileByDisplayName } from '@/services/profileService';
+import CurrencyIcon from '@/components/common/CurrencyIcon';
 
 interface BountyContributionListProps {
   contributions: BountyContribution[];
@@ -34,7 +34,6 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
   const [focused, setFocused] = useState<string | null>(null);
   const [contributorUsernames, setContributorUsernames] = useState<Record<string, string>>({});
   
-  // Create a single render timestamp for the entire component
   const renderTimestamp = React.useMemo(() => Date.now(), [contributions]);
   
   useEffect(() => {
@@ -44,7 +43,6 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
       await Promise.all(
         contributions.map(async (contribution) => {
           try {
-            // Use getProfileByDisplayName instead of getProfileByUsername
             const profile = await getProfileByDisplayName(contribution.contributor_name);
             if (profile && profile.username) {
               usernamesMap[contribution.contributor_name] = profile.username;
@@ -100,10 +98,8 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
       
       <div aria-labelledby="contributions-heading" className="space-y-3">
         {contributions.map((contribution) => {
-          // Use a stable key based on contribution ID only
           const stableKey = `contribution-${contribution.id}`;
           
-          // Apply cache busting to the URL string, not the component key
           const profilePicUrl = contribution.contributor_profile_pic 
             ? `${contribution.contributor_profile_pic}${contribution.contributor_profile_pic.includes('?') ? '&' : '?'}t=${renderTimestamp}`
             : '/placeholder.svg';
@@ -141,9 +137,12 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
                     {contribution.contributor_name}
                   </Link>
                 </div>
-                <div className="flex items-center text-icc-gold-dark font-medium text-sm" aria-label={`Contributed ${formatCurrency(contribution.amount)} $SEC`}>
+                <div className="flex items-center text-icc-gold-dark font-medium text-sm" aria-label={`Contributed ${formatCurrency(contribution.amount)} SEC`}>
                   <DollarSign className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
-                  <span>{formatCurrency(contribution.amount)} $SEC</span>
+                  <span className="flex items-center gap-1">
+                    {formatCurrency(contribution.amount)} 
+                    <CurrencyIcon size="sm" />
+                  </span>
                 </div>
               </div>
               

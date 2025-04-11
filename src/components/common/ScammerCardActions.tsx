@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -25,6 +24,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import BountyForm from '@/components/scammer/BountyForm';
+import CurrencyIcon from '@/components/common/CurrencyIcon';
 
 interface ScammerActionButtonProps {
   icon: React.ReactNode;
@@ -80,7 +80,6 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
   const [isLiked, setIsLiked] = useState(userInteraction?.liked || false);
   const [isDisliked, setIsDisliked] = useState(userInteraction?.disliked || false);
 
-  // Update local state when props change
   React.useEffect(() => {
     setLocalLikes(scammer.likes || 0);
     setLocalDislikes(scammer.dislikes || 0);
@@ -118,7 +117,6 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
     try {
       console.log(`Attempting to like scammer ${scammer.id} with wallet ${profile.wallet_address}`);
       
-      // Optimistically update UI
       const wasLiked = isLiked;
       if (wasLiked) {
         setLocalLikes(Math.max(localLikes - 1, 0));
@@ -133,16 +131,13 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
         }
       }
       
-      // Update database
       const result = await likeScammer(scammer.id, profile.wallet_address);
       console.log("Like result:", result);
       
-      // Update UI with actual server data
       if (result && typeof result === 'object' && 'likes' in result) {
         setLocalLikes(result.likes);
         setLocalDislikes(result.dislikes);
         
-        // Update the scammer object
         scammer.likes = result.likes;
         scammer.dislikes = result.dislikes;
       }
@@ -159,7 +154,6 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
     } catch (error) {
       console.error("Error in handleLike:", error);
       handleError(error, "Failed to like scammer");
-      // Revert to original state on error
       setIsLiked(userInteraction?.liked || false);
       setIsDisliked(userInteraction?.disliked || false);
       setLocalLikes(scammer.likes || 0);
@@ -185,7 +179,6 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
     try {
       console.log(`Attempting to dislike scammer ${scammer.id} with wallet ${profile.wallet_address}`);
       
-      // Optimistically update UI
       const wasDisliked = isDisliked;
       if (wasDisliked) {
         setLocalDislikes(Math.max(localDislikes - 1, 0));
@@ -200,16 +193,13 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
         }
       }
       
-      // Update database
       const result = await dislikeScammer(scammer.id, profile.wallet_address);
       console.log("Dislike result:", result);
       
-      // Update UI with actual server data
       if (result && typeof result === 'object' && 'likes' in result) {
         setLocalLikes(result.likes);
         setLocalDislikes(result.dislikes);
         
-        // Update the scammer object
         scammer.likes = result.likes;
         scammer.dislikes = result.dislikes;
       }
@@ -226,7 +216,6 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
     } catch (error) {
       console.error("Error in handleDislike:", error);
       handleError(error, "Failed to dislike scammer");
-      // Revert to original state on error
       setIsLiked(userInteraction?.liked || false);
       setIsDisliked(userInteraction?.disliked || false);
       setLocalLikes(scammer.likes || 0);
@@ -240,7 +229,6 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
     if (showBountyDialog) {
       setBountyDialogOpen(true);
     } else {
-      // Navigate to scammer detail page and scroll to bounty section
       window.location.href = `/scammer/${scammer.id}#bounty-section`;
     }
   };

@@ -37,6 +37,7 @@ import { Input } from '@/components/ui/input';
 import { handleError, ErrorSeverity } from '@/utils/errorHandling';
 import { sendTransactionToDevWallet, connectPhantomWallet } from '@/utils/phantomWallet';
 import { PROFILE_UPDATED_EVENT } from '@/contexts/ProfileContext';
+import CurrencyIcon from '@/components/common/CurrencyIcon';
 
 const ScammerDetailPage = () => {
   const { id } = useParams<{ id: string; }>();
@@ -571,8 +572,8 @@ const ScammerDetailPage = () => {
                   alt={`Photo of ${scammer.name}`} 
                   className="w-full h-full object-cover" 
                 />
-                <div className="absolute top-0 left-0 bg-icc-gold text-icc-blue-dark px-4 py-2 text-sm font-bold rounded-br-lg" aria-label={`Bounty amount: ${scammer.bounty_amount.toLocaleString()} $SEC`}>
-                  {scammer.bounty_amount.toLocaleString()} $SEC Bounty
+                <div className="absolute top-0 left-0 bg-icc-gold text-icc-blue-dark px-4 py-2 text-sm font-bold rounded-br-lg flex items-center gap-1" aria-label={`Bounty amount: ${scammer.bounty_amount.toLocaleString()} SEC`}>
+                  {scammer.bounty_amount.toLocaleString()} <CurrencyIcon size="sm" /> Bounty
                 </div>
               </div>
 
@@ -769,12 +770,14 @@ const ScammerDetailPage = () => {
                   <div id="bounty-section" className="bg-icc-gold-light/20 border border-icc-gold rounded-lg p-5 mt-4">
                     <h4 className="font-bold text-xl text-icc-blue mb-2">Contribute to Bounty</h4>
                     <p className="text-sm text-icc-gray-dark mb-4">
-                      Add $SEC tokens to increase the bounty for {scammer?.name || "this scammer"}
+                      Add <CurrencyIcon size="sm" /> tokens to increase the bounty for {scammer?.name || "this scammer"}
                     </p>
                     <div className="mb-4">
                       <div className="text-sm font-medium text-icc-blue mb-2">Current Bounty</div>
                       <div className="bg-icc-gold-light/30 border border-icc-gold/30 rounded p-3 flex items-center">
-                        <span className="font-mono font-medium text-icc-blue-dark">{scammer?.bounty_amount.toLocaleString() || 0} $SEC</span>
+                        <span className="font-mono font-medium text-icc-blue-dark flex items-center">
+                          {scammer?.bounty_amount.toLocaleString() || 0} <CurrencyIcon className="ml-1" />
+                        </span>
                       </div>
                     </div>
                     
@@ -785,8 +788,8 @@ const ScammerDetailPage = () => {
                           {isLoadingUserContribution ? (
                             <Skeleton className="h-6 w-24" />
                           ) : (
-                            <span className="font-mono font-medium text-icc-blue-dark">
-                              {formatCurrency(userContributionAmount)} $SEC
+                            <span className="font-mono font-medium text-icc-blue-dark flex items-center">
+                              {formatCurrency(userContributionAmount)} <CurrencyIcon className="ml-1" />
                             </span>
                           )}
                         </div>
@@ -821,7 +824,9 @@ const ScammerDetailPage = () => {
                           aria-labelledby="contribution-amount-label"
                           aria-describedby="contribution-amount-currency"
                         />
-                        <span id="contribution-amount-currency" className="text-icc-gold-dark font-medium">$SEC</span>
+                        <span id="contribution-amount-currency" className="text-icc-gold-dark font-medium flex items-center">
+                          <CurrencyIcon />
+                        </span>
                       </div>
                     </div>
                     
