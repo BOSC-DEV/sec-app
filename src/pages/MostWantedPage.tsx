@@ -254,329 +254,267 @@ const MostWantedPage = () => {
             </p>
           </div>
 
-          {isLoading ? (
-            viewMode === 'grid' ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[1, 2, 3, 4, 5, 6].map((index) => (
-                  <div key={index} className="animate-pulse">
-                    <div className="bg-gray-200 aspect-square mb-4"></div>
-                    <div className="h-6 bg-gray-200 rounded mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                  </div>
-                ))}
-              </div>
-            ) : (
+          {!isLoading ? (
+            viewMode === 'table' ? (
               <div className="w-full overflow-hidden rounded-lg border border-icc-gold/50">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-icc-gold/30 border-b border-icc-gold">
-                      <TableHead className="w-12 font-bold text-icc-blue">№</TableHead>
-                      <TableHead className="font-bold text-icc-blue">Outlaw</TableHead>
-                      <TableHead className="font-bold text-icc-blue text-center">
-                        <div className="flex items-center justify-center">
-                          <CurrencyIcon className="h-4 w-4 text-gray-500" />
-                        </div>
-                      </TableHead>
-                      <TableHead className="font-bold text-icc-blue">Accused Of</TableHead>
-                      <TableHead className="font-bold text-icc-blue">Aliases</TableHead>
-                      <TableHead className="font-bold text-icc-blue text-center">
-                        <div className="flex items-center justify-center">
-                          <Globe className="h-4 w-4 text-gray-500" />
-                        </div>
-                      </TableHead>
-                      <TableHead className="font-bold text-icc-blue text-center">
-                        <div className="flex items-center justify-center">
-                          <ThumbsUp className="h-4 w-4 text-gray-500" />
-                        </div>
-                      </TableHead>
-                      <TableHead className="font-bold text-icc-blue text-center">
-                        <div className="flex items-center justify-center">
-                          <Eye className="h-4 w-4 text-gray-500" />
-                        </div>
-                      </TableHead>
-                      <TableHead className="font-bold text-icc-blue">Posted</TableHead>
-                      <TableHead className="font-bold text-icc-blue text-center">
-                        <div className="flex items-center justify-center">
-                          By
-                        </div>
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {[1, 2, 3, 4, 5].map((index) => (
-                      <TableRow key={index} className="border-b border-icc-gold/30">
-                        <TableCell>
-                          <Skeleton className="h-6 w-6" />
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Skeleton className="h-10 w-10 rounded-full" />
-                            <Skeleton className="h-4 w-32" />
-                          </div>
-                        </TableCell>
-                        <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-                        <TableCell className="text-center"><Skeleton className="h-4 w-12 mx-auto" /></TableCell>
-                        <TableCell className="text-center"><Skeleton className="h-4 w-6 mx-auto" /></TableCell>
-                        <TableCell className="text-center"><Skeleton className="h-4 w-6 mx-auto" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-                        <TableCell><Skeleton className="h-8 w-8 rounded-full" /></TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )
-          ) : viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {filteredScammers.map((scammer, index) => (
-                <ScammerCard key={scammer.id} scammer={scammer} rank={index} />
-              ))}
-            </div>
-          ) : (
-            <div className="w-full overflow-hidden rounded-lg border border-icc-gold/50">
-              <TooltipProvider>
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-icc-blue/30 border-b border-icc-gold">
-                      <TableHead 
-                        className="w-12 font-bold text-icc-blue cursor-pointer"
-                        onClick={() => handleSort('rank')}
-                      >
-                        <div className="flex items-center">
-                          <span>№</span>
-                          {renderSortIndicator('rank')}
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="font-bold text-icc-blue cursor-pointer"
-                        onClick={() => handleSort('name')}
-                      >
-                        <div className="flex items-center">
-                          <span>The Accused</span>
-                          {renderSortIndicator('name')}
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="font-bold text-icc-blue text-center cursor-pointer"
-                        onClick={() => handleSort('bounty')}
-                      >
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="flex items-center justify-center cursor-pointer">
-                              <CurrencyIcon className="h-4 w-4 text-gray-500" />
-                              {renderSortIndicator('bounty')}
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Bounty Amount</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TableHead>
-                      <TableHead 
-                        className="font-bold text-icc-blue cursor-pointer"
-                        onClick={() => handleSort('accused_of')}
-                      >
-                        <div className="flex items-center">
-                          <span>Accusations</span>
-                          {renderSortIndicator('accused_of')}
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="font-bold text-icc-blue cursor-pointer"
-                        onClick={() => handleSort('aliases')}
-                      >
-                        <div className="flex items-center">
-                          <span>Aliases</span>
-                          {renderSortIndicator('aliases')}
-                        </div>
-                      </TableHead>
-                      <TableHead className="font-bold text-icc-blue text-center">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="flex items-center justify-center cursor-pointer">
-                              <Globe className="h-4 w-4 text-gray-500" />
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Links</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TableHead>
-                      <TableHead 
-                        className="font-bold text-icc-blue text-center cursor-pointer"
-                        onClick={() => handleSort('likes')}
-                      >
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="flex items-center justify-center cursor-pointer">
-                              <ThumbsUp className="h-4 w-4 text-gray-500" />
-                              {renderSortIndicator('likes')}
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Likes</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TableHead>
-                      <TableHead 
-                        className="font-bold text-icc-blue text-center cursor-pointer"
-                        onClick={() => handleSort('views')}
-                      >
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="flex items-center justify-center cursor-pointer">
-                              <Eye className="h-4 w-4 text-gray-500" />
-                              {renderSortIndicator('views')}
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Views</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TableHead>
-                      <TableHead 
-                        className="font-bold text-icc-blue cursor-pointer"
-                        onClick={() => handleSort('date')}
-                      >
-                        <div className="flex items-center">
-                          <span>Posted</span>
-                          {renderSortIndicator('date')}
-                        </div>
-                      </TableHead>
-                      <TableHead className="font-bold text-icc-blue text-center">
-                        <div className="flex items-center justify-center">
-                          By
-                        </div>
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredScammers.map((scammer, index) => {
-                      const reporterProfile = getReporterProfile(scammer.added_by);
-                      
-                      return (
-                        <TableRow 
-                          key={scammer.id} 
-                          className="border-b border-icc-gold/30 hover:bg-icc-blue/10 cursor-pointer transition-colors"
-                          onClick={() => handleRowClick(scammer.id)}
+                <TooltipProvider>
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-icc-blue/30 border-b border-icc-gold">
+                        <TableHead 
+                          className="w-12 font-bold text-white cursor-pointer"
+                          onClick={() => handleSort('rank')}
                         >
-                          <TableCell className="font-medium text-white">{index + 1}</TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-3">
-                              <img 
-                                src={scammer.photo_url || '/placeholder.svg'} 
-                                alt={scammer.name} 
-                                className="w-10 h-10 rounded-full object-cover border-2 border-icc-gold"
-                              />
-                              <span className="font-medium text-white">{scammer.name}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-center font-semibold text-white">
-                            {scammer.bounty_amount ? (
-                              <span className="flex items-center justify-center">
-                                {scammer.bounty_amount} <CurrencyIcon size="sm" className="ml-1" />
-                              </span>
-                            ) : (
-                              <span className="flex items-center justify-center">
-                                0 <CurrencyIcon size="sm" className="ml-1" />
-                              </span>
-                            )}
-                          </TableCell>
-                          <TableCell className="max-w-[200px] truncate text-gray-300">
-                            {scammer.accused_of || '-'}
-                          </TableCell>
-                          <TableCell>
-                            {scammer.aliases && scammer.aliases.length > 0 ? (
-                              <div className="flex flex-wrap gap-1">
-                                <Badge variant="gold" className="text-xs text-white">
-                                  {scammer.aliases[0]}
-                                </Badge>
-                                {scammer.aliases.length > 1 && (
-                                  <Badge variant="gold" className="text-xs text-white flex items-center gap-0.5">
-                                    <Plus className="h-3 w-3" />
-                                    {scammer.aliases.length - 1}
-                                  </Badge>
-                                )}
+                          <div className="flex items-center">
+                            <span>№</span>
+                            {renderSortIndicator('rank')}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="font-bold text-white cursor-pointer"
+                          onClick={() => handleSort('name')}
+                        >
+                          <div className="flex items-center">
+                            <span>The Accused</span>
+                            {renderSortIndicator('name')}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="font-bold text-white text-center cursor-pointer"
+                          onClick={() => handleSort('bounty')}
+                        >
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="flex items-center justify-center cursor-pointer">
+                                <CurrencyIcon className="h-4 w-4 text-gray-300" />
+                                {renderSortIndicator('bounty')}
                               </div>
-                            ) : (
-                              <span className="text-gray-400">-</span>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <div className="flex items-center justify-center gap-1">
-                              {scammer.links && scammer.links.length > 0 ? (
-                                scammer.links.map((link, i) => (
-                                  <a 
-                                    key={i} 
-                                    href={link.startsWith('http') ? link : `https://${link}`} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="inline-block p-1 rounded-full bg-icc-blue hover:bg-icc-blue-light transition-colors"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    <Globe className="h-4 w-4 text-white" />
-                                  </a>
-                                ))
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Bounty Amount</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TableHead>
+                        <TableHead 
+                          className="font-bold text-white cursor-pointer"
+                          onClick={() => handleSort('accused_of')}
+                        >
+                          <div className="flex items-center">
+                            <span>Accusations</span>
+                            {renderSortIndicator('accused_of')}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="font-bold text-white cursor-pointer"
+                          onClick={() => handleSort('aliases')}
+                        >
+                          <div className="flex items-center">
+                            <span>Aliases</span>
+                            {renderSortIndicator('aliases')}
+                          </div>
+                        </TableHead>
+                        <TableHead className="font-bold text-white text-center">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="flex items-center justify-center cursor-pointer">
+                                <Globe className="h-4 w-4 text-gray-300" />
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Links</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TableHead>
+                        <TableHead 
+                          className="font-bold text-white text-center cursor-pointer"
+                          onClick={() => handleSort('likes')}
+                        >
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="flex items-center justify-center cursor-pointer">
+                                <ThumbsUp className="h-4 w-4 text-gray-300" />
+                                {renderSortIndicator('likes')}
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Likes</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TableHead>
+                        <TableHead 
+                          className="font-bold text-white text-center cursor-pointer"
+                          onClick={() => handleSort('views')}
+                        >
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="flex items-center justify-center cursor-pointer">
+                                <Eye className="h-4 w-4 text-gray-300" />
+                                {renderSortIndicator('views')}
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Views</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TableHead>
+                        <TableHead 
+                          className="font-bold text-white cursor-pointer"
+                          onClick={() => handleSort('date')}
+                        >
+                          <div className="flex items-center">
+                            <span>Posted</span>
+                            {renderSortIndicator('date')}
+                          </div>
+                        </TableHead>
+                        <TableHead className="font-bold text-white text-center">
+                          <div className="flex items-center justify-center">
+                            By
+                          </div>
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredScammers.map((scammer, index) => {
+                        const reporterProfile = getReporterProfile(scammer.added_by);
+                        
+                        return (
+                          <TableRow 
+                            key={scammer.id} 
+                            className="border-b border-icc-gold/30 hover:bg-icc-blue/10 cursor-pointer transition-colors"
+                            onClick={() => handleRowClick(scammer.id)}
+                          >
+                            <TableCell className="font-medium text-white">{index + 1}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <img 
+                                  src={scammer.photo_url || '/placeholder.svg'} 
+                                  alt={scammer.name} 
+                                  className="w-10 h-10 rounded-full object-cover border-2 border-icc-gold"
+                                />
+                                <span className="font-medium text-white">{scammer.name}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-center font-semibold text-white">
+                              {scammer.bounty_amount ? (
+                                <span className="flex items-center justify-center">
+                                  {scammer.bounty_amount} <CurrencyIcon size="sm" className="ml-1" />
+                                </span>
+                              ) : (
+                                <span className="flex items-center justify-center">
+                                  0 <CurrencyIcon size="sm" className="ml-1" />
+                                </span>
+                              )}
+                            </TableCell>
+                            <TableCell className="max-w-[200px] truncate text-gray-300">
+                              {scammer.accused_of || '-'}
+                            </TableCell>
+                            <TableCell>
+                              {scammer.aliases && scammer.aliases.length > 0 ? (
+                                <div className="flex flex-wrap gap-1">
+                                  <Badge variant="gold" className="text-xs text-white">
+                                    {scammer.aliases[0]}
+                                  </Badge>
+                                  {scammer.aliases.length > 1 && (
+                                    <Badge variant="gold" className="text-xs text-white flex items-center gap-0.5">
+                                      <Plus className="h-3 w-3" />
+                                      {scammer.aliases.length - 1}
+                                    </Badge>
+                                  )}
+                                </div>
                               ) : (
                                 <span className="text-gray-400">-</span>
                               )}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-center text-white">
-                            {scammer.likes || 0}
-                          </TableCell>
-                          <TableCell className="text-center text-white">
-                            {scammer.views || 0}
-                          </TableCell>
-                          <TableCell className="text-white">
-                            {new Date(scammer.date_added).toLocaleDateString('en-US', {
-                              month: '2-digit',
-                              day: '2-digit',
-                              year: '2-digit'
-                            })}
-                          </TableCell>
-                          <TableCell>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Avatar 
-                                  className="w-8 h-8 bg-icc-blue-light cursor-pointer border border-icc-gold/50 mx-auto"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (reporterProfile) {
-                                      navigate(`/profile/${reporterProfile.username || reporterProfile.wallet_address}`);
-                                    }
-                                  }}
-                                >
-                                  {reporterProfile?.profile_pic_url ? (
-                                    <AvatarImage 
-                                      src={reporterProfile.profile_pic_url} 
-                                      alt={reporterProfile.display_name}
-                                      onError={(e) => {
-                                        e.currentTarget.style.display = 'none';
-                                      }}
-                                    />
-                                  ) : null}
-                                  <AvatarFallback className="bg-icc-blue text-white">
-                                    {reporterProfile ? 
-                                      reporterProfile.display_name.substring(0, 2).toUpperCase() : 
-                                      '?'}
-                                  </AvatarFallback>
-                                </Avatar>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>{reporterProfile?.display_name || 'Unknown Reporter'}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </TooltipProvider>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <div className="flex items-center justify-center gap-1">
+                                {scammer.links && scammer.links.length > 0 ? (
+                                  scammer.links.map((link, i) => (
+                                    <a 
+                                      key={i} 
+                                      href={link.startsWith('http') ? link : `https://${link}`} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="inline-block p-1 rounded-full bg-icc-blue hover:bg-icc-blue-light transition-colors"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <Globe className="h-4 w-4 text-white" />
+                                    </a>
+                                  ))
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-center text-white">
+                              {scammer.likes || 0}
+                            </TableCell>
+                            <TableCell className="text-center text-white">
+                              {scammer.views || 0}
+                            </TableCell>
+                            <TableCell className="text-white">
+                              {new Date(scammer.date_added).toLocaleDateString('en-US', {
+                                month: '2-digit',
+                                day: '2-digit',
+                                year: '2-digit'
+                              })}
+                            </TableCell>
+                            <TableCell>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Avatar 
+                                    className="w-8 h-8 bg-icc-blue-light cursor-pointer border border-icc-gold/50 mx-auto"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (reporterProfile) {
+                                        navigate(`/profile/${reporterProfile.username || reporterProfile.wallet_address}`);
+                                      }
+                                    }}
+                                  >
+                                    {reporterProfile?.profile_pic_url ? (
+                                      <AvatarImage 
+                                        src={reporterProfile.profile_pic_url} 
+                                        alt={reporterProfile.display_name}
+                                        onError={(e) => {
+                                          e.currentTarget.style.display = 'none';
+                                        }}
+                                      />
+                                    ) : null}
+                                    <AvatarFallback className="bg-icc-blue text-white">
+                                      {reporterProfile ? 
+                                        reporterProfile.display_name.substring(0, 2).toUpperCase() : 
+                                        '?'}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>{reporterProfile?.display_name || 'Unknown Reporter'}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </TooltipProvider>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {filteredScammers.map((scammer, index) => (
+                  <ScammerCard key={scammer.id} scammer={scammer} rank={index} />
+                ))}
+              </div>
+            )
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[1, 2, 3, 4, 5, 6].map((index) => (
+                <div key={index} className="animate-pulse">
+                  <div className="bg-gray-200 aspect-square mb-4"></div>
+                  <div className="h-6 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              ))}
             </div>
           )}
 
