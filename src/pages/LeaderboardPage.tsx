@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Trophy, Medal, ThumbsUp, Eye, MessageSquare, Clock, Globe } from 'lucide-react';
@@ -28,7 +27,6 @@ const LeaderboardPage = () => {
     queryFn: getProfileStatistics
   });
   
-  // Calculate total bounty for each profile (sum of bounties paid and bounties raised)
   const profilesWithTotalBounty = profiles.map(profile => ({
     ...profile,
     total_bounty: (profile.bounty_amount || 0) + (profile.bounties_raised || 0)
@@ -86,7 +84,7 @@ const LeaderboardPage = () => {
       default:
         comparison = 0;
     }
-    return sortOrder === 'asc' ? comparison : -comparison;
+    return sortOrder === 'asc' ? -comparison : comparison;
   });
   
   const renderRankIcon = (rank: number) => {
