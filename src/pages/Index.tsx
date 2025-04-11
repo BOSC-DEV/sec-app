@@ -59,7 +59,7 @@ const Index = () => {
                   <div className="h-4 bg-gray-200 rounded w-1/2"></div>
                 </div>)}
             </div> : <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {topScammers.map(scammer => <ScammerCard key={scammer.id} scammer={scammer} />)}
+              {topScammers.map((scammer, index) => <ScammerCard key={scammer.id} scammer={scammer} rank={index} />)}
             </div>}
 
           <div className="text-center mt-10">

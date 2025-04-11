@@ -16,9 +16,10 @@ import CurrencyIcon from '@/components/common/CurrencyIcon';
 
 interface ScammerCardProps {
   scammer: Scammer;
+  rank?: number;
 }
 
-const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
+const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
   const navigate = useNavigate();
   const { profile } = useProfile();
   const isCreator = profile?.wallet_address === scammer.added_by;
@@ -233,6 +234,11 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
             alt={scammer.name} 
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
+          {rank !== undefined && rank < 3 && (
+            <div className="absolute top-0 left-0 bg-icc-red text-white px-3 py-1 text-sm font-bold rounded-br-lg">
+              #{rank + 1} Most Wanted
+            </div>
+          )}
           <div className="absolute top-0 right-0 bg-icc-gold text-icc-blue-dark px-3 py-1 text-sm font-bold flex items-center rounded-bl-lg">
             <CurrencyIcon className="h-4 w-4 mr-1" />
             <span>{scammer.bounty_amount.toLocaleString()}</span>

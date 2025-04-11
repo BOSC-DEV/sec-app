@@ -317,8 +317,8 @@ const MostWantedPage = () => {
             )
           ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {filteredScammers.map(scammer => (
-                <ScammerCard key={scammer.id} scammer={scammer} />
+              {filteredScammers.map((scammer, index) => (
+                <ScammerCard key={scammer.id} scammer={scammer} rank={index} />
               ))}
             </div>
           ) : (
