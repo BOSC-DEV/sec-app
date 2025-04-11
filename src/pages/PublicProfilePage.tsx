@@ -427,8 +427,8 @@ const PublicProfilePage = () => {
                   <div className="space-y-8">
                     {profile?.wallet_address ? (
                       <>
-                        <WalletBalance />
-                        <WalletInfo />
+                        <WalletBalance walletAddress={profile.wallet_address} />
+                        <WalletInfo walletAddress={profile.wallet_address} isOwnProfile={isOwnProfile} />
                       </>
                     ) : (
                       <div className="text-center py-12">

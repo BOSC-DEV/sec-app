@@ -2,21 +2,23 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useProfile } from '@/contexts/ProfileContext';
 import { CreditCard, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { Connection, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 
 // Import from phantomWallet utility
-import { getConnection, getPhantomProvider } from '@/utils/phantomWallet';
+import { getConnection } from '@/utils/phantomWallet';
 
 // SEC token mint address
 const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump');
 
-const WalletBalance = () => {
-  const { walletAddress } = useProfile();
+interface WalletBalanceProps {
+  walletAddress?: string | null;
+}
+
+const WalletBalance: React.FC<WalletBalanceProps> = ({ walletAddress }) => {
   const [solBalance, setSolBalance] = useState<number | null>(null);
   const [secBalance, setSecBalance] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -115,7 +117,7 @@ const WalletBalance = () => {
               <CreditCard className="h-5 w-5" /> Wallet Balances
             </CardTitle>
             <CardDescription>
-              Your current token balances
+              Current token balances
             </CardDescription>
           </div>
         </div>

@@ -6,8 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Wallet, ExternalLink, Copy, LogOut } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
-const WalletInfo = () => {
-  const { walletAddress, disconnectWallet } = useProfile();
+interface WalletInfoProps {
+  walletAddress?: string | null;
+  isOwnProfile?: boolean;
+}
+
+const WalletInfo: React.FC<WalletInfoProps> = ({ walletAddress, isOwnProfile = false }) => {
+  const { disconnectWallet } = useProfile();
 
   const copyWalletAddress = () => {
     if (walletAddress) {
@@ -87,15 +92,17 @@ const WalletInfo = () => {
               </div>
             </div>
 
-            <div className="pt-4">
-              <Button 
-                variant="outline" 
-                className="w-full border-icc-red text-icc-red hover:bg-icc-red-light/10 hover:text-icc-red flex items-center justify-center gap-2"
-                onClick={handleDisconnect}
-              >
-                <LogOut className="h-4 w-4" /> Disconnect Wallet
-              </Button>
-            </div>
+            {isOwnProfile && (
+              <div className="pt-4">
+                <Button 
+                  variant="outline" 
+                  className="w-full border-icc-red text-icc-red hover:bg-icc-red-light/10 hover:text-icc-red flex items-center justify-center gap-2"
+                  onClick={handleDisconnect}
+                >
+                  <LogOut className="h-4 w-4" /> Disconnect Wallet
+                </Button>
+              </div>
+            )}
           </div>
         ) : (
           <div className="text-center py-6 text-gray-500">
