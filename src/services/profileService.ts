@@ -48,6 +48,20 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
       throw checkError;
     }
     
+    // Create a more readable default display name if not provided
+    const defaultDisplayName = profile.display_name || 
+      profile.wallet_address
+        .split('')
+        .filter(char => /[a-zA-Z0-9]/.test(char))
+        .join('')
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/(\d)([a-zA-Z])/g, '$1 $2')
+        .replace(/([a-zA-Z])(\d)/g, '$1 $2')
+        .split(/(?=[A-Z])/)
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ')
+        .slice(0, 50); // Limit to 50 characters
+
     let result;
 
     if (existingProfile) {
@@ -60,7 +74,7 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
       const { data, error } = await supabase
         .from('profiles')
         .update({
-          display_name: profile.display_name,
+          display_name: defaultDisplayName,
           username: profile.username,
           profile_pic_url: profile.profile_pic_url,
           bio: profile.bio,
@@ -100,7 +114,7 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
         .insert({
           id: profile.id,
           wallet_address: profile.wallet_address,
-          display_name: profile.display_name,
+          display_name: defaultDisplayName,
           username: profile.username,
           profile_pic_url: profile.profile_pic_url,
           created_at: new Date().toISOString(),
