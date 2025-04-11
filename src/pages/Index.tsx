@@ -10,6 +10,7 @@ import { Shield, AlertTriangle, ExternalLink, DollarSign } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { formatNumber } from '@/lib/utils';
 import DisclaimerDialog from '@/components/common/DisclaimerDialog';
+import CurrencyIcon from '@/components/common/CurrencyIcon';
 
 const Index = () => {
   const [disclaimerOpen, setDisclaimerOpen] = useState(false);
@@ -154,7 +155,9 @@ const Index = () => {
             ) : (
               <>
                 <div className="text-center p-6">
-                  <div className="text-4xl font-bold text-icc-blue mb-2">${formatNumber(statistics.totalBounty)}</div>
+                  <div className="text-4xl font-bold text-icc-blue mb-2 flex items-center justify-center">
+                    <CurrencyIcon size="lg" className="mr-1" />{formatNumber(statistics.totalBounty)}
+                  </div>
                   <div className="text-sm text-icc-gray">Total Bounties Posted</div>
                 </div>
                 <div className="text-center p-6">

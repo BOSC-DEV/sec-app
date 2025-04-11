@@ -28,6 +28,7 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip';
 import { Plus } from 'lucide-react';
+import CurrencyIcon from '@/components/common/CurrencyIcon';
 
 const MostWantedPage = () => {
   const [filteredScammers, setFilteredScammers] = useState<Scammer[]>([]);
@@ -461,7 +462,15 @@ const MostWantedPage = () => {
                             )}
                           </TableCell>
                           <TableCell className="text-center font-semibold text-icc-blue">
-                            {scammer.bounty_amount ? `${scammer.bounty_amount} $SEC` : '0 $SEC'}
+                            {scammer.bounty_amount ? (
+                              <span className="flex items-center justify-center">
+                                {scammer.bounty_amount} <CurrencyIcon size="sm" className="ml-1" />
+                              </span>
+                            ) : (
+                              <span className="flex items-center justify-center">
+                                0 <CurrencyIcon size="sm" className="ml-1" />
+                              </span>
+                            )}
                           </TableCell>
                           <TableCell className="text-center">
                             {scammer.likes || 0}

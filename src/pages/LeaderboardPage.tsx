@@ -17,6 +17,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { getProfiles } from '@/services/profileService';
 import { Profile } from '@/types/dataTypes';
 import { formatNumber } from '@/lib/utils';
+import CurrencyIcon from '@/components/common/CurrencyIcon';
 
 type SortField = 'rank' | 'name' | 'reports' | 'likes' | 'views' | 'comments' | 'bounty' | 'activity';
 type SortOrder = 'asc' | 'desc';
@@ -295,7 +296,15 @@ const LeaderboardPage = () => {
                         
                         <TableCell className="text-center font-semibold text-icc-primary">
                           <Link to={`/profile/${profile.username || profile.wallet_address}`} className="hover:underline">
-                            {profile.bounty_amount ? `${profile.bounty_amount} $SEC` : '0 $SEC'}
+                            {profile.bounty_amount ? (
+                              <span className="flex items-center justify-center">
+                                {profile.bounty_amount} <CurrencyIcon size="sm" className="ml-1" />
+                              </span>
+                            ) : (
+                              <span className="flex items-center justify-center">
+                                0 <CurrencyIcon size="sm" className="ml-1" />
+                              </span>
+                            )}
                           </Link>
                         </TableCell>
                         

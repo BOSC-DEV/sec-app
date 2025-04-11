@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -261,7 +262,7 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
               onClick={handleBountyClick}
               title="Add Bounty"
             >
-              <DollarSign size={16} />
+              <CurrencyIcon size="sm" />
               <span>{scammer.bounty_amount || 0}</span>
             </Button>
           </DialogTrigger>
