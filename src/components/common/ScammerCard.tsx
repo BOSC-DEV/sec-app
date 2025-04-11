@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, ThumbsUp, ThumbsDown, MessageSquare, Edit, Info } from 'lucide-react';
@@ -313,7 +312,8 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
                 className="text-xs px-2 mx-1"
                 onClick={handleBountyClick}
               >
-                <Info className="h-3.5 w-3.5" />
+                <Info className="h-3.5 w-3.5 mr-1" />
+                More
               </Button>
             </TooltipTrigger>
             <TooltipContent>
