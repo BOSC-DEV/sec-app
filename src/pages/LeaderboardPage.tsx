@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Trophy, Medal, ThumbsUp, Eye, MessageSquare, Clock, FileText, ChevronUp, ChevronDown, Globe, Wallet, CoinsIcon } from 'lucide-react';
+import { Trophy, Medal, ThumbsUp, Eye, MessageSquare, Clock, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import CompactHero from '@/components/common/CompactHero';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -13,12 +13,12 @@ import { Profile } from '@/types/dataTypes';
 import { formatNumber } from '@/lib/utils';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
 
-type SortField = 'rank' | 'name' | 'reports' | 'likes' | 'views' | 'comments' | 'bounty' | 'bounties_raised' | 'activity';
+type SortField = 'total_bounty' | 'rank' | 'name' | 'reports' | 'likes' | 'views' | 'comments' | 'bounty' | 'bounties_raised' | 'activity';
 type SortOrder = 'asc' | 'desc';
 
 const LeaderboardPage = () => {
-  const [sortField, setSortField] = useState<SortField>('rank');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [sortField, setSortField] = useState<SortField>('total_bounty');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   
   const {
     data: profiles = [],
@@ -28,23 +28,34 @@ const LeaderboardPage = () => {
     queryFn: getProfileStatistics
   });
   
+  // Calculate total bounty for each profile (sum of bounties paid and bounties raised)
+  const profilesWithTotalBounty = profiles.map(profile => ({
+    ...profile,
+    total_bounty: (profile.bounty_amount || 0) + (profile.bounties_raised || 0)
+  }));
+  
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
-      setSortOrder('asc');
+      setSortOrder('desc');
     }
   };
   
   const getSortIcon = (field: SortField) => {
     if (sortField !== field) return null;
-    return sortOrder === 'asc' ? <ChevronUp className="h-4 w-4 ml-1" /> : <ChevronDown className="h-4 w-4 ml-1" />;
+    return sortOrder === 'asc' ? 
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 ml-1"><path d="m5 15 7-7 7 7"/></svg> : 
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 ml-1"><path d="m19 9-7 7-7-7"/></svg>;
   };
   
-  const sortedProfiles = [...profiles].sort((a, b) => {
+  const sortedProfiles = [...profilesWithTotalBounty].sort((a, b) => {
     let comparison = 0;
     switch (sortField) {
+      case 'total_bounty':
+        comparison = (b.total_bounty || 0) - (a.total_bounty || 0);
+        break;
       case 'rank':
         comparison = (b.points || 0) - (a.points || 0);
         break;
@@ -104,11 +115,18 @@ const LeaderboardPage = () => {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-icc-gold/30 border-b border-icc-gold">
-                      <TableHead className="w-20 text-center cursor-pointer font-bold text-icc-blue" onClick={() => handleSort('rank')}>
-                        <div className="flex items-center justify-center">
-                          <span>Rank</span>
-                          {getSortIcon('rank')}
-                        </div>
+                      <TableHead className="w-20 text-center cursor-pointer font-bold text-icc-blue" onClick={() => handleSort('total_bounty')}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="flex items-center justify-center cursor-pointer">
+                              <span>Rank</span>
+                              {getSortIcon('total_bounty')}
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Ranked by total bounty (paid + raised)</p>
+                          </TooltipContent>
+                        </Tooltip>
                       </TableHead>
                       
                       <TableHead className="cursor-pointer font-bold text-icc-blue" onClick={() => handleSort('name')}>
@@ -181,17 +199,31 @@ const LeaderboardPage = () => {
                       </TableHead>
                       
                       <TableHead className="text-center cursor-pointer font-bold text-icc-blue" onClick={() => handleSort('bounty')}>
-                        <div className="flex items-center justify-center">
-                          <span>Bounties Paid</span>
-                          {getSortIcon('bounty')}
-                        </div>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="flex items-center justify-center">
+                              <span>Bounties Paid</span>
+                              {getSortIcon('bounty')}
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Total bounties contributed by hunter</p>
+                          </TooltipContent>
+                        </Tooltip>
                       </TableHead>
                       
                       <TableHead className="text-center cursor-pointer font-bold text-icc-blue" onClick={() => handleSort('bounties_raised')}>
-                        <div className="flex items-center justify-center">
-                          <span>Bounties Raised</span>
-                          {getSortIcon('bounties_raised')}
-                        </div>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="flex items-center justify-center">
+                              <span>Bounties Raised</span>
+                              {getSortIcon('bounties_raised')}
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Total bounties raised for reports created by hunter</p>
+                          </TooltipContent>
+                        </Tooltip>
                       </TableHead>
                       
                       <TableHead className="w-20 text-center cursor-pointer font-bold text-icc-blue" onClick={() => handleSort('activity')}>

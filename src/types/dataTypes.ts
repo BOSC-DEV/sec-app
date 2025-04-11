@@ -38,6 +38,7 @@ export interface Profile {
   bounty_amount?: number;
   bounties_raised?: number;
   last_activity?: string;
+  total_bounty?: number; // Added field: sum of bounty_amount and bounties_raised
 }
 
 export interface Comment {
