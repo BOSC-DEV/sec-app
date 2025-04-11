@@ -7,14 +7,18 @@ import { LucideIcon, User, AlertTriangle, Calendar, Tag, Plus } from 'lucide-rea
 import CurrencyIcon from '@/components/common/CurrencyIcon';
 
 interface ScammerMetadataProps {
-  icon: LucideIcon;
+  icon: LucideIcon | typeof CurrencyIcon;
   label: string;
   value: string | number | React.ReactNode;
 }
 
 export const ScammerMetadata = ({ icon: Icon, label, value }: ScammerMetadataProps) => (
   <div className="flex items-center gap-2 text-sm">
-    <Icon className="h-4 w-4 text-muted-foreground" />
+    {Icon === CurrencyIcon ? (
+      <CurrencyIcon className="h-4 w-4 text-muted-foreground" />
+    ) : (
+      <Icon className="h-4 w-4 text-muted-foreground" />
+    )}
     <span className="text-muted-foreground">{label}:</span>
     <span className="font-medium">{value}</span>
   </div>

@@ -3,7 +3,6 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { DollarSign } from 'lucide-react';
 import { UseMutationResult } from '@tanstack/react-query';
 import { Profile } from '@/types/dataTypes';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
@@ -69,7 +68,10 @@ const ContributionForm = ({
       >
         {isProcessing || addBountyContributionMutation.isPending ? (
           <span className="flex items-center">
-            <CurrencyIcon className="h-4 w-4 mr-2 animate-spin" />
+            {/* Using a div with animation instead of the icon directly */}
+            <div className="h-4 w-4 mr-2 animate-spin">
+              <CurrencyIcon />
+            </div>
             Processing...
           </span>
         ) : profile ? (

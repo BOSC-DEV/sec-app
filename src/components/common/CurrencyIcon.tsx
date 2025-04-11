@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { LucideProps } from 'lucide-react';
 
 interface CurrencyIconProps {
   className?: string;
@@ -25,5 +26,8 @@ const CurrencyIcon: React.FC<CurrencyIconProps> = ({
     />
   );
 };
+
+// This allows using CurrencyIcon as a component property
+CurrencyIcon.displayName = 'CurrencyIcon';
 
 export default CurrencyIcon;
