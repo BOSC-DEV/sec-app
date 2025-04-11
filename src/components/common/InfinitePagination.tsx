@@ -3,9 +3,10 @@ import React, { useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { UseInfiniteQueryResult } from '@tanstack/react-query';
 import FallbackUI from './FallbackUI';
+import { Button } from '@/components/ui/button';
 
 interface InfinitePaginationProps<T> {
-  query: UseInfiniteQueryResult<{ data: T[]; nextCursor?: string | number | null }, unknown>;
+  query: UseInfiniteQueryResult<{ data: T[]; nextCursor?: string | number | null; count?: number }, unknown>;
   renderItem: (item: T, index: number) => React.ReactNode;
   emptyMessage?: string;
   errorMessage?: string;
@@ -15,6 +16,7 @@ interface InfinitePaginationProps<T> {
   loadMoreThreshold?: number;
   loadMoreButtonLabel?: string;
   showManualLoadMore?: boolean;
+  itemsCountMessage?: (count: number) => string;
 }
 
 function InfinitePagination<T>({
@@ -28,6 +30,7 @@ function InfinitePagination<T>({
   loadMoreThreshold = 400,
   loadMoreButtonLabel = "Load More",
   showManualLoadMore = false,
+  itemsCountMessage,
 }: InfinitePaginationProps<T>) {
   const {
     data,
@@ -84,14 +87,17 @@ function InfinitePagination<T>({
   // Extract all items from pages safely
   // Handle both infinite query format (with pages) and single query format
   let allItems: T[] = [];
+  let totalCount: number | undefined;
   
   if (data) {
     // Check if data has a pages property (infinite query result)
     if ('pages' in data && Array.isArray(data.pages)) {
       allItems = data.pages.flatMap(page => page.data || []);
+      totalCount = data.pages[0]?.count;
     } else if ('data' in data && Array.isArray(data.data)) {
       // Single query result with data property
       allItems = data.data;
+      totalCount = (data as any).count;
     }
   }
 
@@ -109,6 +115,12 @@ function InfinitePagination<T>({
 
   return (
     <div className={`w-full ${className}`}>
+      {totalCount !== undefined && itemsCountMessage && (
+        <div className="mb-4 text-sm text-muted-foreground">
+          {itemsCountMessage(totalCount)}
+        </div>
+      )}
+      
       <div className="grid grid-cols-1 gap-4">
         {allItems.map((item, index) => (
           <div key={index} className={itemClassName}>
@@ -120,10 +132,11 @@ function InfinitePagination<T>({
       {hasNextPage && (
         <div className="w-full flex justify-center mt-8">
           {showManualLoadMore ? (
-            <button
+            <Button
               onClick={() => fetchNextPage()}
               disabled={isFetchingNextPage}
               className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors duration-200 disabled:opacity-50"
+              variant="outline"
             >
               {isFetchingNextPage ? (
                 <span className="flex items-center space-x-2">
@@ -133,7 +146,7 @@ function InfinitePagination<T>({
               ) : (
                 loadMoreButtonLabel
               )}
-            </button>
+            </Button>
           ) : (
             isFetchingNextPage && (
               <div className="py-4 flex justify-center">
