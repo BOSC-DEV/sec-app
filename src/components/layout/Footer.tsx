@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import ICCLogo from '../common/ICCLogo';
@@ -31,7 +32,7 @@ const Footer = () => {
                 <div className="text-base font-bold leading-tight">Scams & E-crimes Commission</div>
               </div>
             </Link>
-            <p className="text-sm text-gray-300 mt-4">A decentralized crime registry to bring accountability and self govern the new digital world.</p>
+            <p className="text-sm text-gray-300 mt-4">A decentralized crime registry bringing accountability and self governance to the new digital world.</p>
             <div className="flex space-x-4 mt-6">
               <a 
                 href="https://x.com/sandecommission" 
