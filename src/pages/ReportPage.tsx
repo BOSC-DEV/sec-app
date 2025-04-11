@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useReportForm } from '@/hooks/useReportForm';
@@ -98,7 +99,10 @@ const ReportPage = () => {
 
   return (
     <div>
-      <CompactHero title={isEditMode ? "Edit Scammer Report" : "File a Report"} />
+      <CompactHero 
+        title={isEditMode ? "Edit Scammer Report" : "File a Report"} 
+        subtitle="More details help prevent harm to future victims"
+      />
       
       <div className="icc-section bg-white">
         <div className="icc-container">
