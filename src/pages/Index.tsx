@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Hero from '@/components/common/Hero';
 import ScammerCard from '@/components/common/ScammerCard';
@@ -15,7 +14,6 @@ import CurrencyIcon from '@/components/common/CurrencyIcon';
 const Index = () => {
   const [disclaimerOpen, setDisclaimerOpen] = useState(false);
 
-  // Query for top scammers
   const {
     data: topScammers = [],
     isLoading: isLoadingScammers,
@@ -25,7 +23,6 @@ const Index = () => {
     queryFn: () => getTopScammers(3)
   });
 
-  // Query for statistics
   const {
     data: statistics = { totalBounty: 0, scammersCount: 0, reportersCount: 0, usersCount: 0 },
     isLoading: isLoadingStats,
@@ -46,7 +43,6 @@ const Index = () => {
   return <div>
       <Hero />
 
-      {/* Featured Scammers Section */}
       <section className="icc-section bg-white">
         <div className="icc-container">
           <div className="text-center mb-12">
@@ -73,7 +69,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* How It Works Section */}
       <section className="icc-section bg-gray-50">
         <div className="icc-container">
           <div className="text-center mb-12">
@@ -115,7 +110,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Warning Section */}
       <section className="bg-icc-red text-white py-10">
         <div className="icc-container">
           <div className="flex flex-col md:flex-row items-center justify-between">
@@ -138,11 +132,9 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Statistics Section */}
       <section className="icc-section bg-white">
         <div className="icc-container">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {/* Loading states for statistics */}
             {isLoadingStats ? (
               <>
                 {[1, 2, 3, 4].map((_, index) => (
@@ -158,7 +150,7 @@ const Index = () => {
                   <div className="text-4xl font-bold text-icc-blue mb-2 flex items-center justify-center">
                     <CurrencyIcon size="lg" className="mr-1" />{formatNumber(statistics.totalBounty)}
                   </div>
-                  <div className="text-sm text-icc-gray">Total Bounties Posted</div>
+                  <div className="text-sm text-icc-gray">Total Bounty Value</div>
                 </div>
                 <div className="text-center p-6">
                   <div className="text-4xl font-bold text-icc-blue mb-2">{formatNumber(statistics.scammersCount)}+</div>
@@ -178,7 +170,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Disclaimer Dialog */}
       <DisclaimerDialog open={disclaimerOpen} onOpenChange={setDisclaimerOpen} />
     </div>;
 };
