@@ -69,7 +69,7 @@ const ContributionForm = ({
       >
         {isProcessing || addBountyContributionMutation.isPending ? (
           <span className="flex items-center">
-            <DollarSign className="h-4 w-4 mr-2 animate-spin" />
+            <CurrencyIcon className="h-4 w-4 mr-2 animate-spin" />
             Processing...
           </span>
         ) : profile ? (

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -6,8 +5,7 @@ import {
   ThumbsUp, 
   ThumbsDown, 
   Share2, 
-  Eye,
-  DollarSign
+  Eye
 } from 'lucide-react';
 import { Scammer } from '@/types/dataTypes';
 import { handleError } from '@/utils/errorHandling';

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import CompactHero from '@/components/common/CompactHero';
 import ScammerCard from '@/components/common/ScammerCard';
@@ -6,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getScammers } from '@/services/scammerService';
 import { getProfileByWallet } from '@/services/profileService';
-import { Grid, List, Search, SlidersHorizontal, Globe, ThumbsUp, Eye, FileText, DollarSign, ChevronUp, ChevronDown } from 'lucide-react';
+import { Grid, List, Search, SlidersHorizontal, Globe, ThumbsUp, Eye, ChevronUp, ChevronDown } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { Scammer, Profile } from '@/types/dataTypes';
@@ -275,7 +276,7 @@ const MostWantedPage = () => {
                       <TableHead className="font-bold text-icc-blue">Outlaw</TableHead>
                       <TableHead className="font-bold text-icc-blue text-center">
                         <div className="flex items-center justify-center">
-                          <DollarSign className="h-4 w-4 text-gray-500" />
+                          <CurrencyIcon className="h-4 w-4 text-gray-500" />
                         </div>
                       </TableHead>
                       <TableHead className="font-bold text-icc-blue">Accused Of</TableHead>
@@ -366,7 +367,7 @@ const MostWantedPage = () => {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center cursor-pointer">
-                              <DollarSign className="h-4 w-4 text-gray-500" />
+                              <CurrencyIcon className="h-4 w-4 text-gray-500" />
                               {renderSortIndicator('bounty')}
                             </div>
                           </TooltipTrigger>

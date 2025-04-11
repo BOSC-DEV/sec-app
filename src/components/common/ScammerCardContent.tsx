@@ -3,7 +3,7 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { Scammer } from '@/types/dataTypes';
-import { LucideIcon, User, DollarSign, AlertTriangle, Calendar, Tag, Plus } from 'lucide-react';
+import { LucideIcon, User, AlertTriangle, Calendar, Tag, Plus } from 'lucide-react';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
 
 interface ScammerMetadataProps {
@@ -63,7 +63,7 @@ const ScammerCardContent: React.FC<ScammerCardContentProps> = ({
 
         {showBounty && (
           <ScammerMetadata
-            icon={DollarSign}
+            icon={CurrencyIcon}
             label="Bounty"
             value={
               <div className="flex items-center gap-1">
