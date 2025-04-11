@@ -36,6 +36,7 @@ export interface Profile {
   views_count?: number;
   comments_count?: number;
   bounty_amount?: number;
+  bounties_raised?: number;
   last_activity?: string;
 }
 

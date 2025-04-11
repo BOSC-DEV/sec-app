@@ -80,7 +80,7 @@ export const getProfileStatistics = async (): Promise<any[]> => {
     // Get reports count for each profile (where they are listed as added_by)
     const { data: scammers, error: scammersError } = await supabase
       .from('scammers')
-      .select('added_by, likes, views')
+      .select('added_by, likes, views, bounty_amount')
       .is('deleted_at', null);
     
     if (scammersError) throw scammersError;
@@ -136,6 +136,11 @@ export const getProfileStatistics = async (): Promise<any[]> => {
         .filter(contribution => contribution.contributor_id === profile.wallet_address)
         .reduce((sum, contribution) => sum + (contribution.amount || 0), 0);
       
+      // Calculate bounties raised (total bounties on scammers reported by this profile)
+      const bountiesRaised = scammers
+        .filter(scammer => scammer.added_by === profile.wallet_address)
+        .reduce((sum, scammer) => sum + (scammer.bounty_amount || 0), 0);
+      
       // Add up all statistics
       return {
         ...profile,
@@ -143,7 +148,8 @@ export const getProfileStatistics = async (): Promise<any[]> => {
         likes_count: scammerLikes + commentLikes,
         views_count: scammerViews + commentViews,
         comments_count: commentsCount,
-        bounty_amount: bountyAmount
+        bounty_amount: bountyAmount,
+        bounties_raised: bountiesRaised
       };
     });
   } catch (error) {
