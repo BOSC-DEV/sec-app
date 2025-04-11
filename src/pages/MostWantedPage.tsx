@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { searchScammers } from '@/services/scammerService';
 import { getProfileByWallet } from '@/services/profileService';
-import { Grid, List, Search, SlidersHorizontal } from 'lucide-react';
+import { Grid, List, Search, SlidersHorizontal, Globe, Plus } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Scammer, Profile } from '@/types/dataTypes';
@@ -27,7 +27,6 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip';
-import { Plus } from 'lucide-react';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
 import InfinitePagination from '@/components/common/InfinitePagination';
 
