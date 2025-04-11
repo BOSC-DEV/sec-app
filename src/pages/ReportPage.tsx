@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useReportForm } from '@/hooks/useReportForm';
@@ -30,7 +29,6 @@ const ReportPage = () => {
     onSubmit 
   } = useReportForm(id);
 
-  // Check if user has permission to edit this scammer report
   useEffect(() => {
     const checkEditPermission = async () => {
       if (id && profile?.wallet_address) {
@@ -67,17 +65,14 @@ const ReportPage = () => {
     checkEditPermission();
   }, [id, profile?.wallet_address, navigate]);
 
-  // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Submit form with Ctrl+Enter or Cmd+Enter
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         if (!isSubmitting && !isLoading && !checkingPermission) {
           form.handleSubmit(onSubmit)();
         }
       }
       
-      // Cancel with Escape
       if (e.key === 'Escape') {
         navigate(-1);
       }
@@ -87,7 +82,6 @@ const ReportPage = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [form, navigate, onSubmit, isSubmitting, isLoading, checkingPermission]);
 
-  // If checking permission or loading data, show loading state
   if (checkingPermission || isLoading) {
     return (
       <div>
@@ -104,16 +98,19 @@ const ReportPage = () => {
 
   return (
     <div>
-      <CompactHero title={isEditMode ? "Edit Scammer Report" : "Report a Scammer"} />
+      <CompactHero title={isEditMode ? "Edit Scammer Report" : "File a Report"} />
       
       <div className="icc-section bg-white">
         <div className="icc-container">
-          <p className="text-icc-gray mb-8">
-            {isEditMode 
-              ? "Update information about this scammer. All fields are editable except the bounty amount."
-              : "Report a scammer to warn the community. Providing detailed information helps others recognize and avoid scams."
-            }
-          </p>
+          {isEditMode ? (
+            <p className="text-icc-gray mb-8">
+              Update information about this scammer. All fields are editable except the bounty amount.
+            </p>
+          ) : (
+            <p className="text-icc-gray mb-8">
+              Report a scammer to warn the community. Providing detailed information helps others recognize and avoid scams.
+            </p>
+          )}
           
           <Form {...form}>
             <form 
