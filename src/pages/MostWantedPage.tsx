@@ -408,7 +408,11 @@ const MostWantedPage = () => {
                       >
                         Posted{renderSortIndicator('date')}
                       </TableHead>
-                      <TableHead className="font-bold text-icc-blue text-center">By</TableHead>
+                      <TableHead className="font-bold text-icc-blue text-center">
+                        <div className="flex items-center justify-center">
+                          By
+                        </div>
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -500,7 +504,7 @@ const MostWantedPage = () => {
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Avatar 
-                                  className="w-8 h-8 bg-icc-blue-light cursor-pointer border border-icc-gold/50"
+                                  className="w-8 h-8 bg-icc-blue-light cursor-pointer border border-icc-gold/50 mx-auto"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     if (reporterProfile) {
