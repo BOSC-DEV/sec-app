@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -5,9 +6,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Wallet, LogIn } from 'lucide-react';
+
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
+
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children
 }) => {
@@ -17,7 +20,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     connectWallet
   } = useProfile();
   const location = useLocation();
-  const [showDialog, setShowDialog] = React.useState(!isConnected && !isLoading);
+  const [showDialog, setShowDialog] = React.useState(false);
+  
+  // Initialize dialog state based on authentication status
+  React.useEffect(() => {
+    if (!isLoading) {
+      setShowDialog(!isConnected);
+    }
+  }, [isConnected, isLoading]);
 
   // Show loading state while checking authentication
   if (isLoading) {
@@ -29,7 +39,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Instead of redirecting, show a dialog
   if (!isConnected) {
-    return <Dialog open={showDialog} onOpenChange={setShowDialog}>
+    return (
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Wallet Connection Required</DialogTitle>
@@ -48,10 +59,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             </Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>;
+      </Dialog>
+    );
   }
 
   // If authenticated, render the children
   return <>{children}</>;
 };
+
 export default ProtectedRoute;

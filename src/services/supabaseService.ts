@@ -18,6 +18,11 @@ export const generateScammerId = async (): Promise<string> => {
   }
 };
 
+// Get Supabase instance
+export const getSupabase = () => {
+  return supabase;
+};
+
 // Profile Service
 export const getProfiles = async (): Promise<Profile[]> => {
   const { data, error } = await supabase
