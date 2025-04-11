@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, ThumbsUp, ThumbsDown, MessageSquare, Edit } from 'lucide-react';
@@ -309,7 +310,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
           onClick={handleBountyClick}
         >
           <CurrencyIcon size="sm" className="h-3.5 w-3.5 mr-1" />
-          Bounty
+          <span>Reward</span>
         </Button>
         
         {isCreator ? (
