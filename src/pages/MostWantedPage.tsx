@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import CompactHero from '@/components/common/CompactHero';
 import ScammerCard from '@/components/common/ScammerCard';
@@ -158,7 +157,7 @@ const MostWantedPage = () => {
         subtitle="Browse the database of reported crimes."
       />
 
-      <section className="icc-section bg-white">
+      <section className="icc-section bg-icc-blue-darker">
         <div className="icc-container">
           <div className="mb-8">
             <div className="flex flex-col md:flex-row gap-4 mb-4">
@@ -248,9 +247,9 @@ const MostWantedPage = () => {
               </div>
             )}
           </div>
-
+          
           <div className="mb-6">
-            <p className="text-icc-gray">
+            <p className="text-white">
               Showing <span className="font-semibold">{filteredScammers.length}</span> results
             </p>
           </div>
@@ -341,7 +340,7 @@ const MostWantedPage = () => {
               <TooltipProvider>
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-icc-gold/30 border-b border-icc-gold">
+                    <TableRow className="bg-icc-blue/30 border-b border-icc-gold">
                       <TableHead 
                         className="w-12 font-bold text-icc-blue cursor-pointer"
                         onClick={() => handleSort('rank')}
@@ -461,10 +460,10 @@ const MostWantedPage = () => {
                       return (
                         <TableRow 
                           key={scammer.id} 
-                          className="border-b border-icc-gold/30 hover:bg-icc-gold/10 cursor-pointer transition-colors"
+                          className="border-b border-icc-gold/30 hover:bg-icc-blue/10 cursor-pointer transition-colors"
                           onClick={() => handleRowClick(scammer.id)}
                         >
-                          <TableCell className="font-medium">{index + 1}</TableCell>
+                          <TableCell className="font-medium text-white">{index + 1}</TableCell>
                           <TableCell>
                             <div className="flex items-center gap-3">
                               <img 
@@ -472,10 +471,10 @@ const MostWantedPage = () => {
                                 alt={scammer.name} 
                                 className="w-10 h-10 rounded-full object-cover border-2 border-icc-gold"
                               />
-                              <span className="font-medium text-icc-blue">{scammer.name}</span>
+                              <span className="font-medium text-white">{scammer.name}</span>
                             </div>
                           </TableCell>
-                          <TableCell className="text-center font-semibold text-icc-primary">
+                          <TableCell className="text-center font-semibold text-white">
                             {scammer.bounty_amount ? (
                               <span className="flex items-center justify-center">
                                 {scammer.bounty_amount} <CurrencyIcon size="sm" className="ml-1" />
@@ -486,17 +485,17 @@ const MostWantedPage = () => {
                               </span>
                             )}
                           </TableCell>
-                          <TableCell className="max-w-[200px] truncate">
+                          <TableCell className="max-w-[200px] truncate text-gray-300">
                             {scammer.accused_of || '-'}
                           </TableCell>
                           <TableCell>
                             {scammer.aliases && scammer.aliases.length > 0 ? (
                               <div className="flex flex-wrap gap-1">
-                                <Badge variant="gold" className="text-xs">
+                                <Badge variant="gold" className="text-xs text-white">
                                   {scammer.aliases[0]}
                                 </Badge>
                                 {scammer.aliases.length > 1 && (
-                                  <Badge variant="gold" className="text-xs flex items-center gap-0.5">
+                                  <Badge variant="gold" className="text-xs text-white flex items-center gap-0.5">
                                     <Plus className="h-3 w-3" />
                                     {scammer.aliases.length - 1}
                                   </Badge>
@@ -526,13 +525,13 @@ const MostWantedPage = () => {
                               )}
                             </div>
                           </TableCell>
-                          <TableCell className="text-center">
+                          <TableCell className="text-center text-white">
                             {scammer.likes || 0}
                           </TableCell>
-                          <TableCell className="text-center">
+                          <TableCell className="text-center text-white">
                             {scammer.views || 0}
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="text-white">
                             {new Date(scammer.date_added).toLocaleDateString('en-US', {
                               month: '2-digit',
                               day: '2-digit',
