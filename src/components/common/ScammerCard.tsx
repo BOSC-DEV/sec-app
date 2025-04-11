@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, ThumbsUp, ThumbsDown, MessageSquare, Edit } from 'lucide-react';
@@ -232,7 +233,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer }) => {
             alt={scammer.name} 
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
-          <div className="absolute top-0 right-0 bg-icc-gold text-icc-blue-dark px-3 py-1 text-sm font-bold flex items-center">
+          <div className="absolute top-0 right-0 bg-icc-gold text-icc-blue-dark px-3 py-1 text-sm font-bold flex items-center rounded-bl-lg">
             <CurrencyIcon className="h-4 w-4 mr-1" />
             <span>{scammer.bounty_amount.toLocaleString()}</span>
           </div>
