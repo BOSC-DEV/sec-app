@@ -33,7 +33,6 @@ const PublicProfilePage = () => {
     enabled: !!username,
   });
 
-  // Add effect to refetch when location changes (coming back to this page)
   useEffect(() => {
     refetch();
   }, [location, refetch]);
@@ -52,7 +51,6 @@ const PublicProfilePage = () => {
     enabled: !!profile?.wallet_address,
   });
 
-  // New query to fetch bounty contributions
   const { data: bountyContributions, isLoading: isLoadingBounties } = useQuery({
     queryKey: ['userBounties', profile?.wallet_address],
     queryFn: () => getUserBountyContributions(profile?.wallet_address || '', 1, 50),
@@ -145,13 +143,11 @@ const PublicProfilePage = () => {
   const pageTitle = profile ? `${profile.display_name} (@${profile.username}) | SEC.digital` : 'Profile | SEC.digital';
   const pageDescription = profile?.bio || `Check out this profile on SEC.digital - The Scams & E-crimes Commission`;
 
-  // Format the date for display
   const formatDate = (dateString: string) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString();
   };
 
-  // Format currency for display
   const formatCurrency = (amount: number) => {
     return amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
@@ -424,14 +420,21 @@ const PublicProfilePage = () => {
                 </div>
               </TabsContent>
               
-              {/* New Wallet tab */}
               <TabsContent value="wallet" className="mt-0">
                 <div className="bg-background/60 backdrop-blur-sm rounded-lg p-6 border">
                   <h2 className="text-2xl font-bold text-icc-gold mb-6">Wallet</h2>
                   
                   <div className="space-y-8">
-                    <WalletBalance />
-                    <WalletInfo />
+                    {profile?.wallet_address ? (
+                      <>
+                        <WalletBalance />
+                        <WalletInfo />
+                      </>
+                    ) : (
+                      <div className="text-center py-12">
+                        <p className="text-muted-foreground text-lg">No wallet information available</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </TabsContent>

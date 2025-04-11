@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,7 @@ import { Wallet, ExternalLink, Copy, LogOut } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 const WalletInfo = () => {
-  const { walletAddress, isPhantomAvailable, disconnectWallet } = useProfile();
+  const { walletAddress, disconnectWallet } = useProfile();
 
   const copyWalletAddress = () => {
     if (walletAddress) {
@@ -50,14 +49,9 @@ const WalletInfo = () => {
               <Wallet className="h-5 w-5" /> Wallet Information
             </CardTitle>
             <CardDescription>
-              Your connected wallet details
+              Connected wallet details
             </CardDescription>
           </div>
-          {isPhantomAvailable && (
-            <Badge variant="outline" className="bg-icc-blue-light/20 text-icc-blue border-icc-blue-light/30">
-              Phantom
-            </Badge>
-          )}
         </div>
       </CardHeader>
       <CardContent>
@@ -72,11 +66,9 @@ const WalletInfo = () => {
                 <Button variant="outline" size="icon" onClick={copyWalletAddress} title="Copy address">
                   <Copy className="h-4 w-4" />
                 </Button>
-                {isPhantomAvailable && (
-                  <Button variant="outline" size="icon" onClick={openSolanaExplorer} title="View on Solana Explorer">
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                )}
+                <Button variant="outline" size="icon" onClick={openSolanaExplorer} title="View on Solana Explorer">
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
               </div>
             </div>
             
@@ -84,13 +76,13 @@ const WalletInfo = () => {
               <div className="bg-gray-50 p-3 rounded-md">
                 <div className="text-xs text-gray-500 mb-1">Network</div>
                 <div className="font-medium">
-                  {isPhantomAvailable ? 'Solana Mainnet' : 'Mock Network'}
+                  Solana Mainnet
                 </div>
               </div>
               <div className="bg-gray-50 p-3 rounded-md">
                 <div className="text-xs text-gray-500 mb-1">Wallet Type</div>
                 <div className="font-medium">
-                  {isPhantomAvailable ? 'Phantom' : 'Mock Wallet'}
+                  Solana Wallet
                 </div>
               </div>
             </div>

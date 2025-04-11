@@ -3,8 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useProfile } from '@/contexts/ProfileContext';
-import { Badge } from '@/components/ui/badge';
-import { Wallet, CreditCard, RefreshCw } from 'lucide-react';
+import { CreditCard, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { Connection, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
@@ -17,7 +16,7 @@ import { getConnection, getPhantomProvider } from '@/utils/phantomWallet';
 const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump');
 
 const WalletBalance = () => {
-  const { walletAddress, isPhantomAvailable } = useProfile();
+  const { walletAddress } = useProfile();
   const [solBalance, setSolBalance] = useState<number | null>(null);
   const [secBalance, setSecBalance] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -119,11 +118,6 @@ const WalletBalance = () => {
               Your current token balances
             </CardDescription>
           </div>
-          {isPhantomAvailable && (
-            <Badge variant="outline" className="bg-icc-blue-light/20 text-icc-blue border-icc-blue-light/30">
-              Phantom
-            </Badge>
-          )}
         </div>
       </CardHeader>
       <CardContent>
