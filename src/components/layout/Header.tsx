@@ -110,7 +110,7 @@ const Header = () => {
                 onClick={connectWallet}
               >
                 <LogIn className="h-4 w-4" />
-                Log In
+                Connect Wallet
               </Button>
             )}
           </div>
@@ -178,7 +178,7 @@ const Header = () => {
                     size="sm"
                   >
                     <LogIn className="h-3 w-3" />
-                    Log In
+                    Connect Wallet
                   </Button>
                 )}
               </div>
