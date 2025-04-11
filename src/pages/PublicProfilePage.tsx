@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
@@ -18,6 +17,8 @@ import { getUserBountyContributions } from '@/services/bountyService';
 import { Profile, Scammer } from '@/types/dataTypes';
 import ScammerCard from '@/components/common/ScammerCard';
 import { useProfile } from '@/contexts/ProfileContext';
+import WalletBalance from '@/components/profile/WalletBalance';
+import WalletInfo from '@/components/profile/WalletInfo';
 
 const PublicProfilePage = () => {
   const { username } = useParams<{ username: string }>();
@@ -282,6 +283,9 @@ const PublicProfilePage = () => {
                 <TabsTrigger value="bounties" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
                   Bounties
                 </TabsTrigger>
+                <TabsTrigger value="wallet" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                  Wallet
+                </TabsTrigger>
                 <TabsTrigger value="info" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
                   Info
                 </TabsTrigger>
@@ -417,6 +421,18 @@ const PublicProfilePage = () => {
                       <p className="text-muted-foreground text-lg">No bounties available yet</p>
                     </div>
                   )}
+                </div>
+              </TabsContent>
+              
+              {/* New Wallet tab */}
+              <TabsContent value="wallet" className="mt-0">
+                <div className="bg-background/60 backdrop-blur-sm rounded-lg p-6 border">
+                  <h2 className="text-2xl font-bold text-icc-gold mb-6">Wallet</h2>
+                  
+                  <div className="space-y-8">
+                    <WalletBalance />
+                    <WalletInfo />
+                  </div>
                 </div>
               </TabsContent>
                 

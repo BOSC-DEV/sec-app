@@ -70,11 +70,11 @@ const connection = new Connection(QUICKNODE_RPC_URL, connectionConfig);
 let fallbackConnection: Connection | null = null;
 
 // Export these utility functions
-const getConnection = (): Connection => {
+export const getConnection = (): Connection => {
   return connection;
 };
 
-const getFallbackConnection = (): Connection => {
+export const getFallbackConnection = (): Connection => {
   if (!fallbackConnection) {
     console.log('Initializing fallback Solana connection');
     fallbackConnection = new Connection(FALLBACK_RPC_URL, {
