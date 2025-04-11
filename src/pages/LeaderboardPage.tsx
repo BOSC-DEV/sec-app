@@ -100,7 +100,7 @@ const LeaderboardPage = () => {
     <div>
       <CompactHero title="Leaderboard" subtitle="Top hunters tracking and reporting cryptocurrency scammers." />
 
-      <section className="py-12 bg-gradient-to-b from-white to-gray-50">
+      <section className="py-12 bg-icc-blue-darker">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {isLoading ? (
             <div className="p-6 space-y-4">
@@ -114,12 +114,12 @@ const LeaderboardPage = () => {
               <TooltipProvider>
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-icc-gold/30 border-b border-icc-gold">
-                      <TableHead className="w-20 text-center cursor-pointer font-bold text-icc-blue" onClick={() => handleSort('total_bounty')}>
+                    <TableRow className="bg-icc-blue/30 border-b border-icc-gold">
+                      <TableHead className="w-20 text-center cursor-pointer font-bold text-white" onClick={() => handleSort('total_bounty')}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center cursor-pointer">
-                              <span>Rank</span>
+                              <span className="text-white">Rank</span>
                               {getSortIcon('total_bounty')}
                             </div>
                           </TooltipTrigger>
@@ -129,25 +129,25 @@ const LeaderboardPage = () => {
                         </Tooltip>
                       </TableHead>
                       
-                      <TableHead className="cursor-pointer font-bold text-icc-blue" onClick={() => handleSort('name')}>
+                      <TableHead className="cursor-pointer font-bold text-white" onClick={() => handleSort('name')}>
                         <div className="flex items-center">
-                          <span>Hunter</span>
+                          <span className="text-white">Hunter</span>
                           {getSortIcon('name')}
                         </div>
                       </TableHead>
                       
-                      <TableHead className="font-bold text-icc-blue text-center cursor-pointer" onClick={() => handleSort('reports')}>
+                      <TableHead className="font-bold text-white text-center cursor-pointer" onClick={() => handleSort('reports')}>
                         <div className="flex items-center justify-center">
-                          <span>Reports</span>
+                          <span className="text-white">Reports</span>
                           {getSortIcon('reports')}
                         </div>
                       </TableHead>
                       
-                      <TableHead className="text-center cursor-pointer font-bold text-icc-blue" onClick={() => handleSort('likes')}>
+                      <TableHead className="text-center cursor-pointer font-bold text-white" onClick={() => handleSort('likes')}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center cursor-pointer">
-                              <ThumbsUp className="h-4 w-4 text-gray-500" />
+                              <ThumbsUp className="h-4 w-4 text-white" />
                               {getSortIcon('likes')}
                             </div>
                           </TooltipTrigger>
@@ -157,11 +157,11 @@ const LeaderboardPage = () => {
                         </Tooltip>
                       </TableHead>
                       
-                      <TableHead className="text-center cursor-pointer font-bold text-icc-blue" onClick={() => handleSort('views')}>
+                      <TableHead className="text-center cursor-pointer font-bold text-white" onClick={() => handleSort('views')}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center cursor-pointer">
-                              <Eye className="h-4 w-4 text-gray-500" />
+                              <Eye className="h-4 w-4 text-white" />
                               {getSortIcon('views')}
                             </div>
                           </TooltipTrigger>
@@ -171,11 +171,11 @@ const LeaderboardPage = () => {
                         </Tooltip>
                       </TableHead>
                       
-                      <TableHead className="text-center cursor-pointer font-bold text-icc-blue" onClick={() => handleSort('comments')}>
+                      <TableHead className="text-center cursor-pointer font-bold text-white" onClick={() => handleSort('comments')}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center cursor-pointer">
-                              <MessageSquare className="h-4 w-4 text-gray-500" />
+                              <MessageSquare className="h-4 w-4 text-white" />
                               {getSortIcon('comments')}
                             </div>
                           </TooltipTrigger>
@@ -185,11 +185,11 @@ const LeaderboardPage = () => {
                         </Tooltip>
                       </TableHead>
                       
-                      <TableHead className="font-bold text-icc-blue text-center">
+                      <TableHead className="font-bold text-white text-center">
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center">
-                              <Globe className="h-4 w-4 text-gray-500" />
+                              <Globe className="h-4 w-4 text-white" />
                             </div>
                           </TooltipTrigger>
                           <TooltipContent>
@@ -198,11 +198,11 @@ const LeaderboardPage = () => {
                         </Tooltip>
                       </TableHead>
                       
-                      <TableHead className="text-center cursor-pointer font-bold text-icc-blue" onClick={() => handleSort('bounty')}>
+                      <TableHead className="text-center cursor-pointer font-bold text-white" onClick={() => handleSort('bounty')}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center">
-                              <span>Bounties Paid</span>
+                              <span className="text-white">Bounties Paid</span>
                               {getSortIcon('bounty')}
                             </div>
                           </TooltipTrigger>
@@ -212,11 +212,11 @@ const LeaderboardPage = () => {
                         </Tooltip>
                       </TableHead>
                       
-                      <TableHead className="text-center cursor-pointer font-bold text-icc-blue" onClick={() => handleSort('bounties_raised')}>
+                      <TableHead className="text-center cursor-pointer font-bold text-white" onClick={() => handleSort('bounties_raised')}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center">
-                              <span>Bounties Raised</span>
+                              <span className="text-white">Bounties Raised</span>
                               {getSortIcon('bounties_raised')}
                             </div>
                           </TooltipTrigger>
@@ -226,11 +226,11 @@ const LeaderboardPage = () => {
                         </Tooltip>
                       </TableHead>
                       
-                      <TableHead className="w-20 text-center cursor-pointer font-bold text-icc-blue" onClick={() => handleSort('activity')}>
+                      <TableHead className="w-20 text-center cursor-pointer font-bold text-white" onClick={() => handleSort('activity')}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center cursor-pointer">
-                              <Clock className="h-4 w-4 text-gray-500" />
+                              <Clock className="h-4 w-4 text-white" />
                               {getSortIcon('activity')}
                             </div>
                           </TooltipTrigger>
@@ -245,18 +245,18 @@ const LeaderboardPage = () => {
                     {sortedProfiles.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={10} className="text-center py-12">
-                          <div className="flex flex-col items-center justify-center text-gray-500 space-y-3">
+                          <div className="flex flex-col items-center justify-center text-white space-y-3">
                             <Trophy className="h-12 w-12 text-gray-300" />
-                            <p className="text-lg font-medium">No hunters found</p>
-                            <p>Be the first to start hunting scammers!</p>
+                            <p className="text-lg font-medium text-white">No hunters found</p>
+                            <p className="text-white">Be the first to start hunting scammers!</p>
                           </div>
                         </TableCell>
                       </TableRow>
                     ) : (
                       sortedProfiles.map((profile, index) => (
-                        <TableRow key={profile.id} className="border-b border-icc-gold/30 hover:bg-icc-gold/10 transition-colors">
-                          <TableCell className="text-center font-medium">
-                            <div className="flex items-center justify-center">
+                        <TableRow key={profile.id} className="border-b border-icc-gold/30 hover:bg-icc-blue/10 transition-colors">
+                          <TableCell className="text-center font-medium text-white">
+                            <div className="flex items-center justify-center text-white">
                               {renderRankIcon(index)}
                             </div>
                           </TableCell>
@@ -271,32 +271,32 @@ const LeaderboardPage = () => {
                                   </AvatarFallback>
                                 </Avatar>
                                 <div>
-                                  <div className="font-medium text-icc-blue">{profile.display_name}</div>
-                                  <div className="text-sm text-gray-500">@{profile.username || profile.display_name.toLowerCase().replace(/\s/g, '')}</div>
+                                  <div className="font-medium text-white">{profile.display_name}</div>
+                                  <div className="text-sm text-gray-300">@{profile.username || profile.display_name.toLowerCase().replace(/\s/g, '')}</div>
                                 </div>
                               </div>
                             </Link>
                           </TableCell>
                           
-                          <TableCell className="text-center font-medium">
+                          <TableCell className="text-center font-medium text-white">
                             <Link to={`/profile/${profile.username || profile.wallet_address}`} className="hover:underline">
                               {profile.reports_count || 0}
                             </Link>
                           </TableCell>
                           
-                          <TableCell className="text-center">
+                          <TableCell className="text-center text-white">
                             <Link to={`/profile/${profile.username || profile.wallet_address}`} className="hover:underline">
                               {profile.likes_count || 0}
                             </Link>
                           </TableCell>
                           
-                          <TableCell className="text-center">
+                          <TableCell className="text-center text-white">
                             <Link to={`/profile/${profile.username || profile.wallet_address}`} className="hover:underline">
                               {formatNumber(profile.views_count || 0)}
                             </Link>
                           </TableCell>
                           
-                          <TableCell className="text-center">
+                          <TableCell className="text-center text-white">
                             <Link to={`/profile/${profile.username || profile.wallet_address}`} className="hover:underline">
                               {profile.comments_count || 0}
                             </Link>
