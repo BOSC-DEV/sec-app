@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import CompactHero from '@/components/common/CompactHero';
 import ScammerCard from '@/components/common/ScammerCard';
@@ -353,7 +352,6 @@ const MostWantedPage = () => {
                           </TooltipContent>
                         </Tooltip>
                       </TableHead>
-                      <TableHead className="font-bold text-icc-blue">Links</TableHead>
                       <TableHead 
                         className="font-bold text-icc-blue cursor-pointer"
                         onClick={() => handleSort('accused_of')}
@@ -365,6 +363,16 @@ const MostWantedPage = () => {
                         onClick={() => handleSort('aliases')}
                       >
                         Aliases{renderSortIndicator('aliases')}
+                      </TableHead>
+                      <TableHead className="font-bold text-icc-blue text-center">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-pointer"><Globe className="h-4 w-4 inline" /></span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Links</p>
+                          </TooltipContent>
+                        </Tooltip>
                       </TableHead>
                       <TableHead 
                         className="font-bold text-icc-blue text-center cursor-pointer"
@@ -433,26 +441,6 @@ const MostWantedPage = () => {
                               </span>
                             )}
                           </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
-                              {scammer.links && scammer.links.length > 0 ? (
-                                scammer.links.map((link, i) => (
-                                  <a 
-                                    key={i} 
-                                    href={link.startsWith('http') ? link : `https://${link}`} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="inline-block p-1 rounded-full bg-icc-gold/20 hover:bg-icc-gold/40"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    <Globe className="h-4 w-4 text-icc-blue" />
-                                  </a>
-                                ))
-                              ) : (
-                                <span className="text-gray-400">-</span>
-                              )}
-                            </div>
-                          </TableCell>
                           <TableCell className="max-w-[200px] truncate">
                             {scammer.accused_of || '-'}
                           </TableCell>
@@ -472,6 +460,26 @@ const MostWantedPage = () => {
                             ) : (
                               <span className="text-gray-400">-</span>
                             )}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              {scammer.links && scammer.links.length > 0 ? (
+                                scammer.links.map((link, i) => (
+                                  <a 
+                                    key={i} 
+                                    href={link.startsWith('http') ? link : `https://${link}`} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="inline-block p-1 rounded-full bg-icc-gold/20 hover:bg-icc-gold/40"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <Globe className="h-4 w-4 text-icc-blue" />
+                                  </a>
+                                ))
+                              ) : (
+                                <span className="text-gray-400">-</span>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell className="text-center">
                             {scammer.likes || 0}
