@@ -367,7 +367,9 @@ const MostWantedPage = () => {
                       <TableHead className="font-bold text-icc-blue text-center">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <span className="cursor-pointer"><Globe className="h-4 w-4 inline" /></span>
+                            <div className="flex items-center justify-center cursor-pointer">
+                              <Globe className="h-4 w-4" />
+                            </div>
                           </TooltipTrigger>
                           <TooltipContent>
                             <p>Links</p>
@@ -461,8 +463,8 @@ const MostWantedPage = () => {
                               <span className="text-gray-400">-</span>
                             )}
                           </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
+                          <TableCell className="text-center">
+                            <div className="flex items-center justify-center gap-1">
                               {scammer.links && scammer.links.length > 0 ? (
                                 scammer.links.map((link, i) => (
                                   <a 
