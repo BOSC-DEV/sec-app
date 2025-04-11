@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Hero from '@/components/common/Hero';
 import ScammerCard from '@/components/common/ScammerCard';
@@ -11,7 +10,6 @@ import { useQuery } from '@tanstack/react-query';
 import { formatNumber } from '@/lib/utils';
 import DisclaimerDialog from '@/components/common/DisclaimerDialog';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
-
 const Index = () => {
   const [disclaimerOpen, setDisclaimerOpen] = useState(false);
   const {
@@ -47,7 +45,7 @@ const Index = () => {
       <section className="icc-section bg-white">
         <div className="icc-container">
           <div className="text-center mb-12">
-            <h2 className="icc-title">Most Wanted List</h2>
+            <h2 className="icc-title">The Most Wanted</h2>
             <p className="max-w-2xl mx-auto text-icc-gray"></p>
           </div>
 
