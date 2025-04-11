@@ -309,7 +309,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
           onClick={handleBountyClick}
         >
           <CurrencyIcon size="sm" className="h-3.5 w-3.5 mr-1" />
-          Bounty
+          More
         </Button>
         
         {isCreator ? (
