@@ -10,10 +10,8 @@ import { useQuery } from '@tanstack/react-query';
 import { formatNumber } from '@/lib/utils';
 import DisclaimerDialog from '@/components/common/DisclaimerDialog';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
-
 const Index = () => {
   const [disclaimerOpen, setDisclaimerOpen] = useState(false);
-
   const {
     data: topScammers = [],
     isLoading: isLoadingScammers,
@@ -22,24 +20,25 @@ const Index = () => {
     queryKey: ['topScammers'],
     queryFn: () => getTopScammers(3)
   });
-
   const {
-    data: statistics = { totalBounty: 0, scammersCount: 0, reportersCount: 0, usersCount: 0 },
+    data: statistics = {
+      totalBounty: 0,
+      scammersCount: 0,
+      reportersCount: 0,
+      usersCount: 0
+    },
     isLoading: isLoadingStats,
     error: statsError
   } = useQuery({
     queryKey: ['statistics'],
     queryFn: getStatistics
   });
-
   if (scammersError) {
     console.error('Failed to load top scammers', scammersError);
   }
-
   if (statsError) {
     console.error('Failed to load statistics', statsError);
   }
-
   return <div>
       <Hero />
 
@@ -73,9 +72,7 @@ const Index = () => {
         <div className="icc-container">
           <div className="text-center mb-12">
             <h2 className="icc-title">How It Works</h2>
-            <p className="max-w-2xl mx-auto text-icc-gray">
-              Our platform leverages collective intelligence to identify and track cryptocurrency fraud.
-            </p>
+            <p className="max-w-2xl mx-auto text-icc-gray">Our platform leverages collective intelligence to identify and track digital crimes.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -120,11 +117,7 @@ const Index = () => {
                 <p className="text-gray-100 max-w-2xl">This platform is for informational purposes only. Always verify and follow all legal channels for reporting crimes.</p>
               </div>
             </div>
-            <Button 
-              variant="outline" 
-              className="border-white text-black hover:bg-white/10 hover:text-white"
-              onClick={() => setDisclaimerOpen(true)}
-            >
+            <Button variant="outline" className="border-white text-black hover:bg-white/10 hover:text-white" onClick={() => setDisclaimerOpen(true)}>
               Read Disclaimer
               <ExternalLink className="ml-2 h-4 w-4" />
             </Button>
@@ -135,17 +128,12 @@ const Index = () => {
       <section className="icc-section bg-white">
         <div className="icc-container">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {isLoadingStats ? (
-              <>
-                {[1, 2, 3, 4].map((_, index) => (
-                  <div key={index} className="text-center p-6">
+            {isLoadingStats ? <>
+                {[1, 2, 3, 4].map((_, index) => <div key={index} className="text-center p-6">
                     <div className="h-10 bg-gray-200 rounded-md mb-2 animate-pulse mx-auto w-3/4"></div>
                     <div className="h-5 bg-gray-200 rounded-md w-1/2 mx-auto animate-pulse"></div>
-                  </div>
-                ))}
-              </>
-            ) : (
-              <>
+                  </div>)}
+              </> : <>
                 <div className="text-center p-6">
                   <div className="text-4xl font-bold text-icc-blue mb-2 flex items-center justify-center">
                     <CurrencyIcon size="lg" className="mr-1" />{formatNumber(statistics.totalBounty)}
@@ -164,8 +152,7 @@ const Index = () => {
                   <div className="text-4xl font-bold text-icc-blue mb-2">{formatNumber(statistics.usersCount)}</div>
                   <div className="text-sm text-icc-gray">Total Users</div>
                 </div>
-              </>
-            )}
+              </>}
           </div>
         </div>
       </section>
