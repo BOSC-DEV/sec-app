@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import CompactHero from '@/components/common/CompactHero';
 import ScammerCard from '@/components/common/ScammerCard';
@@ -339,19 +340,6 @@ const MostWantedPage = () => {
                       >
                         The Accused{renderSortIndicator('name')}
                       </TableHead>
-                      <TableHead className="font-bold text-icc-blue">Links</TableHead>
-                      <TableHead 
-                        className="font-bold text-icc-blue cursor-pointer"
-                        onClick={() => handleSort('accused_of')}
-                      >
-                        Accusations{renderSortIndicator('accused_of')}
-                      </TableHead>
-                      <TableHead 
-                        className="font-bold text-icc-blue cursor-pointer"
-                        onClick={() => handleSort('aliases')}
-                      >
-                        Aliases{renderSortIndicator('aliases')}
-                      </TableHead>
                       <TableHead 
                         className="font-bold text-icc-blue text-center cursor-pointer"
                         onClick={() => handleSort('bounty')}
@@ -364,6 +352,19 @@ const MostWantedPage = () => {
                             <p>Bounty Amount</p>
                           </TooltipContent>
                         </Tooltip>
+                      </TableHead>
+                      <TableHead className="font-bold text-icc-blue">Links</TableHead>
+                      <TableHead 
+                        className="font-bold text-icc-blue cursor-pointer"
+                        onClick={() => handleSort('accused_of')}
+                      >
+                        Accusations{renderSortIndicator('accused_of')}
+                      </TableHead>
+                      <TableHead 
+                        className="font-bold text-icc-blue cursor-pointer"
+                        onClick={() => handleSort('aliases')}
+                      >
+                        Aliases{renderSortIndicator('aliases')}
                       </TableHead>
                       <TableHead 
                         className="font-bold text-icc-blue text-center cursor-pointer"
@@ -421,6 +422,17 @@ const MostWantedPage = () => {
                               <span className="font-medium text-icc-blue">{scammer.name}</span>
                             </div>
                           </TableCell>
+                          <TableCell className="text-center font-semibold text-icc-blue">
+                            {scammer.bounty_amount ? (
+                              <span className="flex items-center justify-center">
+                                {scammer.bounty_amount} <CurrencyIcon size="sm" className="ml-1" />
+                              </span>
+                            ) : (
+                              <span className="flex items-center justify-center">
+                                0 <CurrencyIcon size="sm" className="ml-1" />
+                              </span>
+                            )}
+                          </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-1">
                               {scammer.links && scammer.links.length > 0 ? (
@@ -459,17 +471,6 @@ const MostWantedPage = () => {
                               </div>
                             ) : (
                               <span className="text-gray-400">-</span>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-center font-semibold text-icc-blue">
-                            {scammer.bounty_amount ? (
-                              <span className="flex items-center justify-center">
-                                {scammer.bounty_amount} <CurrencyIcon size="sm" className="ml-1" />
-                              </span>
-                            ) : (
-                              <span className="flex items-center justify-center">
-                                0 <CurrencyIcon size="sm" className="ml-1" />
-                              </span>
                             )}
                           </TableCell>
                           <TableCell className="text-center">
