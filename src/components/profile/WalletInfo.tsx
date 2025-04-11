@@ -76,21 +76,6 @@ const WalletInfo: React.FC<WalletInfoProps> = ({ walletAddress, isOwnProfile = f
                 </Button>
               </div>
             </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gray-50 p-3 rounded-md">
-                <div className="text-xs text-gray-500 mb-1">Network</div>
-                <div className="font-medium">
-                  Solana Mainnet
-                </div>
-              </div>
-              <div className="bg-gray-50 p-3 rounded-md">
-                <div className="text-xs text-gray-500 mb-1">Wallet Type</div>
-                <div className="font-medium">
-                  Solana Wallet
-                </div>
-              </div>
-            </div>
 
             {isOwnProfile && (
               <div className="pt-4">
