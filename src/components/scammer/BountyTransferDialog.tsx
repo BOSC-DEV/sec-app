@@ -11,7 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { ArrowRightIcon, AlertCircle } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { transferBountyContribution, getUserTransferableContributions } from '@/services/bounty/bountyService';
+import { transferBountyContribution, getUserTransferableContributions } from '@/services/bountyService';
 import { getScammerById } from '@/services/scammerService';
 import { formatCurrency } from '@/lib/utils';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -37,91 +37,42 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
   const [sourceContributions, setSourceContributions] = useState<BountyContribution[]>([]);
   const [selectedContribution, setSelectedContribution] = useState<BountyContribution | null>(null);
   const [maxTransferAmount, setMaxTransferAmount] = useState<number>(0);
-  const [alreadyTransferred, setAlreadyTransferred] = useState<number>(0);
 
   // Fetch user's transferable contributions
-  const fetchTransferableContributions = async () => {
-    if (!profile?.wallet_address || !isOpen) return;
-    
-    setIsLoading(true);
-    try {
-      // Get all transferable contributions except ones already on this scammer
-      const contributions = await getUserTransferableContributions(profile.wallet_address, scammerId);
-      setSourceContributions(contributions);
-    } catch (error) {
-      console.error("Error fetching transferable contributions:", error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch your transferable contributions",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
   useEffect(() => {
-    if (isOpen) {
-      fetchTransferableContributions();
-    } else {
-      // Reset state when dialog closes
-      setSelectedContribution(null);
-      setTransferAmount('0');
-      setMaxTransferAmount(0);
-      setAlreadyTransferred(0);
-    }
-  }, [profile?.wallet_address, scammerId, isOpen]);
-
-  // Calculate already transferred amount when selecting a contribution
-  const calculateAlreadyTransferred = async (contributionId: string) => {
-    if (!contributionId) return 0;
+    const fetchTransferableContributions = async () => {
+      if (!profile?.wallet_address || !isOpen) return;
+      
+      setIsLoading(true);
+      try {
+        // Get all transferable contributions except ones already on this scammer
+        const contributions = await getUserTransferableContributions(profile.wallet_address, scammerId);
+        setSourceContributions(contributions);
+      } catch (error) {
+        console.error("Error fetching transferable contributions:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch your transferable contributions",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
     
-    try {
-      // Find all transfers from this contribution
-      const { data, error } = await supabase
-        .from("bounty_contributions")
-        .select("amount")
-        .eq("transferred_from_id", contributionId)
-        .eq("is_active", true);
-      
-      if (error) throw error;
-      
-      // Sum up all transferred amounts
-      const totalTransferred = data.reduce((sum, item) => sum + Number(item.amount), 0);
-      return totalTransferred;
-    } catch (error) {
-      console.error("Error calculating transferred amount:", error);
-      return 0;
-    }
-  };
+    fetchTransferableContributions();
+  }, [profile?.wallet_address, scammerId, isOpen, toast]);
 
   // Update max transfer amount when selected contribution changes
   useEffect(() => {
     if (selectedContribution) {
-      const fetchTransferInfo = async () => {
-        // Calculate how much has already been transferred from this contribution
-        const transferred = await calculateAlreadyTransferred(selectedContribution.id);
-        setAlreadyTransferred(transferred);
-        
-        // Max is 90% of the original contribution minus already transferred amount
-        const maxTotal = selectedContribution.amount * 0.9;
-        const remainingTransferable = maxTotal - transferred;
-        
-        setMaxTransferAmount(Math.max(0, remainingTransferable));
-        
-        // Default to max amount or reset if no more available
-        if (remainingTransferable > 0) {
-          setTransferAmount(remainingTransferable.toFixed(2));
-        } else {
-          setTransferAmount('0');
-        }
-      };
-      
-      fetchTransferInfo();
+      // Max is 90% of the original contribution
+      const max = selectedContribution.amount * 0.9;
+      setMaxTransferAmount(max);
+      setTransferAmount(max.toFixed(2));
     } else {
       setMaxTransferAmount(0);
       setTransferAmount('0');
-      setAlreadyTransferred(0);
     }
   }, [selectedContribution]);
 
@@ -144,6 +95,11 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
     // Ensure it's not more than max allowed
     if (amount > maxTransferAmount) {
       setTransferAmount(maxTransferAmount.toFixed(2));
+      return;
+    }
+    
+    if (selectedContribution && amount > selectedContribution.amount * 0.9) {
+      setTransferAmount((selectedContribution.amount * 0.9).toFixed(2));
       return;
     }
     
@@ -171,12 +127,10 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
       return;
     }
     
-    // Check against 90% total limit including already transferred
-    const maxTotal = selectedContribution.amount * 0.9;
-    if (amount + alreadyTransferred > maxTotal) {
+    if (amount > selectedContribution.amount * 0.9) {
       toast({
         title: "Error",
-        description: `You can only transfer up to 90% (${maxTotal.toFixed(2)} $SEC) in total from this contribution`,
+        description: `You can only transfer up to 90% (${(selectedContribution.amount * 0.9).toFixed(2)} $SEC) of the original contribution`,
         variant: "destructive"
       });
       return;
@@ -205,12 +159,10 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
         description: `Successfully transferred ${transferAmount} $SEC to ${scammerName}`
       });
       
-      // Reset state
+      // Reset form and close dialogs
       setSelectedContribution(null);
       setTransferAmount('0');
       setConfirmDialogOpen(false);
-      
-      // Close the dialog
       setIsOpen(false);
       
       // Trigger callback for parent to refresh data
@@ -231,14 +183,7 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={(open) => {
-        setIsOpen(open);
-        // If dialog is closed, reset state to avoid stale data
-        if (!open) {
-          setSelectedContribution(null);
-          setTransferAmount('0');
-        }
-      }}>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
           <Button variant="outline" size="sm" className="w-full">
             <ArrowRightIcon className="h-4 w-4 mr-2" /> 
@@ -297,13 +242,6 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
 
                 {selectedContribution && (
                   <>
-                    {alreadyTransferred > 0 && (
-                      <div className="text-sm text-amber-600 p-3 bg-amber-50 rounded-md">
-                        <p className="font-medium">Already transferred: {formatCurrency(alreadyTransferred)} <CurrencyIcon size="sm" /></p>
-                        <p className="text-xs mt-1">You can transfer up to {formatCurrency(maxTransferAmount)} <CurrencyIcon size="sm" /> more from this contribution.</p>
-                      </div>
-                    )}
-                    
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
                         <Label htmlFor="transfer-amount">Transfer Amount</Label>
@@ -320,7 +258,7 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
                           min="0"
                           max={maxTransferAmount}
                           step="0.01"
-                          disabled={isLoading || maxTransferAmount <= 0}
+                          disabled={isLoading}
                         />
                         <span className="text-sm font-medium flex items-center">
                           <CurrencyIcon size="sm" />
@@ -330,26 +268,21 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
 
                     <div className="space-y-1">
                       <div className="flex justify-between text-sm">
-                        <span>Total amount transferred:</span>
+                        <span>Amount to keep at original scammer:</span>
                         <span className="flex items-center">
-                          {formatCurrency(alreadyTransferred + parseFloat(transferAmount || '0'))} <CurrencyIcon size="sm" className="ml-1" />
+                          {selectedContribution && formatCurrency(selectedContribution.amount - parseFloat(transferAmount || '0'))} <CurrencyIcon size="sm" className="ml-1" />
                         </span>
                       </div>
                       <Progress 
                         value={
                           selectedContribution ? 
-                          ((alreadyTransferred + parseFloat(transferAmount || '0')) / (selectedContribution.amount * 0.9)) * 100 : 
+                          ((selectedContribution.amount - parseFloat(transferAmount || '0')) / selectedContribution.amount) * 100 : 
                           0
                         } 
                       />
-                      {selectedContribution && (alreadyTransferred + parseFloat(transferAmount || '0') > selectedContribution.amount * 0.9) && (
+                      {selectedContribution && (parseFloat(transferAmount) > selectedContribution.amount * 0.9) && (
                         <p className="text-xs text-red-500 mt-1">
-                          You can only transfer up to 90% ({formatCurrency(selectedContribution.amount * 0.9)} <CurrencyIcon size="sm" />) in total from the original contribution
-                        </p>
-                      )}
-                      {maxTransferAmount <= 0 && (
-                        <p className="text-xs text-red-500 mt-1">
-                          You have already transferred the maximum allowed amount from this contribution
+                          At least 10% ({formatCurrency(selectedContribution.amount * 0.1)} <CurrencyIcon size="sm" />) must remain with the original scammer
                         </p>
                       )}
                     </div>
@@ -363,8 +296,7 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
                       isLoading || 
                       !selectedContribution || 
                       parseFloat(transferAmount) <= 0 ||
-                      maxTransferAmount <= 0 ||
-                      alreadyTransferred + parseFloat(transferAmount) > selectedContribution?.amount * 0.9
+                      parseFloat(transferAmount) > selectedContribution?.amount * 0.9
                     }
                     className="w-full"
                   >
@@ -393,7 +325,7 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </Dialog>
+      </AlertDialog>
     </>
   );
 };
