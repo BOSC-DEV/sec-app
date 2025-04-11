@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import CompactHero from '@/components/common/CompactHero';
 import ScammerCard from '@/components/common/ScammerCard';
@@ -6,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getScammers } from '@/services/scammerService';
 import { getProfileByWallet } from '@/services/profileService';
-import { Grid, Globe, List, Search, SlidersHorizontal } from 'lucide-react';
+import { Grid, List, Search, SlidersHorizontal, Globe } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { Scammer, Profile } from '@/types/dataTypes';
@@ -154,7 +155,7 @@ const MostWantedPage = () => {
     <div>
       <CompactHero 
         title="Most Wanted"
-        subtitle="Browse the database of reported cryptocurrency scammers and fraudsters."
+        subtitle="Browse the database of reported crimes."
       />
 
       <section className="icc-section bg-white">
