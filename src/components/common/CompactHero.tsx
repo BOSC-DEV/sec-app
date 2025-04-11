@@ -8,7 +8,7 @@ interface CompactHeroProps {
 
 const CompactHero: React.FC<CompactHeroProps> = ({ title, subtitle = "More details help prevent harm to future victims." }) => {
   return (
-    <div className="relative bg-icc-blue dark:bg-icc-blue-dark text-white">
+    <div className="relative bg-icc-blue dark:bg-icc-blue-darker text-white">
       <div className="absolute inset-0 bg-[url('/images/cyber-pattern.png')] opacity-10"></div>
       <div className="icc-container py-8 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
