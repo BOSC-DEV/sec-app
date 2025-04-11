@@ -15,6 +15,7 @@ import { transferBountyContribution, getUserTransferableContributions } from '@/
 import { getScammerById } from '@/services/scammerService';
 import { formatCurrency } from '@/lib/utils';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import CurrencyIcon from '@/components/common/CurrencyIcon';
 
 interface BountyTransferDialogProps {
   scammerId: string;
@@ -230,7 +231,7 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
                               </AvatarFallback>
                             </Avatar>
                             <span>
-                              {contribution.scammers?.name} ({formatCurrency(contribution.amount)} $SEC)
+                              {contribution.scammers?.name} ({formatCurrency(contribution.amount)} <CurrencyIcon size="sm" />)
                             </span>
                           </div>
                         </SelectItem>
@@ -245,7 +246,7 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
                       <div className="flex justify-between items-center">
                         <Label htmlFor="transfer-amount">Transfer Amount</Label>
                         <span className="text-sm text-gray-500">
-                          Max: {formatCurrency(maxTransferAmount)} $SEC
+                          Max: {formatCurrency(maxTransferAmount)} <CurrencyIcon size="sm" />
                         </span>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -259,15 +260,17 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
                           step="0.01"
                           disabled={isLoading}
                         />
-                        <span className="text-sm font-medium">$SEC</span>
+                        <span className="text-sm font-medium flex items-center">
+                          <CurrencyIcon size="sm" />
+                        </span>
                       </div>
                     </div>
 
                     <div className="space-y-1">
                       <div className="flex justify-between text-sm">
                         <span>Amount to keep at original scammer:</span>
-                        <span>
-                          {selectedContribution && formatCurrency(selectedContribution.amount - parseFloat(transferAmount || '0'))} $SEC
+                        <span className="flex items-center">
+                          {selectedContribution && formatCurrency(selectedContribution.amount - parseFloat(transferAmount || '0'))} <CurrencyIcon size="sm" className="ml-1" />
                         </span>
                       </div>
                       <Progress 
@@ -279,7 +282,7 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
                       />
                       {selectedContribution && (parseFloat(transferAmount) > selectedContribution.amount * 0.9) && (
                         <p className="text-xs text-red-500 mt-1">
-                          At least 10% ({formatCurrency(selectedContribution.amount * 0.1)} $SEC) must remain with the original scammer
+                          At least 10% ({formatCurrency(selectedContribution.amount * 0.1)} <CurrencyIcon size="sm" />) must remain with the original scammer
                         </p>
                       )}
                     </div>
@@ -311,7 +314,7 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Bounty Transfer</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to transfer {formatCurrency(parseFloat(transferAmount))} $SEC from 
+              Are you sure you want to transfer {formatCurrency(parseFloat(transferAmount))} <CurrencyIcon size="sm" /> from 
               {selectedContribution?.scammers?.name ? ` ${selectedContribution.scammers.name}` : ' the original scammer'} to {scammerName}?
             </AlertDialogDescription>
           </AlertDialogHeader>

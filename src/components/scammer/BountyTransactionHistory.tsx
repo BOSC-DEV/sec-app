@@ -18,7 +18,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { BountyContribution } from '@/types/dataTypes';
 import { formatDistanceToNow, format } from 'date-fns';
-import { DollarSign, ExternalLink } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
   Tooltip,
@@ -95,7 +95,7 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center p-6">
-            <DollarSign className="h-12 w-12 animate-spin text-muted-foreground" />
+            <CurrencyIcon className="h-12 w-12 animate-spin text-muted-foreground" />
           </div>
         </CardContent>
       </Card>

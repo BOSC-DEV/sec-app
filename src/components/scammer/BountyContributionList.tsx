@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { BountyContribution } from '@/types/dataTypes';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { DollarSign, Calendar, ArrowLeftIcon, ArrowRightIcon } from 'lucide-react';
+import { Calendar, ArrowLeftIcon, ArrowRightIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
   Tooltip,
@@ -138,7 +139,6 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
                   </Link>
                 </div>
                 <div className="flex items-center text-icc-gold-dark font-medium text-sm" aria-label={`Contributed ${formatCurrency(contribution.amount)} SEC`}>
-                  <DollarSign className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
                   <span className="flex items-center gap-1">
                     {formatCurrency(contribution.amount)} 
                     <CurrencyIcon size="sm" />
