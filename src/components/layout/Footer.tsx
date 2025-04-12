@@ -50,7 +50,7 @@ const Footer = () => {
           </div>
           
           <div>
-            <h4 className="text-white dark:text-gray-200 font-serif font-bold mb-4">Quick Links</h4>
+            <h4 className="text-white dark:text-gray-200 font-serif font-bold mb-4 text-left">Quick Links</h4>
             <ul className="space-y-2">
               <li><Link to="/" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm">Home</Link></li>
               <li><Link to="/most-wanted" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm">Most Wanted</Link></li>
@@ -62,7 +62,7 @@ const Footer = () => {
           </div>
           
           <div>
-            <h4 className="text-white dark:text-gray-200 font-serif font-bold mb-4">Resources</h4>
+            <h4 className="text-white dark:text-gray-200 font-serif font-bold mb-4 text-left">Resources</h4>
             <ul className="space-y-2">
               <li>
                 <button 
@@ -108,7 +108,7 @@ const Footer = () => {
           </div>
           
           <div>
-            <h4 className="text-white dark:text-gray-200 font-serif font-bold mb-4">Legal</h4>
+            <h4 className="text-white dark:text-gray-200 font-serif font-bold mb-4 text-left">Legal</h4>
             <ul className="space-y-2">
               <li>
                 <button 
