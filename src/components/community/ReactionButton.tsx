@@ -102,25 +102,26 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
   
   const fetchReactions = async () => {
     try {
-      let table = '';
-      let idColumn = '';
+      let tableName: 'announcement_reactions' | 'chat_message_reactions' | 'reply_reactions';
+      let idColumn: string;
       
       if (itemType === 'announcement') {
-        table = 'announcement_reactions';
+        tableName = 'announcement_reactions';
         idColumn = 'announcement_id';
       } else if (itemType === 'message') {
-        table = 'chat_message_reactions';
+        tableName = 'chat_message_reactions';
         idColumn = 'message_id';
       } else if (itemType === 'reply') {
-        table = 'reply_reactions';
+        tableName = 'reply_reactions';
         idColumn = 'reply_id';
+      } else {
+        console.error('Invalid item type:', itemType);
+        return;
       }
       
-      if (!table) return;
-      
-      // Use raw SQL query instead of rpc function
+      // Use typesafe query with the correct table name
       const { data, error } = await supabase
-        .from(table)
+        .from(tableName)
         .select('reaction_type, user_id')
         .eq(idColumn, itemId);
       
@@ -138,18 +139,20 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
       });
       
       // Count reactions and check if user has reacted
-      data.forEach(reaction => {
-        const type = reaction.reaction_type;
-        const currentData = reactionMap.get(type) || { count: 0, has_reacted: false };
-        
-        currentData.count += 1;
-        
-        if (reaction.user_id === profile?.wallet_address) {
-          currentData.has_reacted = true;
-        }
-        
-        reactionMap.set(type, currentData);
-      });
+      if (data) {
+        data.forEach(reaction => {
+          const type = reaction.reaction_type;
+          const currentData = reactionMap.get(type) || { count: 0, has_reacted: false };
+          
+          currentData.count += 1;
+          
+          if (reaction.user_id === profile?.wallet_address) {
+            currentData.has_reacted = true;
+          }
+          
+          reactionMap.set(type, currentData);
+        });
+      }
       
       // Convert map to array
       reactionMap.forEach((value, key) => {
@@ -170,27 +173,27 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
     fetchReactions();
     
     // Set up real-time subscription
-    let table = '';
-    let idColumn = '';
+    let tableName: string;
+    let idColumn: string;
     
     if (itemType === 'announcement') {
-      table = 'announcement_reactions';
+      tableName = 'announcement_reactions';
       idColumn = 'announcement_id';
     } else if (itemType === 'message') {
-      table = 'chat_message_reactions';
+      tableName = 'chat_message_reactions';
       idColumn = 'message_id';
     } else if (itemType === 'reply') {
-      table = 'reply_reactions';
+      tableName = 'reply_reactions';
       idColumn = 'reply_id';
+    } else {
+      return;
     }
     
-    if (!table) return;
-    
-    const channel = supabase.channel(`${table}_${itemId}`)
+    const channel = supabase.channel(`${tableName}_${itemId}`)
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
-        table: table,
+        table: tableName,
         filter: `${idColumn}=eq.${itemId}`
       }, () => {
         fetchReactions();
