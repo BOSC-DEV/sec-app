@@ -80,13 +80,13 @@ const CommunityPage = () => {
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="h-[calc(100vh-300px)] flex flex-col">
+              <div className="h-[600px] flex flex-col">
                 <Card className="flex-1 overflow-hidden">
                   <CardHeader className="pb-3">
                     <h3 className="text-lg font-semibold">Announcements</h3>
                   </CardHeader>
                   <CardContent className="p-0 h-full">
-                    <ScrollArea className="h-[calc(100vh-380px)]">
+                    <ScrollArea className="h-[520px]">
                       <div className="p-4">
                         <AnnouncementFeed useCarousel={false} />
                       </div>
@@ -95,7 +95,7 @@ const CommunityPage = () => {
                 </Card>
               </div>
               
-              <div className="h-[calc(100vh-300px)] flex flex-col">
+              <div className="h-[600px] flex flex-col">
                 <LiveChat />
               </div>
             </div>
@@ -128,7 +128,9 @@ const CommunityPage = () => {
             </TabsContent>
             
             <TabsContent value="chat" className="mt-0">
-              <LiveChat />
+              <div className="h-[600px]">
+                <LiveChat />
+              </div>
             </TabsContent>
             
             <TabsContent value="badges" className="mt-0">

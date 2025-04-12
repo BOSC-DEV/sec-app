@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,6 +28,7 @@ import ReactionButton from './ReactionButton';
 import BadgeTier from '@/components/profile/BadgeTier';
 import { calculateBadgeTier } from '@/utils/badgeUtils';
 import AdminContextMenu from './AdminContextMenu';
+import { Textarea } from '@/components/ui/textarea';
 
 const LiveChat = () => {
   const { profile, isConnected } = useProfile();
@@ -246,7 +248,7 @@ const LiveChat = () => {
   }
   
   return (
-    <Card className="mb-8">
+    <Card className="h-full flex flex-col">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
@@ -262,8 +264,8 @@ const LiveChat = () => {
       
       <Separator />
       
-      <CardContent className="p-0">
-        <ScrollArea className="h-[400px] p-4">
+      <CardContent className="p-0 flex-grow overflow-hidden">
+        <ScrollArea className="h-[calc(100%-1rem)] p-4">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full py-10">
               <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
@@ -364,7 +366,7 @@ const LiveChat = () => {
         </ScrollArea>
       </CardContent>
       
-      <CardFooter className="border-t p-4">
+      <CardFooter className="border-t p-4 mt-auto">
         {!isConnected ? (
           <div className="w-full flex justify-center">
             <Button variant="outline" onClick={() => toast({
@@ -425,12 +427,13 @@ const LiveChat = () => {
                 </Popover>
               </div>
               
-              <Input
+              <Textarea
                 placeholder="Type your message..."
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 disabled={isSubmitting}
-                className="flex-1"
+                className="flex-1 min-h-[40px] max-h-[100px]"
+                rows={1}
               />
               
               <Button type="submit" disabled={isSubmitting || (!newMessage.trim() && !imageFile)}>
