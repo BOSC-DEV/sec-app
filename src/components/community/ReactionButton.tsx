@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { toggleAnnouncementReaction, toggleChatMessageReaction, toggleReplyReaction } from '@/services/communityService';
@@ -10,6 +11,7 @@ import { cn } from '@/lib/utils';
 
 type ReactionType = 'like' | 'fire' | 'party' | 'applause';
 type ItemType = 'announcement' | 'message' | 'reply';
+type TableName = 'announcement_reactions' | 'chat_message_reactions' | 'reply_reactions';
 
 interface ReactionButtonProps {
   itemId: string;
@@ -101,8 +103,8 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
   
   const fetchReactions = async () => {
     try {
-      let tableName = '';
-      let idColumn = '';
+      let tableName: TableName;
+      let idColumn: string;
       
       if (itemType === 'announcement') {
         tableName = 'announcement_reactions';
@@ -166,8 +168,8 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
   useEffect(() => {
     fetchReactions();
     
-    let tableName = '';
-    let idColumn = '';
+    let tableName: TableName;
+    let idColumn: string;
     
     if (itemType === 'announcement') {
       tableName = 'announcement_reactions';
