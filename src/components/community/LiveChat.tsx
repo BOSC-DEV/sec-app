@@ -297,11 +297,22 @@ const LiveChat = () => {
   const renderMessage = (message: ChatMessage, index: number) => {
     const userBadge = message.author_id ? userBounties[message.author_id] !== undefined ? calculateBadgeTier(userBounties[message.author_id]) : null : null;
     const isCurrentUser = message.author_id === profile?.wallet_address;
-    const time = formatDistanceToNow(new Date(message.created_at), { addSuffix: false });
-    const formattedTime = time.includes('minute') ? time.replace(' minutes', 'm').replace(' minute', 'm') : 
-                          time.includes('second') ? time.replace(' seconds', 's').replace(' second', 's') : 
-                          time.includes('hour') ? time.replace(' hours', 'h').replace(' hour', 'h') : time;
-    
+    const formatTimeStamp = (dateString: string) => {
+      const distance = formatDistanceToNow(new Date(dateString), { addSuffix: false });
+      
+      if (distance.includes('second')) return distance.replace(' seconds', 's').replace(' second', 's');
+      if (distance.includes('minute')) return distance.replace(' minutes', 'm').replace(' minute', 'm');
+      if (distance.includes('hour')) return distance.replace(' hours', 'h').replace(' hour', 'h');
+      if (distance.includes('day')) return distance.replace(' days', 'd').replace(' day', 'd');
+      if (distance.includes('week')) return distance.replace(' weeks', 'w').replace(' week', 'w');
+      if (distance.includes('month')) return distance.replace(' months', 'mo').replace(' month', 'mo');
+      if (distance.includes('year')) return distance.replace(' years', 'y').replace(' year', 'y');
+      
+      return distance;
+    };
+
+    const time = formatTimeStamp(message.created_at);
+
     const messageContent = (
       <div key={message.id} className={`flex my-4 ${isCurrentUser ? 'justify-end' : 'justify-start'}`}>
         <div className={`flex ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'} space-x-2 ${isCurrentUser ? 'space-x-reverse' : ''}`}>
@@ -346,7 +357,7 @@ const LiveChat = () => {
                 <ReactionButton itemId={message.id} itemType="message" size="xs" iconOnly />
               </div>
               <span className="text-xs text-muted-foreground">
-                {formattedTime}
+                {time}
               </span>
             </div>
           </div>
