@@ -38,44 +38,49 @@ const DynamicFieldArray = ({
 
   return (
     <div className="space-y-4 mb-4">
-      <div className="flex justify-between items-center">
-        <FormLabel>{label}</FormLabel>
-        <Button 
-          type="button" 
-          variant="outline" 
-          size="sm" 
-          onClick={addField}
-        >
-          <Plus className="h-4 w-4 mr-1" /> {name === 'wallet_addresses' ? 'Add Address' : `Add ${label}`}
-        </Button>
-      </div>
+      <FormLabel>{label}</FormLabel>
       
       {fieldValues.map((_, index) => (
-        <div key={`${name}-${index}`} className="flex gap-2 items-center">
+        <div key={`${name}-${index}`} className="space-y-2">
           <FormField
             control={control}
             name={`${name}.${index}`}
             render={({ field }) => (
-              <FormItem className="flex-1 mb-0">
+              <FormItem>
                 <FormControl>
                   <Input placeholder={`Enter ${label.toLowerCase()}`} {...field} />
                 </FormControl>
               </FormItem>
             )}
           />
-          <Button 
-            type="button" 
-            variant="ghost" 
-            size="icon"
-            onClick={() => removeField(index)}
-            disabled={fieldValues.length <= 1}
-          >
-            <Trash className="h-4 w-4 text-gray-500" />
-          </Button>
+          <div className="flex justify-end">
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="sm" 
+              onClick={() => removeField(index)}
+              disabled={fieldValues.length <= 1}
+              className="text-xs"
+            >
+              <Trash className="h-3 w-3 mr-1" /> Remove
+            </Button>
+          </div>
         </div>
       ))}
+      
+      <Button 
+        type="button" 
+        variant="outline" 
+        size="sm" 
+        onClick={addField}
+        className="w-full mt-2"
+      >
+        <Plus className="h-4 w-4 mr-1" /> 
+        {name === 'wallet_addresses' ? 'Add Address' : `Add ${label}`}
+      </Button>
     </div>
   );
 };
 
 export default DynamicFieldArray;
+
