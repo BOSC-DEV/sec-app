@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -147,12 +148,12 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect }) => {
           </ScrollArea>
         ) : (
           <Tabs defaultValue="reactions" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="w-full mb-2">
+            <TabsList className="w-full mb-2 flex justify-start overflow-x-auto">
               {allEmojiCategories.map(category => (
                 <TabsTrigger 
                   key={category.id} 
                   value={category.id}
-                  className="text-xs"
+                  className="text-xs flex-shrink-0"
                 >
                   {category.name}
                 </TabsTrigger>
