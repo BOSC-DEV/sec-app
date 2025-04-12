@@ -104,6 +104,14 @@ const Footer = () => {
                   Community
                 </Link>
               </li>
+              <li>
+                <Link 
+                  to="/ca" 
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full hover:bg-white/10 py-1 px-2 rounded transition-colors"
+                >
+                  Contributor Agreement
+                </Link>
+              </li>
             </ul>
           </div>
           
