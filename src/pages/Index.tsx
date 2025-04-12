@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Hero from '@/components/common/Hero';
 import ScammerCard from '@/components/common/ScammerCard';
@@ -76,10 +77,7 @@ const Index = () => {
           )}
 
           <div className="text-center mt-10">
-            <Button 
-              asChild 
-              className="icc-btn-primary py-6 px-8 dark:text-white" 
-            >
+            <Button asChild className="icc-btn-primary py-6 px-8">
               <Link to="/most-wanted">View All Reports</Link>
             </Button>
           </div>

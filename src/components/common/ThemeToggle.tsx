@@ -13,7 +13,7 @@ const ThemeToggle: React.FC = () => {
       aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
       pressed={theme === 'dark'}
       onPressedChange={toggleTheme}
-      variant="gold"
+      variant="outline"
       size="sm"
       className="ml-2"
     >

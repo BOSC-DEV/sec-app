@@ -56,15 +56,13 @@ const Header = () => {
                 <div className="text-base md:text-xl font-bold leading-tight">Scams & E-crimes Commission</div>
               </div>
             </Link>
-          </div>
 
-          <div className="flex items-center">
-            <nav className="hidden md:flex items-center mr-6">
+            <nav className="hidden md:flex items-center space-x-6">
               {navigationItems.map((item) => (
                 <Link 
                   key={item.path}
                   to={item.path} 
-                  className={`text-white hover:text-icc-gold transition-colors px-4 ${
+                  className={`text-white hover:text-icc-gold transition-colors ${
                     location.pathname === item.path ? 'text-icc-gold font-medium' : ''
                   }`}
                 >
@@ -72,43 +70,43 @@ const Header = () => {
                 </Link>
               ))}
             </nav>
+          </div>
 
-            <div className="flex items-center space-x-2">
-              <ThemeToggle />
-              {isLoading ? (
-                <Button variant="outline" size="sm" disabled className="opacity-75">
-                  Loading...
-                </Button>
-              ) : isConnected ? (
-                <div className="flex items-center space-x-3">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="text-white hover:bg-icc-blue-light"
-                    onClick={handleProfileClick}
-                    aria-label="Profile"
-                  >
-                    <User className="h-5 w-5" />
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="border-icc-gold text-icc-gold hover:bg-icc-blue-light flex items-center gap-2"
-                    onClick={handleWalletButtonClick}
-                  >
-                    <Wallet className="h-4 w-4" />
-                    {profile ? profile.display_name.substring(0, 10) || 'Profile' : 'Profile'}
-                  </Button>
-                </div>
-              ) : (
+          <div className="flex items-center space-x-2">
+            <ThemeToggle />
+            {isLoading ? (
+              <Button variant="outline" size="sm" disabled className="opacity-75">
+                Loading...
+              </Button>
+            ) : isConnected ? (
+              <div className="flex items-center space-x-3">
                 <Button 
-                  className="bg-icc-gold text-icc-blue hover:bg-icc-gold-light flex items-center gap-2"
-                  onClick={connectWallet}
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-white hover:bg-icc-blue-light"
+                  onClick={handleProfileClick}
+                  aria-label="Profile"
                 >
-                  <LogIn className="h-4 w-4" />
-                  Connect Wallet
+                  <User className="h-5 w-5" />
                 </Button>
-              )}
-            </div>
+                <Button 
+                  variant="outline" 
+                  className="border-icc-gold text-icc-gold hover:bg-icc-blue-light flex items-center gap-2"
+                  onClick={handleWalletButtonClick}
+                >
+                  <Wallet className="h-4 w-4" />
+                  {profile ? profile.display_name.substring(0, 10) || 'Profile' : 'Profile'}
+                </Button>
+              </div>
+            ) : (
+              <Button 
+                className="bg-icc-gold text-icc-blue hover:bg-icc-gold-light flex items-center gap-2"
+                onClick={connectWallet}
+              >
+                <LogIn className="h-4 w-4" />
+                Connect Wallet
+              </Button>
+            )}
           </div>
         </div>
       </div>
