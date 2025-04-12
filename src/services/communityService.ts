@@ -208,16 +208,145 @@ export const sendChatMessage = async (message: {
 // Like/Dislike Functions for Announcements
 export const likeAnnouncement = async (announcementId: string, userId: string): Promise<{likes: number, dislikes: number} | null> => {
   try {
-    const { data, error } = await supabase.rpc('toggle_announcement_like', {
-      p_announcement_id: announcementId,
-      p_user_id: userId
-    });
-    
-    if (error) {
-      throw error;
+    // First, check if the user has already liked or disliked the announcement
+    const { data: existingInteractions, error: fetchError } = await supabase
+      .from('user_scammer_interactions')  // Using existing interactions table
+      .select('liked, disliked')
+      .eq('scammer_id', announcementId)
+      .eq('user_id', userId)
+      .single();
+      
+    if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is the error code for no rows returned
+      throw fetchError;
     }
     
-    return data as {likes: number, dislikes: number};
+    let likes = 0;
+    let dislikes = 0;
+    
+    // If the user has already interacted with this announcement
+    if (existingInteractions) {
+      // If already liked, remove the like
+      if (existingInteractions.liked) {
+        const { error: updateError } = await supabase
+          .from('user_scammer_interactions')
+          .update({ liked: false, last_updated: new Date().toISOString() })
+          .eq('scammer_id', announcementId)
+          .eq('user_id', userId);
+          
+        if (updateError) {
+          throw updateError;
+        }
+        
+        // Decrement likes
+        const { data: announcement, error: fetchAnnouncementError } = await supabase
+          .from('announcements')
+          .select('likes, dislikes')
+          .eq('id', announcementId)
+          .single();
+          
+        if (fetchAnnouncementError) {
+          throw fetchAnnouncementError;
+        }
+        
+        likes = Math.max(0, (announcement?.likes || 1) - 1);
+        dislikes = announcement?.dislikes || 0;
+        
+        const { error: updateAnnouncementError } = await supabase
+          .from('announcements')
+          .update({ likes })
+          .eq('id', announcementId);
+          
+        if (updateAnnouncementError) {
+          throw updateAnnouncementError;
+        }
+      }
+      // If not liked, add like and remove dislike if it exists
+      else {
+        const updates: { liked: boolean; disliked: boolean; last_updated: string } = {
+          liked: true,
+          disliked: false,
+          last_updated: new Date().toISOString()
+        };
+        
+        const { error: updateError } = await supabase
+          .from('user_scammer_interactions')
+          .update(updates)
+          .eq('scammer_id', announcementId)
+          .eq('user_id', userId);
+          
+        if (updateError) {
+          throw updateError;
+        }
+        
+        // Get current likes/dislikes
+        const { data: announcement, error: fetchAnnouncementError } = await supabase
+          .from('announcements')
+          .select('likes, dislikes')
+          .eq('id', announcementId)
+          .single();
+          
+        if (fetchAnnouncementError) {
+          throw fetchAnnouncementError;
+        }
+        
+        likes = (announcement?.likes || 0) + 1;
+        dislikes = existingInteractions.disliked 
+          ? Math.max(0, (announcement?.dislikes || 1) - 1) 
+          : (announcement?.dislikes || 0);
+        
+        const { error: updateAnnouncementError } = await supabase
+          .from('announcements')
+          .update({ 
+            likes,
+            dislikes
+          })
+          .eq('id', announcementId);
+          
+        if (updateAnnouncementError) {
+          throw updateAnnouncementError;
+        }
+      }
+    }
+    // If this is the first interaction
+    else {
+      const { error: insertError } = await supabase
+        .from('user_scammer_interactions')
+        .insert({
+          scammer_id: announcementId,
+          user_id: userId,
+          liked: true,
+          disliked: false,
+          last_updated: new Date().toISOString()
+        });
+        
+      if (insertError) {
+        throw insertError;
+      }
+      
+      // Increment likes
+      const { data: announcement, error: fetchAnnouncementError } = await supabase
+        .from('announcements')
+        .select('likes')
+        .eq('id', announcementId)
+        .single();
+        
+      if (fetchAnnouncementError) {
+        throw fetchAnnouncementError;
+      }
+      
+      likes = (announcement?.likes || 0) + 1;
+      
+      const { error: updateAnnouncementError } = await supabase
+        .from('announcements')
+        .update({ likes })
+        .eq('id', announcementId);
+        
+      if (updateAnnouncementError) {
+        throw updateAnnouncementError;
+      }
+    }
+    
+    return { likes, dislikes };
   } catch (error) {
     handleError(error, 'Error liking announcement');
     return null;
@@ -226,16 +355,145 @@ export const likeAnnouncement = async (announcementId: string, userId: string): 
 
 export const dislikeAnnouncement = async (announcementId: string, userId: string): Promise<{likes: number, dislikes: number} | null> => {
   try {
-    const { data, error } = await supabase.rpc('toggle_announcement_dislike', {
-      p_announcement_id: announcementId,
-      p_user_id: userId
-    });
-    
-    if (error) {
-      throw error;
+    // First, check if the user has already liked or disliked the announcement
+    const { data: existingInteractions, error: fetchError } = await supabase
+      .from('user_scammer_interactions')
+      .select('liked, disliked')
+      .eq('scammer_id', announcementId)
+      .eq('user_id', userId)
+      .single();
+      
+    if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is the error code for no rows returned
+      throw fetchError;
     }
     
-    return data as {likes: number, dislikes: number};
+    let likes = 0;
+    let dislikes = 0;
+    
+    // If the user has already interacted with this announcement
+    if (existingInteractions) {
+      // If already disliked, remove the dislike
+      if (existingInteractions.disliked) {
+        const { error: updateError } = await supabase
+          .from('user_scammer_interactions')
+          .update({ disliked: false, last_updated: new Date().toISOString() })
+          .eq('scammer_id', announcementId)
+          .eq('user_id', userId);
+          
+        if (updateError) {
+          throw updateError;
+        }
+        
+        // Decrement dislikes
+        const { data: announcement, error: fetchAnnouncementError } = await supabase
+          .from('announcements')
+          .select('likes, dislikes')
+          .eq('id', announcementId)
+          .single();
+          
+        if (fetchAnnouncementError) {
+          throw fetchAnnouncementError;
+        }
+        
+        dislikes = Math.max(0, (announcement?.dislikes || 1) - 1);
+        likes = announcement?.likes || 0;
+        
+        const { error: updateAnnouncementError } = await supabase
+          .from('announcements')
+          .update({ dislikes })
+          .eq('id', announcementId);
+          
+        if (updateAnnouncementError) {
+          throw updateAnnouncementError;
+        }
+      }
+      // If not disliked, add dislike and remove like if it exists
+      else {
+        const updates: { liked: boolean; disliked: boolean; last_updated: string } = {
+          liked: false,
+          disliked: true,
+          last_updated: new Date().toISOString()
+        };
+        
+        const { error: updateError } = await supabase
+          .from('user_scammer_interactions')
+          .update(updates)
+          .eq('scammer_id', announcementId)
+          .eq('user_id', userId);
+          
+        if (updateError) {
+          throw updateError;
+        }
+        
+        // Get current likes/dislikes
+        const { data: announcement, error: fetchAnnouncementError } = await supabase
+          .from('announcements')
+          .select('likes, dislikes')
+          .eq('id', announcementId)
+          .single();
+          
+        if (fetchAnnouncementError) {
+          throw fetchAnnouncementError;
+        }
+        
+        dislikes = (announcement?.dislikes || 0) + 1;
+        likes = existingInteractions.liked 
+          ? Math.max(0, (announcement?.likes || 1) - 1) 
+          : (announcement?.likes || 0);
+        
+        const { error: updateAnnouncementError } = await supabase
+          .from('announcements')
+          .update({ 
+            likes,
+            dislikes
+          })
+          .eq('id', announcementId);
+          
+        if (updateAnnouncementError) {
+          throw updateAnnouncementError;
+        }
+      }
+    }
+    // If this is the first interaction
+    else {
+      const { error: insertError } = await supabase
+        .from('user_scammer_interactions')
+        .insert({
+          scammer_id: announcementId,
+          user_id: userId,
+          liked: false,
+          disliked: true,
+          last_updated: new Date().toISOString()
+        });
+        
+      if (insertError) {
+        throw insertError;
+      }
+      
+      // Increment dislikes
+      const { data: announcement, error: fetchAnnouncementError } = await supabase
+        .from('announcements')
+        .select('dislikes')
+        .eq('id', announcementId)
+        .single();
+        
+      if (fetchAnnouncementError) {
+        throw fetchAnnouncementError;
+      }
+      
+      dislikes = (announcement?.dislikes || 0) + 1;
+      
+      const { error: updateAnnouncementError } = await supabase
+        .from('announcements')
+        .update({ dislikes })
+        .eq('id', announcementId);
+        
+      if (updateAnnouncementError) {
+        throw updateAnnouncementError;
+      }
+    }
+    
+    return { likes, dislikes };
   } catch (error) {
     handleError(error, 'Error disliking announcement');
     return null;
@@ -245,16 +503,145 @@ export const dislikeAnnouncement = async (announcementId: string, userId: string
 // Like/Dislike Functions for Replies
 export const likeReply = async (replyId: string, userId: string): Promise<{likes: number, dislikes: number} | null> => {
   try {
-    const { data, error } = await supabase.rpc('toggle_reply_like', {
-      p_reply_id: replyId,
-      p_user_id: userId
-    });
-    
-    if (error) {
-      throw error;
+    // First, check if the user has already liked or disliked the reply
+    const { data: existingInteractions, error: fetchError } = await supabase
+      .from('user_comment_interactions')  // Using existing interactions table
+      .select('liked, disliked')
+      .eq('comment_id', replyId)
+      .eq('user_id', userId)
+      .single();
+      
+    if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is the error code for no rows returned
+      throw fetchError;
     }
     
-    return data as {likes: number, dislikes: number};
+    let likes = 0;
+    let dislikes = 0;
+    
+    // If the user has already interacted with this reply
+    if (existingInteractions) {
+      // If already liked, remove the like
+      if (existingInteractions.liked) {
+        const { error: updateError } = await supabase
+          .from('user_comment_interactions')
+          .update({ liked: false, last_updated: new Date().toISOString() })
+          .eq('comment_id', replyId)
+          .eq('user_id', userId);
+          
+        if (updateError) {
+          throw updateError;
+        }
+        
+        // Decrement likes
+        const { data: reply, error: fetchReplyError } = await supabase
+          .from('announcement_replies')
+          .select('likes, dislikes')
+          .eq('id', replyId)
+          .single();
+          
+        if (fetchReplyError) {
+          throw fetchReplyError;
+        }
+        
+        likes = Math.max(0, (reply?.likes || 1) - 1);
+        dislikes = reply?.dislikes || 0;
+        
+        const { error: updateReplyError } = await supabase
+          .from('announcement_replies')
+          .update({ likes })
+          .eq('id', replyId);
+          
+        if (updateReplyError) {
+          throw updateReplyError;
+        }
+      }
+      // If not liked, add like and remove dislike if it exists
+      else {
+        const updates: { liked: boolean; disliked: boolean; last_updated: string } = {
+          liked: true,
+          disliked: false,
+          last_updated: new Date().toISOString()
+        };
+        
+        const { error: updateError } = await supabase
+          .from('user_comment_interactions')
+          .update(updates)
+          .eq('comment_id', replyId)
+          .eq('user_id', userId);
+          
+        if (updateError) {
+          throw updateError;
+        }
+        
+        // Get current likes/dislikes
+        const { data: reply, error: fetchReplyError } = await supabase
+          .from('announcement_replies')
+          .select('likes, dislikes')
+          .eq('id', replyId)
+          .single();
+          
+        if (fetchReplyError) {
+          throw fetchReplyError;
+        }
+        
+        likes = (reply?.likes || 0) + 1;
+        dislikes = existingInteractions.disliked 
+          ? Math.max(0, (reply?.dislikes || 1) - 1) 
+          : (reply?.dislikes || 0);
+        
+        const { error: updateReplyError } = await supabase
+          .from('announcement_replies')
+          .update({ 
+            likes,
+            dislikes
+          })
+          .eq('id', replyId);
+          
+        if (updateReplyError) {
+          throw updateReplyError;
+        }
+      }
+    }
+    // If this is the first interaction
+    else {
+      const { error: insertError } = await supabase
+        .from('user_comment_interactions')
+        .insert({
+          comment_id: replyId,
+          user_id: userId,
+          liked: true,
+          disliked: false,
+          last_updated: new Date().toISOString()
+        });
+        
+      if (insertError) {
+        throw insertError;
+      }
+      
+      // Increment likes
+      const { data: reply, error: fetchReplyError } = await supabase
+        .from('announcement_replies')
+        .select('likes')
+        .eq('id', replyId)
+        .single();
+        
+      if (fetchReplyError) {
+        throw fetchReplyError;
+      }
+      
+      likes = (reply?.likes || 0) + 1;
+      
+      const { error: updateReplyError } = await supabase
+        .from('announcement_replies')
+        .update({ likes })
+        .eq('id', replyId);
+        
+      if (updateReplyError) {
+        throw updateReplyError;
+      }
+    }
+    
+    return { likes, dislikes };
   } catch (error) {
     handleError(error, 'Error liking reply');
     return null;
@@ -263,16 +650,145 @@ export const likeReply = async (replyId: string, userId: string): Promise<{likes
 
 export const dislikeReply = async (replyId: string, userId: string): Promise<{likes: number, dislikes: number} | null> => {
   try {
-    const { data, error } = await supabase.rpc('toggle_reply_dislike', {
-      p_reply_id: replyId,
-      p_user_id: userId
-    });
-    
-    if (error) {
-      throw error;
+    // First, check if the user has already liked or disliked the reply
+    const { data: existingInteractions, error: fetchError } = await supabase
+      .from('user_comment_interactions')
+      .select('liked, disliked')
+      .eq('comment_id', replyId)
+      .eq('user_id', userId)
+      .single();
+      
+    if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is the error code for no rows returned
+      throw fetchError;
     }
     
-    return data as {likes: number, dislikes: number};
+    let likes = 0;
+    let dislikes = 0;
+    
+    // If the user has already interacted with this reply
+    if (existingInteractions) {
+      // If already disliked, remove the dislike
+      if (existingInteractions.disliked) {
+        const { error: updateError } = await supabase
+          .from('user_comment_interactions')
+          .update({ disliked: false, last_updated: new Date().toISOString() })
+          .eq('comment_id', replyId)
+          .eq('user_id', userId);
+          
+        if (updateError) {
+          throw updateError;
+        }
+        
+        // Decrement dislikes
+        const { data: reply, error: fetchReplyError } = await supabase
+          .from('announcement_replies')
+          .select('likes, dislikes')
+          .eq('id', replyId)
+          .single();
+          
+        if (fetchReplyError) {
+          throw fetchReplyError;
+        }
+        
+        dislikes = Math.max(0, (reply?.dislikes || 1) - 1);
+        likes = reply?.likes || 0;
+        
+        const { error: updateReplyError } = await supabase
+          .from('announcement_replies')
+          .update({ dislikes })
+          .eq('id', replyId);
+          
+        if (updateReplyError) {
+          throw updateReplyError;
+        }
+      }
+      // If not disliked, add dislike and remove like if it exists
+      else {
+        const updates: { liked: boolean; disliked: boolean; last_updated: string } = {
+          liked: false,
+          disliked: true,
+          last_updated: new Date().toISOString()
+        };
+        
+        const { error: updateError } = await supabase
+          .from('user_comment_interactions')
+          .update(updates)
+          .eq('comment_id', replyId)
+          .eq('user_id', userId);
+          
+        if (updateError) {
+          throw updateError;
+        }
+        
+        // Get current likes/dislikes
+        const { data: reply, error: fetchReplyError } = await supabase
+          .from('announcement_replies')
+          .select('likes, dislikes')
+          .eq('id', replyId)
+          .single();
+          
+        if (fetchReplyError) {
+          throw fetchReplyError;
+        }
+        
+        dislikes = (reply?.dislikes || 0) + 1;
+        likes = existingInteractions.liked 
+          ? Math.max(0, (reply?.likes || 1) - 1) 
+          : (reply?.likes || 0);
+        
+        const { error: updateReplyError } = await supabase
+          .from('announcement_replies')
+          .update({ 
+            likes,
+            dislikes
+          })
+          .eq('id', replyId);
+          
+        if (updateReplyError) {
+          throw updateReplyError;
+        }
+      }
+    }
+    // If this is the first interaction
+    else {
+      const { error: insertError } = await supabase
+        .from('user_comment_interactions')
+        .insert({
+          comment_id: replyId,
+          user_id: userId,
+          liked: false,
+          disliked: true,
+          last_updated: new Date().toISOString()
+        });
+        
+      if (insertError) {
+        throw insertError;
+      }
+      
+      // Increment dislikes
+      const { data: reply, error: fetchReplyError } = await supabase
+        .from('announcement_replies')
+        .select('dislikes')
+        .eq('id', replyId)
+        .single();
+        
+      if (fetchReplyError) {
+        throw fetchReplyError;
+      }
+      
+      dislikes = (reply?.dislikes || 0) + 1;
+      
+      const { error: updateReplyError } = await supabase
+        .from('announcement_replies')
+        .update({ dislikes })
+        .eq('id', replyId);
+        
+      if (updateReplyError) {
+        throw updateReplyError;
+      }
+    }
+    
+    return { likes, dislikes };
   } catch (error) {
     handleError(error, 'Error disliking reply');
     return null;
@@ -282,16 +798,145 @@ export const dislikeReply = async (replyId: string, userId: string): Promise<{li
 // Like/Dislike Functions for Chat Messages
 export const likeChatMessage = async (messageId: string, userId: string): Promise<{likes: number, dislikes: number} | null> => {
   try {
-    const { data, error } = await supabase.rpc('toggle_chat_message_like', {
-      p_message_id: messageId,
-      p_user_id: userId
-    });
-    
-    if (error) {
-      throw error;
+    // First, check if the user has already liked or disliked the message
+    const { data: existingInteractions, error: fetchError } = await supabase
+      .from('user_comment_interactions')  // Using existing interactions table for simplicity
+      .select('liked, disliked')
+      .eq('comment_id', messageId)  // Using comment_id column for the message id
+      .eq('user_id', userId)
+      .single();
+      
+    if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is the error code for no rows returned
+      throw fetchError;
     }
     
-    return data as {likes: number, dislikes: number};
+    let likes = 0;
+    let dislikes = 0;
+    
+    // If the user has already interacted with this message
+    if (existingInteractions) {
+      // If already liked, remove the like
+      if (existingInteractions.liked) {
+        const { error: updateError } = await supabase
+          .from('user_comment_interactions')
+          .update({ liked: false, last_updated: new Date().toISOString() })
+          .eq('comment_id', messageId)
+          .eq('user_id', userId);
+          
+        if (updateError) {
+          throw updateError;
+        }
+        
+        // Decrement likes
+        const { data: message, error: fetchMessageError } = await supabase
+          .from('chat_messages')
+          .select('likes, dislikes')
+          .eq('id', messageId)
+          .single();
+          
+        if (fetchMessageError) {
+          throw fetchMessageError;
+        }
+        
+        likes = Math.max(0, (message?.likes || 1) - 1);
+        dislikes = message?.dislikes || 0;
+        
+        const { error: updateMessageError } = await supabase
+          .from('chat_messages')
+          .update({ likes })
+          .eq('id', messageId);
+          
+        if (updateMessageError) {
+          throw updateMessageError;
+        }
+      }
+      // If not liked, add like and remove dislike if it exists
+      else {
+        const updates: { liked: boolean; disliked: boolean; last_updated: string } = {
+          liked: true,
+          disliked: false,
+          last_updated: new Date().toISOString()
+        };
+        
+        const { error: updateError } = await supabase
+          .from('user_comment_interactions')
+          .update(updates)
+          .eq('comment_id', messageId)
+          .eq('user_id', userId);
+          
+        if (updateError) {
+          throw updateError;
+        }
+        
+        // Get current likes/dislikes
+        const { data: message, error: fetchMessageError } = await supabase
+          .from('chat_messages')
+          .select('likes, dislikes')
+          .eq('id', messageId)
+          .single();
+          
+        if (fetchMessageError) {
+          throw fetchMessageError;
+        }
+        
+        likes = (message?.likes || 0) + 1;
+        dislikes = existingInteractions.disliked 
+          ? Math.max(0, (message?.dislikes || 1) - 1) 
+          : (message?.dislikes || 0);
+        
+        const { error: updateMessageError } = await supabase
+          .from('chat_messages')
+          .update({ 
+            likes,
+            dislikes
+          })
+          .eq('id', messageId);
+          
+        if (updateMessageError) {
+          throw updateMessageError;
+        }
+      }
+    }
+    // If this is the first interaction
+    else {
+      const { error: insertError } = await supabase
+        .from('user_comment_interactions')
+        .insert({
+          comment_id: messageId,
+          user_id: userId,
+          liked: true,
+          disliked: false,
+          last_updated: new Date().toISOString()
+        });
+        
+      if (insertError) {
+        throw insertError;
+      }
+      
+      // Increment likes
+      const { data: message, error: fetchMessageError } = await supabase
+        .from('chat_messages')
+        .select('likes')
+        .eq('id', messageId)
+        .single();
+        
+      if (fetchMessageError) {
+        throw fetchMessageError;
+      }
+      
+      likes = (message?.likes || 0) + 1;
+      
+      const { error: updateMessageError } = await supabase
+        .from('chat_messages')
+        .update({ likes })
+        .eq('id', messageId);
+          
+      if (updateMessageError) {
+        throw updateMessageError;
+      }
+    }
+    
+    return { likes, dislikes };
   } catch (error) {
     handleError(error, 'Error liking chat message');
     return null;
@@ -300,16 +945,145 @@ export const likeChatMessage = async (messageId: string, userId: string): Promis
 
 export const dislikeChatMessage = async (messageId: string, userId: string): Promise<{likes: number, dislikes: number} | null> => {
   try {
-    const { data, error } = await supabase.rpc('toggle_chat_message_dislike', {
-      p_message_id: messageId,
-      p_user_id: userId
-    });
-    
-    if (error) {
-      throw error;
+    // First, check if the user has already liked or disliked the message
+    const { data: existingInteractions, error: fetchError } = await supabase
+      .from('user_comment_interactions')
+      .select('liked, disliked')
+      .eq('comment_id', messageId)
+      .eq('user_id', userId)
+      .single();
+      
+    if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is the error code for no rows returned
+      throw fetchError;
     }
     
-    return data as {likes: number, dislikes: number};
+    let likes = 0;
+    let dislikes = 0;
+    
+    // If the user has already interacted with this message
+    if (existingInteractions) {
+      // If already disliked, remove the dislike
+      if (existingInteractions.disliked) {
+        const { error: updateError } = await supabase
+          .from('user_comment_interactions')
+          .update({ disliked: false, last_updated: new Date().toISOString() })
+          .eq('comment_id', messageId)
+          .eq('user_id', userId);
+          
+        if (updateError) {
+          throw updateError;
+        }
+        
+        // Decrement dislikes
+        const { data: message, error: fetchMessageError } = await supabase
+          .from('chat_messages')
+          .select('likes, dislikes')
+          .eq('id', messageId)
+          .single();
+          
+        if (fetchMessageError) {
+          throw fetchMessageError;
+        }
+        
+        dislikes = Math.max(0, (message?.dislikes || 1) - 1);
+        likes = message?.likes || 0;
+        
+        const { error: updateMessageError } = await supabase
+          .from('chat_messages')
+          .update({ dislikes })
+          .eq('id', messageId);
+          
+        if (updateMessageError) {
+          throw updateMessageError;
+        }
+      }
+      // If not disliked, add dislike and remove like if it exists
+      else {
+        const updates: { liked: boolean; disliked: boolean; last_updated: string } = {
+          liked: false,
+          disliked: true,
+          last_updated: new Date().toISOString()
+        };
+        
+        const { error: updateError } = await supabase
+          .from('user_comment_interactions')
+          .update(updates)
+          .eq('comment_id', messageId)
+          .eq('user_id', userId);
+          
+        if (updateError) {
+          throw updateError;
+        }
+        
+        // Get current likes/dislikes
+        const { data: message, error: fetchMessageError } = await supabase
+          .from('chat_messages')
+          .select('likes, dislikes')
+          .eq('id', messageId)
+          .single();
+          
+        if (fetchMessageError) {
+          throw fetchMessageError;
+        }
+        
+        dislikes = (message?.dislikes || 0) + 1;
+        likes = existingInteractions.liked 
+          ? Math.max(0, (message?.likes || 1) - 1) 
+          : (message?.likes || 0);
+        
+        const { error: updateMessageError } = await supabase
+          .from('chat_messages')
+          .update({ 
+            likes,
+            dislikes
+          })
+          .eq('id', messageId);
+          
+        if (updateMessageError) {
+          throw updateMessageError;
+        }
+      }
+    }
+    // If this is the first interaction
+    else {
+      const { error: insertError } = await supabase
+        .from('user_comment_interactions')
+        .insert({
+          comment_id: messageId,
+          user_id: userId,
+          liked: false,
+          disliked: true,
+          last_updated: new Date().toISOString()
+        });
+        
+      if (insertError) {
+        throw insertError;
+      }
+      
+      // Increment dislikes
+      const { data: message, error: fetchMessageError } = await supabase
+        .from('chat_messages')
+        .select('dislikes')
+        .eq('id', messageId)
+        .single();
+        
+      if (fetchMessageError) {
+        throw fetchMessageError;
+      }
+      
+      dislikes = (message?.dislikes || 0) + 1;
+      
+      const { error: updateMessageError } = await supabase
+        .from('chat_messages')
+        .update({ dislikes })
+        .eq('id', messageId);
+          
+      if (updateMessageError) {
+        throw updateMessageError;
+      }
+    }
+    
+    return { likes, dislikes };
   } catch (error) {
     handleError(error, 'Error disliking chat message');
     return null;
@@ -320,19 +1094,23 @@ export const dislikeChatMessage = async (messageId: string, userId: string): Pro
 export const getUserAnnouncementInteraction = async (announcementId: string, userId: string): Promise<{liked: boolean, disliked: boolean}> => {
   try {
     const { data, error } = await supabase
-      .from('announcement_interactions')
-      .select('interaction_type')
-      .eq('announcement_id', announcementId)
-      .eq('user_id', userId);
+      .from('user_scammer_interactions')
+      .select('liked, disliked')
+      .eq('scammer_id', announcementId)
+      .eq('user_id', userId)
+      .single();
       
     if (error) {
+      if (error.code === 'PGRST116') {
+        return { liked: false, disliked: false };
+      }
       throw error;
     }
     
-    const liked = data?.some(interaction => interaction.interaction_type === 'like') || false;
-    const disliked = data?.some(interaction => interaction.interaction_type === 'dislike') || false;
-    
-    return { liked, disliked };
+    return { 
+      liked: data.liked || false, 
+      disliked: data.disliked || false 
+    };
   } catch (error) {
     console.error('Error getting user announcement interaction:', error);
     return { liked: false, disliked: false };
@@ -343,19 +1121,23 @@ export const getUserAnnouncementInteraction = async (announcementId: string, use
 export const getUserReplyInteraction = async (replyId: string, userId: string): Promise<{liked: boolean, disliked: boolean}> => {
   try {
     const { data, error } = await supabase
-      .from('reply_interactions')
-      .select('interaction_type')
-      .eq('reply_id', replyId)
-      .eq('user_id', userId);
+      .from('user_comment_interactions')
+      .select('liked, disliked')
+      .eq('comment_id', replyId)
+      .eq('user_id', userId)
+      .single();
       
     if (error) {
+      if (error.code === 'PGRST116') {
+        return { liked: false, disliked: false };
+      }
       throw error;
     }
     
-    const liked = data?.some(interaction => interaction.interaction_type === 'like') || false;
-    const disliked = data?.some(interaction => interaction.interaction_type === 'dislike') || false;
-    
-    return { liked, disliked };
+    return { 
+      liked: data.liked || false, 
+      disliked: data.disliked || false 
+    };
   } catch (error) {
     console.error('Error getting user reply interaction:', error);
     return { liked: false, disliked: false };
@@ -366,22 +1148,26 @@ export const getUserReplyInteraction = async (replyId: string, userId: string): 
 export const getUserChatMessageInteraction = async (messageId: string, userId: string): Promise<{liked: boolean, disliked: boolean}> => {
   try {
     const { data, error } = await supabase
-      .from('chat_message_interactions')
-      .select('interaction_type')
-      .eq('message_id', messageId)
-      .eq('user_id', userId);
+      .from('user_comment_interactions')
+      .select('liked, disliked')
+      .eq('comment_id', messageId)
+      .eq('user_id', userId)
+      .single();
       
     if (error) {
+      if (error.code === 'PGRST116') {
+        return { liked: false, disliked: false };
+      }
       throw error;
     }
     
-    const liked = data?.some(interaction => interaction.interaction_type === 'like') || false;
-    const disliked = data?.some(interaction => interaction.interaction_type === 'dislike') || false;
-    
-    return { liked, disliked };
+    return { 
+      liked: data.liked || false, 
+      disliked: data.disliked || false 
+    };
   } catch (error) {
     console.error('Error getting user chat message interaction:', error);
-    return { liked, disliked: false };
+    return { liked: false, disliked: false };
   }
 };
 
@@ -395,15 +1181,6 @@ export const deleteAnnouncement = async (announcementId: string): Promise<boolea
       
     if (repliesError) {
       throw repliesError;
-    }
-    
-    const { error: interactionsError } = await supabase
-      .from('announcement_interactions')
-      .delete()
-      .eq('announcement_id', announcementId);
-    
-    if (interactionsError) {
-      throw interactionsError;
     }
     
     const { error } = await supabase
@@ -449,15 +1226,6 @@ export const editAnnouncement = async (
 
 export const deleteAnnouncementReply = async (replyId: string): Promise<boolean> => {
   try {
-    const { error: interactionsError } = await supabase
-      .from('reply_interactions')
-      .delete()
-      .eq('reply_id', replyId);
-    
-    if (interactionsError) {
-      throw interactionsError;
-    }
-    
     const { error } = await supabase
       .from('announcement_replies')
       .delete()
@@ -501,15 +1269,6 @@ export const editAnnouncementReply = async (
 
 export const deleteChatMessage = async (messageId: string): Promise<boolean> => {
   try {
-    const { error: interactionsError } = await supabase
-      .from('chat_message_interactions')
-      .delete()
-      .eq('message_id', messageId);
-    
-    if (interactionsError) {
-      throw interactionsError;
-    }
-    
     const { error } = await supabase
       .from('chat_messages')
       .delete()
@@ -530,4 +1289,3 @@ export const isUserAdmin = async (username: string): Promise<boolean> => {
   const ADMIN_USERNAMES = ['sec', 'thesec'];
   return ADMIN_USERNAMES.includes(username);
 };
-

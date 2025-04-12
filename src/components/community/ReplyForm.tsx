@@ -7,11 +7,16 @@ import { addAnnouncementReply } from '@/services/communityService';
 import RichTextEditor from './RichTextEditor';
 
 interface ReplyFormProps {
-  announcementId: string;
-  onReplySubmitted: () => void;
+  announcementId?: string;
+  onSubmit: (content: string) => Promise<void>;
+  onReplySubmitted?: () => void;
 }
 
-const ReplyForm: React.FC<ReplyFormProps> = ({ announcementId, onReplySubmitted }) => {
+const ReplyForm: React.FC<ReplyFormProps> = ({ 
+  announcementId, 
+  onSubmit, 
+  onReplySubmitted 
+}) => {
   const { profile, isConnected } = useProfile();
   const [replyContent, setReplyContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,17 +45,12 @@ const ReplyForm: React.FC<ReplyFormProps> = ({ announcementId, onReplySubmitted 
     setIsSubmitting(true);
     
     try {
-      await addAnnouncementReply({
-        announcement_id: announcementId,
-        content: replyContent,
-        author_id: profile.wallet_address,
-        author_name: profile.display_name,
-        author_username: profile.username,
-        author_profile_pic: profile.profile_pic_url || '',
-      });
+      await onSubmit(replyContent);
       
       setReplyContent('');
-      onReplySubmitted();
+      if (onReplySubmitted) {
+        onReplySubmitted();
+      }
       
       toast({
         title: "Reply posted",
