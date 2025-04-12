@@ -21,8 +21,10 @@ import { Textarea } from '@/components/ui/textarea';
 import BadgeTier from '@/components/profile/BadgeTier';
 import { calculateBadgeTier } from '@/utils/badgeUtils';
 import { getUserTotalBountyAmount } from '@/services/bountyService';
+
 const SLOW_MODE_DELAY = 30; // 30 seconds
 const SLOW_MODE_STORAGE_KEY = 'chat_slow_mode';
+
 const LiveChat = () => {
   const {
     profile,
@@ -41,6 +43,7 @@ const LiveChat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const slowModeTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
     const checkAdmin = async () => {
       if (profile?.username) {
@@ -52,6 +55,7 @@ const LiveChat = () => {
     };
     checkAdmin();
   }, [profile?.username]);
+
   useEffect(() => {
     const loadSlowModeState = () => {
       if (isAdmin) return; // Admins don't need slow mode
@@ -80,6 +84,7 @@ const LiveChat = () => {
       loadSlowModeState();
     }
   }, [profile?.wallet_address, isAdmin]);
+
   useEffect(() => {
     if (slowModeExpiry && slowModeCountdown > 0 && profile?.wallet_address && !isAdmin) {
       try {
@@ -94,6 +99,7 @@ const LiveChat = () => {
       localStorage.removeItem(SLOW_MODE_STORAGE_KEY);
     }
   }, [slowModeExpiry, slowModeCountdown, profile?.wallet_address, isAdmin]);
+
   useEffect(() => {
     if (slowModeCountdown > 0) {
       slowModeTimerRef.current = setTimeout(() => {
@@ -106,11 +112,13 @@ const LiveChat = () => {
       };
     }
   }, [slowModeCountdown]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({
       behavior: 'smooth'
     });
   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isConnected) {
@@ -166,6 +174,7 @@ const LiveChat = () => {
       setIsSubmitting(false);
     }
   };
+
   const handleDeleteMessage = async (messageId: string) => {
     if (!isAdmin) return;
     try {
@@ -190,6 +199,7 @@ const LiveChat = () => {
       });
     }
   };
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -216,6 +226,7 @@ const LiveChat = () => {
     reader.readAsDataURL(file);
     setImageFile(file);
   };
+
   const removeImage = () => {
     setImageFile(null);
     setImagePreview(null);
@@ -223,9 +234,11 @@ const LiveChat = () => {
       fileInputRef.current.value = '';
     }
   };
+
   const handleEmojiSelect = (emoji: string) => {
     setNewMessage(prev => prev + emoji);
   };
+
   const fetchUserBounty = async (walletAddress: string) => {
     try {
       if (userBounties[walletAddress]) return;
@@ -238,6 +251,7 @@ const LiveChat = () => {
       console.error('Error fetching user bounty:', error);
     }
   };
+
   useEffect(() => {
     const fetchMessages = async () => {
       try {
@@ -277,6 +291,7 @@ const LiveChat = () => {
       }
     };
   }, []);
+
   if (isLoading) {
     return <div className="flex justify-center py-12">
         <div className="animate-pulse flex flex-col space-y-4 w-full">
@@ -290,6 +305,7 @@ const LiveChat = () => {
         </div>
       </div>;
   }
+
   return <Card className="h-full flex flex-col">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
@@ -299,7 +315,7 @@ const LiveChat = () => {
           </div>
           <div className="bg-muted rounded-full px-3 py-1 text-xs text-muted-foreground flex items-center">
             <Info className="h-3 w-3 mr-1" />
-            Messages are stored for 24 hours
+            Stored for 24 hours
           </div>
         </div>
       </CardHeader>
@@ -422,4 +438,5 @@ const LiveChat = () => {
       </CardFooter>
     </Card>;
 };
+
 export default LiveChat;
