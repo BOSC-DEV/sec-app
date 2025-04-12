@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ExternalLink, AlertTriangle, Copy, Check } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+
 interface ContactDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
 const ContactDialog: React.FC<ContactDialogProps> = ({
   open,
   onOpenChange
@@ -16,6 +18,7 @@ const ContactDialog: React.FC<ContactDialogProps> = ({
     toast
   } = useToast();
   const [copied, setCopied] = useState(false);
+
   const handleCopyEmail = () => {
     navigator.clipboard.writeText("gov@sec.digital").then(() => {
       setCopied(true);
@@ -25,7 +28,6 @@ const ContactDialog: React.FC<ContactDialogProps> = ({
         duration: 2000
       });
 
-      // Reset the copied state after 2 seconds
       setTimeout(() => {
         setCopied(false);
       }, 2000);
@@ -39,6 +41,7 @@ const ContactDialog: React.FC<ContactDialogProps> = ({
       });
     });
   };
+
   return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
         <DialogHeader>
@@ -113,4 +116,5 @@ const ContactDialog: React.FC<ContactDialogProps> = ({
       </DialogContent>
     </Dialog>;
 };
+
 export default ContactDialog;

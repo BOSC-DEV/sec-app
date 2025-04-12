@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -83,7 +84,7 @@ const CookieDialog: React.FC<CookieDialogProps> = ({
             </p>
           </div>
         </ScrollArea>
-        <DialogFooter>
+        <DialogFooter className="mt-4">
           <DialogClose asChild>
             <Button className="bg-neutral-50">I Understand</Button>
           </DialogClose>
