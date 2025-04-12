@@ -72,42 +72,59 @@ const Header = () => {
   return (
     <header className="icc-header sticky top-0 z-50">
       <div className="icc-container py-3">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <ICCLogo className="h-10 w-auto" />
-              <div className="font-serif max-w-[200px] md:max-w-none">
-                <div className="text-base md:text-xl font-bold leading-tight">Scams & E-crimes Commission</div>
-              </div>
-            </Link>
+        <div className="flex justify-between items-center w-full">
+          {/* Logo on the far left */}
+          <Link to="/" className="flex items-center space-x-2">
+            <ICCLogo className="h-10 w-auto" />
+            <div className="font-serif max-w-[200px] md:max-w-none">
+              <div className="text-base md:text-xl font-bold leading-tight">Scams & E-crimes Commission</div>
+            </div>
+          </Link>
 
-            <nav className="hidden md:flex items-center space-x-6 ml-6">
-              {navigationItems.map((item) => (
-                item.path ? (
-                  <Link 
-                    key={item.path}
-                    to={item.path} 
-                    className={`text-white hover:text-icc-gold transition-colors flex items-center ${
-                      location.pathname === item.path ? 'text-icc-gold font-medium' : ''
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                ) : (
-                  <button
-                    key={item.label}
-                    onClick={item.onClick}
-                    className="text-white hover:text-icc-gold transition-colors flex items-center"
-                  >
-                    {item.icon}
-                    {item.label}
-                  </button>
-                )
-              ))}
-            </nav>
+          {/* Mobile toggle button - only visible on small screens */}
+          <div className="md:hidden">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={toggleMenu}
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+            >
+              {isMenuOpen ? (
+                <X className="h-6 w-6 text-white" />
+              ) : (
+                <Menu className="h-6 w-6 text-white" />
+              )}
+            </Button>
           </div>
 
-          <div className="flex items-center space-x-2">
+          {/* Navigation items - centered and spread across */}
+          <nav className="hidden md:flex items-center justify-center space-x-8 flex-grow mx-8">
+            {navigationItems.map((item) => (
+              item.path ? (
+                <Link 
+                  key={item.path}
+                  to={item.path} 
+                  className={`text-white hover:text-icc-gold transition-colors flex items-center ${
+                    location.pathname === item.path ? 'text-icc-gold font-medium' : ''
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ) : (
+                <button
+                  key={item.label}
+                  onClick={item.onClick}
+                  className="text-white hover:text-icc-gold transition-colors flex items-center"
+                >
+                  {item.icon}
+                  {item.label}
+                </button>
+              )
+            ))}
+          </nav>
+
+          {/* Connect wallet button and theme toggle - on the far right */}
+          <div className="hidden md:flex items-center space-x-2">
             <ThemeToggle variant="outline" size="sm" className="mr-2" />
             {isLoading ? (
               <Button variant="outline" size="sm" disabled className="opacity-75">
@@ -149,6 +166,7 @@ const Header = () => {
         </div>
       </div>
 
+      {/* Mobile menu dropdown */}
       {isMenuOpen && (
         <div className="md:hidden bg-icc-blue-light">
           <div className="icc-container py-4">
