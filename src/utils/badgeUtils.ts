@@ -1,4 +1,3 @@
-
 // Define the badge tier enum with proper spacing and capitalization
 export enum BadgeTier {
   Shrimp = 'Shrimp',
@@ -7,7 +6,7 @@ export enum BadgeTier {
   'King Cobra' = 'King Cobra',
   'Bull Shark' = 'Bull Shark',
   'Great Ape' = 'Great Ape',
-  'Golden Eagle' = 'Golden Eagle',
+  'Bald Eagle' = 'Bald Eagle',
   'T-Rex' = 'T-Rex',
   'Blue Whale' = 'Blue Whale'
 }
@@ -37,7 +36,7 @@ export const BADGE_TIERS: { [key in BadgeTier]: { minPercent: number, color: str
   [BadgeTier["King Cobra"]]: { minPercent: 0.06, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🐍' },
   [BadgeTier["Bull Shark"]]: { minPercent: 0.1, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦈' },
   [BadgeTier["Great Ape"]]: { minPercent: 0.3, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦍' },
-  [BadgeTier["Golden Eagle"]]: { minPercent: 0.2, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦅' },
+  [BadgeTier["Bald Eagle"]]: { minPercent: 0.2, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦅' },
   [BadgeTier["T-Rex"]]: { minPercent: 0.5, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦖' },
   [BadgeTier["Blue Whale"]]: { minPercent: 1.0, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🐳' }
 };
