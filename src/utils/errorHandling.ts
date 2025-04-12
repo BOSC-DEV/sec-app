@@ -4,14 +4,6 @@ import log from "@/services/loggingService";
 import { sanitizeHtml, sanitizeInput } from "./securityUtils";
 import { ErrorSeverity } from "./errorSeverity";
 
-// Error severity levels
-export enum ErrorSeverity {
-  LOW = 'low',      // Minor UI glitches, non-critical features
-  MEDIUM = 'medium', // Important but not critical features
-  HIGH = 'high',     // Critical path features, authentication
-  CRITICAL = 'critical' // Application-breaking errors
-}
-
 interface ErrorHandlingOptions {
   fallbackMessage?: string;
   severity?: ErrorSeverity;
