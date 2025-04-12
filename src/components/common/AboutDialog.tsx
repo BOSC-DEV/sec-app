@@ -139,7 +139,7 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
         </ScrollArea>
         <DialogFooter>
           <DialogClose asChild>
-            <Button className="bg-slate-900 hover:bg-slate-800">Close</Button>
+            <Button className="bg-neutral-50">Close</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>
