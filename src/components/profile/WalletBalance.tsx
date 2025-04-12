@@ -119,24 +119,24 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
           <div className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* SOL Balance */}
-              <div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 rounded-xl p-4 border border-blue-100 dark:border-blue-800 shadow-sm">
-                <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">SOL Balance</div>
+              <div className="bg-gray-800 text-white rounded-xl p-4 shadow-sm">
+                <div className="text-sm text-gray-300 mb-1">SOL Balance</div>
                 {isLoading ? (
                   <Skeleton className="h-7 w-24 dark:bg-gray-700" />
                 ) : (
-                  <div className="font-mono text-xl font-bold text-blue-700 dark:text-blue-300">
+                  <div className="font-mono text-xl font-bold text-white">
                     {formatBalance(solBalance)} <span className="text-xs font-normal">SOL</span>
                   </div>
                 )}
               </div>
 
               {/* SEC Balance */}
-              <div className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30 rounded-xl p-4 border border-amber-100 dark:border-amber-800 shadow-sm">
-                <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">SEC Balance</div>
+              <div className="bg-gray-800 text-white rounded-xl p-4 shadow-sm">
+                <div className="text-sm text-gray-300 mb-1">SEC Balance</div>
                 {isLoading ? (
                   <Skeleton className="h-7 w-24 dark:bg-gray-700" />
                 ) : (
-                  <div className="font-mono text-xl font-bold text-amber-700 dark:text-amber-300">
+                  <div className="font-mono text-xl font-bold text-white">
                     {formatBalance(secBalance)} <span className="text-xs font-normal">SEC</span>
                   </div>
                 )}
@@ -167,3 +167,4 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
 };
 
 export default WalletBalance;
+
