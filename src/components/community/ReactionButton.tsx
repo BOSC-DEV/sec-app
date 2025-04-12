@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Button } from '@/components/ui/button';
@@ -33,6 +34,7 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
 }) => {
   const { profile } = useProfile();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showReactionBar, setShowReactionBar] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -223,21 +225,21 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   };
   
   return (
-    <div className="relative" ref={containerRef}>
-      <div className="flex items-center gap-1">
-        {sortedReactions.length > 0 && (
-          <div className="flex items-center gap-1 bg-accent/10 rounded-full px-2 py-0.5 mr-1">
+    <div className="relative" ref={containerRef}
+         onMouseEnter={() => setShowReactionBar(true)}
+         onMouseLeave={() => setShowReactionBar(false)}>
+      <div className="flex items-center">
+        {showReactionBar && sortedReactions.length > 0 && (
+          <div className="absolute right-full mr-2 flex items-center bg-background border rounded-full shadow-sm px-1.5 py-0.5">
             {sortedReactions.map(([emoji, count]) => (
-              <Button
+              <button
                 key={emoji}
-                variant={hasUserReacted(emoji) ? "secondary" : "ghost"}
-                size="sm"
-                className={`px-1 py-0 h-auto text-sm bg-transparent hover:bg-transparent ${hasUserReacted(emoji) ? 'opacity-100' : 'opacity-70'}`}
+                className={`px-1 mx-0.5 text-sm hover:bg-accent/20 rounded-full ${hasUserReacted(emoji) ? 'text-primary font-medium' : 'text-muted-foreground'}`}
                 onClick={() => handleEmojiSelect(emoji)}
               >
-                <span className="mr-0.5">{emoji}</span>
-                <span className="text-xs text-muted-foreground">{count}</span>
-              </Button>
+                <span>{emoji}</span>
+                <span className="ml-0.5 text-xs">{count}</span>
+              </button>
             ))}
           </div>
         )}
