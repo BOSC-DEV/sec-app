@@ -1,40 +1,30 @@
-
 import React, { useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogClose
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ExternalLink, AlertTriangle, Copy, Check } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
-
 interface ContactDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-const ContactDialog: React.FC<ContactDialogProps> = ({ 
-  open, 
-  onOpenChange 
+const ContactDialog: React.FC<ContactDialogProps> = ({
+  open,
+  onOpenChange
 }) => {
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [copied, setCopied] = useState(false);
-  
   const handleCopyEmail = () => {
     navigator.clipboard.writeText("gov@sec.digital").then(() => {
       setCopied(true);
       toast({
         title: "Email copied",
         description: "Email address copied to clipboard",
-        duration: 2000,
+        duration: 2000
       });
-      
+
       // Reset the copied state after 2 seconds
       setTimeout(() => {
         setCopied(false);
@@ -45,13 +35,11 @@ const ContactDialog: React.FC<ContactDialogProps> = ({
         title: "Copy failed",
         description: "Failed to copy email address",
         variant: "destructive",
-        duration: 2000,
+        duration: 2000
       });
     });
   };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+  return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-serif text-icc-blue">Contact Us</DialogTitle>
@@ -63,19 +51,11 @@ const ContactDialog: React.FC<ContactDialogProps> = ({
           <div className="space-y-6 text-sm">
             <div className="text-center my-6">
               <h3 className="font-bold text-lg mb-2">General Inquiries</h3>
-              <button 
-                onClick={handleCopyEmail}
-                className="text-icc-blue hover:text-icc-blue-light text-xl font-bold flex items-center justify-center mx-auto transition-colors"
-                aria-label="Copy email address to clipboard"
-              >
+              <button onClick={handleCopyEmail} aria-label="Copy email address to clipboard" className="text-xl font-bold flex items-center justify-center mx-auto transition-colors text-zinc-400">
                 gov@sec.digital
-                {copied ? (
-                  <Check className="ml-2 h-4 w-4 text-green-500" />
-                ) : (
-                  <Copy className="ml-2 h-4 w-4" />
-                )}
+                {copied ? <Check className="ml-2 h-4 w-4 text-green-500" /> : <Copy className="ml-2 h-4 w-4" />}
               </button>
-              <p className="mt-2 text-gray-600">
+              <p className="mt-2 text-zinc-50">
                 For general questions, partnership opportunities, and other inquiries
               </p>
             </div>
@@ -127,12 +107,10 @@ const ContactDialog: React.FC<ContactDialogProps> = ({
         </ScrollArea>
         <DialogFooter>
           <DialogClose asChild>
-            <Button className="bg-icc-blue hover:bg-icc-blue-dark">Close</Button>
+            <Button className="bg-neutral-50">Close</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
-
 export default ContactDialog;
