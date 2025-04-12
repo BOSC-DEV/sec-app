@@ -41,7 +41,6 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
   const badge = (
     <Badge className={`${color} ${sizeClasses[size]} flex items-center gap-1`}>
       <span className={iconSizes[size]}>{icon}</span>
-      {!isMobile && <span className="truncate">{icon}</span>}
     </Badge>
   );
   

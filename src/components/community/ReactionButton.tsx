@@ -184,7 +184,11 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
       return;
     }
     
-    const channel = supabase.channel(`${tableName}_${itemId}`)
+    // Fix the excessive type instantiation by simplifying the channel creation and type handling
+    const channelName = `${tableName}_${itemId}`;
+    const channel = supabase.channel(channelName);
+    
+    channel
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
