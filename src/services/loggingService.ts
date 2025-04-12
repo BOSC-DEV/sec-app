@@ -50,8 +50,8 @@ const getSessionId = (): string => {
 
 // Get current user ID if available
 const getUserId = (): string | undefined => {
-  const session = supabase.auth.session();
-  return session?.user?.id;
+  const session = supabase.auth.getSession();
+  return session?.data?.session?.user?.id;
 };
 
 // Only log to Supabase in production
@@ -130,7 +130,11 @@ const logToSupabase = async (entry: LogEntry): Promise<void> => {
   if (!shouldLogToSupabase()) return;
 
   try {
-    // Sanitize entry for Supabase insertion
+    // For now, we'll just log to console that we would send to Supabase
+    // This avoids the error with the application_logs table which doesn't exist yet
+    console.log('Would send log to Supabase:', entry);
+    
+    /* Commented out until application_logs table is created
     const { error } = await supabase
       .from('application_logs')
       .insert([entry]);
@@ -138,6 +142,7 @@ const logToSupabase = async (entry: LogEntry): Promise<void> => {
     if (error) {
       console.error('Failed to send log to Supabase:', error);
     }
+    */
   } catch (err) {
     console.error('Error sending log to Supabase:', err);
   }

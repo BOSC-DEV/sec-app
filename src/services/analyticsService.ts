@@ -48,6 +48,9 @@ declare global {
         set: (properties: Record<string, any>) => void;
       };
       register: (properties: Record<string, any>) => void;
+      // Add the missing opt-in/opt-out methods
+      opt_out_tracking?: () => void;
+      opt_in_tracking?: () => void;
     };
     dataLayer?: any[];
     sa_event?: (eventName: string, params?: Record<string, any>) => void;
@@ -288,7 +291,7 @@ export const optOutOfAnalytics = () => {
   debugLog('User opted out of analytics');
   
   // Clear any existing analytics cookies if possible
-  if (window.mixpanel) {
+  if (window.mixpanel?.opt_out_tracking) {
     window.mixpanel.opt_out_tracking();
   }
 };
@@ -298,7 +301,7 @@ export const optInToAnalytics = () => {
   localStorage.setItem('analytics_opt_out', 'false');
   debugLog('User opted into analytics');
   
-  if (window.mixpanel) {
+  if (window.mixpanel?.opt_in_tracking) {
     window.mixpanel.opt_in_tracking();
   }
   

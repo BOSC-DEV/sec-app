@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { ProfileProvider } from '@/contexts/ProfileContext';
 import { HelmetProvider } from 'react-helmet-async';
+import { vi } from 'vitest';
 
 // Create a wrapper with all providers needed for testing
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
@@ -46,8 +47,8 @@ const mockFormField = (name: string, value: any, type = 'text') => {
     name,
     value,
     type,
-    onChange: jest.fn(),
-    onBlur: jest.fn(),
+    onChange: vi.fn(),
+    onBlur: vi.fn(),
   };
 };
 
@@ -74,14 +75,14 @@ const mockLocalStorage = () => {
   const store: Record<string, string> = {};
   
   return {
-    getItem: jest.fn((key: string) => store[key] || null),
-    setItem: jest.fn((key: string, value: string) => {
+    getItem: vi.fn((key: string) => store[key] || null),
+    setItem: vi.fn((key: string, value: string) => {
       store[key] = value;
     }),
-    removeItem: jest.fn((key: string) => {
+    removeItem: vi.fn((key: string) => {
       delete store[key];
     }),
-    clear: jest.fn(() => {
+    clear: vi.fn(() => {
       Object.keys(store).forEach(key => delete store[key]);
     }),
   };
@@ -92,27 +93,27 @@ const mockSupabaseClient = () => {
   const data = {}; // Store mock data here
   
   return {
-    from: jest.fn().mockReturnThis(),
-    select: jest.fn().mockReturnThis(),
-    insert: jest.fn().mockReturnThis(),
-    update: jest.fn().mockReturnThis(),
-    delete: jest.fn().mockReturnThis(),
-    eq: jest.fn().mockReturnThis(),
-    single: jest.fn().mockReturnThis(),
-    order: jest.fn().mockReturnThis(),
-    limit: jest.fn().mockReturnThis(),
-    range: jest.fn().mockReturnThis(),
-    then: jest.fn(cb => Promise.resolve(cb({ data: [], error: null }))),
+    from: vi.fn().mockReturnThis(),
+    select: vi.fn().mockReturnThis(),
+    insert: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
+    delete: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    single: vi.fn().mockReturnThis(),
+    order: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockReturnThis(),
+    range: vi.fn().mockReturnThis(),
+    then: vi.fn(cb => Promise.resolve(cb({ data: [], error: null }))),
     auth: {
-      signIn: jest.fn(),
-      signOut: jest.fn(),
-      session: jest.fn(),
+      signIn: vi.fn(),
+      signOut: vi.fn(),
+      session: vi.fn(),
       user: { id: 'mock-user-id' },
     },
     storage: {
-      from: jest.fn().mockReturnThis(),
-      upload: jest.fn(),
-      getPublicUrl: jest.fn(),
+      from: vi.fn().mockReturnThis(),
+      upload: vi.fn(),
+      getPublicUrl: vi.fn(),
     },
   };
 };
