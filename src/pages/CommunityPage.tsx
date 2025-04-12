@@ -13,11 +13,13 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/componen
 import BadgeTiersPage from '@/components/profile/BadgeTiersPage';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const CommunityPage = () => {
   const { profile, isConnected } = useProfile();
   const [activeTab, setActiveTab] = useState("announcements");
   const [splitScreen, setSplitScreen] = useState(true);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!isConnected) {
@@ -28,6 +30,13 @@ const CommunityPage = () => {
       });
     }
   }, [isConnected]);
+
+  // Use tab view on mobile by default
+  useEffect(() => {
+    if (isMobile) {
+      setSplitScreen(false);
+    }
+  }, [isMobile]);
 
   const toggleSplitScreen = () => {
     setSplitScreen(!splitScreen);
@@ -53,7 +62,7 @@ const CommunityPage = () => {
       />
       
       <div className="icc-container py-8">
-        {splitScreen ? (
+        {splitScreen && !isMobile ? (
           <>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold">Community</h2>
@@ -103,7 +112,7 @@ const CommunityPage = () => {
         ) : (
           <Tabs defaultValue="announcements" value={activeTab} onValueChange={setActiveTab}>
             <div className="flex justify-between items-center mb-4">
-              <TabsList className="flex-1">
+              <TabsList className="flex-1 w-full">
                 <TabsTrigger value="announcements" className="flex-1">Announcements</TabsTrigger>
                 <TabsTrigger value="chat" className="flex-1">Live Chat</TabsTrigger>
                 <TabsTrigger value="badges" className="flex-1 flex items-center">
@@ -112,15 +121,17 @@ const CommunityPage = () => {
                 </TabsTrigger>
               </TabsList>
               
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={toggleSplitScreen}
-                className="ml-2 flex items-center gap-2"
-              >
-                <Rows className="h-4 w-4" />
-                <span>Split Screen</span>
-              </Button>
+              {!isMobile && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={toggleSplitScreen}
+                  className="ml-2 flex items-center gap-2"
+                >
+                  <Rows className="h-4 w-4" />
+                  <span>Split Screen</span>
+                </Button>
+              )}
             </div>
             
             <TabsContent value="announcements" className="mt-0">
