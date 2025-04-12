@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -330,13 +329,9 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
                   {announcement.author_username ? (
                     <Link to={`/profile/${announcement.author_username}`} className="hover:underline">
                       {announcement.author_name}
-                      <span className="text-icc-gold ml-1 font-bold">@{announcement.author_username}</span>
                     </Link>
                   ) : (
-                    <>
-                      {announcement.author_name}
-                      <span className="text-icc-gold ml-1 font-bold">@{announcement.author_username}</span>
-                    </>
+                    announcement.author_name
                   )}
                 </div>
                 <div className="text-xs text-icc-gold font-medium mt-0.5">
