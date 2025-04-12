@@ -1,40 +1,17 @@
-
 import React from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogClose
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  Shield, 
-  Lock, 
-  AlertTriangle, 
-  Search, 
-  ClipboardCheck, 
-  Scale, 
-  Wallet, 
-  FileText, 
-  BadgeHelp, 
-  BookOpen 
-} from 'lucide-react';
-
+import { Shield, Lock, AlertTriangle, Search, ClipboardCheck, Scale, Wallet, FileText, BadgeHelp, BookOpen } from 'lucide-react';
 interface SafetyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-const SafetyDialog: React.FC<SafetyDialogProps> = ({ 
-  open, 
-  onOpenChange 
+const SafetyDialog: React.FC<SafetyDialogProps> = ({
+  open,
+  onOpenChange
 }) => {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+  return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-serif text-icc-blue flex items-center gap-2">
@@ -175,12 +152,10 @@ const SafetyDialog: React.FC<SafetyDialogProps> = ({
         </ScrollArea>
         <DialogFooter>
           <DialogClose asChild>
-            <Button className="bg-icc-blue hover:bg-icc-blue-dark">I Understand</Button>
+            <Button className="bg-neutral-50">I Understand</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
-
 export default SafetyDialog;
