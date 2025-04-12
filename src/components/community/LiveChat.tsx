@@ -23,6 +23,7 @@ import { getChatMessages, sendChatMessage } from '@/services/communityService';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import EmojiPicker from '@/components/community/EmojiPicker';
+import ReactionButton from './ReactionButton';
 
 const LiveChat = () => {
   const { profile, isConnected } = useProfile();
@@ -263,6 +264,10 @@ const LiveChat = () => {
                         </a>
                       </div>
                     )}
+                    
+                    <div className="mt-1">
+                      <ReactionButton itemId={message.id} itemType="chat" />
+                    </div>
                   </div>
                 </div>
               ))}

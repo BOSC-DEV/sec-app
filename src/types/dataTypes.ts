@@ -91,3 +91,12 @@ export interface ChatMessage {
   image_url?: string;
   created_at: string;
 }
+
+export interface MessageReaction {
+  id: string;
+  announcement_id?: string;
+  message_id?: string;
+  user_id: string;
+  reaction_type: string;
+  created_at: string;
+}

@@ -12,6 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { Megaphone, Calendar, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
+import ReactionButton from './ReactionButton';
 
 const ADMIN_USERNAMES = ['sec', 'thesec'];
 
@@ -168,8 +169,9 @@ const AnnouncementFeed = () => {
                 <div className="whitespace-pre-wrap">{announcement.content}</div>
               </CardContent>
               
-              <CardFooter className="bg-muted/30 py-2 text-xs text-muted-foreground">
-                <div className="flex justify-end w-full">
+              <CardFooter className="bg-muted/30 py-2 flex justify-between items-center">
+                <ReactionButton itemId={announcement.id} itemType="announcement" />
+                <div className="text-xs text-muted-foreground">
                   Official SEC Announcement
                 </div>
               </CardFooter>

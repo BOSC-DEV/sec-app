@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Announcement, ChatMessage } from '@/types/dataTypes';
+import { Announcement, ChatMessage, MessageReaction } from '@/types/dataTypes';
 import { toast } from '@/hooks/use-toast';
 import { handleError } from '@/utils/errorHandling';
 import { sanitizeHtml } from '@/utils/securityUtils';
@@ -137,6 +137,149 @@ export const sendChatMessage = async (message: {
   } catch (error) {
     handleError(error, 'Error sending chat message');
     return null;
+  }
+};
+
+// Reaction Services
+export const getAnnouncementReactions = async (announcementId: string): Promise<MessageReaction[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('announcement_reactions')
+      .select('*')
+      .eq('announcement_id', announcementId);
+      
+    if (error) {
+      throw error;
+    }
+    
+    return data || [];
+  } catch (error) {
+    handleError(error, 'Error fetching announcement reactions');
+    return [];
+  }
+};
+
+export const getChatMessageReactions = async (messageId: string): Promise<MessageReaction[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('chat_message_reactions')
+      .select('*')
+      .eq('message_id', messageId);
+      
+    if (error) {
+      throw error;
+    }
+    
+    return data || [];
+  } catch (error) {
+    handleError(error, 'Error fetching chat message reactions');
+    return [];
+  }
+};
+
+export const toggleAnnouncementReaction = async (
+  announcementId: string, 
+  userId: string, 
+  reactionType: string
+): Promise<boolean> => {
+  try {
+    // Check if reaction already exists
+    const { data: existingReaction, error: checkError } = await supabase
+      .from('announcement_reactions')
+      .select('*')
+      .eq('announcement_id', announcementId)
+      .eq('user_id', userId)
+      .eq('reaction_type', reactionType)
+      .maybeSingle();
+      
+    if (checkError) {
+      throw checkError;
+    }
+    
+    // If reaction exists, remove it
+    if (existingReaction) {
+      const { error: deleteError } = await supabase
+        .from('announcement_reactions')
+        .delete()
+        .eq('id', existingReaction.id);
+        
+      if (deleteError) {
+        throw deleteError;
+      }
+      
+      return false; // Reaction removed
+    }
+    
+    // If reaction doesn't exist, add it
+    const { error: insertError } = await supabase
+      .from('announcement_reactions')
+      .insert({
+        announcement_id: announcementId,
+        user_id: userId,
+        reaction_type: reactionType,
+      });
+      
+    if (insertError) {
+      throw insertError;
+    }
+    
+    return true; // Reaction added
+  } catch (error) {
+    handleError(error, 'Error toggling announcement reaction');
+    return false;
+  }
+};
+
+export const toggleChatMessageReaction = async (
+  messageId: string, 
+  userId: string, 
+  reactionType: string
+): Promise<boolean> => {
+  try {
+    // Check if reaction already exists
+    const { data: existingReaction, error: checkError } = await supabase
+      .from('chat_message_reactions')
+      .select('*')
+      .eq('message_id', messageId)
+      .eq('user_id', userId)
+      .eq('reaction_type', reactionType)
+      .maybeSingle();
+      
+    if (checkError) {
+      throw checkError;
+    }
+    
+    // If reaction exists, remove it
+    if (existingReaction) {
+      const { error: deleteError } = await supabase
+        .from('chat_message_reactions')
+        .delete()
+        .eq('id', existingReaction.id);
+        
+      if (deleteError) {
+        throw deleteError;
+      }
+      
+      return false; // Reaction removed
+    }
+    
+    // If reaction doesn't exist, add it
+    const { error: insertError } = await supabase
+      .from('chat_message_reactions')
+      .insert({
+        message_id: messageId,
+        user_id: userId,
+        reaction_type: reactionType,
+      });
+      
+    if (insertError) {
+      throw insertError;
+    }
+    
+    return true; // Reaction added
+  } catch (error) {
+    handleError(error, 'Error toggling chat message reaction');
+    return false;
   }
 };
 
