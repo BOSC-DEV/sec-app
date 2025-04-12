@@ -36,6 +36,7 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   
   // Add click outside handler
   useEffect(() => {
@@ -200,7 +201,7 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
     .slice(0, 3); // Show top 3 reactions
   
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <div className="flex items-center gap-2">
         {sortedReactions.length > 0 ? (
           sortedReactions.map(([emoji, count]) => (
@@ -233,8 +234,8 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
           ref={pickerRef} 
           className="absolute bottom-full mb-2 z-10"
           style={{ 
-            right: 'auto',
-            left: 0
+            left: 0,
+            transform: containerRef.current && containerRef.current.getBoundingClientRect().left < 150 ? 'none' : 'translateX(-50%)'
           }}
         >
           <EmojiPicker onEmojiSelect={handleEmojiSelect} />
