@@ -1,10 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, User, Shield, Wallet, LogOut, LogIn } from 'lucide-react';
+import { Menu, X, User, Shield, Wallet, LogOut, LogIn, Copy } from 'lucide-react';
 import ICCLogo from '../common/ICCLogo';
 import { useProfile } from '@/contexts/ProfileContext';
 import ThemeToggle from '@/components/common/ThemeToggle';
+import { toast } from '@/hooks/use-toast';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -38,12 +40,33 @@ const Header = () => {
     setIsMenuOpen(false);
   };
 
+  const copyToClipboard = async () => {
+    const walletAddress = "HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump";
+    
+    try {
+      await navigator.clipboard.writeText(walletAddress);
+      toast({
+        title: "Copied to clipboard",
+        description: "Wallet address copied to clipboard successfully",
+        variant: "default",
+      });
+    } catch (err) {
+      toast({
+        title: "Copy failed",
+        description: "Failed to copy wallet address to clipboard",
+        variant: "destructive",
+      });
+      console.error("Failed to copy: ", err);
+    }
+  };
+
   const navigationItems = [
     { label: 'Home', path: '/' },
     { label: 'Most Wanted', path: '/most-wanted' },
     { label: 'Report', path: '/report' },
     { label: 'Leaderboard', path: '/leaderboard' },
     { label: 'Community', path: '/community' },
+    { label: 'Ca', onClick: copyToClipboard, icon: <Copy className="h-3 w-3 mr-1" /> },
   ];
 
   return (
@@ -60,15 +83,26 @@ const Header = () => {
 
             <nav className="hidden md:flex items-center space-x-6 ml-6">
               {navigationItems.map((item) => (
-                <Link 
-                  key={item.path}
-                  to={item.path} 
-                  className={`text-white hover:text-icc-gold transition-colors flex items-center ${
-                    location.pathname === item.path ? 'text-icc-gold font-medium' : ''
-                  }`}
-                >
-                  {item.label}
-                </Link>
+                item.path ? (
+                  <Link 
+                    key={item.path}
+                    to={item.path} 
+                    className={`text-white hover:text-icc-gold transition-colors flex items-center ${
+                      location.pathname === item.path ? 'text-icc-gold font-medium' : ''
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                ) : (
+                  <button
+                    key={item.label}
+                    onClick={item.onClick}
+                    className="text-white hover:text-icc-gold transition-colors flex items-center"
+                  >
+                    {item.icon}
+                    {item.label}
+                  </button>
+                )
               ))}
             </nav>
           </div>
@@ -120,16 +154,30 @@ const Header = () => {
           <div className="icc-container py-4">
             <nav className="flex flex-col space-y-4">
               {navigationItems.map((item) => (
-                <Link 
-                  key={item.path}
-                  to={item.path} 
-                  className={`text-white hover:text-icc-gold transition-colors px-2 py-1 flex items-center ${
-                    location.pathname === item.path ? 'text-icc-gold font-medium' : ''
-                  }`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.label}
-                </Link>
+                item.path ? (
+                  <Link 
+                    key={item.path}
+                    to={item.path} 
+                    className={`text-white hover:text-icc-gold transition-colors px-2 py-1 flex items-center ${
+                      location.pathname === item.path ? 'text-icc-gold font-medium' : ''
+                    }`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                ) : (
+                  <button
+                    key={item.label}
+                    onClick={(e) => {
+                      item.onClick();
+                      setIsMenuOpen(false);
+                    }}
+                    className="text-white hover:text-icc-gold transition-colors px-2 py-1 flex items-center"
+                  >
+                    {item.icon}
+                    {item.label}
+                  </button>
+                )
               ))}
               
               <div className="flex items-center justify-between pt-2">
