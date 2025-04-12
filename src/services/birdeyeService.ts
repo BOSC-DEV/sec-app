@@ -7,6 +7,9 @@ export const SEC_TOKEN_ADDRESS = 'HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump';
 // Birdeye API base URL
 const BIRDEYE_API_BASE_URL = 'https://public-api.birdeye.so';
 
+// Birdeye API key (free tier)
+const BIRDEYE_API_KEY = '2UtaRBU52Dq3jXj4pSJcDcFGzlgZFW2p';
+
 export interface TokenPriceData {
   price: number;
   priceChange24h: number;
@@ -27,6 +30,7 @@ export const fetchTokenPrice = async (tokenAddress: string): Promise<TokenPriceD
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        'X-API-KEY': BIRDEYE_API_KEY,
       },
     });
 
