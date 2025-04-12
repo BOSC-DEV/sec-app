@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -116,7 +116,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect }) => {
   }
   
   return (
-    <Card className="w-72 shadow-md">
+    <Card className="w-72 shadow-md border">
       <CardContent className="p-2">
         <div className="relative mb-2">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -144,12 +144,12 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect }) => {
           </ScrollArea>
         ) : (
           <Tabs defaultValue="reactions" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="w-full mb-2 flex justify-start overflow-x-auto h-8 bg-muted/30 p-0.5 rounded-md">
+            <TabsList className="w-full mb-2 flex justify-start overflow-x-auto h-7 bg-muted/20 p-0.5 rounded-md">
               {allEmojiCategories.map(category => (
                 <TabsTrigger 
                   key={category.id} 
                   value={category.id}
-                  className="text-xs flex-shrink-0 px-2 py-0.5 data-[state=active]:bg-background"
+                  className="text-xs flex-shrink-0 px-2 py-0.5 data-[state=active]:bg-background data-[state=active]:shadow-sm"
                 >
                   {category.name}
                 </TabsTrigger>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Button } from '@/components/ui/button';
@@ -200,6 +199,29 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
     .sort(([, countA], [, countB]) => countB - countA)
     .slice(0, 3); // Show top 3 reactions
   
+  // Function to determine the optimal positioning for the emoji picker
+  const getEmojiPickerPosition = () => {
+    if (!containerRef.current) return {};
+    
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const pickerWidth = 288; // Width of the emoji picker (72px * 4 columns)
+    
+    // Check if emoji picker would overflow on the right
+    const rightOverflow = containerRect.left + pickerWidth > viewportWidth;
+    // Check if emoji picker would overflow on the left
+    const leftOverflow = containerRect.left - pickerWidth/2 < 0;
+    
+    // Calculate left position to keep picker fully visible
+    if (leftOverflow) {
+      return { left: 0, transform: 'none' };
+    } else if (rightOverflow) {
+      return { right: 0, left: 'auto', transform: 'none' };
+    } else {
+      return { left: '50%', transform: 'translateX(-50%)' };
+    }
+  };
+  
   return (
     <div className="relative" ref={containerRef}>
       <div className="flex items-center gap-2">
@@ -233,10 +255,7 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
         <div 
           ref={pickerRef} 
           className="absolute bottom-full mb-2 z-10"
-          style={{ 
-            left: 0,
-            transform: containerRef.current && containerRef.current.getBoundingClientRect().left < 150 ? 'none' : 'translateX(-50%)'
-          }}
+          style={getEmojiPickerPosition()}
         >
           <EmojiPicker onEmojiSelect={handleEmojiSelect} />
         </div>
