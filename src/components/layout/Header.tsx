@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -92,26 +91,15 @@ const Header = () => {
 
             <nav className="hidden md:flex items-center space-x-6 ml-6">
               {navigationItems.map((item) => (
-                item.path ? (
-                  <Link 
-                    key={item.path}
-                    to={item.path} 
-                    className={`text-white hover:text-icc-gold transition-colors flex items-center ${
-                      location.pathname === item.path ? 'text-icc-gold font-medium' : ''
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                ) : (
-                  <button
-                    key={item.label}
-                    onClick={item.onClick}
-                    className="text-white hover:text-icc-gold transition-colors flex items-center"
-                  >
-                    {item.icon}
-                    {item.label}
-                  </button>
-                )
+                <Link 
+                  key={item.path}
+                  to={item.path} 
+                  className={`text-white hover:text-icc-gold transition-colors flex items-center ${
+                    location.pathname === item.path ? 'text-icc-gold font-medium' : ''
+                  }`}
+                >
+                  {item.label}
+                </Link>
               ))}
             </nav>
           </div>
@@ -230,30 +218,16 @@ const Header = () => {
           <div className="icc-container py-4">
             <nav className="flex flex-col space-y-4">
               {navigationItems.map((item) => (
-                item.path ? (
-                  <Link 
-                    key={item.path}
-                    to={item.path} 
-                    className={`text-white hover:text-icc-gold transition-colors px-2 py-1 flex items-center ${
-                      location.pathname === item.path ? 'text-icc-gold font-medium' : ''
-                    }`}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {item.label}
-                  </Link>
-                ) : (
-                  <button
-                    key={item.label}
-                    onClick={(e) => {
-                      item.onClick();
-                      setIsMenuOpen(false);
-                    }}
-                    className="text-white hover:text-icc-gold transition-colors px-2 py-1 flex items-center"
-                  >
-                    {item.icon}
-                    {item.label}
-                  </button>
-                )
+                <Link 
+                  key={item.path}
+                  to={item.path} 
+                  className={`text-white hover:text-icc-gold transition-colors px-2 py-1 flex items-center ${
+                    location.pathname === item.path ? 'text-icc-gold font-medium' : ''
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {item.label}
+                </Link>
               ))}
               
               <div className="flex items-center justify-between pt-2">
