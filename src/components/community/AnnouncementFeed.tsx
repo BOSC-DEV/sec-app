@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -50,12 +49,10 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   const [isAdmin, setIsAdmin] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Edit dialog state
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editContent, setEditContent] = useState('');
   const [editingAnnouncementId, setEditingAnnouncementId] = useState<string | null>(null);
   
-  // Check if user is admin
   useEffect(() => {
     const checkAdmin = async () => {
       if (profile?.username) {
@@ -74,7 +71,6 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
     queryFn: getAnnouncements,
   });
   
-  // Filter announcements based on search query
   const filteredAnnouncements = React.useMemo(() => {
     if (!searchQuery.trim()) return announcements;
     
@@ -86,7 +82,6 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
     );
   }, [searchQuery, announcements]);
   
-  // Reset current index when filtered announcements change
   useEffect(() => {
     if (currentIndex >= filteredAnnouncements.length && filteredAnnouncements.length > 0) {
       setCurrentIndex(0);
@@ -319,14 +314,16 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         </CardContent>
         
         <CardFooter className="pt-0 px-6 pb-3 flex flex-col items-start">
-          <div className="w-full bg-muted/30 py-2 px-3 rounded-md flex justify-between items-center">
+          <div className="w-full flex justify-between items-center">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <div className="flex items-center">
                 <Eye className="h-3 w-3 mr-1" />
                 {announcement.views || 0}
               </div>
             </div>
-            <ReactionButton itemId={announcement.id} itemType="announcement" />
+            <div className="bg-accent/10 rounded-md py-1.5 px-2">
+              <ReactionButton itemId={announcement.id} itemType="announcement" />
+            </div>
           </div>
           
           <AnnouncementReplies announcementId={announcement.id} isAdmin={isAdmin} />
@@ -347,7 +344,6 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   
   return (
     <div className="space-y-6">
-      {/* Search input */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
@@ -421,7 +417,6 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         </div>
       )}
       
-      {/* Edit Announcement Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="sm:max-w-[700px]">
           <DialogHeader>

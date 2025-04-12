@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Button } from '@/components/ui/button';
@@ -207,11 +208,11 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
               key={emoji}
               variant={hasUserReacted(emoji) ? "secondary" : "outline"}
               size={size}
-              className="px-2 py-1 h-auto gap-1"
+              className={`px-2 py-1 h-auto border shadow-sm ${hasUserReacted(emoji) ? 'bg-accent/50' : 'bg-background hover:bg-accent/30'}`}
               onClick={() => handleEmojiSelect(emoji)}
             >
               <span>{emoji}</span>
-              <span className="text-xs">{count}</span>
+              <span className="ml-1 text-xs font-medium">{count}</span>
             </Button>
           ))
         ) : null}
@@ -220,7 +221,7 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
           ref={buttonRef}
           variant="outline"
           size={size}
-          className="px-2 py-1 h-auto"
+          className="px-2 py-1 h-auto bg-background shadow-sm"
           onClick={() => setShowEmojiPicker(!showEmojiPicker)}
         >
           <Smile className={`${size === 'sm' ? 'h-3 w-3' : 'h-4 w-4'}`} />
