@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 
 declare global {
@@ -28,6 +28,7 @@ const Turnstile: React.FC<TurnstileProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string>('');
+  const [isRendered, setIsRendered] = useState(false);
 
   useEffect(() => {
     // Load the Turnstile script if it hasn't been loaded yet
@@ -49,20 +50,23 @@ const Turnstile: React.FC<TurnstileProps> = ({
     }
 
     const renderTurnstile = () => {
-      if (window.turnstile && containerRef.current) {
+      if (window.turnstile && containerRef.current && !isRendered) {
         try {
           widgetIdRef.current = window.turnstile.render(containerRef.current, {
             sitekey: siteKey,
             callback: (token: string) => {
               onVerify(token);
+              setIsRendered(true);
             },
             theme: theme,
             size: size,
             'refresh-expired': refreshExpired,
             'expired-callback': () => {
               onVerify('');
+              setIsRendered(false);
             }
           });
+          setIsRendered(true);
         } catch (error) {
           console.error('Failed to render Turnstile:', error);
         }
@@ -82,12 +86,13 @@ const Turnstile: React.FC<TurnstileProps> = ({
       if (window.turnstile && widgetIdRef.current) {
         try {
           window.turnstile.reset(widgetIdRef.current);
+          setIsRendered(false);
         } catch (error) {
           console.error('Failed to reset Turnstile:', error);
         }
       }
     };
-  }, [siteKey, onVerify, theme, size, refreshExpired]);
+  }, [siteKey, onVerify, theme, size, refreshExpired, isRendered]);
 
   return (
     <div className="mt-2 mb-4">
