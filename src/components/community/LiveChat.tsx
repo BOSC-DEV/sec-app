@@ -303,8 +303,8 @@ const LiveChat = () => {
                           time.includes('hour') ? time.replace(' hours', 'h').replace(' hour', 'h') : time;
     
     const messageContent = (
-      <div key={message.id} className={`flex mb-3 ${isCurrentUser ? 'justify-end' : 'justify-start'}`}>
-        <div className={`flex ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'} space-x-2`}>
+      <div key={message.id} className={`flex my-4 ${isCurrentUser ? 'justify-end' : 'justify-start'}`}>
+        <div className={`flex ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'} space-x-2 ${isCurrentUser ? 'space-x-reverse' : ''}`}>
           <div className="flex-shrink-0">
             <Link to={message.author_username ? `/profile/${message.author_username}` : '#'}>
               <Avatar className="h-10 w-10 cursor-pointer border-2 border-background">
@@ -314,8 +314,8 @@ const LiveChat = () => {
             </Link>
           </div>
           
-          <div className={`max-w-[75%] md:max-w-[60%] rounded-lg px-3 py-2 ${isCurrentUser ? 'bg-icc-blue-light text-white rounded-tr-none' : 'bg-card rounded-tl-none'}`}>
-            <div className="flex items-center gap-1 mb-1">
+          <div className={`min-w-[180px] max-w-[75%] md:max-w-[60%] rounded-lg px-3 py-2 ${isCurrentUser ? 'bg-icc-blue-light text-white rounded-tr-none' : 'bg-card rounded-tl-none'}`}>
+            <div className="flex items-center gap-1 mb-1 flex-wrap">
               <span className={`font-semibold text-sm ${isCurrentUser ? 'text-icc-gold' : 'text-icc-gold'}`}>
                 {message.author_name}
               </span>

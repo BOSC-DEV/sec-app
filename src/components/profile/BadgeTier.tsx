@@ -39,7 +39,7 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
 
   // Create the badge element - showing only the icon
   const badge = (
-    <Badge className={`${color} ${sizeClasses[size]} flex items-center gap-1`}>
+    <Badge className={`${color} ${sizeClasses[size]} flex items-center gap-1 shrink-0`}>
       <span className={iconSizes[size]}>{icon}</span>
     </Badge>
   );
@@ -48,7 +48,8 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
     return badge;
   }
   
-  return <div className="inline-block">
+  return (
+    <div className="inline-block">
       <TooltipProvider>
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
@@ -82,7 +83,8 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-    </div>;
+    </div>
+  );
 };
 
 export default BadgeTier;

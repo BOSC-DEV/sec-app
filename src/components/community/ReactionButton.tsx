@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { toggleAnnouncementReaction, toggleChatMessageReaction, toggleReplyReaction } from '@/services/communityService';
@@ -10,7 +11,6 @@ import { cn } from '@/lib/utils';
 
 type ReactionType = 'like' | 'fire' | 'party' | 'applause';
 type ItemType = 'announcement' | 'message' | 'reply';
-type TableName = 'announcement_reactions' | 'chat_message_reactions' | 'reply_reactions';
 
 interface ReactionButtonProps {
   itemId: string;
@@ -102,7 +102,7 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
   
   const fetchReactions = async () => {
     try {
-      let tableName: TableName;
+      let tableName: string;
       let idColumn: string;
       
       if (itemType === 'announcement') {
@@ -167,31 +167,25 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
   useEffect(() => {
     fetchReactions();
     
-    let tableName: TableName;
-    let idColumn: string;
+    // Fixed type instantiation issue by simplifying channel creation
+    const channelName = `reactions_${itemType}_${itemId}`;
     
+    let tableSource: string;
     if (itemType === 'announcement') {
-      tableName = 'announcement_reactions';
-      idColumn = 'announcement_id';
+      tableSource = 'announcement_reactions';
     } else if (itemType === 'message') {
-      tableName = 'chat_message_reactions';
-      idColumn = 'message_id';
-    } else if (itemType === 'reply') {
-      tableName = 'reply_reactions';
-      idColumn = 'reply_id';
+      tableSource = 'chat_message_reactions';
     } else {
-      return;
+      tableSource = 'reply_reactions';
     }
     
-    const channelName = `${tableName}_${itemId}`;
     const channel = supabase.channel(channelName);
     
     channel
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
-        table: tableName,
-        filter: `${idColumn}=eq.${itemId}`
+        table: tableSource
       }, () => {
         fetchReactions();
       })
