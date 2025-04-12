@@ -34,7 +34,11 @@ export const InteractionButton: React.FC<InteractionButtonProps> = ({
   <Button
     variant="ghost"
     size="sm"
-    className={`flex items-center gap-1 ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
+    className={`flex items-center gap-1 
+      ${isActive 
+        ? 'text-primary bg-gray-100 dark:bg-gray-800' 
+        : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
+      }`}
     onClick={onClick}
     title={label}
   >
@@ -251,14 +255,14 @@ const CommunityInteractionButtons: React.FC<CommunityInteractionButtonsProps> = 
   return (
     <div className="flex space-x-1">
       <InteractionButton
-        icon={<ThumbsUp size={16} />}
+        icon={<ThumbsUp size={16} className="text-gray-600" />}
         count={localLikes}
         onClick={handleLike}
         isActive={isLiked}
         label="Like"
       />
       <InteractionButton
-        icon={<ThumbsDown size={16} />}
+        icon={<ThumbsDown size={16} className="text-gray-600" />}
         count={localDislikes}
         onClick={handleDislike}
         isActive={isDisliked}
