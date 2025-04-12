@@ -1,28 +1,16 @@
-
 import React from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogClose
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
 interface TermsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-const TermsDialog: React.FC<TermsDialogProps> = ({ 
-  open, 
-  onOpenChange 
+const TermsDialog: React.FC<TermsDialogProps> = ({
+  open,
+  onOpenChange
 }) => {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+  return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-serif text-icc-blue">Terms of Service</DialogTitle>
@@ -133,12 +121,10 @@ const TermsDialog: React.FC<TermsDialogProps> = ({
         </ScrollArea>
         <DialogFooter>
           <DialogClose asChild>
-            <Button className="bg-icc-blue hover:bg-icc-blue-dark">I Agree</Button>
+            <Button className="bg-neutral-50">I Agree</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
-
 export default TermsDialog;
