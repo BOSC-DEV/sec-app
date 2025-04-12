@@ -126,7 +126,7 @@ export const getUserBountyContributions = async (
   userId: string,
   page: number = 1,
   perPage: number = 10
-): Promise<{ contributions: BountyContribution[]; totalCount: number }> => {
+): Promise<{ contributions: BountyContribution[]; totalCount: number; totalBountyAmount: number }> => {
   try {
     console.log(`Fetching bounty contributions for user ${userId}`);
     
@@ -167,9 +167,28 @@ export const getUserBountyContributions = async (
       throw error;
     }
 
+    // Calculate total bounty amount
+    const { data: allContributions, error: allContributionsError } = await supabase
+      .from("bounty_contributions")
+      .select("amount")
+      .eq("contributor_id", userId)
+      .eq("is_active", true);
+
+    if (allContributionsError) {
+      console.error("Error fetching all user contributions:", allContributionsError);
+      throw allContributionsError;
+    }
+
+    // Sum up all contributions
+    const totalBountyAmount = allContributions.reduce(
+      (sum, item) => sum + Number(item.amount),
+      0
+    );
+
     return {
       contributions: data as unknown as BountyContribution[],
       totalCount: count || 0,
+      totalBountyAmount
     };
   } catch (error) {
     handleError(error, {
@@ -177,7 +196,7 @@ export const getUserBountyContributions = async (
       severity: ErrorSeverity.MEDIUM,
       context: "GET_USER_BOUNTY_CONTRIBUTIONS",
     });
-    return { contributions: [], totalCount: 0 };
+    return { contributions: [], totalCount: 0, totalBountyAmount: 0 };
   }
 };
 
