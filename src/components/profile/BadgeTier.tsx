@@ -1,14 +1,17 @@
+
 import React from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { BadgeInfo, BadgeTier as BadgeTierEnum, formatSecAmount } from '@/utils/badgeUtils';
+
 interface BadgeTierProps {
   badgeInfo: BadgeInfo;
   showProgress?: boolean;
   size?: 'sm' | 'md' | 'lg';
   showTooltip?: boolean;
 }
+
 const BadgeTier: React.FC<BadgeTierProps> = ({
   badgeInfo,
   showProgress = false,
@@ -33,10 +36,17 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
   };
 
   // Create the badge element
-  const badge;
+  const badge = (
+    <Badge className={`${color} ${sizeClasses[size]} flex items-center gap-1`}>
+      <span className={iconSizes[size]}>{icon}</span>
+      <span>{tier}</span>
+    </Badge>
+  );
+  
   if (!showTooltip) {
     return badge;
   }
+  
   return <div className="inline-block">
       <TooltipProvider>
         <Tooltip delayDuration={100}>
@@ -73,4 +83,5 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
       </TooltipProvider>
     </div>;
 };
+
 export default BadgeTier;
