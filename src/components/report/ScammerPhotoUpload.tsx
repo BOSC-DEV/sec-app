@@ -1,11 +1,9 @@
-
 import React, { useState, useCallback, memo } from 'react';
 import { FormDescription } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { Control, UseFormSetValue } from 'react-hook-form';
 import { useToast } from '@/hooks/use-toast';
 import PhotoPreview from './PhotoPreview';
-
 interface ScammerPhotoUploadProps {
   photoPreview: string;
   setPhotoPreview: React.Dispatch<React.SetStateAction<string>>;
@@ -33,16 +31,17 @@ const ScammerPhotoUpload = ({
   photoFile,
   setPhotoFile,
   setValue,
-  control,
+  control
 }: ScammerPhotoUploadProps) => {
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Memoize handlers to prevent unnecessary re-renders
   const handlePhotoClick = useCallback(() => {
     fileInputRef.current?.click();
   }, []);
-
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -52,7 +51,7 @@ const ScammerPhotoUpload = ({
       toast({
         title: "File too large",
         description: "Please upload an image smaller than 5MB",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
@@ -62,13 +61,12 @@ const ScammerPhotoUpload = ({
       toast({
         title: "Invalid file type",
         description: "Please upload an image file",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     setPhotoFile(file);
-    
+
     // Create a preview URL
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -80,36 +78,18 @@ const ScammerPhotoUpload = ({
     };
     reader.readAsDataURL(file);
   }, [setPhotoFile, setPhotoPreview, setValue, toast]);
-
-  return (
-    <div className="photo-upload-container" role="region" aria-label="Photo upload section">
-      <div className="flex items-center gap-x-3">
+  return <div className="photo-upload-container" role="region" aria-label="Photo upload section">
+      <div className="flex items-center gap-x-3 my-[10px] py-[10px]">
         <PhotoPreview photoPreview={photoPreview} onClick={handlePhotoClick} />
-        <Button 
-          type="button" 
-          variant="outline" 
-          size="sm"
-          onClick={handlePhotoClick}
-          aria-label={photoPreview ? "Change the uploaded photo" : "Upload a new photo"}
-        >
+        <Button type="button" variant="outline" size="sm" onClick={handlePhotoClick} aria-label={photoPreview ? "Change the uploaded photo" : "Upload a new photo"}>
           {photoPreview ? 'Change Photo' : 'Upload Photo'}
         </Button>
-        <input 
-          type="file" 
-          ref={fileInputRef} 
-          className="hidden" 
-          accept="image/*"
-          onChange={handleFileChange}
-          aria-label="Upload photo"
-          aria-hidden="true"
-          tabIndex={-1}
-        />
+        <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} aria-label="Upload photo" aria-hidden="true" tabIndex={-1} />
       </div>
       <FormDescription className="mt-1">
         Upload a photo of the scammer, if available.
       </FormDescription>
-    </div>
-  );
+    </div>;
 };
 
 // Memoize the component to prevent unnecessary re-renders
