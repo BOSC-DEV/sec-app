@@ -15,13 +15,15 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
 import { 
   Megaphone, 
   Calendar, 
   AlertCircle, 
   Eye, 
   ChevronLeft, 
-  ChevronRight
+  ChevronRight,
+  Search
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
@@ -46,6 +48,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   const [viewedAnnouncements, setViewedAnnouncements] = useState<Set<string>>(new Set());
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Edit dialog state
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -70,6 +73,25 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
     queryKey: ['announcements'],
     queryFn: getAnnouncements,
   });
+  
+  // Filter announcements based on search query
+  const filteredAnnouncements = React.useMemo(() => {
+    if (!searchQuery.trim()) return announcements;
+    
+    const query = searchQuery.toLowerCase();
+    return announcements.filter(announcement => 
+      announcement.content.toLowerCase().includes(query) || 
+      announcement.author_name.toLowerCase().includes(query) ||
+      (announcement.author_username && announcement.author_username.toLowerCase().includes(query))
+    );
+  }, [searchQuery, announcements]);
+  
+  // Reset current index when filtered announcements change
+  useEffect(() => {
+    if (currentIndex >= filteredAnnouncements.length && filteredAnnouncements.length > 0) {
+      setCurrentIndex(0);
+    }
+  }, [filteredAnnouncements.length, currentIndex]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -181,15 +203,15 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   };
   
   const handlePrevAnnouncement = () => {
-    setCurrentIndex(prev => (prev > 0 ? prev - 1 : announcements.length - 1));
+    setCurrentIndex(prev => (prev > 0 ? prev - 1 : filteredAnnouncements.length - 1));
   };
   
   const handleNextAnnouncement = () => {
-    setCurrentIndex(prev => (prev < announcements.length - 1 ? prev + 1 : 0));
+    setCurrentIndex(prev => (prev < filteredAnnouncements.length - 1 ? prev + 1 : 0));
   };
   
   useEffect(() => {
-    if (!announcements.length) return;
+    if (!filteredAnnouncements.length) return;
     
     const observer = new IntersectionObserver(
       (entries) => {
@@ -212,14 +234,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
     return () => {
       elements.forEach(el => observer.unobserve(el));
     };
-  }, [announcements, viewedAnnouncements]);
-  
-  // Reset the current index when the number of announcements changes
-  useEffect(() => {
-    if (currentIndex >= announcements.length && announcements.length > 0) {
-      setCurrentIndex(0);
-    }
-  }, [announcements.length, currentIndex]);
+  }, [filteredAnnouncements, viewedAnnouncements]);
   
   if (isLoading) {
     return (
@@ -332,6 +347,29 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   
   return (
     <div className="space-y-6">
+      {/* Search input */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search announcements..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9"
+        />
+      </div>
+      
+      {filteredAnnouncements.length === 0 && searchQuery !== '' && (
+        <Card className="bg-muted/50">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-xl font-medium text-center">No Matching Announcements</h3>
+            <p className="text-muted-foreground text-center mt-1">
+              No announcements match your search query "{searchQuery}"
+            </p>
+          </CardContent>
+        </Card>
+      )}
+      
       {isAdmin && (
         <Card>
           <CardHeader className="pb-3">
@@ -364,7 +402,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         <>
           <Carousel className="w-full">
             <CarouselContent>
-              {announcements.map((announcement) => (
+              {filteredAnnouncements.map((announcement) => (
                 <CarouselItem key={announcement.id}>
                   {renderAnnouncementCard(announcement)}
                 </CarouselItem>
@@ -374,12 +412,12 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
             <CarouselNext className="right-2" />
           </Carousel>
           <div className="text-center text-muted-foreground text-sm">
-            {currentIndex + 1} of {announcements.length} announcements
+            {currentIndex + 1} of {filteredAnnouncements.length} announcements
           </div>
         </>
       ) : (
         <div className="space-y-4">
-          {announcements.map(renderAnnouncementCard)}
+          {filteredAnnouncements.map(renderAnnouncementCard)}
         </div>
       )}
       
