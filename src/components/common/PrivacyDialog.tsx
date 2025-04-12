@@ -1,28 +1,16 @@
-
 import React from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogClose
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
 interface PrivacyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-const PrivacyDialog: React.FC<PrivacyDialogProps> = ({ 
-  open, 
-  onOpenChange 
+const PrivacyDialog: React.FC<PrivacyDialogProps> = ({
+  open,
+  onOpenChange
 }) => {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+  return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-serif text-icc-blue">Privacy Policy</DialogTitle>
@@ -127,12 +115,10 @@ const PrivacyDialog: React.FC<PrivacyDialogProps> = ({
         </ScrollArea>
         <DialogFooter>
           <DialogClose asChild>
-            <Button className="bg-icc-blue hover:bg-icc-blue-dark">I Understand</Button>
+            <Button className="bg-neutral-50">I Understand</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
-
 export default PrivacyDialog;
