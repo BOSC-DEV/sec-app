@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -274,6 +273,22 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   }
   
   const renderAnnouncementCard = (announcement: Announcement) => {
+    const formatTimeStamp = (dateString: string) => {
+      const distance = formatDistanceToNow(new Date(dateString), { addSuffix: true });
+      
+      if (distance.includes('second')) return distance.replace(' seconds ago', 's').replace(' second ago', 's');
+      if (distance.includes('minute')) return distance.replace(' minutes ago', 'm').replace(' minute ago', 'm');
+      if (distance.includes('hour')) return distance.replace(' hours ago', 'h').replace(' hour ago', 'h');
+      if (distance.includes('day')) return distance.replace(' days ago', 'd').replace(' day ago', 'd');
+      if (distance.includes('week')) return distance.replace(' weeks ago', 'w').replace(' week ago', 'w');
+      if (distance.includes('month')) return distance.replace(' months ago', 'mo').replace(' month ago', 'mo');
+      if (distance.includes('year')) return distance.replace(' years ago', 'y').replace(' year ago', 'y');
+      
+      return distance;
+    };
+
+    const time = formatTimeStamp(announcement.created_at);
+
     const cardContent = (
       <Card 
         key={announcement.id} 
@@ -318,7 +333,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
             
             <div className="flex items-center text-muted-foreground text-sm">
               <Calendar className="h-3 w-3 mr-1" />
-              {formatDistanceToNow(new Date(announcement.created_at), { addSuffix: true })}
+              {time}
             </div>
           </div>
         </CardHeader>
