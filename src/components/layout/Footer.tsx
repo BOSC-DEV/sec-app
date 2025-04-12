@@ -66,7 +66,7 @@ const Footer = () => {
               <li>
                 <button 
                   onClick={() => setAboutOpen(true)} 
-                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left"
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full"
                 >
                   About SEC
                 </button>
@@ -74,7 +74,7 @@ const Footer = () => {
               <li>
                 <button 
                   onClick={() => setFaqOpen(true)} 
-                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left"
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full"
                 >
                   FAQ
                 </button>
@@ -82,7 +82,7 @@ const Footer = () => {
               <li>
                 <button 
                   onClick={() => setContactOpen(true)} 
-                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left"
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full"
                 >
                   Contact Us
                 </button>
@@ -90,7 +90,7 @@ const Footer = () => {
               <li>
                 <button 
                   onClick={() => setSafetyOpen(true)} 
-                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left"
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full"
                 >
                   Safety Guidelines
                 </button>
@@ -104,7 +104,7 @@ const Footer = () => {
               <li>
                 <button 
                   onClick={() => setTermsOpen(true)} 
-                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left"
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full"
                 >
                   Terms of Service
                 </button>
@@ -112,7 +112,7 @@ const Footer = () => {
               <li>
                 <button 
                   onClick={() => setPrivacyOpen(true)} 
-                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left"
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full"
                 >
                   Privacy Policy
                 </button>
@@ -120,7 +120,7 @@ const Footer = () => {
               <li>
                 <button 
                   onClick={() => setDisclaimerOpen(true)} 
-                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left"
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full"
                 >
                   Disclaimer
                 </button>
@@ -128,7 +128,7 @@ const Footer = () => {
               <li>
                 <button 
                   onClick={() => setCookiesOpen(true)} 
-                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left"
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full"
                 >
                   Cookie Policy
                 </button>

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -58,7 +59,7 @@ const ContactDialog: React.FC<ContactDialogProps> = ({
                 gov@sec.digital
                 {copied ? <Check className="ml-2 h-4 w-4 text-green-500" /> : <Copy className="ml-2 h-4 w-4" />}
               </button>
-              <p className="mt-2 text-zinc-50">
+              <p className="mt-2 text-zinc-600">
                 For general questions, partnership opportunities, and other inquiries
               </p>
             </div>
@@ -110,7 +111,7 @@ const ContactDialog: React.FC<ContactDialogProps> = ({
         </ScrollArea>
         <DialogFooter>
           <DialogClose asChild>
-            <Button className="bg-neutral-50">Close</Button>
+            <Button variant="neutral">Close</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>
