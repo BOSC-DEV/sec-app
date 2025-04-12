@@ -12,18 +12,15 @@ import { getConnection } from '@/utils/phantomWallet';
 
 // SEC token mint address
 const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump');
-
 interface WalletBalanceProps {
   walletAddress?: string | null;
 }
-
 const WalletBalance: React.FC<WalletBalanceProps> = ({
   walletAddress
 }) => {
   const [solBalance, setSolBalance] = useState<number | null>(null);
   const [secBalance, setSecBalance] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
   const fetchSolBalance = async (address: string) => {
     try {
       const connection = getConnection();
@@ -35,7 +32,6 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
       return 0;
     }
   };
-
   const fetchSecBalance = async (address: string) => {
     try {
       const connection = getConnection();
@@ -60,7 +56,6 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
       return 0;
     }
   };
-
   const fetchBalances = async () => {
     if (!walletAddress) return;
     setIsLoading(true);
@@ -80,13 +75,11 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
       setIsLoading(false);
     }
   };
-
   useEffect(() => {
     if (walletAddress) {
       fetchBalances();
     }
   }, [walletAddress]);
-
   const handleRefresh = () => {
     fetchBalances();
     toast({
@@ -94,7 +87,6 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
       description: 'Updating wallet balances...'
     });
   };
-
   const formatBalance = (balance: number | null): string => {
     if (balance === null) return '-';
     return balance.toLocaleString(undefined, {
@@ -102,67 +94,45 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
       maximumFractionDigits: 6
     });
   };
-
-  return (
-    <Card className="w-full dark:border-gray-700">
+  return <Card className="w-full dark:border-gray-700">
       <CardHeader>
         <div className="flex justify-between items-center">
           <div>
-            <CardTitle className="text-lg dark:text-white">Wallet Balance</CardTitle>
+            <CardTitle className="text-lg dark:text-white">Balance</CardTitle>
             <CardDescription className="dark:text-gray-400">Current balances in your wallet</CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        {walletAddress ? (
-          <div className="space-y-6">
+        {walletAddress ? <div className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* SOL Balance */}
               <div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:bg-gray-800 rounded-xl p-4 border border-blue-100 dark:border-none shadow-sm">
                 <div className="text-sm text-gray-500 dark:text-gray-300 mb-1">SOL Balance</div>
-                {isLoading ? (
-                  <Skeleton className="h-7 w-24 dark:bg-gray-700" />
-                ) : (
-                  <div className="font-mono text-xl font-bold text-blue-700 dark:text-white">
+                {isLoading ? <Skeleton className="h-7 w-24 dark:bg-gray-700" /> : <div className="font-mono text-xl font-bold text-blue-700 dark:text-white">
                     {formatBalance(solBalance)} <span className="text-xs font-normal">SOL</span>
-                  </div>
-                )}
+                  </div>}
               </div>
 
               {/* SEC Balance */}
               <div className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:bg-gray-800 rounded-xl p-4 border border-amber-100 dark:border-none shadow-sm">
                 <div className="text-sm text-gray-500 dark:text-gray-300 mb-1">SEC Balance</div>
-                {isLoading ? (
-                  <Skeleton className="h-7 w-24 dark:bg-gray-700" />
-                ) : (
-                  <div className="font-mono text-xl font-bold text-amber-700 dark:text-white">
+                {isLoading ? <Skeleton className="h-7 w-24 dark:bg-gray-700" /> : <div className="font-mono text-xl font-bold text-amber-700 dark:text-white">
                     {formatBalance(secBalance)} <span className="text-xs font-normal">SEC</span>
-                  </div>
-                )}
+                  </div>}
               </div>
             </div>
 
             <div className="flex justify-center">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="text-xs flex items-center gap-1 dark:border-gray-700 dark:text-gray-300" 
-                onClick={handleRefresh} 
-                disabled={isLoading}
-              >
+              <Button variant="outline" size="sm" className="text-xs flex items-center gap-1 dark:border-gray-700 dark:text-gray-300" onClick={handleRefresh} disabled={isLoading}>
                 <RefreshCw className="h-3 w-3" />
                 {isLoading ? 'Refreshing...' : 'Refresh Balances'}
               </Button>
             </div>
-          </div>
-        ) : (
-          <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+          </div> : <div className="text-center py-6 text-gray-500 dark:text-gray-400">
             No wallet connected
-          </div>
-        )}
+          </div>}
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default WalletBalance;
