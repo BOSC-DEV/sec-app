@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { KeyboardEvent } from 'react';
 import { Control, FieldErrors, UseFormSetValue, useWatch } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,6 +36,13 @@ const DynamicFieldArray = ({
     }
   };
 
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>, isLastField: boolean) => {
+    if (event.key === 'Enter' && isLastField) {
+      event.preventDefault();
+      addField();
+    }
+  };
+
   return (
     <div className="space-y-4 mb-4">
       <FormLabel>{label}</FormLabel>
@@ -48,7 +55,11 @@ const DynamicFieldArray = ({
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input placeholder={`Enter ${label.toLowerCase()}`} {...field} />
+                  <Input 
+                    placeholder={`Enter ${label.toLowerCase()}`} 
+                    {...field} 
+                    onKeyDown={(e) => handleKeyDown(e, index === fieldValues.length - 1)}
+                  />
                 </FormControl>
                 <div className="flex justify-between mt-2">
                   {index === fieldValues.length - 1 && (
