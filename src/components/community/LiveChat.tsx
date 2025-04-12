@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,7 +15,8 @@ import {
   Smile, 
   AlertCircle, 
   Download,
-  Info
+  Info,
+  X
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
@@ -200,7 +200,6 @@ const LiveChat = () => {
         setMessages(data);
         setIsLoading(false);
         
-        // Fetch bounty info for all message authors
         const uniqueAuthors = new Set(data.map(message => message.author_id));
         uniqueAuthors.forEach(authorId => {
           if (authorId) fetchUserBounty(authorId);
@@ -224,7 +223,6 @@ const LiveChat = () => {
         payload => {
           setMessages(prev => [...prev, payload.new as ChatMessage]);
           
-          // Fetch bounty for new message author
           if (payload.new.author_id) {
             fetchUserBounty(payload.new.author_id);
           }
@@ -408,7 +406,7 @@ const LiveChat = () => {
                   className="absolute top-1 right-1 h-6 w-6 rounded-full bg-background/80"
                   onClick={removeImage}
                 >
-                  <AlertCircle className="h-4 w-4" />
+                  <X className="h-4 w-4" />
                 </Button>
               </div>
             )}
