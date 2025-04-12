@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Notification, NotificationType, EntityType } from '@/types/dataTypes';
 import { handleError } from '@/utils/errorHandling';
@@ -131,6 +130,78 @@ export const createNotification = async (notification: Omit<Notification, 'id' |
   } catch (error) {
     handleError(error, 'Error creating notification');
     return null;
+  }
+};
+
+// Get all active user IDs
+export const getAllUserIds = async (): Promise<string[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('wallet_address');
+      
+    if (error) {
+      console.error("Error fetching user IDs:", error);
+      return [];
+    }
+    
+    return data.map(profile => profile.wallet_address) || [];
+  } catch (error) {
+    handleError(error, 'Error fetching all user IDs');
+    return [];
+  }
+};
+
+// Notify all users about a new announcement
+export const notifyAllUsersAboutAnnouncement = async (
+  announcementId: string,
+  announcementContent: string,
+  actorId: string,
+  actorName: string,
+  actorUsername?: string,
+  actorProfilePic?: string
+): Promise<void> => {
+  try {
+    console.log(`Creating announcement notifications from ${actorName} to all users`);
+    
+    // Get all user IDs
+    const userIds = await getAllUserIds();
+    
+    // Truncate content for the notification
+    const truncatedContent = announcementContent.replace(/<[^>]*>?/gm, '').substring(0, 100) + '...';
+    
+    // Create a batch of notifications (one per user)
+    const notifications = userIds
+      .filter(userId => userId !== actorId) // Don't notify the actor
+      .map(userId => ({
+        recipient_id: userId,
+        type: NotificationType.SYSTEM,
+        content: `New announcement from ${actorName}: ${truncatedContent}`,
+        entity_id: announcementId,
+        entity_type: EntityType.ANNOUNCEMENT,
+        actor_id: actorId,
+        actor_name: actorName,
+        actor_username: actorUsername,
+        actor_profile_pic: actorProfilePic,
+        is_read: false
+      }));
+    
+    // Insert notifications in batches (to avoid payload size limitations)
+    const batchSize = 50;
+    for (let i = 0; i < notifications.length; i += batchSize) {
+      const batch = notifications.slice(i, i + batchSize);
+      const { error } = await supabase
+        .from('notifications')
+        .insert(batch);
+        
+      if (error) {
+        console.error(`Error creating batch of announcement notifications (${i}-${i+batchSize}):`, error);
+      }
+    }
+    
+    console.log(`Created ${notifications.length} announcement notifications`);
+  } catch (error) {
+    console.error('Error notifying users about announcement:', error);
   }
 };
 

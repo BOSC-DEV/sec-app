@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -9,6 +10,7 @@ import {
   editAnnouncement,
   isUserAdmin
 } from '@/services/communityService';
+import { notifyAllUsersAboutAnnouncement } from '@/services/notificationService';
 import { Announcement } from '@/types/dataTypes';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -112,7 +114,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
     setIsSubmitting(true);
     
     try {
-      await createAnnouncement({
+      const createdAnnouncement = await createAnnouncement({
         content: newAnnouncement,
         author_id: profile?.wallet_address || '',
         author_name: profile?.display_name || '',
@@ -120,14 +122,28 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         author_profile_pic: profile?.profile_pic_url || '',
       });
       
+      if (createdAnnouncement) {
+        // Notify all users about the new announcement
+        await notifyAllUsersAboutAnnouncement(
+          createdAnnouncement.id,
+          createdAnnouncement.content,
+          profile?.wallet_address || '',
+          profile?.display_name || '',
+          profile?.username,
+          profile?.profile_pic_url
+        );
+        
+        toast({
+          title: "Announcement posted",
+          description: "Your announcement has been posted and all users have been notified",
+          variant: "default",
+        });
+      } else {
+        throw new Error("Failed to create announcement");
+      }
+      
       setNewAnnouncement('');
       refetch();
-      
-      toast({
-        title: "Announcement posted",
-        description: "Your announcement has been posted successfully",
-        variant: "default",
-      });
     } catch (error) {
       console.error('Error posting announcement:', error);
       toast({
