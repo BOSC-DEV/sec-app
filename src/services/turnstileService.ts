@@ -1,9 +1,10 @@
+
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { handleError, ErrorSeverity } from '@/utils/errorHandling';
 
 // Cloudflare Turnstile site key - replace with your actual production site key
-export const TURNSTILE_SITE_KEY = 'YOUR_ACTUAL_PRODUCTION_SITE_KEY'; // Update this with your real site key
+export const TURNSTILE_SITE_KEY = '0x4AAAAAAAAD5xpGURgHzfRc'; // Update this with your real site key
 
 /**
  * Verifies a Cloudflare Turnstile token
