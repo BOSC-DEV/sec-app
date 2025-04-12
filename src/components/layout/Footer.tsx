@@ -59,10 +59,9 @@ const Footer = () => {
               </a>
               <button
                 onClick={copyToClipboard}
-                className="text-white hover:text-icc-gold dark:text-gray-300 dark:hover:text-icc-gold flex items-center space-x-1"
+                className="text-white hover:text-icc-gold dark:text-gray-300 dark:hover:text-icc-gold flex items-center"
                 aria-label="Copy Contract Address"
               >
-                <span>Ca</span>
                 <Copy className="h-4 w-4" />
               </button>
             </div>
