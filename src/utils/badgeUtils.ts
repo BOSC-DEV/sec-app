@@ -1,3 +1,4 @@
+
 // Badge tier thresholds based on SEC coin holdings
 // Total supply: 1,000,000,000 SEC
 
@@ -10,6 +11,8 @@ export enum BadgeTier {
   KING_COBRA = 'King Cobra',
   BULL_SHARK = 'Bull Shark',
   GREAT_APE = 'Great Ape',
+  GOLDEN_EAGLE = 'Golden Eagle',
+  TREX = 'T-Rex',
   BLUE_WHALE = 'Blue Whale'
 }
 
@@ -33,6 +36,8 @@ export const BADGE_TIERS: { [key in BadgeTier]: { minPercent: number, color: str
   [BadgeTier.KING_COBRA]: { minPercent: 0.06, color: 'text-green-600 bg-green-100 border-green-200 dark:bg-green-900/20 dark:border-green-800', icon: '🐍' },
   [BadgeTier.BULL_SHARK]: { minPercent: 0.1, color: 'text-indigo-500 bg-indigo-100 border-indigo-200 dark:bg-indigo-900/20 dark:border-indigo-800', icon: '🦈' },
   [BadgeTier.GREAT_APE]: { minPercent: 0.3, color: 'text-amber-700 bg-amber-100 border-amber-200 dark:bg-amber-900/20 dark:border-amber-700', icon: '🦍' },
+  [BadgeTier.GOLDEN_EAGLE]: { minPercent: 0.2, color: 'text-amber-500 bg-amber-100/70 border-amber-300 dark:bg-amber-800/30 dark:border-amber-600', icon: '🦅' },
+  [BadgeTier.TREX]: { minPercent: 0.5, color: 'text-green-700 bg-green-100/70 border-green-300 dark:bg-green-800/30 dark:border-green-600', icon: '🦖' },
   [BadgeTier.BLUE_WHALE]: { minPercent: 1.0, color: 'text-icc-gold bg-icc-gold/10 border-icc-gold/30 dark:bg-icc-gold/20', icon: '🐳' }
 };
 
@@ -83,6 +88,8 @@ export const getBadgeTier = (secHolding: number): BadgeTier => {
   const holdingPercent = (secHolding / TOTAL_SEC_SUPPLY) * 100;
   
   if (holdingPercent >= BADGE_TIERS[BadgeTier.BLUE_WHALE].minPercent) return BadgeTier.BLUE_WHALE;
+  if (holdingPercent >= BADGE_TIERS[BadgeTier.TREX].minPercent) return BadgeTier.TREX;
+  if (holdingPercent >= BADGE_TIERS[BadgeTier.GOLDEN_EAGLE].minPercent) return BadgeTier.GOLDEN_EAGLE;
   if (holdingPercent >= BADGE_TIERS[BadgeTier.GREAT_APE].minPercent) return BadgeTier.GREAT_APE;
   if (holdingPercent >= BADGE_TIERS[BadgeTier.BULL_SHARK].minPercent) return BadgeTier.BULL_SHARK;
   if (holdingPercent >= BADGE_TIERS[BadgeTier.KING_COBRA].minPercent) return BadgeTier.KING_COBRA;
