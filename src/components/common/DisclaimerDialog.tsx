@@ -1,11 +1,14 @@
+
 import React from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+
 interface DisclaimerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
 const DisclaimerDialog: React.FC<DisclaimerDialogProps> = ({
   open,
   onOpenChange
@@ -111,10 +114,11 @@ const DisclaimerDialog: React.FC<DisclaimerDialogProps> = ({
         </ScrollArea>
         <DialogFooter>
           <DialogClose asChild>
-            <Button className="bg-neutral-50">I Understand</Button>
+            <Button variant="neutral" className="text-icc-blue hover:bg-gray-100">I Understand</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>;
 };
+
 export default DisclaimerDialog;

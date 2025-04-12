@@ -3,11 +3,13 @@ import React from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Shield, Lock, AlertTriangle, Search, ClipboardCheck, Scale, Wallet, FileText, BadgeHelp, BookOpen } from 'lucide-react';
+import { Shield } from 'lucide-react';
+
 interface SafetyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
 const SafetyDialog: React.FC<SafetyDialogProps> = ({
   open,
   onOpenChange
@@ -153,10 +155,11 @@ const SafetyDialog: React.FC<SafetyDialogProps> = ({
         </ScrollArea>
         <DialogFooter className="mt-4">
           <DialogClose asChild>
-            <Button className="bg-neutral-50">I Understand</Button>
+            <Button variant="neutral" className="text-icc-blue hover:bg-gray-100">I Understand</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>;
 };
+
 export default SafetyDialog;

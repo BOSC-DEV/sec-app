@@ -1,12 +1,15 @@
+
 import React from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { HelpCircle, UserCheck, Search, FileText, Wallet, CheckCircle, List, DollarSign, UserCircle, AlertTriangle, Scale, TrendingUp, Globe, BadgeHelp, Shield } from 'lucide-react';
+import { HelpCircle } from 'lucide-react';
+
 interface FAQDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
 const FAQDialog: React.FC<FAQDialogProps> = ({
   open,
   onOpenChange
@@ -247,10 +250,11 @@ const FAQDialog: React.FC<FAQDialogProps> = ({
         </ScrollArea>
         <DialogFooter>
           <DialogClose asChild>
-            <Button className="bg-neutral-50">Close</Button>
+            <Button variant="neutral" className="text-icc-blue hover:bg-gray-100">Close</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>;
 };
+
 export default FAQDialog;

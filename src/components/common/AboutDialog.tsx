@@ -1,12 +1,15 @@
+
 import React from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ShieldCheck, Globe, BookOpen } from 'lucide-react';
+
 interface AboutDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
 const AboutDialog: React.FC<AboutDialogProps> = ({
   open,
   onOpenChange
@@ -139,10 +142,11 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
         </ScrollArea>
         <DialogFooter>
           <DialogClose asChild>
-            <Button className="bg-neutral-50">Close</Button>
+            <Button variant="neutral" className="text-icc-blue hover:bg-gray-100">Close</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>;
 };
+
 export default AboutDialog;
