@@ -24,6 +24,7 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
   const {
     disconnectWallet
   } = useProfile();
+  // Ensure we're using the secBalance directly here
   const badgeInfo = useBadgeTier(secBalance);
 
   const copyWalletAddress = () => {

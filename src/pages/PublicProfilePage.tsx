@@ -61,7 +61,8 @@ const PublicProfilePage = () => {
     enabled: !!profile?.wallet_address
   });
   
-  const badgeInfo = useBadgeTier(profile?.wallet_address ? bountyContributions?.totalBountyAmount || 0 : null);
+  const badgeInfo = useBadgeTier(profile?.wallet_address ? 
+    (bountyContributions?.totalBountyAmount || 0) : null);
   
   const {
     data: scammerReports,

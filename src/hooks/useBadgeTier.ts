@@ -12,7 +12,9 @@ export const useBadgeTier = (secBalance: number | null): BadgeInfo | null => {
   
   useEffect(() => {
     if (secBalance !== null && secBalance !== undefined) {
-      setBadgeInfo(calculateBadgeTier(secBalance));
+      // Ensure we're using the same calculation logic everywhere
+      const calculatedBadgeInfo = calculateBadgeTier(secBalance);
+      setBadgeInfo(calculatedBadgeInfo);
     }
   }, [secBalance]);
   
