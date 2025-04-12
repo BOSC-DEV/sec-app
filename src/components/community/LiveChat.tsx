@@ -541,7 +541,7 @@ const LiveChat = () => {
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 disabled={isSubmitting || (slowModeCountdown > 0 && !isAdmin)}
-                className="flex-1 min-h-[40px] max-h-[100px]"
+                className="flex-1 min-h-[40px] max-h-[100px] text-xs leading-tight"
                 rows={1}
               />
               
