@@ -217,7 +217,7 @@ const PublicProfilePage = () => {
                                            dark:border-icc-blue-light dark:text-white dark:hover:bg-icc-blue-dark dark:hover:text-white"
                             >
                               <Edit size={16} />
-                              Edit Profile
+                              Edit
                             </Button>
                             <Button 
                               variant="outline" 
