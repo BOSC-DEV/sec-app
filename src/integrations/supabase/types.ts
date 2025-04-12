@@ -280,39 +280,6 @@ export type Database = {
           },
         ]
       }
-      key_updates: {
-        Row: {
-          category: string
-          created_at: string | null
-          description: string
-          expires_at: string | null
-          id: string
-          importance: string | null
-          is_pinned: boolean | null
-          title: string
-        }
-        Insert: {
-          category: string
-          created_at?: string | null
-          description: string
-          expires_at?: string | null
-          id?: string
-          importance?: string | null
-          is_pinned?: boolean | null
-          title: string
-        }
-        Update: {
-          category?: string
-          created_at?: string | null
-          description?: string
-          expires_at?: string | null
-          id?: string
-          importance?: string | null
-          is_pinned?: boolean | null
-          title?: string
-        }
-        Relationships: []
-      }
       leaderboard_stats: {
         Row: {
           id: string
@@ -506,45 +473,6 @@ export type Database = {
           shares?: number | null
           views?: number | null
           wallet_addresses?: string[] | null
-        }
-        Relationships: []
-      }
-      support_tickets: {
-        Row: {
-          assigned_to: string | null
-          created_at: string | null
-          description: string
-          id: string
-          priority: string | null
-          resolution_notes: string | null
-          status: string | null
-          subject: string
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          assigned_to?: string | null
-          created_at?: string | null
-          description: string
-          id?: string
-          priority?: string | null
-          resolution_notes?: string | null
-          status?: string | null
-          subject: string
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          assigned_to?: string | null
-          created_at?: string | null
-          description?: string
-          id?: string
-          priority?: string | null
-          resolution_notes?: string | null
-          status?: string | null
-          subject?: string
-          updated_at?: string | null
-          user_id?: string
         }
         Relationships: []
       }
