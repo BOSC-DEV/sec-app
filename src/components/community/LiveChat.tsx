@@ -34,6 +34,7 @@ import { calculateBadgeTier } from '@/utils/badgeUtils';
 import { getUserTotalBountyAmount } from '@/services/bountyService';
 
 const SLOW_MODE_DELAY = 30; // 30 seconds
+const SLOW_MODE_STORAGE_KEY = 'chat_slow_mode';
 
 const LiveChat = () => {
   const { profile, isConnected } = useProfile();
@@ -46,6 +47,7 @@ const LiveChat = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userBounties, setUserBounties] = useState<Record<string, number>>({});
   const [slowModeCountdown, setSlowModeCountdown] = useState(0);
+  const [slowModeExpiry, setSlowModeExpiry] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const slowModeTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -62,6 +64,53 @@ const LiveChat = () => {
     
     checkAdmin();
   }, [profile?.username]);
+  
+  // Initialize slow mode from localStorage on component mount
+  useEffect(() => {
+    const loadSlowModeState = () => {
+      if (isAdmin) return; // Admins don't need slow mode
+      
+      try {
+        const storedData = localStorage.getItem(SLOW_MODE_STORAGE_KEY);
+        if (storedData) {
+          const { expiry, userId } = JSON.parse(storedData);
+          
+          // Only use the stored value if it belongs to the current user
+          if (userId === profile?.wallet_address && expiry > Date.now()) {
+            const remainingSeconds = Math.ceil((expiry - Date.now()) / 1000);
+            setSlowModeCountdown(remainingSeconds);
+            setSlowModeExpiry(expiry);
+          } else if (userId !== profile?.wallet_address || expiry <= Date.now()) {
+            // Clear expired or different user's data
+            localStorage.removeItem(SLOW_MODE_STORAGE_KEY);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading slow mode state:', error);
+        localStorage.removeItem(SLOW_MODE_STORAGE_KEY);
+      }
+    };
+    
+    if (profile?.wallet_address) {
+      loadSlowModeState();
+    }
+  }, [profile?.wallet_address, isAdmin]);
+  
+  // Save slow mode state to localStorage whenever it changes
+  useEffect(() => {
+    if (slowModeExpiry && slowModeCountdown > 0 && profile?.wallet_address && !isAdmin) {
+      try {
+        localStorage.setItem(SLOW_MODE_STORAGE_KEY, JSON.stringify({
+          expiry: slowModeExpiry,
+          userId: profile.wallet_address
+        }));
+      } catch (error) {
+        console.error('Error saving slow mode state:', error);
+      }
+    } else if (slowModeCountdown === 0 && !isAdmin) {
+      localStorage.removeItem(SLOW_MODE_STORAGE_KEY);
+    }
+  }, [slowModeExpiry, slowModeCountdown, profile?.wallet_address, isAdmin]);
   
   // Slow mode countdown effect
   useEffect(() => {
@@ -130,7 +179,9 @@ const LiveChat = () => {
       
       // Start slow mode countdown for non-admins
       if (!isAdmin) {
+        const expiryTime = Date.now() + (SLOW_MODE_DELAY * 1000);
         setSlowModeCountdown(SLOW_MODE_DELAY);
+        setSlowModeExpiry(expiryTime);
       }
       
     } catch (error) {
