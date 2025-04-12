@@ -160,26 +160,53 @@ const Header = () => {
                   <Wallet className="h-4 w-4" />
                   {/* Always use just wallet icon on mobile */}
                 </Button>
+                {/* Add burger menu button for mobile */}
+                {isMobile && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-white hover:bg-icc-blue-light md:hidden"
+                    onClick={toggleMenu}
+                    aria-label="Menu"
+                  >
+                    {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                  </Button>
+                )}
               </div>
             ) : (
-              <Button 
-                variant="gold"
-                size="sm"
-                className="flex items-center gap-2"
-                onClick={connectWallet}
-              >
-                {isMobile ? <Wallet className="h-4 w-4" /> : (
-                  <>
-                    <LogIn className="h-4 w-4" />
-                    Connect Wallet
-                  </>
+              <div className="flex items-center space-x-3">
+                <Button 
+                  variant="gold"
+                  size="sm"
+                  className="flex items-center gap-2"
+                  onClick={connectWallet}
+                >
+                  {isMobile ? <Wallet className="h-4 w-4" /> : (
+                    <>
+                      <LogIn className="h-4 w-4" />
+                      Connect Wallet
+                    </>
+                  )}
+                </Button>
+                {/* Add burger menu button for mobile when not connected */}
+                {isMobile && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-white hover:bg-icc-blue-light md:hidden"
+                    onClick={toggleMenu}
+                    aria-label="Menu"
+                  >
+                    {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                  </Button>
                 )}
-              </Button>
+              </div>
             )}
           </div>
         </div>
       </div>
 
+      {/* Mobile menu */}
       {isMenuOpen && (
         <div className="md:hidden bg-icc-blue-light">
           <div className="icc-container py-4">
