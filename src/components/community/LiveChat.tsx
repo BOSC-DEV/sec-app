@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -219,11 +218,13 @@ const LiveChat = () => {
     const formatTimeStamp = (dateString: string) => {
       const distance = formatDistanceToNow(new Date(dateString), { addSuffix: false });
       
+      if (distance.includes('second') || distance.includes('minute ago')) {
+        return '1m';
+      }
+      
       if (distance.includes('about')) {
         const cleanedDistance = distance.replace('about ', '');
         
-        if (cleanedDistance.includes('second')) return cleanedDistance.replace(' seconds', 's').replace(' second', 's');
-        if (cleanedDistance.includes('minute')) return cleanedDistance.replace(' minutes', 'm').replace(' minute', 'm');
         if (cleanedDistance.includes('hour')) return cleanedDistance.replace(' hours', 'h').replace(' hour', 'h');
         if (cleanedDistance.includes('day')) return cleanedDistance.replace(' days', 'd').replace(' day', 'd');
         if (cleanedDistance.includes('week')) return cleanedDistance.replace(' weeks', 'w').replace(' week', 'w');
@@ -233,8 +234,6 @@ const LiveChat = () => {
         return cleanedDistance;
       }
       
-      if (distance.includes('second')) return distance.replace(' seconds', 's').replace(' second', 's');
-      if (distance.includes('minute')) return distance.replace(' minutes', 'm').replace(' minute', 'm');
       if (distance.includes('hour')) return distance.replace(' hours', 'h').replace(' hour', 'h');
       if (distance.includes('day')) return distance.replace(' days', 'd').replace(' day', 'd');
       if (distance.includes('week')) return distance.replace(' weeks', 'w').replace(' week', 'w');
