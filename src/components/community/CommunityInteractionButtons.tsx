@@ -1,4 +1,5 @@
-import React, { useState, useEffect, ReactElement } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Button } from '@/components/ui/button';
 import { ThumbsUp, ThumbsDown } from 'lucide-react';
@@ -16,7 +17,7 @@ import {
 } from '@/services/communityService';
 
 interface InteractionButtonProps {
-  icon: ReactElement;
+  icon: React.ReactNode;
   count: number;
   onClick?: () => void;
   isActive?: boolean;
@@ -35,15 +36,13 @@ export const InteractionButton: React.FC<InteractionButtonProps> = ({
     size="sm"
     className={`flex items-center gap-1 
       ${isActive 
-        ? 'text-white bg-gray-600 dark:bg-gray-700' 
-        : 'text-white/70 hover:bg-gray-600/20 dark:hover:bg-gray-700/20'
+        ? 'text-primary bg-gray-100 dark:bg-gray-800' 
+        : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
       }`}
     onClick={onClick}
     title={label}
   >
-    {React.cloneElement(icon, { 
-      className: 'text-gray-600' 
-    })}
+    {icon}
     <span>{count > 999 ? `${(count / 1000).toFixed(1)}k` : count}</span>
   </Button>
 );
