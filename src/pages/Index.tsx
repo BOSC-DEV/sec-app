@@ -10,10 +10,8 @@ import { useQuery } from '@tanstack/react-query';
 import { formatNumber } from '@/lib/utils';
 import DisclaimerDialog from '@/components/common/DisclaimerDialog';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
-
 const Index = () => {
   const [disclaimerOpen, setDisclaimerOpen] = useState(false);
-  
   const {
     data: topScammers = [],
     isLoading: isLoadingScammers,
@@ -22,7 +20,6 @@ const Index = () => {
     queryKey: ['topScammers'],
     queryFn: () => getTopScammers(3)
   });
-  
   const {
     data: statistics = {
       totalBounty: 0,
@@ -36,17 +33,13 @@ const Index = () => {
     queryKey: ['statistics'],
     queryFn: getStatistics
   });
-  
   if (scammersError) {
     console.error('Failed to load top scammers', scammersError);
   }
-  
   if (statsError) {
     console.error('Failed to load statistics', statsError);
   }
-  
-  return (
-    <div>
+  return <div>
       <Hero />
 
       <section className="icc-section bg-white dark:bg-gray-900">
@@ -56,24 +49,16 @@ const Index = () => {
             <p className="max-w-2xl mx-auto text-icc-gray dark:text-gray-300"></p>
           </div>
 
-          {isLoadingScammers ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[1, 2, 3].map(index => (
-                <div key={index} className="animate-pulse">
+          {isLoadingScammers ? <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[1, 2, 3].map(index => <div key={index} className="animate-pulse">
                   <div className="bg-gray-200 dark:bg-gray-700 aspect-square mb-4"></div>
                   <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
                   <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
                   <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {topScammers.map((scammer, index) => (
-                <ScammerCard key={scammer.id} scammer={scammer} rank={index} />
-              ))}
-            </div>
-          )}
+                </div>)}
+            </div> : <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {topScammers.map((scammer, index) => <ScammerCard key={scammer.id} scammer={scammer} rank={index} />)}
+            </div>}
 
           <div className="text-center mt-10">
             <Button asChild className="icc-btn-primary py-6 px-8 dark:text-white dark:hover:text-gray-200">
@@ -132,11 +117,7 @@ const Index = () => {
                 <p className="text-gray-100 max-w-2xl">This platform is for informational purposes only. Always verify and follow all legal channels for reporting crimes.</p>
               </div>
             </div>
-            <Button 
-              variant="outline" 
-              className="border-white text-white hover:bg-white/10 hover:text-white dark:border-gray-300 dark:text-gray-200" 
-              onClick={() => setDisclaimerOpen(true)}
-            >
+            <Button variant="outline" onClick={() => setDisclaimerOpen(true)} className="border-white text-white hover:text-white dark:border-gray-300 dark:text-gray-200 bg-slate-900 hover:bg-slate-800">
               Read Disclaimer
               <ExternalLink className="ml-2 h-4 w-4" />
             </Button>
@@ -147,17 +128,12 @@ const Index = () => {
       <section className="icc-section bg-white dark:bg-gray-900">
         <div className="icc-container">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {isLoadingStats ? (
-              <>
-                {[1, 2, 3, 4].map((_, index) => (
-                  <div key={index} className="text-center p-6">
+            {isLoadingStats ? <>
+                {[1, 2, 3, 4].map((_, index) => <div key={index} className="text-center p-6">
                     <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded-md mb-2 animate-pulse mx-auto w-3/4"></div>
                     <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded-md w-1/2 mx-auto animate-pulse"></div>
-                  </div>
-                ))}
-              </>
-            ) : (
-              <>
+                  </div>)}
+              </> : <>
                 <div className="text-center p-6">
                   <div className="text-4xl font-bold text-icc-blue dark:text-white mb-2 flex items-center justify-center">
                     <CurrencyIcon size="lg" className="mr-1" />{formatNumber(statistics.totalBounty)}
@@ -176,15 +152,12 @@ const Index = () => {
                   <div className="text-4xl font-bold text-icc-blue dark:text-white mb-2">{formatNumber(statistics.usersCount)}</div>
                   <div className="text-sm text-icc-gray dark:text-gray-400">Total Users</div>
                 </div>
-              </>
-            )}
+              </>}
           </div>
         </div>
       </section>
 
       <DisclaimerDialog open={disclaimerOpen} onOpenChange={setDisclaimerOpen} />
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
