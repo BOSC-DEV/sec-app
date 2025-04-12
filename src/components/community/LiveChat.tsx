@@ -260,11 +260,15 @@ const LiveChat = () => {
           
           <div className={`min-w-[180px] max-w-[75%] md:max-w-[60%] rounded-xl px-4 py-3 shadow-sm ${
             isCurrentUser 
-              ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-tr-none' 
+              ? 'bg-gradient-to-r from-icc-blue-light to-icc-blue dark:from-icc-blue/80 dark:to-icc-blue/90 text-white' 
               : 'bg-white dark:bg-slate-800 dark:border-slate-700 border border-gray-100 rounded-tl-none'
           }`}>
             <div className="flex items-center gap-1 mb-1 flex-wrap">
-              <span className={`font-semibold text-sm ${isCurrentUser ? 'text-white' : 'text-icc-gold'}`}>
+              <span className={`font-semibold text-sm ${
+                isCurrentUser 
+                  ? 'text-white' 
+                  : 'text-icc-gold'
+              }`}>
                 {message.author_name}
               </span>
               {userBadge && <BadgeTier badgeInfo={userBadge} size="sm" showTooltip={true} />}
@@ -295,8 +299,13 @@ const LiveChat = () => {
                 itemType="message"
                 initialLikes={message.likes}
                 initialDislikes={message.dislikes}
+                className={isCurrentUser ? 'text-white/80 hover:text-white' : ''}
               />
-              <span className={`text-xs ${isCurrentUser ? 'text-blue-100' : 'text-muted-foreground'}`}>
+              <span className={`text-xs ${
+                isCurrentUser 
+                  ? 'text-white/70' 
+                  : 'text-muted-foreground'
+              }`}>
                 {time}
               </span>
             </div>
@@ -426,4 +435,3 @@ const LiveChat = () => {
 };
 
 export default LiveChat;
-
