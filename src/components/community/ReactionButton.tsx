@@ -1,7 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
-import { toggleAnnouncementReaction, toggleChatMessageReaction, toggleReplyReaction } from '@/services/communityService';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Heart, Flame, PartyPopper, ThumbsUp, MessagesSquare } from 'lucide-react';
@@ -314,6 +312,172 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
       </div>
     </DropdownMenu>
   );
+};
+
+// Helper functions for reactions
+const toggleAnnouncementReaction = async (
+  announcementId: string,
+  userId: string,
+  reactionType: string,
+  userName: string,
+  userUsername?: string,
+  userProfilePic?: string
+): Promise<boolean> => {
+  try {
+    // Check if the user has already reacted with this reaction type
+    const { data: existingReaction, error: checkError } = await supabase
+      .from('announcement_reactions')
+      .select('*')
+      .eq('announcement_id', announcementId)
+      .eq('user_id', userId)
+      .eq('reaction_type', reactionType)
+      .single();
+      
+    if (checkError && checkError.code !== 'PGRST116') {
+      throw checkError;
+    }
+    
+    // If the reaction exists, remove it (toggle off)
+    if (existingReaction) {
+      const { error: deleteError } = await supabase
+        .from('announcement_reactions')
+        .delete()
+        .eq('id', existingReaction.id);
+        
+      if (deleteError) throw deleteError;
+    } 
+    // Otherwise, add the reaction (toggle on)
+    else {
+      const { error: insertError } = await supabase
+        .from('announcement_reactions')
+        .insert({
+          announcement_id: announcementId,
+          user_id: userId,
+          user_name: userName,
+          user_username: userUsername || null,
+          user_profile_pic: userProfilePic || null,
+          reaction_type: reactionType,
+          created_at: new Date().toISOString()
+        });
+        
+      if (insertError) throw insertError;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error toggling announcement reaction:', error);
+    return false;
+  }
+};
+
+const toggleChatMessageReaction = async (
+  messageId: string,
+  userId: string,
+  reactionType: string,
+  userName: string,
+  userUsername?: string,
+  userProfilePic?: string
+): Promise<boolean> => {
+  try {
+    // Check if the user has already reacted with this reaction type
+    const { data: existingReaction, error: checkError } = await supabase
+      .from('chat_message_reactions')
+      .select('*')
+      .eq('message_id', messageId)
+      .eq('user_id', userId)
+      .eq('reaction_type', reactionType)
+      .single();
+      
+    if (checkError && checkError.code !== 'PGRST116') {
+      throw checkError;
+    }
+    
+    // If the reaction exists, remove it (toggle off)
+    if (existingReaction) {
+      const { error: deleteError } = await supabase
+        .from('chat_message_reactions')
+        .delete()
+        .eq('id', existingReaction.id);
+        
+      if (deleteError) throw deleteError;
+    } 
+    // Otherwise, add the reaction (toggle on)
+    else {
+      const { error: insertError } = await supabase
+        .from('chat_message_reactions')
+        .insert({
+          message_id: messageId,
+          user_id: userId,
+          user_name: userName,
+          user_username: userUsername || null,
+          user_profile_pic: userProfilePic || null,
+          reaction_type: reactionType,
+          created_at: new Date().toISOString()
+        });
+        
+      if (insertError) throw insertError;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error toggling chat message reaction:', error);
+    return false;
+  }
+};
+
+const toggleReplyReaction = async (
+  replyId: string,
+  userId: string,
+  reactionType: string,
+  userName: string,
+  userUsername?: string,
+  userProfilePic?: string
+): Promise<boolean> => {
+  try {
+    // Check if the user has already reacted with this reaction type
+    const { data: existingReaction, error: checkError } = await supabase
+      .from('reply_reactions')
+      .select('*')
+      .eq('reply_id', replyId)
+      .eq('user_id', userId)
+      .eq('reaction_type', reactionType)
+      .single();
+      
+    if (checkError && checkError.code !== 'PGRST116') {
+      throw checkError;
+    }
+    
+    // If the reaction exists, remove it (toggle off)
+    if (existingReaction) {
+      const { error: deleteError } = await supabase
+        .from('reply_reactions')
+        .delete()
+        .eq('id', existingReaction.id);
+        
+      if (deleteError) throw deleteError;
+    } 
+    // Otherwise, add the reaction (toggle on)
+    else {
+      const { error: insertError } = await supabase
+        .from('reply_reactions')
+        .insert({
+          reply_id: replyId,
+          user_id: userId,
+          user_name: userName,
+          user_username: userUsername || null,
+          user_profile_pic: userProfilePic || null,
+          reaction_type: reactionType,
+          created_at: new Date().toISOString()
+        });
+        
+      if (insertError) throw insertError;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error toggling reply reaction:', error);
+    return false;
+  }
 };
 
 export default ReactionButton;
