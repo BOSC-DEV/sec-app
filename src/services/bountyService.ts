@@ -7,13 +7,30 @@ import {
   getUserContributionAmountForScammer
 } from './bounty/bountyQueryService';
 
-// Re-export functions from the query service
+import {
+  addBountyContribution
+} from './bounty/bountyContributionService';
+
+import {
+  transferBountyContribution,
+  getUserTransferableContributions
+} from './bounty/bountyTransferService';
+
+// Re-export functions from bounty services
 export {
+  // Query service exports
   getScammerBountyContributions,
   getBountyContributionById,
   getScammerTotalBounty,
   getUserBountyContributions,
-  getUserContributionAmountForScammer
+  getUserContributionAmountForScammer,
+  
+  // Contribution service exports
+  addBountyContribution,
+  
+  // Transfer service exports
+  transferBountyContribution,
+  getUserTransferableContributions
 };
 
 // This is a convenience method to get just the total bounty amount for a user
