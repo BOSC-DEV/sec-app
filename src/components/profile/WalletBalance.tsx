@@ -117,7 +117,7 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
               {/* SOL Balance */}
               <div className="p-4">
                 <div className="text-sm text-gray-500 dark:text-gray-200 mb-1">SOL Balance</div>
-                {isLoading ? <Skeleton className="h-7 w-24 dark:bg-gray-700" /> : <div className="font-mono text-xl font-bold text-blue-700 dark:text-white">
+                {isLoading ? <Skeleton className="h-7 w-24 dark:bg-gray-700" /> : <div className="font-mono text-xl font-bold text-primary dark:text-white">
                     {formatBalance(solBalance)} <span className="text-xs font-normal dark:text-gray-300">SOL</span>
                   </div>}
               </div>
@@ -125,7 +125,7 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
               {/* SEC Balance */}
               <div className="p-4">
                 <div className="text-sm text-gray-500 dark:text-gray-200 mb-1">SEC Balance</div>
-                {isLoading ? <Skeleton className="h-7 w-24 dark:bg-gray-700" /> : <div className="font-mono text-xl font-bold text-amber-700 dark:text-white">
+                {isLoading ? <Skeleton className="h-7 w-24 dark:bg-gray-700" /> : <div className="font-mono text-xl font-bold text-primary dark:text-white">
                     {formatBalance(secBalance)} <span className="text-xs font-normal dark:text-gray-300">SEC</span>
                   </div>}
               </div>
@@ -144,3 +144,4 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
     </Card>;
 };
 export default WalletBalance;
+
