@@ -7,12 +7,12 @@ import { Announcement } from '@/types/dataTypes';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Megaphone, Calendar, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import ReactionButton from './ReactionButton';
+import RichTextEditor from './RichTextEditor';
 
 const ADMIN_USERNAMES = ['sec', 'thesec'];
 
@@ -107,11 +107,9 @@ const AnnouncementFeed = () => {
           
           <CardContent>
             <form onSubmit={handleSubmit}>
-              <Textarea
-                placeholder="Write an announcement for the community..."
+              <RichTextEditor 
                 value={newAnnouncement}
-                onChange={(e) => setNewAnnouncement(e.target.value)}
-                className="min-h-[120px]"
+                onChange={setNewAnnouncement}
               />
               <div className="mt-3 flex justify-end">
                 <Button 
@@ -166,7 +164,7 @@ const AnnouncementFeed = () => {
               <Separator />
               
               <CardContent className="py-4">
-                <div className="whitespace-pre-wrap">{announcement.content}</div>
+                <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: announcement.content }} />
               </CardContent>
               
               <CardFooter className="bg-muted/30 py-2 flex justify-between items-center">

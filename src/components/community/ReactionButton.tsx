@@ -29,18 +29,20 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   const [reactions, setReactions] = useState<Record<string, string[]>>(initialReactions);
   const [open, setOpen] = useState(false);
   
+  const channelName = `${itemType}-reactions-${itemId}`;
+  const tableName = itemType === 'announcement' ? 'announcement_reactions' : 'chat_message_reactions';
+  const idField = itemType === 'announcement' ? 'announcement_id' : 'message_id';
+  
   useEffect(() => {
     // Set up real-time subscription for reactions
     const channel = supabase
-      .channel(`${itemType}-reactions-${itemId}`)
+      .channel(channelName)
       .on('postgres_changes', 
         { 
           event: '*', 
           schema: 'public', 
-          table: itemType === 'announcement' ? 'announcement_reactions' : 'chat_message_reactions',
-          filter: itemType === 'announcement' 
-            ? `announcement_id=eq.${itemId}` 
-            : `message_id=eq.${itemId}`
+          table: tableName,
+          filter: `${idField}=eq.${itemId}`
         }, 
         () => {
           // Refresh reactions when changes occur
@@ -55,15 +57,12 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [itemId, itemType]);
+  }, [itemId, itemType, channelName, tableName, idField]);
   
   const fetchReactions = async () => {
     try {
-      const table = itemType === 'announcement' ? 'announcement_reactions' : 'chat_message_reactions';
-      const idField = itemType === 'announcement' ? 'announcement_id' : 'message_id';
-      
       const { data, error } = await supabase
-        .from(table)
+        .from(tableName)
         .select('user_id, reaction_type')
         .eq(idField, itemId);
         
