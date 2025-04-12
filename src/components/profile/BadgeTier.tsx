@@ -4,6 +4,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { BadgeInfo, BadgeTier as BadgeTierEnum, formatSecAmount } from '@/utils/badgeUtils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface BadgeTierProps {
   badgeInfo: BadgeInfo;
@@ -18,6 +19,7 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
   size = 'md',
   showTooltip = true
 }) => {
+  const isMobile = useIsMobile();
   const {
     tier,
     icon,
@@ -39,7 +41,7 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
   const badge = (
     <Badge className={`${color} ${sizeClasses[size]} flex items-center gap-1`}>
       <span className={iconSizes[size]}>{icon}</span>
-      <span>{tier}</span>
+      {!isMobile && <span>{tier}</span>}
     </Badge>
   );
   
@@ -85,3 +87,4 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
 };
 
 export default BadgeTier;
+

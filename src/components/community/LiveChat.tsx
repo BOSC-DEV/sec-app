@@ -304,8 +304,8 @@ const LiveChat = () => {
     
     const messageContent = (
       <div key={message.id} className={`flex mb-3 ${isCurrentUser ? 'justify-end' : 'justify-start'}`}>
-        <div className={`flex ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'}`}>
-          <div className={`flex-shrink-0 ${isCurrentUser ? 'ml-2' : 'mr-2'}`}>
+        <div className={`flex ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'} space-x-2`}>
+          <div className="flex-shrink-0">
             <Link to={message.author_username ? `/profile/${message.author_username}` : '#'}>
               <Avatar className="h-10 w-10 cursor-pointer border-2 border-background">
                 <AvatarImage src={message.author_profile_pic} alt={message.author_name} />
