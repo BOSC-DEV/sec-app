@@ -42,6 +42,25 @@ interface ReactionCount {
   has_reacted: boolean;
 }
 
+// Define types for reaction inserts
+type AnnouncementReactionInsert = {
+  reaction_type: string;
+  user_id: string;
+  announcement_id: string;
+};
+
+type MessageReactionInsert = {
+  reaction_type: string;
+  user_id: string;
+  message_id: string;
+};
+
+type ReplyReactionInsert = {
+  reaction_type: string;
+  user_id: string;
+  reply_id: string;
+};
+
 const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: ReactionButtonProps) => {
   const { profile, isConnected } = useProfile();
   const [reactions, setReactions] = useState<ReactionCount[]>([]);
@@ -100,20 +119,45 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
         if (deleteError) throw deleteError;
         success = true;
       } else {
-        // Add new reaction
-        const insertData: Record<string, any> = {
-          reaction_type: reactionType,
-          user_id: profile?.wallet_address || ''
-        };
-        
-        // Set the appropriate ID column
-        insertData[idColumn] = itemId;
-        
-        const { error: insertError } = await supabase
-          .from(table)
-          .insert(insertData);
+        // Add new reaction based on table type
+        if (itemType === 'announcement') {
+          const insertData: AnnouncementReactionInsert = {
+            reaction_type: reactionType,
+            user_id: profile?.wallet_address || '',
+            announcement_id: itemId
+          };
           
-        if (insertError) throw insertError;
+          const { error: insertError } = await supabase
+            .from('announcement_reactions')
+            .insert(insertData);
+            
+          if (insertError) throw insertError;
+        } else if (itemType === 'message') {
+          const insertData: MessageReactionInsert = {
+            reaction_type: reactionType,
+            user_id: profile?.wallet_address || '',
+            message_id: itemId
+          };
+          
+          const { error: insertError } = await supabase
+            .from('chat_message_reactions')
+            .insert(insertData);
+            
+          if (insertError) throw insertError;
+        } else {
+          const insertData: ReplyReactionInsert = {
+            reaction_type: reactionType,
+            user_id: profile?.wallet_address || '',
+            reply_id: itemId
+          };
+          
+          const { error: insertError } = await supabase
+            .from('reply_reactions')
+            .insert(insertData);
+            
+          if (insertError) throw insertError;
+        }
+        
         success = true;
       }
       
