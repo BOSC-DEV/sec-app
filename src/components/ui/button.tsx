@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -6,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 gap-2 border-none", // Removed the extra white space by removing gap-2 from the start and adding it later, and added border-none
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 gap-2 border-none", 
   {
     variants: {
       variant: {
@@ -17,12 +16,12 @@ const buttonVariants = cva(
           "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+        ghost: "bg-transparent hover:bg-accent hover:text-accent-foreground border-none",
         link: "text-primary underline-offset-4 hover:underline",
         iccblue: "bg-icc-blue text-white hover:bg-icc-blue-light",
         gold: "bg-icc-gold text-icc-blue-dark hover:bg-icc-gold-dark border border-icc-gold-dark",
         danger: "bg-red-600 text-white hover:bg-red-700",
-        neutral: "bg-neutral-200 text-neutral-800 hover:bg-neutral-300", // Added neutral variant for better light mode contrast
+        neutral: "bg-neutral-200 text-neutral-800 hover:bg-neutral-300",
       },
       size: {
         default: "h-10 px-4 py-2",

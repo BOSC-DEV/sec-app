@@ -3,13 +3,12 @@ import React from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Toggle } from '@/components/ui/toggle';
 
 const ThemeToggle: React.FC<{
-  variant?: 'default' | 'outline' | 'gold';
+  variant?: 'default' | 'outline' | 'gold' | 'ghost';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   className?: string;
-}> = ({ variant = 'outline', size = 'sm', className = '' }) => {
+}> = ({ variant = 'ghost', size = 'icon', className = '' }) => {
   const { theme, toggleTheme } = useTheme();
   
   return (
@@ -23,7 +22,7 @@ const ThemeToggle: React.FC<{
       {theme === 'dark' ? (
         <Sun className="h-4 w-4" />
       ) : (
-        <Moon className="h-4 w-4 text-icc-blue" /> // Added text-icc-blue for better visibility in light mode
+        <Moon className="h-4 w-4 text-icc-blue" />
       )}
     </Button>
   );
