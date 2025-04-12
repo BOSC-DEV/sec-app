@@ -195,7 +195,8 @@ const PublicProfilePage = () => {
                               variant="outline" 
                               size="sm" 
                               onClick={handleEditProfile} 
-                              className="flex items-center gap-1 border-neutral-500 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
+                              className="flex items-center gap-1 border-neutral-500 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 
+                                           dark:border-icc-blue-light dark:text-white dark:hover:bg-icc-blue-dark dark:hover:text-white"
                             >
                               <Edit size={16} />
                               Edit Profile
@@ -207,7 +208,8 @@ const PublicProfilePage = () => {
                                 disconnectWallet();
                                 navigate('/');
                               }} 
-                              className="flex items-center gap-1 border-red-500 text-red-700 hover:bg-red-50 hover:text-red-900"
+                              className="flex items-center gap-1 border-red-500 text-red-700 hover:bg-red-50 hover:text-red-900
+                                           dark:border-red-400 dark:text-red-300 dark:hover:bg-red-900/20 dark:hover:text-red-200"
                             >
                               <LogOut size={16} />
                               Disconnect
