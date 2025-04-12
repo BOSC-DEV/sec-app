@@ -19,8 +19,10 @@ import ScammerCard from '@/components/common/ScammerCard';
 import { useProfile } from '@/contexts/ProfileContext';
 import WalletBalance from '@/components/profile/WalletBalance';
 import WalletInfo from '@/components/profile/WalletInfo';
+import { useBadgeTier } from '@/hooks/useBadgeTier';
 
 const PublicProfilePage = () => {
+  
   const {
     username
   } = useParams<{
@@ -42,10 +44,25 @@ const PublicProfilePage = () => {
     queryFn: () => getProfileByUsername(username || ''),
     enabled: !!username
   });
+  
   useEffect(() => {
     refetch();
   }, [location, refetch]);
+  
   const isOwnProfile = currentUserProfile?.wallet_address === profile?.wallet_address;
+  
+  // Get badge tier information based on SEC balance
+  const {
+    data: bountyContributions,
+    isLoading: isLoadingBounties
+  } = useQuery({
+    queryKey: ['userBounties', profile?.wallet_address],
+    queryFn: () => getUserBountyContributions(profile?.wallet_address || '', 1, 50),
+    enabled: !!profile?.wallet_address
+  });
+  
+  const badgeInfo = useBadgeTier(profile?.wallet_address ? bountyContributions?.totalBountyAmount || 0 : null);
+  
   const {
     data: scammerReports,
     isLoading: isLoadingReports
@@ -62,14 +79,7 @@ const PublicProfilePage = () => {
     queryFn: () => getLikedScammersByUser(profile?.wallet_address || ''),
     enabled: !!profile?.wallet_address
   });
-  const {
-    data: bountyContributions,
-    isLoading: isLoadingBounties
-  } = useQuery({
-    queryKey: ['userBounties', profile?.wallet_address],
-    queryFn: () => getUserBountyContributions(profile?.wallet_address || '', 1, 50),
-    enabled: !!profile?.wallet_address
-  });
+  
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
@@ -104,6 +114,7 @@ const PublicProfilePage = () => {
   const disconnectWallet = () => {
     // Implement wallet disconnection logic here
   };
+
   if (error) {
     return <div className="container py-10">
         <Card>
@@ -121,6 +132,7 @@ const PublicProfilePage = () => {
         </Card>
       </div>;
   }
+  
   const renderProfileSkeleton = () => <div className="animate-pulse">
       <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
         <Skeleton className="w-32 h-32 rounded-full" />
@@ -131,27 +143,33 @@ const PublicProfilePage = () => {
         </div>
       </div>
     </div>;
+  
   const getInitials = (name: string) => {
     return name?.substring(0, 2).toUpperCase() || '👤';
   };
+  
   const truncateWalletAddress = (address: string) => {
     if (!address) return '';
     return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
   };
+  
   const defaultShareImage = '/lovable-uploads/3f23090d-4e36-43fc-b230-a8f898d7edd2.png';
   const pageImage = profile?.profile_pic_url || defaultShareImage;
   const pageTitle = profile ? `${profile.display_name} (@${profile.username}) | SEC.digital` : 'Profile | SEC.digital';
   const pageDescription = profile?.bio || `Check out this profile on SEC.digital - The Scams & E-crimes Commission`;
+  
   const formatDate = (dateString: string) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString();
   };
+  
   const formatCurrency = (amount: number) => {
     return amount.toLocaleString(undefined, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
   };
+
   return (
     <HelmetProvider>
       <>
@@ -185,9 +203,11 @@ const PublicProfilePage = () => {
                   
                   <div className="flex-1 space-y-3 text-center md:text-left">
                     <div className="flex flex-wrap items-center justify-center md:justify-between gap-2">
-                      <div>
+                      <div className="flex items-center gap-2">
                         <h1 className="text-3xl font-bold text-icc-gold">{profile?.display_name}</h1>
-                        <p className="text-muted-foreground">@{profile?.username}</p>
+                        {badgeInfo && <div className="ml-2">
+                          <BadgeTier badgeInfo={badgeInfo} showTooltip={true} />
+                        </div>}
                       </div>
                       <div className="flex items-center space-x-3 mt-3 md:mt-0 p-0">
                         {isOwnProfile && <>
@@ -222,6 +242,7 @@ const PublicProfilePage = () => {
                       </div>
                     </div>
                     
+                    <p className="text-muted-foreground">@{profile?.username}</p>
                     <p className="text-base max-w-2xl">{profile?.bio}</p>
                     
                     <div className="flex flex-wrap gap-3 justify-center md:justify-start">
@@ -366,6 +387,7 @@ const PublicProfilePage = () => {
                           walletAddress={profile.wallet_address} 
                           isOwnProfile={isOwnProfile} 
                           secBalance={profile?.wallet_address ? bountyContributions?.totalBountyAmount || 0 : null}
+                          displayName={profile?.display_name}
                         />
                       </> : <div className="text-center py-12">
                         <p className="text-muted-foreground text-lg">No wallet information available</p>

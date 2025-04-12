@@ -51,11 +51,11 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
 
   return <div className="inline-block">
       <TooltipProvider>
-        <Tooltip>
+        <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
             {badge}
           </TooltipTrigger>
-          <TooltipContent className="p-4 max-w-sm">
+          <TooltipContent side="right" align="start" className="p-4 max-w-sm">
             <div className="space-y-3">
               <div className="font-semibold text-center">
                 <span className="mr-2 text-lg">{icon}</span>
