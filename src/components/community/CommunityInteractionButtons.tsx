@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Button } from '@/components/ui/button';
@@ -36,8 +35,8 @@ export const InteractionButton: React.FC<InteractionButtonProps> = ({
     size="sm"
     className={`flex items-center gap-1 
       ${isActive 
-        ? 'text-primary bg-gray-100 dark:bg-gray-800' 
-        : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
+        ? 'text-white bg-gray-600 dark:bg-gray-700' 
+        : 'text-white/70 hover:bg-gray-600/20 dark:hover:bg-gray-700/20'
       }`}
     onClick={onClick}
     title={label}
