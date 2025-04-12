@@ -206,9 +206,6 @@ const PublicProfilePage = () => {
                     <div className="flex flex-wrap items-center justify-center md:justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <h1 className="text-3xl font-bold text-icc-gold">{profile?.display_name}</h1>
-                        {badgeInfo && <div className="ml-2">
-                          <BadgeTier badgeInfo={badgeInfo} showTooltip={true} />
-                        </div>}
                       </div>
                       <div className="flex items-center space-x-3 mt-3 md:mt-0 p-0">
                         {isOwnProfile && <>
@@ -265,7 +262,7 @@ const PublicProfilePage = () => {
                   </div>
                 </div>}
             </div>
-              
+            
             <Tabs defaultValue="reports" className="w-full" value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="w-full justify-start overflow-x-auto bg-background/60 backdrop-blur-sm rounded-lg border p-1 mb-6">
                 <TabsTrigger value="reports" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
