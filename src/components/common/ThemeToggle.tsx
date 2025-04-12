@@ -23,7 +23,7 @@ const ThemeToggle: React.FC<{
       {theme === 'dark' ? (
         <Sun className="h-4 w-4" />
       ) : (
-        <Moon className="h-4 w-4" />
+        <Moon className="h-4 w-4 text-icc-blue" /> // Added text-icc-blue for better visibility in light mode
       )}
     </Button>
   );
