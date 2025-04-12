@@ -4,6 +4,8 @@ import { toast } from '@/hooks/use-toast';
 import { ReportFormValues } from '@/types/formTypes';
 import { Profile } from '@/types/dataTypes';
 import { generateScammerId } from './supabaseService';
+import { sanitizeInput, sanitizeHtml } from '@/utils/securityUtils';
+import { ErrorSeverity, handleError } from '@/utils/errorHandling';
 
 /**
  * Uploads a photo for a scammer report
@@ -33,7 +35,11 @@ export const uploadScammerPhoto = async (
       
     return publicUrlData.publicUrl;
   } catch (error) {
-    console.error("Photo upload exception:", error);
+    handleError(error, {
+      fallbackMessage: "Failed to upload photo",
+      severity: ErrorSeverity.MEDIUM,
+      context: "scammer_photo_upload"
+    });
     throw error;
   }
 };
@@ -87,18 +93,21 @@ export const updateScammerReport = async (
   data: ReportFormValues,
   photoUrl: string | null
 ) => {
-  const aliases = data.aliases?.filter(item => item !== '') || [];
-  const links = data.links?.filter(item => item !== '') || [];
-  const accomplices = data.accomplices?.filter(item => item !== '') || [];
-  const wallet_addresses = data.wallet_addresses?.filter(item => item !== '') || [];
+  // Sanitize all text inputs
+  const name = sanitizeInput(data.name);
+  const accused_of = sanitizeInput(data.accused_of || '');
+  const aliases = data.aliases?.filter(item => item !== '').map(sanitizeInput) || [];
+  const links = data.links?.filter(item => item !== '').map(sanitizeInput) || [];
+  const accomplices = data.accomplices?.filter(item => item !== '').map(sanitizeInput) || [];
+  const wallet_addresses = data.wallet_addresses?.filter(item => item !== '').map(sanitizeInput) || [];
   
   console.log("Updating existing scammer:", id);
   
   const { error } = await supabase
     .from('scammers')
     .update({
-      name: data.name,
-      accused_of: data.accused_of,
+      name,
+      accused_of,
       wallet_addresses,
       photo_url: photoUrl,
       aliases,
@@ -126,17 +135,20 @@ export const createScammerReport = async (
     const newId = await generateScammerId();
     console.log("Generated new scammer ID:", newId);
     
-    const aliases = data.aliases?.filter(item => item !== '') || [];
-    const links = data.links?.filter(item => item !== '') || [];
-    const accomplices = data.accomplices?.filter(item => item !== '') || [];
-    const wallet_addresses = data.wallet_addresses?.filter(item => item !== '') || [];
+    // Sanitize all text inputs
+    const name = sanitizeInput(data.name);
+    const accused_of = sanitizeInput(data.accused_of || '');
+    const aliases = data.aliases?.filter(item => item !== '').map(sanitizeInput) || [];
+    const links = data.links?.filter(item => item !== '').map(sanitizeInput) || [];
+    const accomplices = data.accomplices?.filter(item => item !== '').map(sanitizeInput) || [];
+    const wallet_addresses = data.wallet_addresses?.filter(item => item !== '').map(sanitizeInput) || [];
     
     const { error } = await supabase
       .from('scammers')
       .insert({
         id: newId,
-        name: data.name,
-        accused_of: data.accused_of,
+        name,
+        accused_of,
         wallet_addresses,
         photo_url: photoUrl,
         aliases,
@@ -163,7 +175,11 @@ export const createScammerReport = async (
     
     return newId;
   } catch (error) {
-    console.error("ID generation or insertion error:", error);
+    handleError(error, {
+      fallbackMessage: "Failed to create scammer report", 
+      severity: ErrorSeverity.HIGH,
+      context: "create_scammer_report"
+    });
     throw error;
   }
 };

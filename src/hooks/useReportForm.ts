@@ -12,6 +12,7 @@ import {
   createScammerReport, 
   fetchScammerById 
 } from '@/services/reportService';
+import { verifyTurnstileToken } from '@/services/turnstileService';
 
 // Validation schema for the report form
 export const reportSchema = z.object({
@@ -35,6 +36,8 @@ export const useReportForm = (id?: string) => {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>('');
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string>('');
+  const [isTurnstileVerified, setIsTurnstileVerified] = useState(false);
   
   const form = useForm<ReportFormValues>({
     resolver: zodResolver(reportSchema),
@@ -48,6 +51,12 @@ export const useReportForm = (id?: string) => {
       accomplices: [''],
     }
   });
+  
+  // Handle Turnstile verification
+  const handleTurnstileVerify = (token: string) => {
+    setTurnstileToken(token);
+    setIsTurnstileVerified(token.length > 0);
+  };
   
   // Fetch existing scammer data for edit mode
   useEffect(() => {
@@ -96,6 +105,14 @@ export const useReportForm = (id?: string) => {
         variant: "destructive"
       });
       return;
+    }
+    
+    // For new submissions, verify Turnstile
+    if (!isEditMode) {
+      const isVerified = await verifyTurnstileToken(turnstileToken);
+      if (!isVerified) {
+        return;
+      }
     }
     
     setIsSubmitting(true);
@@ -160,6 +177,9 @@ export const useReportForm = (id?: string) => {
     photoPreview,
     setPhotoPreview,
     uploadError,
-    onSubmit
+    onSubmit,
+    turnstileToken,
+    handleTurnstileVerify,
+    isTurnstileVerified
   };
 };

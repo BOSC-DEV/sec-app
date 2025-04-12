@@ -10,6 +10,8 @@ import { isScammerCreator } from '@/services/reportService';
 import { useProfile } from '@/contexts/ProfileContext';
 import { toast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import Turnstile from '@/components/common/Turnstile';
+import { TURNSTILE_SITE_KEY } from '@/services/turnstileService';
 
 const ReportPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -27,7 +29,8 @@ const ReportPage = () => {
     setPhotoFile, 
     photoPreview, 
     setPhotoPreview, 
-    onSubmit 
+    onSubmit,
+    handleTurnstileVerify 
   } = useReportForm(id);
 
   useEffect(() => {
@@ -106,9 +109,13 @@ const ReportPage = () => {
       
       <div className="icc-section bg-white">
         <div className="icc-container">
-          {isEditMode && (
+          {isEditMode ? (
             <p className="text-icc-gray mb-8">
               Update information about this scammer. All fields are editable except the bounty amount.
+            </p>
+          ) : (
+            <p className="text-icc-gray mb-8">
+              Help protect the community by reporting scammers. Please complete the verification below and fill out the form.
             </p>
           )}
           
@@ -125,6 +132,19 @@ const ReportPage = () => {
                 photoPreview={photoPreview}
                 setPhotoPreview={setPhotoPreview}
               />
+              
+              {!isEditMode && (
+                <div className="border p-4 rounded-md bg-gray-50">
+                  <h3 className="font-medium mb-2">Verification</h3>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Please complete the verification below to submit your report.
+                  </p>
+                  <Turnstile 
+                    siteKey={TURNSTILE_SITE_KEY}
+                    onVerify={handleTurnstileVerify}
+                  />
+                </div>
+              )}
               
               <div className="flex justify-end space-x-4">
                 <Button 
