@@ -82,11 +82,6 @@ const Header = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
               <ICCLogo className="h-10 w-auto" />
-              {!isMobile && (
-                <div className="font-serif max-w-[200px] md:max-w-none">
-                  <div className="text-base md:text-xl font-bold leading-tight">Scams & E-crimes Commission</div>
-                </div>
-              )}
             </Link>
 
             <nav className="hidden md:flex items-center space-x-6 ml-6">
@@ -112,7 +107,6 @@ const Header = () => {
               </Button>
             ) : isConnected ? (
               <div className="flex items-center space-x-3">
-                {/* Bell icon for notifications */}
                 <div className="relative">
                   <Button 
                     variant="ghost" 
@@ -138,7 +132,6 @@ const Header = () => {
                 >
                   <User className="h-5 w-5" />
                 </Button>
-                {/* Contract address copy button */}
                 <Button 
                   variant="ghost" 
                   size="icon"
@@ -156,7 +149,6 @@ const Header = () => {
                 >
                   <Wallet className="h-5 w-5" />
                 </Button>
-                {/* Add burger menu button for mobile */}
                 {isMobile && (
                   <Button
                     variant="ghost"
@@ -171,7 +163,6 @@ const Header = () => {
               </div>
             ) : (
               <div className="flex items-center space-x-3">
-                {/* Contract address copy button when not connected */}
                 <Button 
                   variant="ghost" 
                   size="icon"
@@ -194,7 +185,6 @@ const Header = () => {
                     </>
                   )}
                 </Button>
-                {/* Add burger menu button for mobile when not connected */}
                 {isMobile && (
                   <Button
                     variant="ghost"
@@ -212,7 +202,6 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Mobile menu */}
       {isMenuOpen && (
         <div className="md:hidden bg-icc-blue-light">
           <div className="icc-container py-4">
@@ -237,7 +226,6 @@ const Header = () => {
                   </Button>
                 ) : isConnected ? (
                   <div className="flex items-center justify-around space-x-2 w-full">
-                    {/* Bell icon for mobile */}
                     <Button 
                       variant="ghost" 
                       size="icon" 
@@ -256,7 +244,6 @@ const Header = () => {
                     >
                       <User className="h-5 w-5" />
                     </Button>
-                    {/* Copy button in mobile menu */}
                     <Button 
                       variant="ghost" 
                       size="icon" 
@@ -277,7 +264,6 @@ const Header = () => {
                   </div>
                 ) : (
                   <div className="flex items-center justify-around space-x-2 w-full">
-                    {/* Copy button in mobile menu when not connected */}
                     <Button 
                       variant="ghost" 
                       size="icon" 
@@ -299,7 +285,6 @@ const Header = () => {
                 )}
               </div>
               
-              {/* Center notification dropdown in mobile view */}
               {showNotifications && isConnected && (
                 <div className="mt-2 flex justify-center">
                   <div className="w-full max-w-xs">
