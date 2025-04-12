@@ -229,7 +229,14 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
       </div>
       
       {showEmojiPicker && (
-        <div ref={pickerRef} className="absolute right-0 bottom-full mb-2 z-10">
+        <div 
+          ref={pickerRef} 
+          className="absolute bottom-full mb-2 z-10"
+          style={{ 
+            right: 'auto',
+            left: 0
+          }}
+        >
           <EmojiPicker onEmojiSelect={handleEmojiSelect} />
         </div>
       )}
