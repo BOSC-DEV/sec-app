@@ -7,7 +7,7 @@ import { handleError } from '@/utils/errorHandling';
 export const getUserNotifications = async (userId: string): Promise<Notification[]> => {
   try {
     console.log("Fetching notifications for user:", userId);
-    // Check if the notifications table exists
+    
     const { data, error } = await supabase
       .from('notifications')
       .select('*')
@@ -31,6 +31,7 @@ export const getUserNotifications = async (userId: string): Promise<Notification
 export const getUnreadNotificationsCount = async (userId: string): Promise<number> => {
   try {
     console.log("Counting unread notifications for user:", userId);
+    
     const { count, error } = await supabase
       .from('notifications')
       .select('*', { count: 'exact', head: true })
@@ -53,6 +54,7 @@ export const getUnreadNotificationsCount = async (userId: string): Promise<numbe
 export const markNotificationAsRead = async (notificationId: string): Promise<boolean> => {
   try {
     console.log("Marking notification as read:", notificationId);
+    
     const { error } = await supabase
       .from('notifications')
       .update({ is_read: true })
@@ -74,6 +76,7 @@ export const markNotificationAsRead = async (notificationId: string): Promise<bo
 export const markAllNotificationsAsRead = async (userId: string): Promise<boolean> => {
   try {
     console.log("Marking all notifications as read for user:", userId);
+    
     const { error } = await supabase
       .from('notifications')
       .update({ is_read: true })
@@ -101,6 +104,7 @@ export const createNotification = async (notification: Omit<Notification, 'id' |
     }
     
     console.log("Creating notification:", notification);
+    
     const { data, error } = await supabase
       .from('notifications')
       .insert({

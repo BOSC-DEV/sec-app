@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Button } from '@/components/ui/button';
 import { Heart, ThumbsUp, Star, Smile } from 'lucide-react';
-import { EmojiPicker } from './EmojiPicker';
+import EmojiPicker from './EmojiPicker';
 import { 
   toggleAnnouncementReaction, 
   toggleChatMessageReaction, 
@@ -11,6 +11,7 @@ import {
 } from '@/services/communityService';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { EntityType } from '@/types/dataTypes';
 
 type ReactionButtonProps = {
   itemId: string;
@@ -53,15 +54,32 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
         return '';
     }
   };
+
+  // Map the item type to EntityType
+  const getEntityType = (): EntityType => {
+    switch (itemType) {
+      case 'announcement':
+        return EntityType.ANNOUNCEMENT;
+      case 'message':
+        return EntityType.CHAT_MESSAGE;
+      case 'reply':
+        return EntityType.REPLY;
+      default:
+        return EntityType.ANNOUNCEMENT;
+    }
+  };
   
   // Query to get all reactions for this item
   const { data: reactions = [], refetch } = useQuery({
     queryKey: [`${itemType}-reactions`, itemId],
     queryFn: async () => {
+      const tableName = getTableName();
+      const idField = getIdFieldName();
+      
       const { data, error } = await supabase
-        .from(getTableName())
+        .from(tableName)
         .select('*')
-        .eq(getIdFieldName(), itemId);
+        .eq(idField, itemId);
         
       if (error) {
         throw error;
@@ -69,7 +87,7 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
       
       return data || [];
     },
-    enabled: !!itemId,
+    enabled: !!itemId && !!getTableName(),
   });
   
   // Get counts of each reaction type
@@ -77,8 +95,10 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
     const counts: Record<string, number> = {};
     
     reactions.forEach(reaction => {
-      const type = reaction.reaction_type;
-      counts[type] = (counts[type] || 0) + 1;
+      if ('reaction_type' in reaction) {
+        const type = reaction.reaction_type;
+        counts[type] = (counts[type] || 0) + 1;
+      }
     });
     
     return counts;
@@ -87,7 +107,7 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   // Check if user has already reacted with a specific emoji
   const hasUserReacted = (emoji: string) => {
     return reactions.some(
-      r => r.user_id === profile?.wallet_address && r.reaction_type === emoji
+      r => 'user_id' in r && 'reaction_type' in r && r.user_id === profile?.wallet_address && r.reaction_type === emoji
     );
   };
   

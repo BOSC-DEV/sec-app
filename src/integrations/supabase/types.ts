@@ -346,6 +346,51 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          actor_name: string | null
+          actor_profile_pic: string | null
+          actor_username: string | null
+          content: string
+          created_at: string | null
+          entity_id: string
+          entity_type: string
+          id: string
+          is_read: boolean | null
+          recipient_id: string
+          type: string
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_name?: string | null
+          actor_profile_pic?: string | null
+          actor_username?: string | null
+          content: string
+          created_at?: string | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          is_read?: boolean | null
+          recipient_id: string
+          type: string
+        }
+        Update: {
+          actor_id?: string | null
+          actor_name?: string | null
+          actor_profile_pic?: string | null
+          actor_username?: string | null
+          content?: string
+          created_at?: string | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          is_read?: boolean | null
+          recipient_id?: string
+          type?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           bio: string | null

@@ -32,7 +32,6 @@ export const addBountyContribution = async (
     if (error) throw error;
     
     // Update total bounty amount for the scammer
-    // Use the async updateScammerBounty function instead of direct RPC call
     await updateScammerBounty(scammerId, amount, true);
     
     // Get the scammer details to send a notification

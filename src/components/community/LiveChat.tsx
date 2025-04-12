@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -65,7 +64,6 @@ const LiveChat = () => {
     checkAdmin();
   }, [profile?.username]);
   
-  // Initialize slow mode from localStorage on component mount
   useEffect(() => {
     const loadSlowModeState = () => {
       if (isAdmin) return; // Admins don't need slow mode
@@ -75,13 +73,11 @@ const LiveChat = () => {
         if (storedData) {
           const { expiry, userId } = JSON.parse(storedData);
           
-          // Only use the stored value if it belongs to the current user
           if (userId === profile?.wallet_address && expiry > Date.now()) {
             const remainingSeconds = Math.ceil((expiry - Date.now()) / 1000);
             setSlowModeCountdown(remainingSeconds);
             setSlowModeExpiry(expiry);
           } else if (userId !== profile?.wallet_address || expiry <= Date.now()) {
-            // Clear expired or different user's data
             localStorage.removeItem(SLOW_MODE_STORAGE_KEY);
           }
         }
@@ -96,7 +92,6 @@ const LiveChat = () => {
     }
   }, [profile?.wallet_address, isAdmin]);
   
-  // Save slow mode state to localStorage whenever it changes
   useEffect(() => {
     if (slowModeExpiry && slowModeCountdown > 0 && profile?.wallet_address && !isAdmin) {
       try {
@@ -112,7 +107,6 @@ const LiveChat = () => {
     }
   }, [slowModeExpiry, slowModeCountdown, profile?.wallet_address, isAdmin]);
   
-  // Slow mode countdown effect
   useEffect(() => {
     if (slowModeCountdown > 0) {
       slowModeTimerRef.current = setTimeout(() => {
@@ -177,7 +171,6 @@ const LiveChat = () => {
       setImageFile(null);
       setImagePreview(null);
       
-      // Start slow mode countdown for non-admins
       if (!isAdmin) {
         const expiryTime = Date.now() + (SLOW_MODE_DELAY * 1000);
         setSlowModeCountdown(SLOW_MODE_DELAY);
@@ -447,7 +440,7 @@ const LiveChat = () => {
                       )}
                       
                       <div className="mt-1">
-                        <ReactionButton itemId={message.id} itemType="chat" />
+                        <ReactionButton itemId={message.id} itemType="message" size="sm" />
                       </div>
                     </div>
                   </div>
