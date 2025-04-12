@@ -246,13 +246,13 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
         </div>
         
         <div className="p-4">
-          <h3 className="text-lg font-serif font-bold text-icc-blue">{scammer.name}</h3>
-          <p className="text-sm text-icc-gray mt-1">{truncateText(scammer.accused_of, 100)}</p>
+          <h3 className="text-lg font-serif font-bold text-icc-blue dark:text-white">{scammer.name}</h3>
+          <p className="text-sm text-icc-gray dark:text-gray-300 mt-1">{truncateText(scammer.accused_of, 100)}</p>
           
           {creatorProfile && (
             <div className="mt-2 flex items-center">
               <span 
-                className="flex items-center text-xs text-icc-gray-dark"
+                className="flex items-center text-xs text-icc-gray-dark dark:text-gray-300"
                 onClick={(e) => e.stopPropagation()}
               >
                 <img 
@@ -265,25 +265,25 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
             </div>
           )}
           
-          <div className="mt-4 text-xs text-icc-gray-dark flex justify-between items-center">
+          <div className="mt-4 text-xs text-icc-gray-dark dark:text-gray-300 flex justify-between items-center">
             <div>
               Added: {new Date(scammer.date_added).toLocaleDateString()}
             </div>
             <div className="flex items-center space-x-3">
               <span className="flex items-center">
-                <Eye className="h-3.5 w-3.5 mr-1" />
+                <Eye className="h-3.5 w-3.5 mr-1 dark:text-gray-300" />
                 {viewCount}
               </span>
               <span className="flex items-center">
-                <ThumbsUp className="h-3.5 w-3.5 mr-1" />
+                <ThumbsUp className="h-3.5 w-3.5 mr-1 dark:text-gray-300" />
                 {likes}
               </span>
               <span className="flex items-center">
-                <ThumbsDown className="h-3.5 w-3.5 mr-1" />
+                <ThumbsDown className="h-3.5 w-3.5 mr-1 dark:text-gray-300" />
                 {dislikes}
               </span>
               <span className="flex items-center">
-                <MessageSquare className="h-3.5 w-3.5 mr-1" />
+                <MessageSquare className="h-3.5 w-3.5 mr-1 dark:text-gray-300" />
                 {scammer.comments?.length || 0}
               </span>
             </div>
@@ -291,7 +291,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
         </div>
       </Link>
       
-      <div className="p-4 pt-0 mt-2 border-t border-gray-100 flex justify-between">
+      <div className="p-4 pt-0 mt-2 border-t border-gray-100 dark:border-gray-800 flex justify-between">
         <Toggle
           pressed={isLiked}
           onPressedChange={() => {}}
