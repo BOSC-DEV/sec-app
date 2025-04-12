@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { LayoutPanelLeft, Rows, Trophy } from 'lucide-react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import BadgeTiersPage from '@/components/profile/BadgeTiersPage';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const CommunityPage = () => {
   const { profile, isConnected } = useProfile();
@@ -77,26 +79,24 @@ const CommunityPage = () => {
               </div>
             </div>
             
-            <ResizablePanelGroup
-              direction="horizontal"
-              className="min-h-[600px] border rounded-lg overflow-hidden"
-            >
-              <ResizablePanel defaultSize={50} minSize={30} className="overflow-auto">
-                <div className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">Announcements</h3>
-                  <AnnouncementFeed />
-                </div>
-              </ResizablePanel>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="h-[calc(100vh-300px)] flex flex-col">
+                <Card className="flex-1 overflow-hidden">
+                  <CardHeader className="pb-3">
+                    <h3 className="text-lg font-semibold">Announcements</h3>
+                  </CardHeader>
+                  <CardContent className="p-0 flex-1">
+                    <ScrollArea className="h-full p-4">
+                      <AnnouncementFeed useCarousel={true} />
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              </div>
               
-              <ResizableHandle withHandle />
-              
-              <ResizablePanel defaultSize={50} minSize={30} className="overflow-auto">
-                <div className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">Live Chat</h3>
-                  <LiveChat />
-                </div>
-              </ResizablePanel>
-            </ResizablePanelGroup>
+              <div className="h-[calc(100vh-300px)] flex flex-col">
+                <LiveChat />
+              </div>
+            </div>
           </>
         ) : (
           <Tabs defaultValue="announcements" value={activeTab} onValueChange={setActiveTab}>
@@ -122,7 +122,7 @@ const CommunityPage = () => {
             </div>
             
             <TabsContent value="announcements" className="mt-0">
-              <AnnouncementFeed />
+              <AnnouncementFeed useCarousel={false} />
             </TabsContent>
             
             <TabsContent value="chat" className="mt-0">

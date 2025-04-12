@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -7,21 +8,27 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Megaphone, Calendar, AlertCircle, Eye } from 'lucide-react';
+import { Megaphone, Calendar, AlertCircle, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { Link } from 'react-router-dom';
 import ReactionButton from './ReactionButton';
 import RichTextEditor from './RichTextEditor';
 import AnnouncementReplies from './AnnouncementReplies';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 const ADMIN_USERNAMES = ['sec', 'thesec'];
 
-const AnnouncementFeed = () => {
+interface AnnouncementFeedProps {
+  useCarousel?: boolean;
+}
+
+const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false }) => {
   const { profile, isConnected } = useProfile();
   const [newAnnouncement, setNewAnnouncement] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [viewedAnnouncements, setViewedAnnouncements] = useState<Set<string>>(new Set());
+  const [currentIndex, setCurrentIndex] = useState(0);
   
   const isAdmin = profile?.username && ADMIN_USERNAMES.includes(profile.username);
   
@@ -82,6 +89,14 @@ const AnnouncementFeed = () => {
     }
   };
   
+  const handlePrevAnnouncement = () => {
+    setCurrentIndex(prev => (prev > 0 ? prev - 1 : announcements.length - 1));
+  };
+  
+  const handleNextAnnouncement = () => {
+    setCurrentIndex(prev => (prev < announcements.length - 1 ? prev + 1 : 0));
+  };
+  
   useEffect(() => {
     if (!announcements.length) return;
     
@@ -108,6 +123,13 @@ const AnnouncementFeed = () => {
     };
   }, [announcements, viewedAnnouncements]);
   
+  // Reset the current index when the number of announcements changes
+  useEffect(() => {
+    if (currentIndex >= announcements.length && announcements.length > 0) {
+      setCurrentIndex(0);
+    }
+  }, [announcements.length, currentIndex]);
+  
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
@@ -119,6 +141,93 @@ const AnnouncementFeed = () => {
       </div>
     );
   }
+  
+  if (announcements.length === 0) {
+    return (
+      <Card className="bg-muted/50">
+        <CardContent className="flex flex-col items-center justify-center py-12">
+          <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
+          <h3 className="text-xl font-medium text-center">No Announcements Yet</h3>
+          <p className="text-muted-foreground text-center mt-1">
+            Check back later for updates from the team
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+  
+  const renderAnnouncementCard = (announcement: Announcement) => {
+    return (
+      <Card 
+        key={announcement.id} 
+        className="announcement-card overflow-hidden h-full"
+        data-announcement-id={announcement.id}
+      >
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center">
+              {announcement.author_username ? (
+                <Link to={`/profile/${announcement.author_username}`}>
+                  <Avatar className="h-8 w-8 mr-2 cursor-pointer hover:opacity-80 transition-opacity">
+                    <AvatarImage src={announcement.author_profile_pic} alt={announcement.author_name} />
+                    <AvatarFallback>{announcement.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                </Link>
+              ) : (
+                <Avatar className="h-8 w-8 mr-2">
+                  <AvatarImage src={announcement.author_profile_pic} alt={announcement.author_name} />
+                  <AvatarFallback>{announcement.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+              )}
+              <div>
+                <div className="font-medium">
+                  {announcement.author_username ? (
+                    <Link to={`/profile/${announcement.author_username}`} className="hover:underline">
+                      {announcement.author_name}
+                      <span className="text-icc-gold ml-1 font-bold">@{announcement.author_username}</span>
+                    </Link>
+                  ) : (
+                    <>
+                      {announcement.author_name}
+                      <span className="text-icc-gold ml-1 font-bold">@{announcement.author_username}</span>
+                    </>
+                  )}
+                </div>
+                <div className="text-xs text-icc-gold font-medium mt-0.5">
+                  Official SEC Announcement
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex items-center text-muted-foreground text-sm">
+              <Calendar className="h-3 w-3 mr-1" />
+              {formatDistanceToNow(new Date(announcement.created_at), { addSuffix: true })}
+            </div>
+          </div>
+        </CardHeader>
+        
+        <Separator />
+        
+        <CardContent className="py-4">
+          <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: announcement.content }} />
+        </CardContent>
+        
+        <CardFooter className="pt-0 px-6 pb-3 flex flex-col items-start">
+          <div className="w-full bg-muted/30 py-2 px-3 rounded-md flex justify-between items-center">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <div className="flex items-center">
+                <Eye className="h-3 w-3 mr-1" />
+                {announcement.views || 0}
+              </div>
+            </div>
+            <ReactionButton itemId={announcement.id} itemType="announcement" />
+          </div>
+          
+          <AnnouncementReplies announcementId={announcement.id} />
+        </CardFooter>
+      </Card>
+    );
+  };
   
   return (
     <div className="space-y-6">
@@ -150,88 +259,26 @@ const AnnouncementFeed = () => {
         </Card>
       )}
       
-      {announcements.length === 0 ? (
-        <Card className="bg-muted/50">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-xl font-medium text-center">No Announcements Yet</h3>
-            <p className="text-muted-foreground text-center mt-1">
-              Check back later for updates from the team
-            </p>
-          </CardContent>
-        </Card>
+      {useCarousel ? (
+        <>
+          <Carousel className="w-full">
+            <CarouselContent>
+              {announcements.map((announcement) => (
+                <CarouselItem key={announcement.id}>
+                  {renderAnnouncementCard(announcement)}
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="left-2" />
+            <CarouselNext className="right-2" />
+          </Carousel>
+          <div className="text-center text-muted-foreground text-sm">
+            {currentIndex + 1} of {announcements.length} announcements
+          </div>
+        </>
       ) : (
         <div className="space-y-4">
-          {announcements.map((announcement: Announcement) => (
-            <Card 
-              key={announcement.id} 
-              className="announcement-card overflow-hidden"
-              data-announcement-id={announcement.id}
-            >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center">
-                    {announcement.author_username ? (
-                      <Link to={`/profile/${announcement.author_username}`}>
-                        <Avatar className="h-8 w-8 mr-2 cursor-pointer hover:opacity-80 transition-opacity">
-                          <AvatarImage src={announcement.author_profile_pic} alt={announcement.author_name} />
-                          <AvatarFallback>{announcement.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                      </Link>
-                    ) : (
-                      <Avatar className="h-8 w-8 mr-2">
-                        <AvatarImage src={announcement.author_profile_pic} alt={announcement.author_name} />
-                        <AvatarFallback>{announcement.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                      </Avatar>
-                    )}
-                    <div>
-                      <div className="font-medium">
-                        {announcement.author_username ? (
-                          <Link to={`/profile/${announcement.author_username}`} className="hover:underline">
-                            {announcement.author_name}
-                            <span className="text-icc-gold ml-1 font-bold">@{announcement.author_username}</span>
-                          </Link>
-                        ) : (
-                          <>
-                            {announcement.author_name}
-                            <span className="text-icc-gold ml-1 font-bold">@{announcement.author_username}</span>
-                          </>
-                        )}
-                      </div>
-                      <div className="text-xs text-icc-gold font-medium mt-0.5">
-                        Official SEC Announcement
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center text-muted-foreground text-sm">
-                    <Calendar className="h-3 w-3 mr-1" />
-                    {formatDistanceToNow(new Date(announcement.created_at), { addSuffix: true })}
-                  </div>
-                </div>
-              </CardHeader>
-              
-              <Separator />
-              
-              <CardContent className="py-4">
-                <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: announcement.content }} />
-              </CardContent>
-              
-              <CardFooter className="pt-0 px-6 pb-3 flex flex-col items-start">
-                <div className="w-full bg-muted/30 py-2 px-3 rounded-md flex justify-between items-center">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <div className="flex items-center">
-                      <Eye className="h-3 w-3 mr-1" />
-                      {announcement.views || 0}
-                    </div>
-                  </div>
-                  <ReactionButton itemId={announcement.id} itemType="announcement" />
-                </div>
-                
-                <AnnouncementReplies announcementId={announcement.id} />
-              </CardFooter>
-            </Card>
-          ))}
+          {announcements.map(renderAnnouncementCard)}
         </div>
       )}
     </div>
