@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { getAnnouncementReplies } from '@/services/communityService';
 import { AnnouncementReply } from '@/types/dataTypes';
@@ -6,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 import { MessageSquareReply, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReactionButton from './ReactionButton';
@@ -33,12 +33,10 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
     }
   };
   
-  // Initial fetch
   useEffect(() => {
     fetchReplies();
   }, [announcementId]);
   
-  // Subscribe to real-time updates
   useEffect(() => {
     const channelName = `announcement-replies-${announcementId}`;
     
@@ -149,16 +147,34 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
             replies.map((reply) => (
               <div key={reply.id} className="py-3 border-t first:border-t-0">
                 <div className="flex items-start gap-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={reply.author_profile_pic} alt={reply.author_name} />
-                    <AvatarFallback>{reply.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                  </Avatar>
+                  {reply.author_username ? (
+                    <Link to={`/profile/${reply.author_username}`}>
+                      <Avatar className="h-8 w-8 cursor-pointer hover:opacity-80 transition-opacity">
+                        <AvatarImage src={reply.author_profile_pic} alt={reply.author_name} />
+                        <AvatarFallback>{reply.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                    </Link>
+                  ) : (
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={reply.author_profile_pic} alt={reply.author_name} />
+                      <AvatarFallback>{reply.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                  )}
                   
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{reply.author_name}</span>
+                      {reply.author_username ? (
+                        <Link to={`/profile/${reply.author_username}`} className="font-medium hover:underline">
+                          {reply.author_name}
+                        </Link>
+                      ) : (
+                        <span className="font-medium">{reply.author_name}</span>
+                      )}
+                      
                       {reply.author_username && (
-                        <span className="text-icc-gold text-sm">@{reply.author_username}</span>
+                        <Link to={`/profile/${reply.author_username}`} className="text-icc-gold text-sm hover:underline">
+                          @{reply.author_username}
+                        </Link>
                       )}
                       <span className="text-xs text-muted-foreground">
                         {formatDistanceToNow(new Date(reply.created_at), { addSuffix: true })}

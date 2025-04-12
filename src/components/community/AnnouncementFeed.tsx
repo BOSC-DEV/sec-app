@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -11,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { Megaphone, Calendar, AlertCircle, Eye } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
+import { Link } from 'react-router-dom';
 import ReactionButton from './ReactionButton';
 import RichTextEditor from './RichTextEditor';
 import AnnouncementReplies from './AnnouncementReplies';
@@ -25,7 +25,6 @@ const AnnouncementFeed = () => {
   
   const isAdmin = profile?.username && ADMIN_USERNAMES.includes(profile.username);
   
-  // Fetch announcements
   const { data: announcements = [], refetch, isLoading } = useQuery({
     queryKey: ['announcements'],
     queryFn: getAnnouncements,
@@ -83,7 +82,6 @@ const AnnouncementFeed = () => {
     }
   };
   
-  // Increment view count when announcement is visible
   useEffect(() => {
     if (!announcements.length) return;
     
@@ -99,10 +97,9 @@ const AnnouncementFeed = () => {
           }
         });
       },
-      { threshold: 0.7 } // Register view when 70% of the announcement is visible
+      { threshold: 0.7 }
     );
     
-    // Observe all announcement elements
     const elements = document.querySelectorAll('.announcement-card');
     elements.forEach(el => observer.observe(el));
     
@@ -125,7 +122,6 @@ const AnnouncementFeed = () => {
   
   return (
     <div className="space-y-6">
-      {/* Admin Post Form */}
       {isAdmin && (
         <Card>
           <CardHeader className="pb-3">
@@ -154,7 +150,6 @@ const AnnouncementFeed = () => {
         </Card>
       )}
       
-      {/* Announcements List */}
       {announcements.length === 0 ? (
         <Card className="bg-muted/50">
           <CardContent className="flex flex-col items-center justify-center py-12">
@@ -176,14 +171,32 @@ const AnnouncementFeed = () => {
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center">
-                    <Avatar className="h-8 w-8 mr-2">
-                      <AvatarImage src={announcement.author_profile_pic} alt={announcement.author_name} />
-                      <AvatarFallback>{announcement.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
+                    {announcement.author_username ? (
+                      <Link to={`/profile/${announcement.author_username}`}>
+                        <Avatar className="h-8 w-8 mr-2 cursor-pointer hover:opacity-80 transition-opacity">
+                          <AvatarImage src={announcement.author_profile_pic} alt={announcement.author_name} />
+                          <AvatarFallback>{announcement.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                      </Link>
+                    ) : (
+                      <Avatar className="h-8 w-8 mr-2">
+                        <AvatarImage src={announcement.author_profile_pic} alt={announcement.author_name} />
+                        <AvatarFallback>{announcement.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                    )}
                     <div>
                       <div className="font-medium">
-                        {announcement.author_name}
-                        <span className="text-icc-gold ml-1 font-bold">@{announcement.author_username}</span>
+                        {announcement.author_username ? (
+                          <Link to={`/profile/${announcement.author_username}`} className="hover:underline">
+                            {announcement.author_name}
+                            <span className="text-icc-gold ml-1 font-bold">@{announcement.author_username}</span>
+                          </Link>
+                        ) : (
+                          <>
+                            {announcement.author_name}
+                            <span className="text-icc-gold ml-1 font-bold">@{announcement.author_username}</span>
+                          </>
+                        )}
                       </div>
                       <div className="text-xs text-icc-gold font-medium mt-0.5">
                         Official SEC Announcement

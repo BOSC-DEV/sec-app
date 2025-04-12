@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Link } from 'react-router-dom';
 import { 
   MessageSquare, 
   Image as ImageIcon, 
@@ -36,7 +36,6 @@ const LiveChat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Fetch initial messages
   useEffect(() => {
     const fetchMessages = async () => {
       try {
@@ -44,7 +43,6 @@ const LiveChat = () => {
         setMessages(data);
         setIsLoading(false);
         
-        // Scroll to bottom after loading messages
         setTimeout(() => {
           scrollToBottom();
         }, 100);
@@ -56,7 +54,6 @@ const LiveChat = () => {
     
     fetchMessages();
     
-    // Subscribe to new messages
     const channel = supabase
       .channel('public:chat_messages')
       .on('postgres_changes', 
@@ -64,7 +61,6 @@ const LiveChat = () => {
         payload => {
           setMessages(prev => [...prev, payload.new as ChatMessage]);
           
-          // Scroll to bottom when new message arrives
           setTimeout(() => {
             scrollToBottom();
           }, 100);
@@ -105,7 +101,6 @@ const LiveChat = () => {
     setIsSubmitting(true);
     
     try {
-      // Send message with or without image
       await sendChatMessage({
         content: newMessage,
         author_id: profile?.wallet_address || '',
@@ -135,7 +130,6 @@ const LiveChat = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     
-    // Check file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast({
         title: "File too large",
@@ -145,7 +139,6 @@ const LiveChat = () => {
       return;
     }
     
-    // Check file type
     if (!file.type.startsWith('image/')) {
       toast({
         title: "Invalid file type",
@@ -155,7 +148,6 @@ const LiveChat = () => {
       return;
     }
     
-    // Preview the image
     const reader = new FileReader();
     reader.onload = () => {
       setImagePreview(reader.result as string);
@@ -226,16 +218,34 @@ const LiveChat = () => {
             <div className="space-y-4">
               {messages.map((message) => (
                 <div key={message.id} className="flex items-start space-x-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={message.author_profile_pic} alt={message.author_name} />
-                    <AvatarFallback>{message.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                  </Avatar>
+                  {message.author_username ? (
+                    <Link to={`/profile/${message.author_username}`}>
+                      <Avatar className="h-8 w-8 cursor-pointer hover:opacity-80 transition-opacity">
+                        <AvatarImage src={message.author_profile_pic} alt={message.author_name} />
+                        <AvatarFallback>{message.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                    </Link>
+                  ) : (
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={message.author_profile_pic} alt={message.author_name} />
+                      <AvatarFallback>{message.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                  )}
                   
                   <div className="flex-1">
                     <div className="flex items-center space-x-2">
-                      <span className="font-medium">{message.author_name}</span>
+                      {message.author_username ? (
+                        <Link to={`/profile/${message.author_username}`} className="font-medium hover:underline">
+                          {message.author_name}
+                        </Link>
+                      ) : (
+                        <span className="font-medium">{message.author_name}</span>
+                      )}
+                      
                       {message.author_username && (
-                        <span className="text-icc-gold text-sm">@{message.author_username}</span>
+                        <Link to={`/profile/${message.author_username}`} className="text-icc-gold text-sm hover:underline">
+                          @{message.author_username}
+                        </Link>
                       )}
                       <span className="text-xs text-muted-foreground">
                         {formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}
