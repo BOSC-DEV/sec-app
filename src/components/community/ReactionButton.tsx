@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Button } from '@/components/ui/button';
@@ -58,16 +59,19 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   
   const fetchReactions = async () => {
     try {
-      const { data } = await supabase
+      // Use type assertion to fix TypeScript depth error
+      const response = await supabase
         .from(itemType === 'announcement' ? 'announcement_reactions' : 'chat_message_reactions')
         .select('user_id, reaction_type')
         .eq(itemType === 'announcement' ? 'announcement_id' : 'message_id', itemId);
+      
+      const data = response.data as ReactionData[] | null;
         
       if (data) {
         // Group by reaction type
         const groupedReactions: Record<string, string[]> = {};
         
-        (data as ReactionData[]).forEach(reaction => {
+        data.forEach(reaction => {
           if (!groupedReactions[reaction.reaction_type]) {
             groupedReactions[reaction.reaction_type] = [];
           }
