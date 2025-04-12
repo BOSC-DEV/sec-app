@@ -171,27 +171,40 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
   
   const fetchReactions = async () => {
     try {
-      // Determine which table to use based on itemType
-      let table: 'announcement_reactions' | 'chat_message_reactions' | 'reply_reactions';
-      let idColumn: string;
-      
-      if (itemType === 'announcement') {
-        table = 'announcement_reactions';
-        idColumn = 'announcement_id';
-      } else if (itemType === 'message') {
-        table = 'chat_message_reactions';
-        idColumn = 'message_id';
-      } else {
-        table = 'reply_reactions';
-        idColumn = 'reply_id';
+      // Using explicit typing to avoid excessive type instantiation
+      interface ReactionRow {
+        reaction_type: string;
+        user_id: string;
       }
       
-      const { data: reactionData, error: reactionError } = await supabase
-        .from(table)
-        .select('reaction_type, user_id')
-        .eq(idColumn, itemId);
-        
-      if (reactionError) throw reactionError;
+      let reactionData: ReactionRow[] = [];
+      
+      // Determine which table to use based on itemType and fetch data
+      if (itemType === 'announcement') {
+        const { data, error } = await supabase
+          .from('announcement_reactions')
+          .select('reaction_type, user_id')
+          .eq('announcement_id', itemId);
+          
+        if (error) throw error;
+        reactionData = data || [];
+      } else if (itemType === 'message') {
+        const { data, error } = await supabase
+          .from('chat_message_reactions')
+          .select('reaction_type, user_id')
+          .eq('message_id', itemId);
+          
+        if (error) throw error;
+        reactionData = data || [];
+      } else {
+        const { data, error } = await supabase
+          .from('reply_reactions')
+          .select('reaction_type, user_id')
+          .eq('reply_id', itemId);
+          
+        if (error) throw error;
+        reactionData = data || [];
+      }
       
       const reactionCounts: ReactionCount[] = [];
       const reactionMap = new Map<string, { count: number, has_reacted: boolean }>();
@@ -200,8 +213,8 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
         reactionMap.set(type, { count: 0, has_reacted: false });
       });
       
-      if (reactionData) {
-        reactionData.forEach((reaction: {reaction_type: string, user_id: string}) => {
+      if (reactionData && reactionData.length > 0) {
+        reactionData.forEach((reaction) => {
           const type = reaction.reaction_type;
           const currentData = reactionMap.get(type) || { count: 0, has_reacted: false };
           
