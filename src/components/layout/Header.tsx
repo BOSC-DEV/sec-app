@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -44,19 +45,19 @@ const Header = () => {
   };
 
   const copyToClipboard = async () => {
-    const walletAddress = "HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump";
+    const contractAddress = "HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump";
     
     try {
-      await navigator.clipboard.writeText(walletAddress);
+      await navigator.clipboard.writeText(contractAddress);
       toast({
         title: "Copied to clipboard",
-        description: "Wallet address copied to clipboard successfully",
+        description: "Contract address copied to clipboard successfully",
         variant: "default",
       });
     } catch (err) {
       toast({
         title: "Copy failed",
-        description: "Failed to copy wallet address to clipboard",
+        description: "Failed to copy contract address to clipboard",
         variant: "destructive",
       });
       console.error("Failed to copy: ", err);
@@ -73,7 +74,6 @@ const Header = () => {
     { label: 'Report', path: '/report' },
     { label: 'Leaderboard', path: '/leaderboard' },
     { label: 'Community', path: '/community' },
-    { label: 'Ca', onClick: copyToClipboard, icon: <Copy className="h-3 w-3 mr-1" /> },
   ];
 
   return (
@@ -150,6 +150,16 @@ const Header = () => {
                 >
                   <User className="h-5 w-5" />
                 </Button>
+                {/* Contract address copy button */}
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="text-white hover:bg-icc-blue-light"
+                  onClick={copyToClipboard}
+                  aria-label="Copy Contract Address"
+                >
+                  <Copy className="h-5 w-5" />
+                </Button>
                 <Button 
                   variant="ghost" 
                   size="icon"
@@ -173,6 +183,16 @@ const Header = () => {
               </div>
             ) : (
               <div className="flex items-center space-x-3">
+                {/* Contract address copy button when not connected */}
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="text-white hover:bg-icc-blue-light"
+                  onClick={copyToClipboard}
+                  aria-label="Copy Contract Address"
+                >
+                  <Copy className="h-5 w-5" />
+                </Button>
                 <Button 
                   variant="gold"
                   size="sm"
@@ -262,6 +282,16 @@ const Header = () => {
                     >
                       <User className="h-5 w-5" />
                     </Button>
+                    {/* Copy button in mobile menu */}
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="text-white hover:bg-icc-blue"
+                      onClick={copyToClipboard}
+                      aria-label="Copy Contract Address"
+                    >
+                      <Copy className="h-5 w-5" />
+                    </Button>
                     <Button 
                       variant="outline" 
                       className="border-icc-gold text-icc-gold hover:bg-icc-blue flex items-center justify-center gap-2"
@@ -272,14 +302,26 @@ const Header = () => {
                     </Button>
                   </div>
                 ) : (
-                  <Button 
-                    className="bg-icc-gold text-icc-blue hover:bg-icc-gold-light flex items-center gap-2 w-full"
-                    onClick={connectWallet}
-                    size="sm"
-                  >
-                    <Wallet className="h-3 w-3" />
-                    Connect Wallet
-                  </Button>
+                  <div className="flex items-center justify-around space-x-2 w-full">
+                    {/* Copy button in mobile menu when not connected */}
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="text-white hover:bg-icc-blue"
+                      onClick={copyToClipboard}
+                      aria-label="Copy Contract Address"
+                    >
+                      <Copy className="h-5 w-5" />
+                    </Button>
+                    <Button 
+                      className="bg-icc-gold text-icc-blue hover:bg-icc-gold-light flex items-center gap-2 w-full"
+                      onClick={connectWallet}
+                      size="sm"
+                    >
+                      <Wallet className="h-3 w-3" />
+                      Connect Wallet
+                    </Button>
+                  </div>
                 )}
               </div>
               
