@@ -24,7 +24,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ScrollArea } from '@/components/ui/scroll-area';
 import EmojiPicker from '@/components/community/EmojiPicker';
 import ReactionButton from './ReactionButton';
-import BadgeTier from '@/components/ui/badge-tier';
+import BadgeTier from '@/components/profile/BadgeTier';
+import { calculateBadgeTier } from '@/utils/badgeUtils';
 
 const LiveChat = () => {
   const { profile, isConnected } = useProfile();
@@ -37,20 +38,13 @@ const LiveChat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // This function calculates badge tier based on wallet address
-  // In a real app, this would be based on actual token balance
   const getUserBadge = (address: string) => {
-    // Mock balance for demo - we'll use a larger value to simulate whale status
-    // for wallet addresses that include certain characters
-    const mockBalanceBase = 100000; // Basic balance (0.01% of supply)
+    const mockBalanceBase = 100000;
     
-    // For the current user's address (the one with 15.8M tokens),
-    // or addresses that include specific patterns, assign whale status
     if (address === '5.8%' || address.includes('58') || address.includes('15')) {
-      return calculateBadgeTier(58000000); // 5.8% of supply - whale status
+      return calculateBadgeTier(58000000);
     } 
     
-    // Deterministically generate a balance based on the address
     const hash = address.split('').reduce((acc, char) => {
       return acc + char.charCodeAt(0);
     }, 0);
@@ -58,43 +52,6 @@ const LiveChat = () => {
     const mockBalance = mockBalanceBase * (hash % 200);
     return calculateBadgeTier(mockBalance);
   };
-  
-  useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        const data = await getChatMessages();
-        setMessages(data);
-        setIsLoading(false);
-        
-        setTimeout(() => {
-          scrollToBottom();
-        }, 100);
-      } catch (error) {
-        console.error('Error fetching chat messages:', error);
-        setIsLoading(false);
-      }
-    };
-    
-    fetchMessages();
-    
-    const channel = supabase
-      .channel('public:chat_messages')
-      .on('postgres_changes', 
-        { event: 'INSERT', schema: 'public', table: 'chat_messages' }, 
-        payload => {
-          setMessages(prev => [...prev, payload.new as ChatMessage]);
-          
-          setTimeout(() => {
-            scrollToBottom();
-          }, 100);
-        }
-      )
-      .subscribe();
-      
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
   
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -191,6 +148,43 @@ const LiveChat = () => {
   const handleEmojiSelect = (emoji: string) => {
     setNewMessage(prev => prev + emoji);
   };
+  
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const data = await getChatMessages();
+        setMessages(data);
+        setIsLoading(false);
+        
+        setTimeout(() => {
+          scrollToBottom();
+        }, 100);
+      } catch (error) {
+        console.error('Error fetching chat messages:', error);
+        setIsLoading(false);
+      }
+    };
+    
+    fetchMessages();
+    
+    const channel = supabase
+      .channel('public:chat_messages')
+      .on('postgres_changes', 
+        { event: 'INSERT', schema: 'public', table: 'chat_messages' }, 
+        payload => {
+          setMessages(prev => [...prev, payload.new as ChatMessage]);
+          
+          setTimeout(() => {
+            scrollToBottom();
+          }, 100);
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
   
   if (isLoading) {
     return (

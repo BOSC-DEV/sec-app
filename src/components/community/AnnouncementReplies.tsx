@@ -10,7 +10,7 @@ import { MessageSquareReply, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReactionButton from './ReactionButton';
 import ReplyForm from './ReplyForm';
-import BadgeTier from '../profile/BadgeTier';
+import BadgeTier from '@/components/profile/BadgeTier';
 import { calculateBadgeTier } from '@/utils/badgeUtils';
 
 interface AnnouncementRepliesProps {
