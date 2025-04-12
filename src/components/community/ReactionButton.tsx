@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Button } from '@/components/ui/button';
@@ -33,7 +32,6 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   const [reactions, setReactions] = useState<Record<string, string[]>>(initialReactions);
   const [open, setOpen] = useState(false);
   
-  // Determine the channel name and table based on item type
   const getConfig = () => {
     switch (itemType) {
       case 'announcement':
@@ -60,7 +58,6 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   const config = getConfig();
   
   useEffect(() => {
-    // Set up real-time subscription for reactions
     const channel = supabase
       .channel(config.channelName)
       .on('postgres_changes', 
@@ -71,13 +68,11 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
           filter: `${config.idField}=eq.${itemId}`
         }, 
         () => {
-          // Refresh reactions when changes occur
           fetchReactions();
         }
       )
       .subscribe();
       
-    // Initial fetch
     fetchReactions();
       
     return () => {
@@ -111,7 +106,6 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
       if (error) throw error;
       
       if (data) {
-        // Group by reaction type
         const groupedReactions: Record<string, string[]> = {};
         
         data.forEach((reaction: any) => {
@@ -173,13 +167,13 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   };
   
   return (
-    <div className="flex items-center">
+    <div className="flex items-center space-x-2">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button 
             variant="ghost" 
             size="sm" 
-            className="text-xs flex items-center space-x-1 h-7 px-2"
+            className="text-xs flex items-center space-x-1 h-7 px-2 min-w-[64px]"
           >
             <span>😊</span>
             {getTotalReactionCount() > 0 && (
