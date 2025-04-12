@@ -55,3 +55,32 @@ export const addBountyContribution = async (contribution: {
     throw error;
   }
 };
+
+/**
+ * Get a specific bounty contribution by ID
+ */
+export const getBountyContributionById = async (contributionId: string): Promise<BountyContribution | null> => {
+  try {
+    console.log(`Fetching bounty contribution with ID ${contributionId}`);
+    
+    const { data, error } = await supabase
+      .from("bounty_contributions")
+      .select("*")
+      .eq("id", contributionId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error fetching bounty contribution:", error);
+      throw error;
+    }
+
+    return data as BountyContribution;
+  } catch (error) {
+    handleError(error, {
+      fallbackMessage: "Failed to fetch bounty contribution",
+      severity: ErrorSeverity.MEDIUM,
+      context: "GET_BOUNTY_CONTRIBUTION",
+    });
+    return null;
+  }
+};

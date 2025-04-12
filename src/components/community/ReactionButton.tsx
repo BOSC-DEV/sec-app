@@ -28,7 +28,7 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   
   // Get the appropriate table name based on item type
-  const getTableName = () => {
+  const getTableName = (): string => {
     switch (itemType) {
       case 'announcement':
         return 'announcement_reactions';
@@ -37,12 +37,12 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
       case 'reply':
         return 'reply_reactions';
       default:
-        return '';
+        return 'announcement_reactions'; // Default to prevent empty string
     }
   };
   
   // Get the appropriate ID field name based on item type
-  const getIdFieldName = () => {
+  const getIdFieldName = (): string => {
     switch (itemType) {
       case 'announcement':
         return 'announcement_id';
@@ -51,7 +51,7 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
       case 'reply':
         return 'reply_id';
       default:
-        return '';
+        return 'announcement_id'; // Default to prevent empty string
     }
   };
 
@@ -76,8 +76,9 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
       const tableName = getTableName();
       const idField = getIdFieldName();
       
+      // Use the explicit table name to avoid type errors
       const { data, error } = await supabase
-        .from(tableName)
+        .from(tableName as any)
         .select('*')
         .eq(idField, itemId);
         
@@ -87,7 +88,7 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
       
       return data || [];
     },
-    enabled: !!itemId && !!getTableName(),
+    enabled: !!itemId && !!profile?.wallet_address,
   });
   
   // Get counts of each reaction type

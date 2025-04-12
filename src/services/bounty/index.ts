@@ -1,21 +1,20 @@
 
 // Re-export bounty service functionality
 export { 
-  getBountyContribution,
-  getBountyContributionsByScammerId,
-  getBountyContributionsByContributorId 
+  addBountyContribution,
+  getBountyContributionById 
 } from './bountyContributionService';
 
 export { 
-  transferBounty,
-  addTransferredBounty
+  transferBountyContribution,
+  getUserTransferableContributions
 } from './bountyTransferService';
 
 export { 
-  getTotalBounty,
-  getRecentBountyContributions,
-  getTopBountyContributors,
-  getTopBountiedScammers
+  getScammerTotalBounty,
+  getScammerBountyContributions,
+  getUserBountyContributions,
+  getUserContributionAmountForScammer
 } from './bountyQueryService';
 
 export { 
