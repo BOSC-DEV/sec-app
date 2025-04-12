@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Link } from 'react-router-dom';
-import { MessageSquare, Image as ImageIcon, Send, Smile, AlertCircle, Download, Info, X } from 'lucide-react';
+import { MessageSquare, Image as ImageIcon, Send, Smile, AlertCircle, Download, Info, X, MessagesSquare } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { getChatMessages, sendChatMessage, deleteChatMessage, isUserAdmin } from '@/services/communityService';
@@ -258,9 +258,13 @@ const LiveChat = () => {
             </Link>
           </div>
           
-          <div className={`min-w-[180px] max-w-[75%] md:max-w-[60%] rounded-lg px-3 py-2 ${isCurrentUser ? 'bg-icc-blue-light text-white rounded-tr-none' : 'bg-card rounded-tl-none'}`}>
+          <div className={`min-w-[180px] max-w-[75%] md:max-w-[60%] rounded-xl px-4 py-3 shadow-sm ${
+            isCurrentUser 
+              ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-tr-none' 
+              : 'bg-white dark:bg-slate-800 dark:border-slate-700 border border-gray-100 rounded-tl-none'
+          }`}>
             <div className="flex items-center gap-1 mb-1 flex-wrap">
-              <span className={`font-semibold text-sm ${isCurrentUser ? 'text-icc-gold' : 'text-icc-gold'}`}>
+              <span className={`font-semibold text-sm ${isCurrentUser ? 'text-white' : 'text-icc-gold'}`}>
                 {message.author_name}
               </span>
               {userBadge && <BadgeTier badgeInfo={userBadge} size="sm" showTooltip={true} />}
@@ -274,25 +278,25 @@ const LiveChat = () => {
             </div>
             
             {message.image_url && (
-              <div className="mt-2 relative group">
+              <div className="mt-3 relative group rounded-lg overflow-hidden">
                 <img src={message.image_url} alt="Chat attachment" 
-                  className="max-h-40 rounded-md object-contain bg-muted/20" />
+                  className="max-h-48 w-full rounded-lg object-cover bg-muted/20" />
                 <a href={message.image_url} target="_blank" rel="noopener noreferrer" 
                   className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity 
-                  bg-background/80 rounded-full p-1" title="View full image">
+                  bg-background/80 rounded-full p-1.5" title="View full image">
                   <Download className="h-4 w-4" />
                 </a>
               </div>
             )}
             
-            <div className="flex justify-between items-center mt-1">
+            <div className="flex justify-between items-center mt-1.5">
               <CommunityInteractionButtons 
                 itemId={message.id} 
                 itemType="message"
                 initialLikes={message.likes}
                 initialDislikes={message.dislikes}
               />
-              <span className="text-xs text-muted-foreground">
+              <span className={`text-xs ${isCurrentUser ? 'text-blue-100' : 'text-muted-foreground'}`}>
                 {time}
               </span>
             </div>
@@ -323,23 +327,21 @@ const LiveChat = () => {
   }
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className={`pb-2 ${isMobile ? 'px-3 py-2' : 'px-4 py-3'}`}>
+    <Card className="h-full flex flex-col overflow-hidden shadow-md border-gray-200">
+      <CardHeader className={`pb-2 ${isMobile ? 'px-3 py-2' : 'px-4 py-3'} border-b bg-gradient-to-r from-slate-50 to-gray-100 dark:from-slate-800 dark:to-slate-900`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <MessageSquare className="h-5 w-5 mr-2 text-icc-gold" />
-            <h3 className="text-lg font-medium">Chat</h3>
+            <MessagesSquare className="h-5 w-5 mr-2 text-icc-gold" />
+            <h3 className="text-lg font-medium">Community Chat</h3>
           </div>
-          <div className="bg-muted rounded-full px-3 py-1 text-xs text-muted-foreground flex items-center">
+          <div className="bg-slate-200/70 dark:bg-slate-700/50 rounded-full px-3 py-1 text-xs text-muted-foreground flex items-center">
             <Info className="h-3 w-3 mr-1" />
             Stored for 24 hours
           </div>
         </div>
       </CardHeader>
       
-      <Separator />
-      
-      <CardContent className="p-0 flex-grow overflow-hidden">
+      <CardContent className="p-0 flex-grow overflow-hidden bg-gray-50/50 dark:bg-slate-900/30">
         <ScrollArea className="h-[calc(100%-1rem)]">
           <div className={`space-y-0 p-${isMobile ? '2' : '4'}`}>
             {messages.length === 0 ? (
@@ -358,10 +360,10 @@ const LiveChat = () => {
         </ScrollArea>
       </CardContent>
       
-      <CardFooter className={`border-t ${isMobile ? 'p-2' : 'p-4'} mt-auto`}>
+      <CardFooter className={`${isMobile ? 'p-2' : 'p-4'} mt-auto border-t bg-white dark:bg-slate-800`}>
         {!isConnected ? (
           <div className="w-full flex justify-center">
-            <Button variant="outline" onClick={() => toast({
+            <Button variant="outline" className="shadow-sm" onClick={() => toast({
               title: "Connect Wallet",
               description: "Please connect your wallet to participate in the chat"
             })}>
@@ -381,14 +383,14 @@ const LiveChat = () => {
             
             <div className="flex space-x-2">
               <div className="flex items-center space-x-1">
-                <Button type="button" variant="outline" size="icon" className="h-9 w-9" onClick={() => fileInputRef.current?.click()}>
+                <Button type="button" variant="outline" size="icon" className="h-9 w-9 rounded-full" onClick={() => fileInputRef.current?.click()}>
                   <ImageIcon className="h-4 w-4" />
                 </Button>
                 <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
                 
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button type="button" variant="outline" size="icon" className="h-9 w-9">
+                    <Button type="button" variant="outline" size="icon" className="h-9 w-9 rounded-full">
                       <Smile className="h-4 w-4" />
                     </Button>
                   </PopoverTrigger>
@@ -403,12 +405,12 @@ const LiveChat = () => {
                 value={newMessage} 
                 onChange={e => setNewMessage(e.target.value)} 
                 disabled={isSubmitting} 
-                className="flex-1 min-h-[38px] max-h-[80px] py-2 text-sm resize-none"
+                className="flex-1 min-h-[38px] max-h-[80px] py-2 text-sm resize-none rounded-full px-4"
                 rows={1}
                 style={{lineHeight: '1.2'}}
               />
               
-              <Button type="submit" size="icon" className="h-9 w-9" disabled={isSubmitting || (!newMessage.trim() && !imageFile)}>
+              <Button type="submit" size="icon" className="h-9 w-9 rounded-full bg-blue-500 hover:bg-blue-600" disabled={isSubmitting || (!newMessage.trim() && !imageFile)}>
                 {isSubmitting ? (
                   <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
                 ) : (
@@ -424,3 +426,4 @@ const LiveChat = () => {
 };
 
 export default LiveChat;
+
