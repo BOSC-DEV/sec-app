@@ -462,6 +462,27 @@ export type Database = {
           },
         ]
       }
+      report_submissions: {
+        Row: {
+          created_at: string
+          id: string
+          ip_hash: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_hash: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_hash?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       scammer_views: {
         Row: {
           created_at: string
@@ -668,6 +689,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_report_rate_limits: {
+        Args: { p_user_id: string; p_ip_hash: string }
+        Returns: {
+          allowed: boolean
+          message: string
+        }[]
+      }
       increment_announcement_views: {
         Args: { p_announcement_id: string }
         Returns: undefined
@@ -675,6 +703,10 @@ export type Database = {
       is_duplicate_view: {
         Args: { p_scammer_id: string; p_ip_hash: string }
         Returns: boolean
+      }
+      record_report_submission: {
+        Args: { p_user_id: string; p_ip_hash: string }
+        Returns: string
       }
       upsert_profile: {
         Args: {

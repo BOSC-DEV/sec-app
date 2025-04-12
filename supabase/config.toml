@@ -38,4 +38,3 @@ verify_jwt = true
 
 [functions.submit-report]
 verify_jwt = true
-
