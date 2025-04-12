@@ -54,8 +54,16 @@ export const useReportForm = (id?: string) => {
   
   // Handle Turnstile verification
   const handleTurnstileVerify = (token: string) => {
+    console.log("Turnstile verification callback with token length:", token.length);
     setTurnstileToken(token);
     setIsTurnstileVerified(token.length > 0);
+    
+    if (token.length > 0) {
+      toast({
+        title: "Verification complete",
+        description: "You can now submit your report",
+      });
+    }
   };
   
   // Fetch existing scammer data for edit mode
@@ -111,6 +119,7 @@ export const useReportForm = (id?: string) => {
     if (!isEditMode) {
       const isVerified = await verifyTurnstileToken(turnstileToken);
       if (!isVerified) {
+        console.log("Turnstile verification failed in submission");
         return;
       }
     }

@@ -30,7 +30,8 @@ const ReportPage = () => {
     photoPreview, 
     setPhotoPreview, 
     onSubmit,
-    handleTurnstileVerify 
+    handleTurnstileVerify,
+    isTurnstileVerified
   } = useReportForm(id);
 
   useEffect(() => {
@@ -73,7 +74,16 @@ const ReportPage = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         if (!isSubmitting && !isLoading && !checkingPermission) {
-          form.handleSubmit(onSubmit)();
+          // Only allow submission via keyboard if verification is complete or editing mode
+          if (isEditMode || isTurnstileVerified) {
+            form.handleSubmit(onSubmit)();
+          } else {
+            toast({
+              title: "Verification required",
+              description: "Please complete the verification challenge before submitting",
+              variant: "destructive"
+            });
+          }
         }
       }
       
@@ -84,7 +94,27 @@ const ReportPage = () => {
     
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [form, navigate, onSubmit, isSubmitting, isLoading, checkingPermission]);
+  }, [form, navigate, onSubmit, isSubmitting, isLoading, checkingPermission, isEditMode, isTurnstileVerified]);
+
+  // Function to handle form submission with verification check
+  const handleFormSubmit = (data: any) => {
+    // Skip verification for edit mode
+    if (isEditMode) {
+      onSubmit(data);
+      return;
+    }
+    
+    if (!isTurnstileVerified) {
+      toast({
+        title: "Verification required",
+        description: "Please complete the verification challenge before submitting",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    onSubmit(data);
+  };
 
   if (checkingPermission || isLoading) {
     return (
@@ -121,7 +151,7 @@ const ReportPage = () => {
           
           <Form {...form}>
             <form 
-              onSubmit={form.handleSubmit(onSubmit)} 
+              onSubmit={form.handleSubmit(handleFormSubmit)} 
               className="space-y-8"
               aria-label={isEditMode ? "Edit scammer report form" : "Report a scammer form"}
             >
@@ -143,6 +173,11 @@ const ReportPage = () => {
                     siteKey={TURNSTILE_SITE_KEY}
                     onVerify={handleTurnstileVerify}
                   />
+                  {!isTurnstileVerified && (
+                    <p className="text-sm text-amber-600 mt-2">
+                      Verification is required before submitting the report.
+                    </p>
+                  )}
                 </div>
               )}
               
@@ -157,7 +192,7 @@ const ReportPage = () => {
                 </Button>
                 <Button 
                   type="submit" 
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || (!isEditMode && !isTurnstileVerified)}
                   aria-busy={isSubmitting}
                   aria-label={isSubmitting ? 
                     (isEditMode ? "Updating report, please wait" : "Submitting report, please wait") : 

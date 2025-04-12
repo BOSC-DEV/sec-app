@@ -11,18 +11,32 @@ export const TURNSTILE_SITE_KEY = '1x00000000000000000000AA'; // Replace with yo
  */
 export const verifyTurnstileToken = async (token: string): Promise<boolean> => {
   if (!token) {
+    console.log("Verification failed: No token provided");
     toast({
       title: "Verification required",
-      description: "Please complete the verification challenge",
+      description: "Please complete the verification challenge before submitting",
       variant: "destructive"
     });
     return false;
   }
   
   try {
-    // In a production environment, you would verify this token server-side
-    // This is a simple client-side check just to ensure a token exists
-    return token.length > 0;
+    // For a real implementation, you'd make a server-side request to verify the token
+    // For now, we just check that a token exists and has reasonable length
+    const isValid = token.length > 20;
+    
+    if (!isValid) {
+      console.log("Verification failed: Invalid token");
+      toast({
+        title: "Verification failed",
+        description: "Please try completing the verification again",
+        variant: "destructive"
+      });
+      return false;
+    }
+    
+    console.log("Verification successful");
+    return true;
   } catch (error) {
     console.error('Turnstile verification error:', error);
     toast({

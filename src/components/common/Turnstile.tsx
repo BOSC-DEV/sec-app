@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 
@@ -29,14 +28,18 @@ const Turnstile: React.FC<TurnstileProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string>('');
   const [isRendered, setIsRendered] = useState(false);
+  const [scriptLoaded, setScriptLoaded] = useState(false);
 
   useEffect(() => {
-    // Load the Turnstile script if it hasn't been loaded yet
-    if (!window.turnstile) {
+    if (!window.turnstile && !scriptLoaded) {
       const script = document.createElement('script');
       script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
       script.async = true;
       script.defer = true;
+      
+      script.onload = () => {
+        setScriptLoaded(true);
+      };
       
       script.onerror = () => {
         toast({
@@ -47,52 +50,77 @@ const Turnstile: React.FC<TurnstileProps> = ({
       };
       
       document.head.appendChild(script);
+      setScriptLoaded(true);
+    } else if (window.turnstile) {
+      setScriptLoaded(true);
     }
+  }, [scriptLoaded]);
 
-    const renderTurnstile = () => {
-      if (window.turnstile && containerRef.current && !isRendered) {
-        try {
-          widgetIdRef.current = window.turnstile.render(containerRef.current, {
-            sitekey: siteKey,
-            callback: (token: string) => {
-              onVerify(token);
-              setIsRendered(true);
-            },
-            theme: theme,
-            size: size,
-            'refresh-expired': refreshExpired,
-            'expired-callback': () => {
-              onVerify('');
-              setIsRendered(false);
-            }
-          });
-          setIsRendered(true);
-        } catch (error) {
-          console.error('Failed to render Turnstile:', error);
+  useEffect(() => {
+    if (!scriptLoaded || isRendered || !containerRef.current) return;
+
+    const renderWidget = () => {
+      if (!window.turnstile) return;
+      
+      try {
+        if (widgetIdRef.current) {
+          try {
+            window.turnstile.reset(widgetIdRef.current);
+          } catch (e) {
+            console.error("Error resetting turnstile:", e);
+          }
         }
+        
+        console.log("Rendering Turnstile widget");
+        widgetIdRef.current = window.turnstile.render(containerRef.current!, {
+          sitekey: siteKey,
+          callback: (token: string) => {
+            console.log("Turnstile verification successful");
+            onVerify(token);
+          },
+          theme: theme,
+          size: size,
+          'refresh-expired': refreshExpired,
+          'expired-callback': () => {
+            console.log("Turnstile token expired");
+            onVerify('');
+            setIsRendered(false);
+          }
+        });
+        
+        setIsRendered(true);
+      } catch (error) {
+        console.error('Failed to render Turnstile:', error);
       }
     };
 
-    // Initialize when turnstile is available
-    const checkTurnstileLoaded = setInterval(() => {
-      if (window.turnstile) {
-        clearInterval(checkTurnstileLoaded);
-        renderTurnstile();
-      }
-    }, 100);
+    if (window.turnstile) {
+      renderWidget();
+    } else {
+      const checkInterval = setInterval(() => {
+        if (window.turnstile) {
+          clearInterval(checkInterval);
+          renderWidget();
+        }
+      }, 100);
+      
+      setTimeout(() => clearInterval(checkInterval), 10000);
+      
+      return () => clearInterval(checkInterval);
+    }
+  }, [scriptLoaded, isRendered, siteKey, onVerify, theme, size, refreshExpired]);
 
+  useEffect(() => {
     return () => {
-      clearInterval(checkTurnstileLoaded);
       if (window.turnstile && widgetIdRef.current) {
         try {
           window.turnstile.reset(widgetIdRef.current);
-          setIsRendered(false);
         } catch (error) {
           console.error('Failed to reset Turnstile:', error);
         }
       }
     };
-  }, [siteKey, onVerify, theme, size, refreshExpired, isRendered]);
+  }, []);
 
   return (
     <div className="mt-2 mb-4">
