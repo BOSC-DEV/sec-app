@@ -25,11 +25,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ScrollArea } from '@/components/ui/scroll-area';
 import EmojiPicker from '@/components/community/EmojiPicker';
 import ReactionButton from './ReactionButton';
-import BadgeTier from '@/components/profile/BadgeTier';
-import { calculateBadgeTier, BadgeTier as BadgeTierEnum, BadgeInfo } from '@/utils/badgeUtils';
 import AdminContextMenu from './AdminContextMenu';
 import { Textarea } from '@/components/ui/textarea';
-import { getUserBountyContributions } from '@/services/bountyService';
 
 const LiveChat = () => {
   const { profile, isConnected } = useProfile();
@@ -40,8 +37,6 @@ const LiveChat = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [userBadgeTiers, setUserBadgeTiers] = useState<{[key: string]: BadgeTierEnum}>({});
-  const [userBadgeInfos, setUserBadgeInfos] = useState<{[key: string]: BadgeInfo}>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -57,80 +52,6 @@ const LiveChat = () => {
     
     checkAdmin();
   }, [profile?.username]);
-  
-  const getBadgeInfo = async (authorId: string) => {
-    try {
-      if (userBadgeInfos[authorId]) {
-        return userBadgeInfos[authorId];
-      }
-      
-      if (userBadgeTiers[authorId]) {
-        const badgeInfo = calculateBadgeTier(getDefaultBountyAmount(authorId, userBadgeTiers[authorId]));
-        setUserBadgeInfos(prev => ({...prev, [authorId]: badgeInfo}));
-        return badgeInfo;
-      }
-      
-      // This is the key change - we're now properly fetching bounty contributions to get the accurate badge tier
-      const bountyData = await getUserBountyContributions(authorId, 1, 100);  // Increased perPage to ensure we get all contributions
-      const total = bountyData?.totalBountyAmount || 0;
-      
-      console.log(`Fetched bounty total for ${authorId}: ${total}`);
-      
-      const badgeInfo = calculateBadgeTier(total);
-      
-      setUserBadgeTiers(prev => ({...prev, [authorId]: badgeInfo.tier}));
-      setUserBadgeInfos(prev => ({...prev, [authorId]: badgeInfo}));
-      
-      return badgeInfo;
-    } catch (error) {
-      console.error('Error fetching badge info:', error);
-      const defaultBadgeInfo = calculateBadgeTier(getDefaultBountyAmount(authorId));
-      setUserBadgeInfos(prev => ({...prev, [authorId]: defaultBadgeInfo}));
-      return defaultBadgeInfo;
-    }
-  };
-  
-  // Pre-load all badge info for messages when they're loaded
-  useEffect(() => {
-    const fetchAllBadgeInfo = async () => {
-      if (messages.length === 0) return;
-      
-      const uniqueAuthorIds = [...new Set(messages.map(m => m.author_id).filter(Boolean))];
-      console.log(`Fetching badge info for ${uniqueAuthorIds.length} unique authors`);
-      
-      for (const authorId of uniqueAuthorIds) {
-        if (!userBadgeInfos[authorId]) {
-          await getBadgeInfo(authorId);
-        }
-      }
-    };
-    
-    fetchAllBadgeInfo();
-  }, [messages]);
-  
-  const getDefaultBountyAmount = (address: string, defaultTier?: BadgeTierEnum) => {
-    if (defaultTier) {
-      switch (defaultTier) {
-        case BadgeTierEnum.BLUE_WHALE: return 12000000;
-        case BadgeTierEnum.TREX: return 6000000;
-        case BadgeTierEnum.GOLDEN_EAGLE: return 3000000;
-        case BadgeTierEnum.GREAT_APE: return 1000000;
-        case BadgeTierEnum.BULL_SHARK: return 500000;
-        case BadgeTierEnum.KING_COBRA: return 350000;
-        case BadgeTierEnum.LION: return 150000;
-        case BadgeTierEnum.BULL: return 75000;
-        default: return 5000;
-      }
-    }
-    
-    const mockBalanceBase = 100000;
-    const hash = address.split('').reduce((acc, char) => {
-      return acc + char.charCodeAt(0);
-    }, 0);
-    
-    const mockBalance = mockBalanceBase * (hash % 10);
-    return mockBalance;
-  };
   
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -339,8 +260,6 @@ const LiveChat = () => {
           ) : (
             <div className="space-y-4">
               {messages.map((message) => {
-                const badgeInfo = message.author_id ? userBadgeInfos[message.author_id] : null;
-                
                 const messageContent = (
                   <div key={message.id} className="flex items-start space-x-3">
                     {message.author_username ? (
@@ -365,10 +284,6 @@ const LiveChat = () => {
                           </Link>
                         ) : (
                           <span className="font-medium">{message.author_name}</span>
-                        )}
-                        
-                        {badgeInfo && (
-                          <BadgeTier badgeInfo={badgeInfo} size="sm" showTooltip={true} />
                         )}
                         
                         {message.author_username && (
