@@ -42,7 +42,7 @@ interface ReactionCount {
   has_reacted: boolean;
 }
 
-// Define types for reaction inserts
+// Simplified types for different reaction inserts
 type AnnouncementReactionInsert = {
   reaction_type: string;
   user_id: string;
@@ -81,46 +81,31 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
     try {
       let success = false;
       
-      // Determine which table to use based on itemType
-      let table: 'announcement_reactions' | 'chat_message_reactions' | 'reply_reactions';
-      let idColumn: string;
-      
+      // Check if the user already has the same reaction - with explicit table references
       if (itemType === 'announcement') {
-        table = 'announcement_reactions';
-        idColumn = 'announcement_id';
-      } else if (itemType === 'message') {
-        table = 'chat_message_reactions';
-        idColumn = 'message_id';
-      } else {
-        table = 'reply_reactions';
-        idColumn = 'reply_id';
-      }
-      
-      // Check if the user already has the same reaction
-      const { data: existing, error: checkError } = await supabase
-        .from(table)
-        .select('id')
-        .eq(idColumn, itemId)
-        .eq('user_id', profile?.wallet_address || '')
-        .eq('reaction_type', reactionType)
-        .single();
-        
-      if (checkError && checkError.code !== 'PGRST116') {
-        throw checkError;
-      }
-      
-      if (existing) {
-        // Remove reaction if it exists
-        const { error: deleteError } = await supabase
-          .from(table)
-          .delete()
-          .eq('id', existing.id);
+        const { data: existing, error: checkError } = await supabase
+          .from('announcement_reactions')
+          .select('id')
+          .eq('announcement_id', itemId)
+          .eq('user_id', profile?.wallet_address || '')
+          .eq('reaction_type', reactionType)
+          .single();
           
-        if (deleteError) throw deleteError;
-        success = true;
-      } else {
-        // Add new reaction based on table type
-        if (itemType === 'announcement') {
+        if (checkError && checkError.code !== 'PGRST116') {
+          throw checkError;
+        }
+        
+        if (existing) {
+          // Remove reaction if it exists
+          const { error: deleteError } = await supabase
+            .from('announcement_reactions')
+            .delete()
+            .eq('id', existing.id);
+            
+          if (deleteError) throw deleteError;
+          success = true;
+        } else {
+          // Add new announcement reaction
           const insertData: AnnouncementReactionInsert = {
             reaction_type: reactionType,
             user_id: profile?.wallet_address || '',
@@ -132,7 +117,32 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
             .insert(insertData);
             
           if (insertError) throw insertError;
-        } else if (itemType === 'message') {
+          success = true;
+        }
+      } else if (itemType === 'message') {
+        const { data: existing, error: checkError } = await supabase
+          .from('chat_message_reactions')
+          .select('id')
+          .eq('message_id', itemId)
+          .eq('user_id', profile?.wallet_address || '')
+          .eq('reaction_type', reactionType)
+          .single();
+          
+        if (checkError && checkError.code !== 'PGRST116') {
+          throw checkError;
+        }
+        
+        if (existing) {
+          // Remove reaction if it exists
+          const { error: deleteError } = await supabase
+            .from('chat_message_reactions')
+            .delete()
+            .eq('id', existing.id);
+            
+          if (deleteError) throw deleteError;
+          success = true;
+        } else {
+          // Add new message reaction
           const insertData: MessageReactionInsert = {
             reaction_type: reactionType,
             user_id: profile?.wallet_address || '',
@@ -144,7 +154,33 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
             .insert(insertData);
             
           if (insertError) throw insertError;
+          success = true;
+        }
+      } else {
+        // Item type is 'reply'
+        const { data: existing, error: checkError } = await supabase
+          .from('reply_reactions')
+          .select('id')
+          .eq('reply_id', itemId)
+          .eq('user_id', profile?.wallet_address || '')
+          .eq('reaction_type', reactionType)
+          .single();
+          
+        if (checkError && checkError.code !== 'PGRST116') {
+          throw checkError;
+        }
+        
+        if (existing) {
+          // Remove reaction if it exists
+          const { error: deleteError } = await supabase
+            .from('reply_reactions')
+            .delete()
+            .eq('id', existing.id);
+            
+          if (deleteError) throw deleteError;
+          success = true;
         } else {
+          // Add new reply reaction
           const insertData: ReplyReactionInsert = {
             reaction_type: reactionType,
             user_id: profile?.wallet_address || '',
@@ -156,9 +192,8 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
             .insert(insertData);
             
           if (insertError) throw insertError;
+          success = true;
         }
-        
-        success = true;
       }
       
       if (success) {
@@ -179,7 +214,7 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
       
       let reactionData: ReactionRow[] = [];
       
-      // Determine which table to use based on itemType and fetch data
+      // Direct table queries to avoid excessive type instantiation
       if (itemType === 'announcement') {
         const { data, error } = await supabase
           .from('announcement_reactions')
@@ -248,35 +283,44 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
     // Create a unique channel name to avoid collisions
     const channelName = `reactions_${itemType}_${itemId}`;
     
-    // Determine the table to listen to based on itemType
-    let tableName: 'announcement_reactions' | 'chat_message_reactions' | 'reply_reactions';
-    let filterColumn: string;
-    
-    if (itemType === 'announcement') {
-      tableName = 'announcement_reactions';
-      filterColumn = 'announcement_id';
-    } else if (itemType === 'message') {
-      tableName = 'chat_message_reactions';
-      filterColumn = 'message_id';
-    } else {
-      tableName = 'reply_reactions';
-      filterColumn = 'reply_id';
-    }
-    
-    // Set up the realtime subscription
+    // Set up channel subscription based on itemType
     const channel = supabase.channel(channelName);
     
-    channel
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: tableName,
-        filter: `${filterColumn}=eq.${itemId}`
-      }, () => {
-        fetchReactions();
-      })
-      .subscribe();
-      
+    if (itemType === 'announcement') {
+      channel.on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'announcement_reactions',
+          filter: `announcement_id=eq.${itemId}`
+        },
+        () => fetchReactions()
+      ).subscribe();
+    } else if (itemType === 'message') {
+      channel.on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'chat_message_reactions',
+          filter: `message_id=eq.${itemId}`
+        },
+        () => fetchReactions()
+      ).subscribe();
+    } else {
+      channel.on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'reply_reactions',
+          filter: `reply_id=eq.${itemId}`
+        },
+        () => fetchReactions()
+      ).subscribe();
+    }
+    
     return () => {
       supabase.removeChannel(channel);
     };
