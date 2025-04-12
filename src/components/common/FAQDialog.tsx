@@ -247,7 +247,7 @@ const FAQDialog: React.FC<FAQDialogProps> = ({
         </ScrollArea>
         <DialogFooter>
           <DialogClose asChild>
-            <Button className="bg-neutral-50">Close</Button>
+            <Button className="bg-gray-900 hover:bg-gray-800">Close</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>
