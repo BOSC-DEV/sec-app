@@ -42,7 +42,7 @@ const LiveChat = () => {
     const mockBalanceBase = 100000;
     
     if (address === '5.8%' || address.includes('58') || address.includes('15')) {
-      return calculateBadgeTier(58000000);
+      return calculateBadgeTier(15800000);
     } 
     
     const hash = address.split('').reduce((acc, char) => {

@@ -8,13 +8,14 @@ import LiveChat from '@/components/community/LiveChat';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { LayoutPanelLeft, Rows } from 'lucide-react';
+import { LayoutPanelLeft, Rows, Trophy } from 'lucide-react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
+import BadgeTiersPage from '@/components/profile/BadgeTiersPage';
 
 const CommunityPage = () => {
   const { profile, isConnected } = useProfile();
   const [activeTab, setActiveTab] = useState("announcements");
-  const [splitScreen, setSplitScreen] = useState(true); // Changed to true to make split screen default
+  const [splitScreen, setSplitScreen] = useState(true);
 
   useEffect(() => {
     if (!isConnected) {
@@ -47,15 +48,26 @@ const CommunityPage = () => {
           <>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold">Community</h2>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={toggleSplitScreen}
-                className="flex items-center gap-2"
-              >
-                <LayoutPanelLeft className="h-4 w-4" />
-                <span>Tabbed View</span>
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setActiveTab("badges")}
+                  className="flex items-center gap-2"
+                >
+                  <Trophy className="h-4 w-4" />
+                  <span>View Badge Tiers</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={toggleSplitScreen}
+                  className="flex items-center gap-2"
+                >
+                  <LayoutPanelLeft className="h-4 w-4" />
+                  <span>Tabbed View</span>
+                </Button>
+              </div>
             </div>
             
             <ResizablePanelGroup
@@ -85,6 +97,10 @@ const CommunityPage = () => {
               <TabsList className="flex-1">
                 <TabsTrigger value="announcements" className="flex-1">Announcements</TabsTrigger>
                 <TabsTrigger value="chat" className="flex-1">Live Chat</TabsTrigger>
+                <TabsTrigger value="badges" className="flex-1 flex items-center">
+                  <Trophy className="h-4 w-4 mr-2" />
+                  Badge Tiers
+                </TabsTrigger>
               </TabsList>
               
               <Button 
@@ -104,6 +120,10 @@ const CommunityPage = () => {
             
             <TabsContent value="chat" className="mt-0">
               <LiveChat />
+            </TabsContent>
+            
+            <TabsContent value="badges" className="mt-0">
+              <BadgeTiersPage />
             </TabsContent>
           </Tabs>
         )}
