@@ -262,7 +262,7 @@ const MostWantedPage = () => {
                     <TableHeader>
                       <TableRow className="bg-icc-blue/30 border-b border-icc-gold">
                         <TableHead 
-                          className="w-12 font-bold text-white cursor-pointer"
+                          className="w-12 font-bold dark:text-white cursor-pointer"
                           onClick={() => handleSort('rank')}
                         >
                           <div className="flex items-center">
@@ -271,7 +271,7 @@ const MostWantedPage = () => {
                           </div>
                         </TableHead>
                         <TableHead 
-                          className="font-bold text-white cursor-pointer"
+                          className="font-bold dark:text-white cursor-pointer"
                           onClick={() => handleSort('name')}
                         >
                           <div className="flex items-center">
@@ -280,13 +280,13 @@ const MostWantedPage = () => {
                           </div>
                         </TableHead>
                         <TableHead 
-                          className="font-bold text-white text-center cursor-pointer"
+                          className="font-bold dark:text-white text-center cursor-pointer"
                           onClick={() => handleSort('bounty')}
                         >
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <div className="flex items-center justify-center cursor-pointer">
-                                <CurrencyIcon className="h-4 w-4 text-gray-300" />
+                                <CurrencyIcon className="h-4 w-4 dark:text-gray-300" />
                                 {renderSortIndicator('bounty')}
                               </div>
                             </TooltipTrigger>
@@ -296,7 +296,7 @@ const MostWantedPage = () => {
                           </Tooltip>
                         </TableHead>
                         <TableHead 
-                          className="font-bold text-white cursor-pointer"
+                          className="font-bold dark:text-white cursor-pointer"
                           onClick={() => handleSort('accused_of')}
                         >
                           <div className="flex items-center">
@@ -305,7 +305,7 @@ const MostWantedPage = () => {
                           </div>
                         </TableHead>
                         <TableHead 
-                          className="font-bold text-white cursor-pointer"
+                          className="font-bold dark:text-white cursor-pointer"
                           onClick={() => handleSort('aliases')}
                         >
                           <div className="flex items-center">
@@ -313,11 +313,11 @@ const MostWantedPage = () => {
                             {renderSortIndicator('aliases')}
                           </div>
                         </TableHead>
-                        <TableHead className="font-bold text-white text-center">
+                        <TableHead className="font-bold dark:text-white text-center">
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <div className="flex items-center justify-center cursor-pointer">
-                                <Globe className="h-4 w-4 text-gray-300" />
+                                <Globe className="h-4 w-4 dark:text-gray-300" />
                               </div>
                             </TooltipTrigger>
                             <TooltipContent>
@@ -326,13 +326,13 @@ const MostWantedPage = () => {
                           </Tooltip>
                         </TableHead>
                         <TableHead 
-                          className="font-bold text-white text-center cursor-pointer"
+                          className="font-bold dark:text-white text-center cursor-pointer"
                           onClick={() => handleSort('likes')}
                         >
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <div className="flex items-center justify-center cursor-pointer">
-                                <ThumbsUp className="h-4 w-4 text-gray-300" />
+                                <ThumbsUp className="h-4 w-4 dark:text-gray-300" />
                                 {renderSortIndicator('likes')}
                               </div>
                             </TooltipTrigger>
@@ -342,13 +342,13 @@ const MostWantedPage = () => {
                           </Tooltip>
                         </TableHead>
                         <TableHead 
-                          className="font-bold text-white text-center cursor-pointer"
+                          className="font-bold dark:text-white text-center cursor-pointer"
                           onClick={() => handleSort('views')}
                         >
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <div className="flex items-center justify-center cursor-pointer">
-                                <Eye className="h-4 w-4 text-gray-300" />
+                                <Eye className="h-4 w-4 dark:text-gray-300" />
                                 {renderSortIndicator('views')}
                               </div>
                             </TooltipTrigger>
@@ -358,7 +358,7 @@ const MostWantedPage = () => {
                           </Tooltip>
                         </TableHead>
                         <TableHead 
-                          className="font-bold text-white cursor-pointer"
+                          className="font-bold dark:text-white cursor-pointer"
                           onClick={() => handleSort('date')}
                         >
                           <div className="flex items-center">
@@ -366,7 +366,7 @@ const MostWantedPage = () => {
                             {renderSortIndicator('date')}
                           </div>
                         </TableHead>
-                        <TableHead className="font-bold text-white text-center">
+                        <TableHead className="font-bold dark:text-white text-center">
                           <div className="flex items-center justify-center">
                             By
                           </div>

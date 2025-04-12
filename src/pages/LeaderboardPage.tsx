@@ -115,11 +115,11 @@ const LeaderboardPage = () => {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-icc-blue/30 border-b border-icc-gold">
-                      <TableHead className="w-20 text-center cursor-pointer font-bold text-white" onClick={() => handleSort('total_bounty')}>
+                      <TableHead className="w-20 text-center cursor-pointer font-bold dark:text-white" onClick={() => handleSort('total_bounty')}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center cursor-pointer">
-                              <span className="text-white">Rank</span>
+                              <span className="dark:text-white">Rank</span>
                               {getSortIcon('total_bounty')}
                             </div>
                           </TooltipTrigger>
@@ -129,25 +129,25 @@ const LeaderboardPage = () => {
                         </Tooltip>
                       </TableHead>
                       
-                      <TableHead className="cursor-pointer font-bold text-white" onClick={() => handleSort('name')}>
+                      <TableHead className="cursor-pointer font-bold dark:text-white" onClick={() => handleSort('name')}>
                         <div className="flex items-center">
-                          <span className="text-white">Hunter</span>
+                          <span className="dark:text-white">Hunter</span>
                           {getSortIcon('name')}
                         </div>
                       </TableHead>
                       
-                      <TableHead className="font-bold text-white text-center cursor-pointer" onClick={() => handleSort('reports')}>
+                      <TableHead className="font-bold dark:text-white text-center cursor-pointer" onClick={() => handleSort('reports')}>
                         <div className="flex items-center justify-center">
-                          <span className="text-white">Reports</span>
+                          <span className="dark:text-white">Reports</span>
                           {getSortIcon('reports')}
                         </div>
                       </TableHead>
                       
-                      <TableHead className="text-center cursor-pointer font-bold text-white" onClick={() => handleSort('likes')}>
+                      <TableHead className="text-center cursor-pointer font-bold dark:text-white" onClick={() => handleSort('likes')}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center cursor-pointer">
-                              <ThumbsUp className="h-4 w-4 text-white" />
+                              <ThumbsUp className="h-4 w-4 dark:text-white" />
                               {getSortIcon('likes')}
                             </div>
                           </TooltipTrigger>
@@ -157,11 +157,11 @@ const LeaderboardPage = () => {
                         </Tooltip>
                       </TableHead>
                       
-                      <TableHead className="text-center cursor-pointer font-bold text-white" onClick={() => handleSort('views')}>
+                      <TableHead className="text-center cursor-pointer font-bold dark:text-white" onClick={() => handleSort('views')}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center cursor-pointer">
-                              <Eye className="h-4 w-4 text-white" />
+                              <Eye className="h-4 w-4 dark:text-white" />
                               {getSortIcon('views')}
                             </div>
                           </TooltipTrigger>
@@ -171,11 +171,11 @@ const LeaderboardPage = () => {
                         </Tooltip>
                       </TableHead>
                       
-                      <TableHead className="text-center cursor-pointer font-bold text-white" onClick={() => handleSort('comments')}>
+                      <TableHead className="text-center cursor-pointer font-bold dark:text-white" onClick={() => handleSort('comments')}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center cursor-pointer">
-                              <MessageSquare className="h-4 w-4 text-white" />
+                              <MessageSquare className="h-4 w-4 dark:text-white" />
                               {getSortIcon('comments')}
                             </div>
                           </TooltipTrigger>
@@ -185,11 +185,11 @@ const LeaderboardPage = () => {
                         </Tooltip>
                       </TableHead>
                       
-                      <TableHead className="font-bold text-white text-center">
+                      <TableHead className="font-bold dark:text-white text-center">
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center">
-                              <Globe className="h-4 w-4 text-white" />
+                              <Globe className="h-4 w-4 dark:text-white" />
                             </div>
                           </TooltipTrigger>
                           <TooltipContent>
@@ -198,11 +198,11 @@ const LeaderboardPage = () => {
                         </Tooltip>
                       </TableHead>
                       
-                      <TableHead className="text-center cursor-pointer font-bold text-white" onClick={() => handleSort('bounty')}>
+                      <TableHead className="text-center cursor-pointer font-bold dark:text-white" onClick={() => handleSort('bounty')}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center">
-                              <span className="text-white">Bounties Paid</span>
+                              <span className="dark:text-white">Bounties Paid</span>
                               {getSortIcon('bounty')}
                             </div>
                           </TooltipTrigger>
@@ -212,11 +212,11 @@ const LeaderboardPage = () => {
                         </Tooltip>
                       </TableHead>
                       
-                      <TableHead className="text-center cursor-pointer font-bold text-white" onClick={() => handleSort('bounties_raised')}>
+                      <TableHead className="text-center cursor-pointer font-bold dark:text-white" onClick={() => handleSort('bounties_raised')}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center">
-                              <span className="text-white">Bounties Raised</span>
+                              <span className="dark:text-white">Bounties Raised</span>
                               {getSortIcon('bounties_raised')}
                             </div>
                           </TooltipTrigger>
@@ -226,11 +226,11 @@ const LeaderboardPage = () => {
                         </Tooltip>
                       </TableHead>
                       
-                      <TableHead className="w-20 text-center cursor-pointer font-bold text-white" onClick={() => handleSort('activity')}>
+                      <TableHead className="w-20 text-center cursor-pointer font-bold dark:text-white" onClick={() => handleSort('activity')}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center cursor-pointer">
-                              <Clock className="h-4 w-4 text-white" />
+                              <Clock className="h-4 w-4 dark:text-white" />
                               {getSortIcon('activity')}
                             </div>
                           </TooltipTrigger>
