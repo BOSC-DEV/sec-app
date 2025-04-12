@@ -70,13 +70,24 @@ export interface BountyContribution {
   transferred_to_id?: string;
 }
 
-// New types for Community feature
+// Community feature types
 export interface Announcement {
   id: string;
   content: string;
   author_id: string;
   author_name: string;
   author_username: string;
+  author_profile_pic?: string;
+  created_at: string;
+}
+
+export interface AnnouncementReply {
+  id: string;
+  announcement_id: string;
+  content: string;
+  author_id: string;
+  author_name: string;
+  author_username?: string;
   author_profile_pic?: string;
   created_at: string;
 }
@@ -96,6 +107,7 @@ export interface MessageReaction {
   id: string;
   announcement_id?: string;
   message_id?: string;
+  reply_id?: string;
   user_id: string;
   reaction_type: string;
   created_at: string;

@@ -3,20 +3,15 @@ import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { toggleAnnouncementReaction, toggleChatMessageReaction } from '@/services/communityService';
+import { toggleAnnouncementReaction, toggleChatMessageReaction, toggleReplyReaction } from '@/services/communityService';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ReactionButtonProps {
   itemId: string;
-  itemType: 'announcement' | 'chat';
+  itemType: 'announcement' | 'chat' | 'reply';
   initialReactions?: Record<string, string[]>;
 }
-
-type ReactionData = {
-  user_id: string;
-  reaction_type: string;
-};
 
 const REACTION_EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '😡'];
 
@@ -29,20 +24,42 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   const [reactions, setReactions] = useState<Record<string, string[]>>(initialReactions);
   const [open, setOpen] = useState(false);
   
-  const channelName = `${itemType}-reactions-${itemId}`;
-  const tableName = itemType === 'announcement' ? 'announcement_reactions' : 'chat_message_reactions';
-  const idField = itemType === 'announcement' ? 'announcement_id' : 'message_id';
+  // Determine the channel name and table based on item type
+  const getConfig = () => {
+    switch (itemType) {
+      case 'announcement':
+        return {
+          channelName: `announcement-reactions-${itemId}`,
+          tableName: 'announcement_reactions',
+          idField: 'announcement_id'
+        };
+      case 'chat':
+        return {
+          channelName: `chat-reactions-${itemId}`,
+          tableName: 'chat_message_reactions',
+          idField: 'message_id'
+        };
+      case 'reply':
+        return {
+          channelName: `reply-reactions-${itemId}`,
+          tableName: 'reply_reactions',
+          idField: 'reply_id'
+        };
+    }
+  };
+  
+  const config = getConfig();
   
   useEffect(() => {
     // Set up real-time subscription for reactions
     const channel = supabase
-      .channel(channelName)
+      .channel(config.channelName)
       .on('postgres_changes', 
         { 
           event: '*', 
           schema: 'public', 
-          table: tableName,
-          filter: `${idField}=eq.${itemId}`
+          table: config.tableName,
+          filter: `${config.idField}=eq.${itemId}`
         }, 
         () => {
           // Refresh reactions when changes occur
@@ -57,25 +74,22 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [itemId, itemType, channelName, tableName, idField]);
+  }, [itemId, itemType]);
   
   const fetchReactions = async () => {
     try {
       const { data, error } = await supabase
-        .from(tableName)
+        .from(config.tableName)
         .select('user_id, reaction_type')
-        .eq(idField, itemId);
+        .eq(config.idField, itemId);
         
       if (error) throw error;
       
-      // Explicitly type the data to avoid deep nesting issues
-      const typedData = data as ReactionData[];
-      
-      if (typedData) {
+      if (data) {
         // Group by reaction type
         const groupedReactions: Record<string, string[]> = {};
         
-        typedData.forEach(reaction => {
+        data.forEach(reaction => {
           if (!groupedReactions[reaction.reaction_type]) {
             groupedReactions[reaction.reaction_type] = [];
           }
@@ -100,9 +114,19 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
     }
     
     try {
-      const success = itemType === 'announcement'
-        ? await toggleAnnouncementReaction(itemId, profile.wallet_address, emoji)
-        : await toggleChatMessageReaction(itemId, profile.wallet_address, emoji);
+      let success = false;
+      
+      switch (itemType) {
+        case 'announcement':
+          success = await toggleAnnouncementReaction(itemId, profile.wallet_address, emoji);
+          break;
+        case 'chat':
+          success = await toggleChatMessageReaction(itemId, profile.wallet_address, emoji);
+          break;
+        case 'reply':
+          success = await toggleReplyReaction(itemId, profile.wallet_address, emoji);
+          break;
+      }
       
       setOpen(false);
     } catch (error) {

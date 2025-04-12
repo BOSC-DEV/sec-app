@@ -13,6 +13,7 @@ import { toast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import ReactionButton from './ReactionButton';
 import RichTextEditor from './RichTextEditor';
+import AnnouncementReplies from './AnnouncementReplies';
 
 const ADMIN_USERNAMES = ['sec', 'thesec'];
 
@@ -167,11 +168,15 @@ const AnnouncementFeed = () => {
                 <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: announcement.content }} />
               </CardContent>
               
-              <CardFooter className="bg-muted/30 py-2 flex justify-between items-center">
-                <ReactionButton itemId={announcement.id} itemType="announcement" />
-                <div className="text-xs text-muted-foreground">
-                  Official SEC Announcement
+              <CardFooter className="pt-0 px-6 pb-3 flex flex-col items-start">
+                <div className="w-full bg-muted/30 py-2 px-3 rounded-md flex justify-between items-center">
+                  <ReactionButton itemId={announcement.id} itemType="announcement" />
+                  <div className="text-xs text-muted-foreground">
+                    Official SEC Announcement
+                  </div>
                 </div>
+                
+                <AnnouncementReplies announcementId={announcement.id} />
               </CardFooter>
             </Card>
           ))}

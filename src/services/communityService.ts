@@ -1,6 +1,11 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Announcement, ChatMessage, MessageReaction } from '@/types/dataTypes';
+import { 
+  Announcement, 
+  ChatMessage, 
+  MessageReaction, 
+  AnnouncementReply 
+} from '@/types/dataTypes';
 import { toast } from '@/hooks/use-toast';
 import { handleError } from '@/utils/errorHandling';
 import { sanitizeHtml } from '@/utils/securityUtils';
@@ -48,6 +53,55 @@ export const createAnnouncement = async (announcement: Omit<Announcement, 'id' |
     return data;
   } catch (error) {
     handleError(error, 'Error creating announcement');
+    return null;
+  }
+};
+
+// Announcement Reply Services
+export const getAnnouncementReplies = async (announcementId: string): Promise<AnnouncementReply[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('announcement_replies')
+      .select('*')
+      .eq('announcement_id', announcementId)
+      .order('created_at', { ascending: true });
+      
+    if (error) {
+      throw error;
+    }
+    
+    return data || [];
+  } catch (error) {
+    handleError(error, 'Error fetching announcement replies');
+    return [];
+  }
+};
+
+export const addAnnouncementReply = async (reply: Omit<AnnouncementReply, 'id' | 'created_at'>): Promise<AnnouncementReply | null> => {
+  try {
+    // Sanitize content
+    const sanitizedContent = sanitizeHtml(reply.content);
+    
+    const { data, error } = await supabase
+      .from('announcement_replies')
+      .insert({
+        announcement_id: reply.announcement_id,
+        content: sanitizedContent,
+        author_id: reply.author_id,
+        author_name: reply.author_name,
+        author_username: reply.author_username,
+        author_profile_pic: reply.author_profile_pic,
+      })
+      .select()
+      .single();
+      
+    if (error) {
+      throw error;
+    }
+    
+    return data;
+  } catch (error) {
+    handleError(error, 'Error adding announcement reply');
     return null;
   }
 };
@@ -141,42 +195,6 @@ export const sendChatMessage = async (message: {
 };
 
 // Reaction Services
-export const getAnnouncementReactions = async (announcementId: string): Promise<MessageReaction[]> => {
-  try {
-    const { data, error } = await supabase
-      .from('announcement_reactions')
-      .select('*')
-      .eq('announcement_id', announcementId);
-      
-    if (error) {
-      throw error;
-    }
-    
-    return data || [];
-  } catch (error) {
-    handleError(error, 'Error fetching announcement reactions');
-    return [];
-  }
-};
-
-export const getChatMessageReactions = async (messageId: string): Promise<MessageReaction[]> => {
-  try {
-    const { data, error } = await supabase
-      .from('chat_message_reactions')
-      .select('*')
-      .eq('message_id', messageId);
-      
-    if (error) {
-      throw error;
-    }
-    
-    return data || [];
-  } catch (error) {
-    handleError(error, 'Error fetching chat message reactions');
-    return [];
-  }
-};
-
 export const toggleAnnouncementReaction = async (
   announcementId: string, 
   userId: string, 
@@ -279,6 +297,59 @@ export const toggleChatMessageReaction = async (
     return true; // Reaction added
   } catch (error) {
     handleError(error, 'Error toggling chat message reaction');
+    return false;
+  }
+};
+
+export const toggleReplyReaction = async (
+  replyId: string, 
+  userId: string, 
+  reactionType: string
+): Promise<boolean> => {
+  try {
+    // Check if reaction already exists
+    const { data: existingReaction, error: checkError } = await supabase
+      .from('reply_reactions')
+      .select('*')
+      .eq('reply_id', replyId)
+      .eq('user_id', userId)
+      .eq('reaction_type', reactionType)
+      .maybeSingle();
+      
+    if (checkError) {
+      throw checkError;
+    }
+    
+    // If reaction exists, remove it
+    if (existingReaction) {
+      const { error: deleteError } = await supabase
+        .from('reply_reactions')
+        .delete()
+        .eq('id', existingReaction.id);
+        
+      if (deleteError) {
+        throw deleteError;
+      }
+      
+      return false; // Reaction removed
+    }
+    
+    // If reaction doesn't exist, add it
+    const { error: insertError } = await supabase
+      .from('reply_reactions')
+      .insert({
+        reply_id: replyId,
+        user_id: userId,
+        reaction_type: reactionType,
+      });
+      
+    if (insertError) {
+      throw insertError;
+    }
+    
+    return true; // Reaction added
+  } catch (error) {
+    handleError(error, 'Error toggling reply reaction');
     return false;
   }
 };

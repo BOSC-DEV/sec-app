@@ -7,10 +7,14 @@ import AnnouncementFeed from '@/components/community/AnnouncementFeed';
 import LiveChat from '@/components/community/LiveChat';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { LayoutPanelLeft, Rows } from 'lucide-react';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 
 const CommunityPage = () => {
   const { profile, isConnected } = useProfile();
   const [activeTab, setActiveTab] = useState("announcements");
+  const [splitView, setSplitView] = useState(false);
 
   // Effect to show toast for unconnected users
   useEffect(() => {
@@ -22,6 +26,10 @@ const CommunityPage = () => {
       });
     }
   }, [isConnected]);
+
+  const toggleSplitView = () => {
+    setSplitView(!splitView);
+  };
 
   return (
     <>
@@ -36,20 +44,70 @@ const CommunityPage = () => {
       />
       
       <div className="icc-container py-8">
-        <Tabs defaultValue="announcements" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full mb-6">
-            <TabsTrigger value="announcements" className="flex-1">Announcements</TabsTrigger>
-            <TabsTrigger value="chat" className="flex-1">Live Chat</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="announcements" className="mt-0">
-            <AnnouncementFeed />
-          </TabsContent>
-          
-          <TabsContent value="chat" className="mt-0">
-            <LiveChat />
-          </TabsContent>
-        </Tabs>
+        {splitView ? (
+          <>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">Community</h2>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={toggleSplitView}
+                className="flex items-center gap-2"
+              >
+                <LayoutPanelLeft className="h-4 w-4" />
+                <span>Tabbed View</span>
+              </Button>
+            </div>
+            
+            <ResizablePanelGroup
+              direction="horizontal"
+              className="min-h-[600px] border rounded-lg overflow-hidden"
+            >
+              <ResizablePanel defaultSize={50} minSize={30} className="overflow-auto">
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Announcements</h3>
+                  <AnnouncementFeed />
+                </div>
+              </ResizablePanel>
+              
+              <ResizableHandle withHandle />
+              
+              <ResizablePanel defaultSize={50} minSize={30} className="overflow-auto">
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Live Chat</h3>
+                  <LiveChat />
+                </div>
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          </>
+        ) : (
+          <Tabs defaultValue="announcements" value={activeTab} onValueChange={setActiveTab}>
+            <div className="flex justify-between items-center mb-4">
+              <TabsList className="flex-1">
+                <TabsTrigger value="announcements" className="flex-1">Announcements</TabsTrigger>
+                <TabsTrigger value="chat" className="flex-1">Live Chat</TabsTrigger>
+              </TabsList>
+              
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={toggleSplitView}
+                className="ml-2 flex items-center gap-2"
+              >
+                <Rows className="h-4 w-4" />
+                <span>Split View</span>
+              </Button>
+            </div>
+            
+            <TabsContent value="announcements" className="mt-0">
+              <AnnouncementFeed />
+            </TabsContent>
+            
+            <TabsContent value="chat" className="mt-0">
+              <LiveChat />
+            </TabsContent>
+          </Tabs>
+        )}
       </div>
     </>
   );
