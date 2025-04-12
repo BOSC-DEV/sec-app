@@ -2,6 +2,7 @@ import { toast } from "@/hooks/use-toast";
 import analyticsService from "@/services/analyticsService";
 import log from "@/services/loggingService";
 import { sanitizeHtml, sanitizeInput } from "./securityUtils";
+import { ErrorSeverity } from "./errorSeverity";
 
 // Error severity levels
 export enum ErrorSeverity {

@@ -1,5 +1,6 @@
+
 import { supabase } from '@/integrations/supabase/client';
-import { ErrorSeverity } from '@/utils/errorHandling';
+import { ErrorSeverity } from '@/utils/errorSeverity';
 import analyticsService from './analyticsService';
 
 // Define log levels 
@@ -50,13 +51,9 @@ const getSessionId = (): string => {
 
 // Get current user ID if available
 const getUserId = (): string | undefined => {
-  // The current user ID, if available
-  const session = supabase.auth.getSession();
-  // Since getSession() returns a Promise, we can't directly access session.data
-  // Instead, we'll return undefined for now and handle this asynchronously
-  // in a production app, you might consider using a synchronous method 
-  // or restructuring to handle this asynchronously
-  return undefined;
+  // Get current user synchronously
+  const user = supabase.auth.getUser();
+  return user?.data?.user?.id;
 };
 
 // Only log to Supabase in production
@@ -135,19 +132,22 @@ const logToSupabase = async (entry: LogEntry): Promise<void> => {
   if (!shouldLogToSupabase()) return;
 
   try {
-    // For now, we'll just log to console that we would send to Supabase
-    // This avoids the error with the application_logs table which doesn't exist yet
-    console.log('Would send log to Supabase:', entry);
-    
-    /* Commented out until application_logs table is created
     const { error } = await supabase
       .from('application_logs')
-      .insert([entry]);
+      .insert([{
+        timestamp: entry.timestamp,
+        level: entry.level,
+        message: entry.message,
+        context: entry.context,
+        session_id: entry.sessionId,
+        user_id: entry.userId,
+        data: entry.data ? JSON.stringify(entry.data) : null,
+        error: entry.error ? JSON.stringify(entry.error) : null
+      }]);
 
     if (error) {
       console.error('Failed to send log to Supabase:', error);
     }
-    */
   } catch (err) {
     console.error('Error sending log to Supabase:', err);
   }
