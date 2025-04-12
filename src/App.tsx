@@ -22,6 +22,9 @@ import { ProfileProvider, useProfile } from "./contexts/ProfileContext";
 import EnhancedErrorBoundary from "./components/common/EnhancedErrorBoundary";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import analyticsService from "./services/analyticsService";
+import log from "./services/loggingService";
+import { handleError, ErrorSeverity } from "./utils/errorHandling";
+import environmentUtils from "./utils/environmentUtils";
 import { HelmetProvider } from "react-helmet-async";
 
 // Initialize analytics service
@@ -32,23 +35,37 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
-      refetchOnWindowFocus: false,
-      retry: 1, // Limit retries on failure
+      refetchOnWindowFocus: !environmentUtils.isDevelopment(),
+      retry: environmentUtils.isProduction() ? 2 : 1, // More retries in production
       refetchOnReconnect: true,
       meta: {
         onError: (error: Error) => {
-          analyticsService.trackError(error, 'query_error');
+          handleError(error, {
+            severity: ErrorSeverity.MEDIUM,
+            context: 'query_error'
+          });
         }
       }
     },
     mutations: {
+      retry: environmentUtils.isProduction() ? 2 : 0,
       meta: {
         onError: (error: Error) => {
-          analyticsService.trackError(error, 'mutation_error');
+          handleError(error, {
+            severity: ErrorSeverity.MEDIUM,
+            context: 'mutation_error'
+          });
         }
       }
     }
   },
+});
+
+// Log application startup
+log.info('Application starting', 'app_initialization', {
+  environment: environmentUtils.getEnvironment(),
+  buildId: process.env.BUILD_ID || 'dev',
+  buildTime: process.env.BUILD_TIME || new Date().toISOString()
 });
 
 // Analytics tracker component
@@ -59,18 +76,57 @@ const AnalyticsTracker = () => {
   // Track page views
   useEffect(() => {
     analyticsService.trackPageView();
+    log.info(`Page view: ${location.pathname}`, 'page_navigation');
   }, [location.pathname]);
   
   // Identify user when profile changes
   useEffect(() => {
     analyticsService.identifyUser(profile);
+    
+    if (profile) {
+      log.info(`User identified: ${profile.username || profile.wallet_address}`, 'user_authentication');
+    }
   }, [profile]);
   
   return null;
 };
 
+// Performance monitoring component
+const PerformanceMonitor = () => {
+  useEffect(() => {
+    // Report initial performance metrics
+    const reportPerformance = () => {
+      if (window.performance) {
+        const metrics = {
+          dns: window.performance.timing.domainLookupEnd - window.performance.timing.domainLookupStart,
+          tcp: window.performance.timing.connectEnd - window.performance.timing.connectStart,
+          ttfb: window.performance.timing.responseStart - window.performance.timing.requestStart,
+          domLoad: window.performance.timing.domContentLoadedEventEnd - window.performance.timing.navigationStart,
+          fullLoad: window.performance.timing.loadEventEnd - window.performance.timing.navigationStart
+        };
+        
+        log.info('Performance metrics', 'performance', metrics);
+        
+        if (metrics.domLoad > 3000 || metrics.fullLoad > 5000) {
+          log.warn('Slow page load detected', 'performance', metrics);
+        }
+      }
+    };
+    
+    // Wait for the page to fully load
+    if (document.readyState === 'complete') {
+      reportPerformance();
+    } else {
+      window.addEventListener('load', reportPerformance);
+      return () => window.removeEventListener('load', reportPerformance);
+    }
+  }, []);
+  
+  return null;
+};
+
 const App = () => (
-  <EnhancedErrorBoundary>
+  <EnhancedErrorBoundary componentName="App">
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <ProfileProvider>
@@ -79,8 +135,9 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <AnalyticsTracker />
+              {environmentUtils.featureFlags.enablePerformanceMonitoring && <PerformanceMonitor />}
               <Layout>
-                <EnhancedErrorBoundary>
+                <EnhancedErrorBoundary componentName="Routes">
                   <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/most-wanted" element={<MostWantedPage />} />
@@ -128,7 +185,7 @@ const App = () => (
           </HelmetProvider>
         </ProfileProvider>
       </TooltipProvider>
-      {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
+      {environmentUtils.isDevelopment() && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
   </EnhancedErrorBoundary>
 );

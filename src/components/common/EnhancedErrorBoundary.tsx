@@ -6,6 +6,8 @@ import { Card } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { RefreshCw, Home, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import log from '@/services/loggingService';
+import { ErrorSeverity } from '@/utils/errorHandling';
 
 interface Props {
   children: ReactNode;
@@ -13,6 +15,7 @@ interface Props {
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
   showReset?: boolean;
   showHomeLink?: boolean;
+  componentName?: string;
 }
 
 interface State {
@@ -33,7 +36,16 @@ class EnhancedErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("Uncaught error:", error, errorInfo);
+    const { componentName } = this.props;
+    const context = componentName ? `ErrorBoundary:${componentName}` : 'ErrorBoundary';
+    
+    // Log the error with our improved logging service
+    log.critical(
+      `Uncaught UI error${componentName ? ` in ${componentName}` : ''}`, 
+      error, 
+      context,
+      { errorInfo }
+    );
     
     // Call onError callback if provided
     if (this.props.onError) {
@@ -42,9 +54,6 @@ class EnhancedErrorBoundary extends Component<Props, State> {
     
     // Update state with error info
     this.setState({ errorInfo });
-    
-    // Log to analytics or error tracking service
-    // This would be the place to add Sentry, LogRocket, etc.
     
     // Show toast notification
     toast({

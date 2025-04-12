@@ -40,7 +40,8 @@ refresh_token_reuse_interval = 10
 enable_confirmations = false
 
 [analytics]
-enabled = false
+enabled = true
 port = 54327
 vector_port = 54328
 gpt_port = 54329
+

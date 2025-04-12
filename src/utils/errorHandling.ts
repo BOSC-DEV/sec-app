@@ -1,6 +1,6 @@
-
 import { toast } from "@/hooks/use-toast";
 import analyticsService from "@/services/analyticsService";
+import log from "@/services/loggingService";
 import { sanitizeHtml, sanitizeInput } from "./securityUtils";
 
 // Error severity levels
@@ -41,28 +41,37 @@ export const handleError = (
     onError
   } = options;
   
-  // Always log to console
-  console.error(`[${severity.toUpperCase()}] ${context ? `[${context}] ` : ''}Error:`, error);
-  
   // Extract error message
   let errorMessage = fallbackMessage;
+  let errorObject: Error;
   
   if (error instanceof Error) {
     errorMessage = error.message;
+    errorObject = error;
   } else if (typeof error === 'string') {
     errorMessage = error;
+    errorObject = new Error(error);
   } else if (typeof error === 'object' && error !== null && 'message' in error) {
     errorMessage = String((error as { message: unknown }).message);
+    errorObject = new Error(errorMessage);
+    if ('stack' in error) {
+      errorObject.stack = String((error as { stack: unknown }).stack);
+    }
+  } else {
+    errorObject = new Error(fallbackMessage);
   }
   
   // Sanitize error message before displaying to user
   // This prevents potential XSS via error messages
   errorMessage = sanitizeHtml(errorMessage);
   
-  // Track error in analytics
-  analyticsService.trackError(
-    error instanceof Error ? error : new Error(errorMessage),
-    context
+  // Log the error using our enhanced logging service
+  log.fromSeverity(
+    severity,
+    errorMessage,
+    errorObject,
+    context,
+    { originalError: error }
   );
   
   // Show toast notification unless silent is true
