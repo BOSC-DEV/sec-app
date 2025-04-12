@@ -58,6 +58,14 @@ export const handleError = (
     errorObject = new Error(fallbackMessage);
   }
   
+  // Special case handling for common database errors
+  if (errorMessage.includes('JSON object requested multiple rows') || 
+      errorMessage.includes('no rows returned') ||
+      errorMessage.includes('expected a single row')) {
+    errorMessage = "The requested record was not found or returned multiple results.";
+    errorObject = new Error(errorMessage);
+  }
+  
   // Sanitize error message before displaying to user
   // This prevents potential XSS via error messages
   errorMessage = sanitizeHtml(errorMessage);

@@ -39,6 +39,7 @@ import { sendTransactionToDevWallet, connectPhantomWallet } from '@/utils/phanto
 import { PROFILE_UPDATED_EVENT } from '@/contexts/ProfileContext';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
 import { Link } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 const ScammerDetailPage = () => {
   const { id } = useParams<{ id: string; }>();
@@ -61,7 +62,8 @@ const ScammerDetailPage = () => {
   const [contributionsPage, setContributionsPage] = useState(1);
   const contributionsPerPage = 5;
   const [profileChangeCounter, setProfileChangeCounter] = useState(0);
-  
+  const isMobile = useIsMobile();
+
   useEffect(() => {
     const handleProfileUpdated = () => {
       console.log("Profile updated event received, refreshing contributions");
@@ -541,26 +543,26 @@ const ScammerDetailPage = () => {
           <div className="flex items-center justify-between mb-6">
             <Button variant="ghost" onClick={() => navigate('/most-wanted')} aria-label="Back to Most Wanted list">
               <ArrowLeft className="h-4 w-4 mr-2" aria-hidden="true" />
-              Back to Most Wanted
+              {isMobile ? 'Back' : 'Back to Most Wanted'}
             </Button>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 md:space-x-3">
               {isCreator && <>
                   <Button variant="outline" size="sm" onClick={handleEditScammer} aria-label="Edit this report">
-                    <Edit className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
-                    Edit Report
+                    <Edit className="h-3.5 w-3.5" aria-hidden="true" />
+                    {!isMobile && <span className="ml-1">Edit Report</span>}
                   </Button>
                   <Button variant="danger" size="sm" onClick={handleDeleteScammer} aria-label="Delete this report">
-                    <Trash2 className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
-                    Delete Report
+                    <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                    {!isMobile && <span className="ml-1">Delete Report</span>}
                   </Button>
                 </>}
               <Button variant="outline" size="sm" onClick={() => document.getElementById('bounty-section')?.scrollIntoView({ behavior: 'smooth' })}>
-                <DollarSign className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
-                Add Bounty
+                <DollarSign className="h-3.5 w-3.5" aria-hidden="true" />
+                {!isMobile && <span className="ml-1">Add Bounty</span>}
               </Button>
               <Button variant="outline" size="sm" onClick={handleShare} aria-label="Share this scammer report">
-                <Share2 className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
-                Share
+                <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
+                {!isMobile && <span className="ml-1">Share</span>}
               </Button>
             </div>
           </div>

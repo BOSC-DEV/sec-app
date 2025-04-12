@@ -8,6 +8,7 @@ import { useProfile } from '@/contexts/ProfileContext';
 import ThemeToggle from '@/components/common/ThemeToggle';
 import { toast } from '@/hooks/use-toast';
 import NotificationDropdown from '../notifications/NotificationDropdown';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -15,6 +16,7 @@ const Header = () => {
   const { isConnected, connectWallet, profile, isPhantomAvailable, isLoading } = useProfile();
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     setIsMenuOpen(false);
@@ -82,9 +84,11 @@ const Header = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
               <ICCLogo className="h-10 w-auto" />
-              <div className="font-serif max-w-[200px] md:max-w-none">
-                <div className="text-base md:text-xl font-bold leading-tight">Scams & E-crimes Commission</div>
-              </div>
+              {!isMobile && (
+                <div className="font-serif max-w-[200px] md:max-w-none">
+                  <div className="text-base md:text-xl font-bold leading-tight">Scams & E-crimes Commission</div>
+                </div>
+              )}
             </Link>
 
             <nav className="hidden md:flex items-center space-x-6 ml-6">
@@ -133,7 +137,7 @@ const Header = () => {
                     <Bell className="h-5 w-5" />
                   </Button>
                   {showNotifications && (
-                    <div className="absolute right-0 mt-2 w-80">
+                    <div className={`absolute ${isMobile ? 'left-1/2 -translate-x-1/2' : 'right-0'} mt-2 w-80`}>
                       <NotificationDropdown onClose={() => setShowNotifications(false)} />
                     </div>
                   )}
@@ -154,7 +158,7 @@ const Header = () => {
                   onClick={handleWalletButtonClick}
                 >
                   <Wallet className="h-4 w-4" />
-                  {profile ? profile.display_name.substring(0, 10) || 'Profile' : 'Profile'}
+                  {isMobile ? '' : (profile ? profile.display_name.substring(0, 10) || 'Profile' : 'Profile')}
                 </Button>
               </div>
             ) : (
@@ -164,8 +168,12 @@ const Header = () => {
                 className="flex items-center gap-2"
                 onClick={connectWallet}
               >
-                <LogIn className="h-4 w-4" />
-                Connect Wallet
+                {isMobile ? <Wallet className="h-4 w-4" /> : (
+                  <>
+                    <LogIn className="h-4 w-4" />
+                    Connect Wallet
+                  </>
+                )}
               </Button>
             )}
           </div>
@@ -209,7 +217,7 @@ const Header = () => {
                     Loading...
                   </Button>
                 ) : isConnected ? (
-                  <div className="flex items-center space-x-2 w-full">
+                  <div className="flex items-center justify-around space-x-2 w-full">
                     {/* Bell icon for mobile */}
                     <Button 
                       variant="ghost" 
@@ -231,12 +239,11 @@ const Header = () => {
                     </Button>
                     <Button 
                       variant="outline" 
-                      className="border-icc-gold text-icc-gold hover:bg-icc-blue flex items-center gap-2 flex-1"
+                      className="border-icc-gold text-icc-gold hover:bg-icc-blue flex items-center justify-center gap-2"
                       onClick={handleWalletButtonClick}
                       size="sm"
                     >
                       <Wallet className="h-3 w-3" />
-                      {profile ? (profile.display_name.substring(0, 6) || 'Profile') : 'Profile'}
                     </Button>
                   </div>
                 ) : (
@@ -245,16 +252,18 @@ const Header = () => {
                     onClick={connectWallet}
                     size="sm"
                   >
-                    <LogIn className="h-3 w-3" />
+                    <Wallet className="h-3 w-3" />
                     Connect Wallet
                   </Button>
                 )}
               </div>
               
-              {/* Mobile notification dropdown */}
+              {/* Mobile notification dropdown - center it in mobile view */}
               {showNotifications && isConnected && (
-                <div className="mt-2">
-                  <NotificationDropdown onClose={() => setShowNotifications(false)} isMobile />
+                <div className="mt-2 flex justify-center">
+                  <div className="w-full max-w-xs">
+                    <NotificationDropdown onClose={() => setShowNotifications(false)} isMobile />
+                  </div>
                 </div>
               )}
             </nav>
