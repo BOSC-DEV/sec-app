@@ -111,7 +111,7 @@ const DisclaimerDialog: React.FC<DisclaimerDialogProps> = ({
         </ScrollArea>
         <DialogFooter>
           <DialogClose asChild>
-            <Button className="bg-icc-blue hover:bg-icc-blue-dark">I Understand</Button>
+            <Button className="bg-neutral-50">I Understand</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>
