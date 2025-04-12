@@ -385,7 +385,6 @@ const PublicProfilePage = () => {
                           walletAddress={profile.wallet_address} 
                           isOwnProfile={isOwnProfile} 
                           secBalance={profile?.wallet_address ? bountyContributions?.totalBountyAmount || 0 : null}
-                          displayName={profile?.display_name}
                         />
                       </> : <div className="text-center py-12">
                         <p className="text-muted-foreground text-lg">No wallet information available</p>
