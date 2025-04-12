@@ -520,7 +520,7 @@ export const deleteChatMessage = async (messageId: string): Promise<boolean> => 
   }
 };
 
-// Check if user is an admin
+// Updated isUserAdmin function to be accessible
 export const isUserAdmin = async (username: string): Promise<boolean> => {
   const ADMIN_USERNAMES = ['sec', 'thesec'];
   return ADMIN_USERNAMES.includes(username);

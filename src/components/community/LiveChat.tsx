@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,7 +17,8 @@ import {
   AlertCircle, 
   Download,
   Info,
-  X
+  X,
+  Clock
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
@@ -31,6 +33,8 @@ import BadgeTier from '@/components/profile/BadgeTier';
 import { calculateBadgeTier } from '@/utils/badgeUtils';
 import { getUserTotalBountyAmount } from '@/services/bountyService';
 
+const SLOW_MODE_DELAY = 30; // 30 seconds
+
 const LiveChat = () => {
   const { profile, isConnected } = useProfile();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -41,8 +45,10 @@ const LiveChat = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [userBounties, setUserBounties] = useState<Record<string, number>>({});
+  const [slowModeCountdown, setSlowModeCountdown] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const slowModeTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   useEffect(() => {
     const checkAdmin = async () => {
@@ -57,6 +63,21 @@ const LiveChat = () => {
     checkAdmin();
   }, [profile?.username]);
   
+  // Slow mode countdown effect
+  useEffect(() => {
+    if (slowModeCountdown > 0) {
+      slowModeTimerRef.current = setTimeout(() => {
+        setSlowModeCountdown(prev => prev - 1);
+      }, 1000);
+      
+      return () => {
+        if (slowModeTimerRef.current) {
+          clearTimeout(slowModeTimerRef.current);
+        }
+      };
+    }
+  }, [slowModeCountdown]);
+  
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -68,6 +89,15 @@ const LiveChat = () => {
       toast({
         title: "Not connected",
         description: "Please connect your wallet to chat",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (slowModeCountdown > 0 && !isAdmin) {
+      toast({
+        title: "Slow mode active",
+        description: `Please wait ${slowModeCountdown} seconds before sending another message`,
         variant: "destructive",
       });
       return;
@@ -97,6 +127,11 @@ const LiveChat = () => {
       setNewMessage('');
       setImageFile(null);
       setImagePreview(null);
+      
+      // Start slow mode countdown for non-admins
+      if (!isAdmin) {
+        setSlowModeCountdown(SLOW_MODE_DELAY);
+      }
       
     } catch (error) {
       console.error('Error sending message:', error);
@@ -236,6 +271,9 @@ const LiveChat = () => {
       
     return () => {
       supabase.removeChannel(channel);
+      if (slowModeTimerRef.current) {
+        clearTimeout(slowModeTimerRef.current);
+      }
     };
   }, []);
   
@@ -392,6 +430,13 @@ const LiveChat = () => {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="w-full space-y-2">
+            {slowModeCountdown > 0 && !isAdmin && (
+              <div className="flex items-center bg-muted/50 p-2 rounded text-sm text-muted-foreground mb-2">
+                <Clock className="h-4 w-4 mr-2 text-yellow-500" />
+                <span>Slow mode active: wait {slowModeCountdown} seconds before sending another message</span>
+              </div>
+            )}
+            
             {imagePreview && (
               <div className="relative inline-block">
                 <img 
@@ -418,6 +463,7 @@ const LiveChat = () => {
                   variant="outline"
                   size="icon"
                   onClick={() => fileInputRef.current?.click()}
+                  disabled={slowModeCountdown > 0 && !isAdmin}
                 >
                   <ImageIcon className="h-4 w-4" />
                 </Button>
@@ -431,7 +477,12 @@ const LiveChat = () => {
                 
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button type="button" variant="outline" size="icon">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="icon"
+                      disabled={slowModeCountdown > 0 && !isAdmin}
+                    >
                       <Smile className="h-4 w-4" />
                     </Button>
                   </PopoverTrigger>
@@ -442,15 +493,18 @@ const LiveChat = () => {
               </div>
               
               <Textarea
-                placeholder="Type your message..."
+                placeholder={slowModeCountdown > 0 && !isAdmin ? `Wait ${slowModeCountdown}s to send another message...` : "Type your message..."}
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
-                disabled={isSubmitting}
+                disabled={isSubmitting || (slowModeCountdown > 0 && !isAdmin)}
                 className="flex-1 min-h-[40px] max-h-[100px]"
                 rows={1}
               />
               
-              <Button type="submit" disabled={isSubmitting || (!newMessage.trim() && !imageFile)}>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting || (!newMessage.trim() && !imageFile) || (slowModeCountdown > 0 && !isAdmin)}
+              >
                 {isSubmitting ? (
                   <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
                 ) : (
