@@ -274,15 +274,15 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   
   const renderAnnouncementCard = (announcement: Announcement) => {
     const formatTimeStamp = (dateString: string) => {
-      const distance = formatDistanceToNow(new Date(dateString), { addSuffix: true });
+      const distance = formatDistanceToNow(new Date(dateString), { addSuffix: false });
       
-      if (distance.includes('second')) return distance.replace(' seconds ago', 's').replace(' second ago', 's');
-      if (distance.includes('minute')) return distance.replace(' minutes ago', 'm').replace(' minute ago', 'm');
-      if (distance.includes('hour')) return distance.replace(' hours ago', 'h').replace(' hour ago', 'h');
-      if (distance.includes('day')) return distance.replace(' days ago', 'd').replace(' day ago', 'd');
-      if (distance.includes('week')) return distance.replace(' weeks ago', 'w').replace(' week ago', 'w');
-      if (distance.includes('month')) return distance.replace(' months ago', 'mo').replace(' month ago', 'mo');
-      if (distance.includes('year')) return distance.replace(' years ago', 'y').replace(' year ago', 'y');
+      if (distance.includes('second')) return distance.replace(' seconds', 's').replace(' second', 's');
+      if (distance.includes('minute')) return distance.replace(' minutes', 'm').replace(' minute', 'm');
+      if (distance.includes('hour')) return distance.replace(' hours', 'h').replace(' hour', 'h');
+      if (distance.includes('day')) return distance.replace(' days', 'd').replace(' day', 'd');
+      if (distance.includes('week')) return distance.replace(' weeks', 'w').replace(' week', 'w');
+      if (distance.includes('month')) return distance.replace(' months', 'mo').replace(' month', 'mo');
+      if (distance.includes('year')) return distance.replace(' years', 'y').replace(' year', 'y');
       
       return distance;
     };
