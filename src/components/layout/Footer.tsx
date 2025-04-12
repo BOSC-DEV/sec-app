@@ -9,6 +9,9 @@ import SafetyDialog from '../common/SafetyDialog';
 import FAQDialog from '../common/FAQDialog';
 import AboutDialog from '../common/AboutDialog';
 import ContactDialog from '../common/ContactDialog';
+import { Copy } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+
 const Footer = () => {
   const [termsOpen, setTermsOpen] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
@@ -18,6 +21,27 @@ const Footer = () => {
   const [faqOpen, setFaqOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
+  
+  const copyToClipboard = async () => {
+    const walletAddress = "HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump";
+    
+    try {
+      await navigator.clipboard.writeText(walletAddress);
+      toast({
+        title: "Copied to clipboard",
+        description: "Wallet address copied to clipboard successfully",
+        variant: "default",
+      });
+    } catch (err) {
+      toast({
+        title: "Copy failed",
+        description: "Failed to copy wallet address to clipboard",
+        variant: "destructive",
+      });
+      console.error("Failed to copy: ", err);
+    }
+  };
+  
   return <footer className="icc-footer">
       <div className="icc-container">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -33,6 +57,14 @@ const Footer = () => {
               <a href="https://x.com/sandecommission" target="_blank" rel="noopener noreferrer" className="text-white hover:text-icc-gold dark:text-gray-300 dark:hover:text-icc-gold" aria-label="SEC on X">
                 <img src="/lovable-uploads/91abf77b-554f-410f-85a0-15dfdfcc77e4.png" alt="X (Twitter)" className="h-5 w-5" />
               </a>
+              <button
+                onClick={copyToClipboard}
+                className="text-white hover:text-icc-gold dark:text-gray-300 dark:hover:text-icc-gold flex items-center space-x-1"
+                aria-label="Copy Contract Address"
+              >
+                <span>Ca</span>
+                <Copy className="h-4 w-4" />
+              </button>
             </div>
           </div>
           
