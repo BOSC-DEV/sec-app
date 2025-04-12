@@ -370,6 +370,156 @@ export const toggleReplyReaction = async (
   }
 };
 
+// Admin Management Functions
+export const deleteAnnouncement = async (announcementId: string): Promise<boolean> => {
+  try {
+    // First, delete all replies to this announcement
+    const { error: repliesError } = await supabase
+      .from('announcement_replies')
+      .delete()
+      .eq('announcement_id', announcementId);
+      
+    if (repliesError) {
+      throw repliesError;
+    }
+    
+    // Then delete all reactions to this announcement
+    const { error: reactionsError } = await supabase
+      .from('announcement_reactions')
+      .delete()
+      .eq('announcement_id', announcementId);
+    
+    if (reactionsError) {
+      throw reactionsError;
+    }
+    
+    // Finally delete the announcement
+    const { error } = await supabase
+      .from('announcements')
+      .delete()
+      .eq('id', announcementId);
+      
+    if (error) {
+      throw error;
+    }
+    
+    return true;
+  } catch (error) {
+    handleError(error, 'Error deleting announcement');
+    return false;
+  }
+};
+
+export const editAnnouncement = async (
+  announcementId: string,
+  content: string
+): Promise<Announcement | null> => {
+  try {
+    // Sanitize content
+    const sanitizedContent = sanitizeHtml(content);
+    
+    const { data, error } = await supabase
+      .from('announcements')
+      .update({ content: sanitizedContent })
+      .eq('id', announcementId)
+      .select()
+      .single();
+      
+    if (error) {
+      throw error;
+    }
+    
+    return data;
+  } catch (error) {
+    handleError(error, 'Error updating announcement');
+    return null;
+  }
+};
+
+export const deleteAnnouncementReply = async (replyId: string): Promise<boolean> => {
+  try {
+    // First delete all reactions to this reply
+    const { error: reactionsError } = await supabase
+      .from('reply_reactions')
+      .delete()
+      .eq('reply_id', replyId);
+    
+    if (reactionsError) {
+      throw reactionsError;
+    }
+    
+    // Then delete the reply
+    const { error } = await supabase
+      .from('announcement_replies')
+      .delete()
+      .eq('id', replyId);
+      
+    if (error) {
+      throw error;
+    }
+    
+    return true;
+  } catch (error) {
+    handleError(error, 'Error deleting reply');
+    return false;
+  }
+};
+
+export const editAnnouncementReply = async (
+  replyId: string,
+  content: string
+): Promise<AnnouncementReply | null> => {
+  try {
+    // Sanitize content
+    const sanitizedContent = sanitizeHtml(content);
+    
+    const { data, error } = await supabase
+      .from('announcement_replies')
+      .update({ content: sanitizedContent })
+      .eq('id', replyId)
+      .select()
+      .single();
+      
+    if (error) {
+      throw error;
+    }
+    
+    return data;
+  } catch (error) {
+    handleError(error, 'Error updating reply');
+    return null;
+  }
+};
+
+export const deleteChatMessage = async (messageId: string): Promise<boolean> => {
+  try {
+    // First delete all reactions to this message
+    const { error: reactionsError } = await supabase
+      .from('chat_message_reactions')
+      .delete()
+      .eq('message_id', messageId);
+    
+    if (reactionsError) {
+      throw reactionsError;
+    }
+    
+    // Then delete the message
+    const { error } = await supabase
+      .from('chat_messages')
+      .delete()
+      .eq('id', messageId);
+      
+    if (error) {
+      throw error;
+    }
+    
+    return true;
+  } catch (error) {
+    handleError(error, 'Error deleting chat message');
+    return false;
+  }
+};
+
 // Check if user is an admin
 export const isUserAdmin = async (username: string): Promise<boolean> => {
   const ADMIN_USERNAMES = ['sec', 'thesec'];

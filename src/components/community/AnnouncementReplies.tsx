@@ -1,27 +1,49 @@
+
 import React, { useState, useEffect } from 'react';
-import { getAnnouncementReplies } from '@/services/communityService';
+import { 
+  getAnnouncementReplies,
+  deleteAnnouncementReply,
+  editAnnouncementReply
+} from '@/services/communityService';
 import { AnnouncementReply } from '@/types/dataTypes';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { MessageSquareReply, ChevronDown, ChevronUp } from 'lucide-react';
+import { 
+  MessageSquareReply, 
+  ChevronDown, 
+  ChevronUp
+} from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReactionButton from './ReactionButton';
 import ReplyForm from './ReplyForm';
 import BadgeTier from '@/components/profile/BadgeTier';
 import { calculateBadgeTier } from '@/utils/badgeUtils';
+import AdminContextMenu from './AdminContextMenu';
+import { toast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import RichTextEditor from './RichTextEditor';
 
 interface AnnouncementRepliesProps {
   announcementId: string;
+  isAdmin?: boolean;
 }
 
-const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementId }) => {
+const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ 
+  announcementId,
+  isAdmin = false
+}) => {
   const [replies, setReplies] = useState<AnnouncementReply[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [showReplyForm, setShowReplyForm] = useState(false);
+  
+  // Edit dialog state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editContent, setEditContent] = useState('');
+  const [editingReplyId, setEditingReplyId] = useState<string | null>(null);
   
   const fetchReplies = async () => {
     setIsLoading(true);
@@ -64,6 +86,63 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
   
   const toggleReplyForm = () => {
     setShowReplyForm(!showReplyForm);
+  };
+  
+  const handleDeleteReply = async (replyId: string) => {
+    if (!isAdmin) return;
+    
+    try {
+      const success = await deleteAnnouncementReply(replyId);
+      if (success) {
+        toast({
+          title: "Reply deleted",
+          description: "The reply has been deleted successfully",
+          variant: "default",
+        });
+        fetchReplies();
+      } else {
+        throw new Error("Failed to delete reply");
+      }
+    } catch (error) {
+      console.error('Error deleting reply:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete reply. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const openEditDialog = (reply: AnnouncementReply) => {
+    setEditContent(reply.content);
+    setEditingReplyId(reply.id);
+    setEditDialogOpen(true);
+  };
+  
+  const handleEditReply = async () => {
+    if (!editingReplyId || !isAdmin) return;
+    
+    try {
+      const updated = await editAnnouncementReply(editingReplyId, editContent);
+      if (updated) {
+        toast({
+          title: "Reply updated",
+          description: "The reply has been updated successfully",
+          variant: "default",
+        });
+        setEditDialogOpen(false);
+        fetchReplies();
+      } else {
+        throw new Error("Failed to update reply");
+      }
+    } catch (error) {
+      console.error('Error updating reply:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update reply. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
   
   const getUserBadge = (address: string) => {
@@ -164,7 +243,7 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
             replies.map((reply) => {
               const userBadge = reply.author_id ? getUserBadge(reply.author_id) : null;
               
-              return (
+              const replyContent = (
                 <div key={reply.id} className="py-3 border-t first:border-t-0">
                   <div className="flex items-start gap-3">
                     {reply.author_username ? (
@@ -218,10 +297,44 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
                   </div>
                 </div>
               );
+              
+              return isAdmin ? (
+                <AdminContextMenu 
+                  key={reply.id}
+                  onEdit={() => openEditDialog(reply)}
+                  onDelete={() => handleDeleteReply(reply.id)}
+                >
+                  {replyContent}
+                </AdminContextMenu>
+              ) : replyContent;
             })
           )}
         </CollapsibleContent>
       </Collapsible>
+
+      {/* Edit Reply Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-[700px]">
+          <DialogHeader>
+            <DialogTitle>Edit Reply</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <RichTextEditor 
+              value={editContent}
+              onChange={setEditContent}
+            />
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setEditDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleEditReply}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -19,13 +19,14 @@ import {
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
-import { getChatMessages, sendChatMessage } from '@/services/communityService';
+import { getChatMessages, sendChatMessage, deleteChatMessage, isUserAdmin } from '@/services/communityService';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import EmojiPicker from '@/components/community/EmojiPicker';
 import ReactionButton from './ReactionButton';
 import BadgeTier from '@/components/profile/BadgeTier';
 import { calculateBadgeTier } from '@/utils/badgeUtils';
+import AdminContextMenu from './AdminContextMenu';
 
 const LiveChat = () => {
   const { profile, isConnected } = useProfile();
@@ -35,8 +36,22 @@ const LiveChat = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (profile?.username) {
+        const admin = await isUserAdmin(profile.username);
+        setIsAdmin(admin);
+      } else {
+        setIsAdmin(false);
+      }
+    };
+    
+    checkAdmin();
+  }, [profile?.username]);
   
   const getUserBadge = (address: string) => {
     const mockBalanceBase = 100000;
@@ -103,6 +118,32 @@ const LiveChat = () => {
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+  
+  const handleDeleteMessage = async (messageId: string) => {
+    if (!isAdmin) return;
+    
+    try {
+      const success = await deleteChatMessage(messageId);
+      if (success) {
+        toast({
+          title: "Message deleted",
+          description: "The message has been deleted successfully",
+          variant: "default",
+        });
+        const data = await getChatMessages();
+        setMessages(data);
+      } else {
+        throw new Error("Failed to delete message");
+      }
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete message. Please try again.",
+        variant: "destructive",
+      });
     }
   };
   
@@ -236,7 +277,7 @@ const LiveChat = () => {
               {messages.map((message) => {
                 const userBadge = message.author_id ? getUserBadge(message.author_id) : null;
                 
-                return (
+                const messageContent = (
                   <div key={message.id} className="flex items-start space-x-3">
                     {message.author_username ? (
                       <Link to={`/profile/${message.author_username}`}>
@@ -306,6 +347,16 @@ const LiveChat = () => {
                     </div>
                   </div>
                 );
+                
+                return isAdmin ? (
+                  <AdminContextMenu 
+                    key={message.id}
+                    onDelete={() => handleDeleteMessage(message.id)}
+                    canEdit={false}
+                  >
+                    {messageContent}
+                  </AdminContextMenu>
+                ) : messageContent;
               })}
               <div ref={messagesEndRef} />
             </div>

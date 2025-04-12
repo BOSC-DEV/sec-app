@@ -2,20 +2,36 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useProfile } from '@/contexts/ProfileContext';
-import { getAnnouncements, createAnnouncement, incrementAnnouncementViews } from '@/services/communityService';
+import { 
+  getAnnouncements, 
+  createAnnouncement, 
+  incrementAnnouncementViews,
+  deleteAnnouncement,
+  editAnnouncement,
+  isUserAdmin
+} from '@/services/communityService';
 import { Announcement } from '@/types/dataTypes';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Megaphone, Calendar, AlertCircle, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { 
+  Megaphone, 
+  Calendar, 
+  AlertCircle, 
+  Eye, 
+  ChevronLeft, 
+  ChevronRight
+} from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { Link } from 'react-router-dom';
 import ReactionButton from './ReactionButton';
 import RichTextEditor from './RichTextEditor';
 import AnnouncementReplies from './AnnouncementReplies';
+import AdminContextMenu from './AdminContextMenu';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 
 const ADMIN_USERNAMES = ['sec', 'thesec'];
 
@@ -29,8 +45,26 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [viewedAnnouncements, setViewedAnnouncements] = useState<Set<string>>(new Set());
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(false);
   
-  const isAdmin = profile?.username && ADMIN_USERNAMES.includes(profile.username);
+  // Edit dialog state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editContent, setEditContent] = useState('');
+  const [editingAnnouncementId, setEditingAnnouncementId] = useState<string | null>(null);
+  
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (profile?.username) {
+        const admin = await isUserAdmin(profile.username);
+        setIsAdmin(admin);
+      } else {
+        setIsAdmin(false);
+      }
+    };
+    
+    checkAdmin();
+  }, [profile?.username]);
   
   const { data: announcements = [], refetch, isLoading } = useQuery({
     queryKey: ['announcements'],
@@ -86,6 +120,63 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+  
+  const handleDeleteAnnouncement = async (id: string) => {
+    if (!isAdmin) return;
+    
+    try {
+      const success = await deleteAnnouncement(id);
+      if (success) {
+        toast({
+          title: "Announcement deleted",
+          description: "The announcement has been deleted successfully",
+          variant: "default",
+        });
+        refetch();
+      } else {
+        throw new Error("Failed to delete announcement");
+      }
+    } catch (error) {
+      console.error('Error deleting announcement:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete announcement. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const openEditDialog = (announcement: Announcement) => {
+    setEditContent(announcement.content);
+    setEditingAnnouncementId(announcement.id);
+    setEditDialogOpen(true);
+  };
+  
+  const handleEditAnnouncement = async () => {
+    if (!editingAnnouncementId || !isAdmin) return;
+    
+    try {
+      const updated = await editAnnouncement(editingAnnouncementId, editContent);
+      if (updated) {
+        toast({
+          title: "Announcement updated",
+          description: "The announcement has been updated successfully",
+          variant: "default",
+        });
+        setEditDialogOpen(false);
+        refetch();
+      } else {
+        throw new Error("Failed to update announcement");
+      }
+    } catch (error) {
+      console.error('Error updating announcement:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update announcement. Please try again.",
+        variant: "destructive",
+      });
     }
   };
   
@@ -157,7 +248,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   }
   
   const renderAnnouncementCard = (announcement: Announcement) => {
-    return (
+    const cardContent = (
       <Card 
         key={announcement.id} 
         className="announcement-card overflow-hidden h-full"
@@ -223,10 +314,20 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
             <ReactionButton itemId={announcement.id} itemType="announcement" />
           </div>
           
-          <AnnouncementReplies announcementId={announcement.id} />
+          <AnnouncementReplies announcementId={announcement.id} isAdmin={isAdmin} />
         </CardFooter>
       </Card>
     );
+    
+    return isAdmin ? (
+      <AdminContextMenu 
+        key={announcement.id}
+        onEdit={() => openEditDialog(announcement)}
+        onDelete={() => handleDeleteAnnouncement(announcement.id)}
+      >
+        {cardContent}
+      </AdminContextMenu>
+    ) : cardContent;
   };
   
   return (
@@ -281,6 +382,30 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
           {announcements.map(renderAnnouncementCard)}
         </div>
       )}
+      
+      {/* Edit Announcement Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-[700px]">
+          <DialogHeader>
+            <DialogTitle>Edit Announcement</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <RichTextEditor 
+              value={editContent}
+              onChange={setEditContent}
+            />
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setEditDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleEditAnnouncement}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
