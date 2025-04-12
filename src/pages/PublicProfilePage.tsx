@@ -19,6 +19,7 @@ import ScammerCard from '@/components/common/ScammerCard';
 import { useProfile } from '@/contexts/ProfileContext';
 import WalletBalance from '@/components/profile/WalletBalance';
 import WalletInfo from '@/components/profile/WalletInfo';
+
 const PublicProfilePage = () => {
   const {
     username
@@ -151,7 +152,8 @@ const PublicProfilePage = () => {
       maximumFractionDigits: 2
     });
   };
-  return <HelmetProvider>
+  return (
+    <HelmetProvider>
       <>
         <Helmet>
           <title>{pageTitle}</title>
@@ -189,14 +191,24 @@ const PublicProfilePage = () => {
                       </div>
                       <div className="flex items-center space-x-3 mt-3 md:mt-0 p-0">
                         {isOwnProfile && <>
-                            <Button variant="outline" size="sm" onClick={handleEditProfile} className="flex items-center gap-1 border-icc-blue hover:bg-icc-blue-light/10 text-zinc-50">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={handleEditProfile} 
+                              className="flex items-center gap-1 border-neutral-500 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
+                            >
                               <Edit size={16} />
                               Edit Profile
                             </Button>
-                            <Button variant="outline" size="sm" onClick={() => {
-                        disconnectWallet();
-                        navigate('/');
-                      }} className="flex items-center gap-1 border-icc-red hover:bg-icc-red-light/10 text-zinc-50">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => {
+                                disconnectWallet();
+                                navigate('/');
+                              }} 
+                              className="flex items-center gap-1 border-red-500 text-red-700 hover:bg-red-50 hover:text-red-900"
+                            >
                               <LogOut size={16} />
                               Disconnect
                             </Button>
@@ -425,6 +437,8 @@ const PublicProfilePage = () => {
           </div>
         </div>
       </>
-    </HelmetProvider>;
+    </HelmetProvider>
+  );
 };
+
 export default PublicProfilePage;
