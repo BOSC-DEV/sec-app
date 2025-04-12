@@ -10,8 +10,6 @@ import { isScammerCreator } from '@/services/reportService';
 import { useProfile } from '@/contexts/ProfileContext';
 import { toast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import Turnstile from '@/components/common/Turnstile';
-import { TURNSTILE_SITE_KEY } from '@/services/turnstileService';
 
 const ReportPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -29,9 +27,7 @@ const ReportPage = () => {
     setPhotoFile, 
     photoPreview, 
     setPhotoPreview, 
-    onSubmit,
-    handleTurnstileVerify,
-    isTurnstileVerified
+    onSubmit 
   } = useReportForm(id);
 
   useEffect(() => {
@@ -74,16 +70,7 @@ const ReportPage = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         if (!isSubmitting && !isLoading && !checkingPermission) {
-          // Only allow submission via keyboard if verification is complete or editing mode
-          if (isEditMode || isTurnstileVerified) {
-            form.handleSubmit(onSubmit)();
-          } else {
-            toast({
-              title: "Verification required",
-              description: "Please complete the verification challenge before submitting",
-              variant: "destructive"
-            });
-          }
+          form.handleSubmit(onSubmit)();
         }
       }
       
@@ -94,27 +81,7 @@ const ReportPage = () => {
     
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [form, navigate, onSubmit, isSubmitting, isLoading, checkingPermission, isEditMode, isTurnstileVerified]);
-
-  // Function to handle form submission with verification check
-  const handleFormSubmit = (data: any) => {
-    // Skip verification for edit mode
-    if (isEditMode) {
-      onSubmit(data);
-      return;
-    }
-    
-    if (!isTurnstileVerified) {
-      toast({
-        title: "Verification required",
-        description: "Please complete the verification challenge before submitting",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    onSubmit(data);
-  };
+  }, [form, navigate, onSubmit, isSubmitting, isLoading, checkingPermission]);
 
   if (checkingPermission || isLoading) {
     return (
@@ -139,19 +106,15 @@ const ReportPage = () => {
       
       <div className="icc-section bg-white">
         <div className="icc-container">
-          {isEditMode ? (
+          {isEditMode && (
             <p className="text-icc-gray mb-8">
               Update information about this scammer. All fields are editable except the bounty amount.
-            </p>
-          ) : (
-            <p className="text-icc-gray mb-8">
-              Help protect the community by reporting scammers. Please complete the verification below and fill out the form.
             </p>
           )}
           
           <Form {...form}>
             <form 
-              onSubmit={form.handleSubmit(handleFormSubmit)} 
+              onSubmit={form.handleSubmit(onSubmit)} 
               className="space-y-8"
               aria-label={isEditMode ? "Edit scammer report form" : "Report a scammer form"}
             >
@@ -162,24 +125,6 @@ const ReportPage = () => {
                 photoPreview={photoPreview}
                 setPhotoPreview={setPhotoPreview}
               />
-              
-              {!isEditMode && (
-                <div className="border p-4 rounded-md bg-gray-50">
-                  <h3 className="font-medium mb-2">Verification</h3>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Please complete the verification below to submit your report.
-                  </p>
-                  <Turnstile 
-                    siteKey={TURNSTILE_SITE_KEY}
-                    onVerify={handleTurnstileVerify}
-                  />
-                  {!isTurnstileVerified && (
-                    <p className="text-sm text-amber-600 mt-2">
-                      Verification is required before submitting the report.
-                    </p>
-                  )}
-                </div>
-              )}
               
               <div className="flex justify-end space-x-4">
                 <Button 
@@ -192,7 +137,7 @@ const ReportPage = () => {
                 </Button>
                 <Button 
                   type="submit" 
-                  disabled={isSubmitting || (!isEditMode && !isTurnstileVerified)}
+                  disabled={isSubmitting}
                   aria-busy={isSubmitting}
                   aria-label={isSubmitting ? 
                     (isEditMode ? "Updating report, please wait" : "Submitting report, please wait") : 

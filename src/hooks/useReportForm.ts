@@ -12,7 +12,6 @@ import {
   createScammerReport, 
   fetchScammerById 
 } from '@/services/reportService';
-import { verifyTurnstileToken, submitReportWithVerification } from '@/services/turnstileService';
 
 // Validation schema for the report form
 export const reportSchema = z.object({
@@ -36,8 +35,6 @@ export const useReportForm = (id?: string) => {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>('');
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [turnstileToken, setTurnstileToken] = useState<string>('');
-  const [isTurnstileVerified, setIsTurnstileVerified] = useState(false);
   
   const form = useForm<ReportFormValues>({
     resolver: zodResolver(reportSchema),
@@ -51,26 +48,6 @@ export const useReportForm = (id?: string) => {
       accomplices: [''],
     }
   });
-  
-  // Handle Turnstile verification
-  const handleTurnstileVerify = async (token: string) => {
-    console.log("Turnstile verification callback with token length:", token.length);
-    setTurnstileToken(token);
-    
-    if (token.length > 0) {
-      const isVerified = await verifyTurnstileToken(token);
-      setIsTurnstileVerified(isVerified);
-      
-      if (isVerified) {
-        toast({
-          title: "Verification complete",
-          description: "You can now submit your report",
-        });
-      }
-    } else {
-      setIsTurnstileVerified(false);
-    }
-  };
   
   // Fetch existing scammer data for edit mode
   useEffect(() => {
@@ -121,17 +98,6 @@ export const useReportForm = (id?: string) => {
       return;
     }
     
-    // For new submissions, verify Turnstile using server-side verification
-    if (!isEditMode) {
-      if (!isTurnstileVerified) {
-        const isVerified = await verifyTurnstileToken(turnstileToken);
-        if (!isVerified) {
-          console.log("Turnstile verification failed in submission");
-          return;
-        }
-      }
-    }
-    
     setIsSubmitting(true);
     setUploadError(null);
     
@@ -158,17 +124,6 @@ export const useReportForm = (id?: string) => {
           description: "The scammer report has been updated successfully.",
         });
       } else {
-        // For new reports, use our rate-limited submission process
-        const submissionSuccess = await submitReportWithVerification(
-          { ...data, photo_url: photoUrl },
-          turnstileToken,
-          profile.wallet_address
-        );
-        
-        if (!submissionSuccess) {
-          throw new Error("Report submission failed");
-        }
-        
         scammerId = await createScammerReport(data, photoUrl, profile);
         
         toast({
@@ -205,9 +160,6 @@ export const useReportForm = (id?: string) => {
     photoPreview,
     setPhotoPreview,
     uploadError,
-    onSubmit,
-    turnstileToken,
-    handleTurnstileVerify,
-    isTurnstileVerified
+    onSubmit
   };
 };
