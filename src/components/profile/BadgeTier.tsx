@@ -1,14 +1,17 @@
+
 import React from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { BadgeInfo, BadgeTier as BadgeTierEnum, formatSecAmount } from '@/utils/badgeUtils';
+
 interface BadgeTierProps {
   badgeInfo: BadgeInfo;
   showProgress?: boolean;
   size?: 'sm' | 'md' | 'lg';
   showTooltip?: boolean;
 }
+
 const BadgeTier: React.FC<BadgeTierProps> = ({
   badgeInfo,
   showProgress = false,
@@ -21,20 +24,31 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
     color,
     nextTier
   } = badgeInfo;
+
   const sizeClasses = {
     sm: 'text-xs py-0.5 px-1.5',
     md: 'text-sm py-1 px-2',
     lg: 'text-base py-1.5 px-3'
   };
+
   const iconSizes = {
     sm: 'text-xs',
     md: 'text-sm',
     lg: 'text-base'
   };
-  const badge;
+
+  // Create the badge element
+  const badge = (
+    <Badge className={`${color} ${sizeClasses[size]} flex items-center gap-1`}>
+      <span className={iconSizes[size]}>{icon}</span>
+      <span>{tier}</span>
+    </Badge>
+  );
+
   if (!showTooltip) {
     return badge;
   }
+
   return <div className="inline-block">
       <TooltipProvider>
         <Tooltip>
@@ -71,4 +85,5 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
       </TooltipProvider>
     </div>;
 };
+
 export default BadgeTier;
