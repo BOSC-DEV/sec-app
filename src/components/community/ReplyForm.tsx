@@ -2,85 +2,59 @@
 import React, { useState } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Button } from '@/components/ui/button';
-import { toast } from '@/hooks/use-toast';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import RichTextEditor from './RichTextEditor';
 
-interface ReplyFormProps {
-  announcementId?: string;
+export interface ReplyFormProps {
+  announcementId: string;
   onSubmit: (content: string) => Promise<void>;
-  onReplySubmitted?: () => void;
 }
 
-const ReplyForm: React.FC<ReplyFormProps> = ({ 
-  announcementId, 
-  onSubmit, 
-  onReplySubmitted 
-}) => {
-  const { profile, isConnected } = useProfile();
-  const [replyContent, setReplyContent] = useState('');
+const ReplyForm: React.FC<ReplyFormProps> = ({ announcementId, onSubmit }) => {
+  const { profile } = useProfile();
+  const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!isConnected || !profile) {
-      toast({
-        title: "Connect wallet",
-        description: "Please connect your wallet to reply",
-        variant: "default",
-      });
-      return;
-    }
-    
-    if (!replyContent.trim()) {
-      toast({
-        title: "Empty reply",
-        description: "Please enter a reply",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsSubmitting(true);
+    if (!content.trim()) return;
     
     try {
-      await onSubmit(replyContent);
-      
-      setReplyContent('');
-      if (onReplySubmitted) {
-        onReplySubmitted();
-      }
-      
-      toast({
-        title: "Reply posted",
-        description: "Your reply has been posted successfully",
-        variant: "default",
-      });
+      setIsSubmitting(true);
+      await onSubmit(content);
+      setContent('');
     } catch (error) {
-      console.error('Error posting reply:', error);
-      toast({
-        title: "Error",
-        description: "Failed to post reply. Please try again.",
-        variant: "destructive",
-      });
+      console.error('Error submitting reply:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-3">
-      <RichTextEditor 
-        value={replyContent}
-        onChange={setReplyContent}
-      />
-      <div className="mt-3 flex justify-end">
+    <form onSubmit={handleSubmit} className="space-y-2">
+      <div className="flex gap-2">
+        <Avatar className="h-6 w-6">
+          <AvatarImage src={profile?.profile_pic_url} alt={profile?.display_name || 'User'} />
+          <AvatarFallback>{profile?.display_name?.substring(0, 2).toUpperCase() || 'U'}</AvatarFallback>
+        </Avatar>
+        <div className="flex-1">
+          <RichTextEditor 
+            value={content}
+            onChange={setContent}
+            placeholder="Write a reply..."
+            minHeight="100px"
+          />
+        </div>
+      </div>
+      <div className="flex justify-end">
         <Button 
           type="submit" 
-          disabled={isSubmitting || !replyContent.trim()}
           size="sm"
+          disabled={!content.trim() || isSubmitting}
+          className="ml-auto"
         >
-          {isSubmitting ? "Posting..." : "Post Reply"}
+          {isSubmitting ? 'Submitting...' : 'Reply'}
         </Button>
       </div>
     </form>
