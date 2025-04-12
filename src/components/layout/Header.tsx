@@ -2,14 +2,16 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, User, Shield, Wallet, LogOut, LogIn, Copy } from 'lucide-react';
+import { Menu, X, User, Shield, Wallet, LogOut, LogIn, Copy, Bell } from 'lucide-react';
 import ICCLogo from '../common/ICCLogo';
 import { useProfile } from '@/contexts/ProfileContext';
 import ThemeToggle from '@/components/common/ThemeToggle';
 import { toast } from '@/hooks/use-toast';
+import NotificationDropdown from '../notifications/NotificationDropdown';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const { isConnected, connectWallet, profile, isPhantomAvailable, isLoading } = useProfile();
   const navigate = useNavigate();
   const location = useLocation();
@@ -58,6 +60,10 @@ const Header = () => {
       });
       console.error("Failed to copy: ", err);
     }
+  };
+
+  const toggleNotifications = () => {
+    setShowNotifications(!showNotifications);
   };
 
   const navigationItems = [
@@ -115,6 +121,23 @@ const Header = () => {
               </Button>
             ) : isConnected ? (
               <div className="flex items-center space-x-3">
+                {/* Bell icon for notifications */}
+                <div className="relative">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="text-white hover:bg-icc-blue-light relative"
+                    onClick={toggleNotifications}
+                    aria-label="Notifications"
+                  >
+                    <Bell className="h-5 w-5" />
+                  </Button>
+                  {showNotifications && (
+                    <div className="absolute right-0 mt-2 w-80">
+                      <NotificationDropdown onClose={() => setShowNotifications(false)} />
+                    </div>
+                  )}
+                </div>
                 <Button 
                   variant="ghost" 
                   size="icon" 
@@ -187,6 +210,16 @@ const Header = () => {
                   </Button>
                 ) : isConnected ? (
                   <div className="flex items-center space-x-2 w-full">
+                    {/* Bell icon for mobile */}
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="text-white hover:bg-icc-blue"
+                      onClick={toggleNotifications}
+                      aria-label="Notifications"
+                    >
+                      <Bell className="h-5 w-5" />
+                    </Button>
                     <Button 
                       variant="ghost" 
                       size="icon" 
@@ -217,6 +250,13 @@ const Header = () => {
                   </Button>
                 )}
               </div>
+              
+              {/* Mobile notification dropdown */}
+              {showNotifications && isConnected && (
+                <div className="mt-2">
+                  <NotificationDropdown onClose={() => setShowNotifications(false)} isMobile />
+                </div>
+              )}
             </nav>
           </div>
         </div>

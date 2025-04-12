@@ -138,3 +138,36 @@ export interface ReplyReaction {
   reaction_type: string;
   created_at: string;
 }
+
+// Notification system types
+export interface Notification {
+  id: string;
+  recipient_id: string;
+  type: NotificationType;
+  content: string;
+  entity_id: string;
+  entity_type: EntityType;
+  actor_id?: string;
+  actor_name?: string;
+  actor_username?: string;
+  actor_profile_pic?: string;
+  created_at: string;
+  is_read: boolean;
+}
+
+export enum NotificationType {
+  LIKE = 'like',
+  COMMENT = 'comment',
+  BOUNTY = 'bounty',
+  REACTION = 'reaction',
+  MENTION = 'mention',
+  SYSTEM = 'system'
+}
+
+export enum EntityType {
+  SCAMMER = 'scammer',
+  COMMENT = 'comment',
+  ANNOUNCEMENT = 'announcement',
+  REPLY = 'reply',
+  CHAT_MESSAGE = 'chat_message'
+}

@@ -16,6 +16,7 @@ import ProfilePage from "./pages/ProfilePage";
 import PublicProfilePage from "./pages/PublicProfilePage";
 import LegalPages from "./pages/LegalPages";
 import NotFound from "./pages/NotFound";
+import NotificationsPage from "./pages/NotificationsPage";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ProfileProvider, useProfile } from "./contexts/ProfileContext";
 import EnhancedErrorBoundary from "./components/common/EnhancedErrorBoundary";
@@ -96,6 +97,11 @@ const App = () => (
                     } />
                     <Route path="/leaderboard" element={<LeaderboardPage />} />
                     <Route path="/community" element={<CommunityPage />} />
+                    <Route path="/notifications" element={
+                      <ProtectedRoute>
+                        <NotificationsPage />
+                      </ProtectedRoute>
+                    } />
                     <Route path="/profile" element={
                       <ProtectedRoute>
                         <ProfilePage />

@@ -1,218 +1,183 @@
+
 import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Heart, ThumbsUp, Star, Smile } from 'lucide-react';
+import { EmojiPicker } from './EmojiPicker';
 import { 
   toggleAnnouncementReaction, 
   toggleChatMessageReaction, 
   toggleReplyReaction 
 } from '@/services/communityService';
-import { toast } from '@/hooks/use-toast';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  AnnouncementReaction, 
-  ChatMessageReaction, 
-  ReplyReaction 
-} from '@/types/dataTypes';
 
-interface ReactionButtonProps {
+type ReactionButtonProps = {
   itemId: string;
-  itemType: 'announcement' | 'chat' | 'reply';
-  initialReactions?: Record<string, string[]>;
-}
-
-const REACTION_EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '😡'];
+  itemType: 'announcement' | 'message' | 'reply';
+  size?: 'sm' | 'default';
+};
 
 const ReactionButton: React.FC<ReactionButtonProps> = ({ 
   itemId, 
   itemType,
-  initialReactions = {} 
+  size = 'sm' 
 }) => {
-  const { profile, isConnected } = useProfile();
-  const [reactions, setReactions] = useState<Record<string, string[]>>(initialReactions);
-  const [open, setOpen] = useState(false);
+  const { profile } = useProfile();
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   
-  const getConfig = () => {
+  // Get the appropriate table name based on item type
+  const getTableName = () => {
     switch (itemType) {
       case 'announcement':
-        return {
-          channelName: `announcement-reactions-${itemId}`,
-          tableName: 'announcement_reactions',
-          idField: 'announcement_id'
-        };
-      case 'chat':
-        return {
-          channelName: `chat-reactions-${itemId}`,
-          tableName: 'chat_message_reactions',
-          idField: 'message_id'
-        };
+        return 'announcement_reactions';
+      case 'message':
+        return 'chat_message_reactions';
       case 'reply':
-        return {
-          channelName: `reply-reactions-${itemId}`,
-          tableName: 'reply_reactions',
-          idField: 'reply_id'
-        };
+        return 'reply_reactions';
+      default:
+        return '';
     }
   };
   
-  const config = getConfig();
-  
-  useEffect(() => {
-    const channel = supabase
-      .channel(config.channelName)
-      .on('postgres_changes', 
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: config.tableName,
-          filter: `${config.idField}=eq.${itemId}`
-        }, 
-        () => {
-          fetchReactions();
-        }
-      )
-      .subscribe();
-      
-    fetchReactions();
-      
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [itemId, itemType]);
-  
-  const fetchReactions = async () => {
-    try {
-      let query;
-      
-      if (itemType === 'announcement') {
-        query = supabase
-          .from('announcement_reactions')
-          .select('user_id, reaction_type')
-          .eq('announcement_id', itemId);
-      } else if (itemType === 'chat') {
-        query = supabase
-          .from('chat_message_reactions')
-          .select('user_id, reaction_type')
-          .eq('message_id', itemId);
-      } else if (itemType === 'reply') {
-        query = supabase
-          .from('reply_reactions')
-          .select('user_id, reaction_type')
-          .eq('reply_id', itemId);
-      }
-      
-      const { data, error } = await query!;
-        
-      if (error) throw error;
-      
-      if (data) {
-        const groupedReactions: Record<string, string[]> = {};
-        
-        data.forEach((reaction: any) => {
-          if (!groupedReactions[reaction.reaction_type]) {
-            groupedReactions[reaction.reaction_type] = [];
-          }
-          groupedReactions[reaction.reaction_type].push(reaction.user_id);
-        });
-        
-        setReactions(groupedReactions);
-      }
-    } catch (error) {
-      console.error('Error fetching reactions:', error);
+  // Get the appropriate ID field name based on item type
+  const getIdFieldName = () => {
+    switch (itemType) {
+      case 'announcement':
+        return 'announcement_id';
+      case 'message':
+        return 'message_id';
+      case 'reply':
+        return 'reply_id';
+      default:
+        return '';
     }
   };
   
-  const handleReaction = async (emoji: string) => {
-    if (!isConnected || !profile) {
-      toast({
-        title: "Connect wallet",
-        description: "Please connect your wallet to react to messages",
-        variant: "default",
-      });
-      return;
+  // Query to get all reactions for this item
+  const { data: reactions = [], refetch } = useQuery({
+    queryKey: [`${itemType}-reactions`, itemId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from(getTableName())
+        .select('*')
+        .eq(getIdFieldName(), itemId);
+        
+      if (error) {
+        throw error;
+      }
+      
+      return data || [];
+    },
+    enabled: !!itemId,
+  });
+  
+  // Get counts of each reaction type
+  const getReactionCounts = () => {
+    const counts: Record<string, number> = {};
+    
+    reactions.forEach(reaction => {
+      const type = reaction.reaction_type;
+      counts[type] = (counts[type] || 0) + 1;
+    });
+    
+    return counts;
+  };
+  
+  // Check if user has already reacted with a specific emoji
+  const hasUserReacted = (emoji: string) => {
+    return reactions.some(
+      r => r.user_id === profile?.wallet_address && r.reaction_type === emoji
+    );
+  };
+  
+  // Handle selecting an emoji
+  const handleEmojiSelect = async (emoji: string) => {
+    if (!profile?.wallet_address) return;
+    
+    let success = false;
+    
+    switch (itemType) {
+      case 'announcement':
+        success = await toggleAnnouncementReaction(
+          itemId, 
+          profile.wallet_address, 
+          emoji,
+          profile.display_name,
+          profile.username,
+          profile.profile_pic_url
+        );
+        break;
+      case 'message':
+        success = await toggleChatMessageReaction(
+          itemId, 
+          profile.wallet_address, 
+          emoji,
+          profile.display_name,
+          profile.username,
+          profile.profile_pic_url
+        );
+        break;
+      case 'reply':
+        success = await toggleReplyReaction(
+          itemId, 
+          profile.wallet_address, 
+          emoji,
+          profile.display_name,
+          profile.username,
+          profile.profile_pic_url
+        );
+        break;
     }
     
-    try {
-      let success = false;
-      
-      switch (itemType) {
-        case 'announcement':
-          success = await toggleAnnouncementReaction(itemId, profile.wallet_address, emoji);
-          break;
-        case 'chat':
-          success = await toggleChatMessageReaction(itemId, profile.wallet_address, emoji);
-          break;
-        case 'reply':
-          success = await toggleReplyReaction(itemId, profile.wallet_address, emoji);
-          break;
-      }
-      
-      setOpen(false);
-    } catch (error) {
-      console.error('Error toggling reaction:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add reaction. Please try again.",
-        variant: "destructive",
-      });
+    if (success) {
+      refetch();
     }
+    
+    setShowEmojiPicker(false);
   };
   
-  const getTotalReactionCount = () => {
-    return Object.values(reactions).reduce((total, users) => total + users.length, 0);
-  };
+  // Get reaction counts
+  const reactionCounts = getReactionCounts();
   
-  const hasUserReacted = (emoji: string) => {
-    return profile && reactions[emoji]?.includes(profile.wallet_address);
-  };
+  // Sort reactions by count (descending)
+  const sortedReactions = Object.entries(reactionCounts)
+    .sort(([, countA], [, countB]) => countB - countA)
+    .slice(0, 3); // Show top 3 reactions
   
   return (
-    <div className="flex items-center space-x-2">
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="text-xs flex items-center space-x-1 h-7 px-2 min-w-[64px]"
-          >
-            <span>😊</span>
-            {getTotalReactionCount() > 0 && (
-              <span className="ml-1">{getTotalReactionCount()}</span>
-            )}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-2" align="start">
-          <div className="flex space-x-1">
-            {REACTION_EMOJIS.map(emoji => (
-              <Button
-                key={emoji}
-                variant={hasUserReacted(emoji) ? "secondary" : "ghost"}
-                size="sm"
-                className="p-1 h-8 w-8 text-lg"
-                onClick={() => handleReaction(emoji)}
-              >
-                {emoji}
-              </Button>
-            ))}
-          </div>
-        </PopoverContent>
-      </Popover>
-      
-      <div className="flex space-x-1">
-        {Object.entries(reactions)
-          .filter(([_, users]) => users.length > 0)
-          .map(([emoji, users]) => (
-            <div 
+    <div className="relative">
+      <div className="flex items-center gap-2">
+        {sortedReactions.length > 0 ? (
+          sortedReactions.map(([emoji, count]) => (
+            <Button
               key={emoji}
-              className={`text-xs rounded-full px-2 py-0.5 border flex items-center 
-                ${hasUserReacted(emoji) ? 'bg-secondary' : 'bg-muted'}
-              `}
+              variant={hasUserReacted(emoji) ? "secondary" : "outline"}
+              size={size}
+              className="px-2 py-1 h-auto gap-1"
+              onClick={() => handleEmojiSelect(emoji)}
             >
               <span>{emoji}</span>
-              <span className="ml-1">{users.length}</span>
-            </div>
-          ))}
+              <span className="text-xs">{count}</span>
+            </Button>
+          ))
+        ) : null}
+        
+        <Button
+          variant="outline"
+          size={size}
+          className="px-2 py-1 h-auto"
+          onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+        >
+          <Smile className={`${size === 'sm' ? 'h-3 w-3' : 'h-4 w-4'}`} />
+        </Button>
       </div>
+      
+      {showEmojiPicker && (
+        <div className="absolute right-0 bottom-full mb-2 z-10">
+          <EmojiPicker onEmojiSelect={handleEmojiSelect} />
+        </div>
+      )}
     </div>
   );
 };

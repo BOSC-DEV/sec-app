@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { Comment } from '@/types/dataTypes';
+import { notifyScammerComment } from '@/services/notificationService';
 
 export const getScammerComments = async (scammerId: string): Promise<Comment[]> => {
   const { data, error } = await supabase
@@ -22,7 +23,8 @@ export const addComment = async (comment: {
   content: string,
   author: string,
   author_name: string,
-  author_profile_pic?: string
+  author_profile_pic?: string,
+  author_username?: string
 }): Promise<Comment> => {
   console.log('Adding comment:', comment);
   
@@ -55,7 +57,7 @@ export const addComment = async (comment: {
   try {
     const { data: scammer } = await supabase
       .from('scammers')
-      .select('comments')
+      .select('comments, added_by, name')
       .eq('id', comment.scammer_id)
       .single();
       
@@ -65,6 +67,20 @@ export const addComment = async (comment: {
         .from('scammers')
         .update({ comments })
         .eq('id', comment.scammer_id);
+        
+      // Send notification to scammer creator if not the commenter
+      if (scammer.added_by && scammer.added_by !== comment.author) {
+        await notifyScammerComment(
+          comment.scammer_id,
+          scammer.name,
+          id,
+          scammer.added_by,
+          comment.author,
+          comment.author_name,
+          comment.author_username,
+          comment.author_profile_pic
+        );
+      }
     }
   } catch (e) {
     console.error('Error updating scammer comments array:', e);

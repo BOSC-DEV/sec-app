@@ -1,285 +1,452 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { handleError } from '@/utils/errorHandling';
+import { toast } from '@/hooks/use-toast';
+import { 
+  notifyScammerLike, 
+  notifyScammerComment, 
+  notifyReaction 
+} from '@/services/notificationService';
+import { EntityType } from '@/types/dataTypes';
 
-export const getUserScammerInteraction = async (scammerId: string, walletAddress: string): Promise<{ liked: boolean, disliked: boolean } | null> => {
-  if (!walletAddress) return null;
-  
+// Toggle like on a scammer post
+export const toggleScammerLike = async (
+  scammerId: string, 
+  userId: string, 
+  userName: string,
+  userUsername?: string,
+  userProfilePic?: string
+) => {
   try {
-    console.log(`Fetching interaction for scammer ${scammerId} by user ${walletAddress}`);
+    // First check if user has already interacted with this scammer
+    const { data: existingInteraction } = await supabase
+      .from('user_scammer_interactions')
+      .select('id, liked, disliked, scammer_id')
+      .eq('user_id', userId)
+      .eq('scammer_id', scammerId)
+      .maybeSingle();
+
+    // Get the scammer details for notification
+    const { data: scammer } = await supabase
+      .from('scammers')
+      .select('name, added_by')
+      .eq('id', scammerId)
+      .single();
     
+    if (existingInteraction) {
+      // User has already interacted with this scammer
+      const wasLiked = existingInteraction.liked;
+      
+      // Update existing interaction
+      const { error } = await supabase
+        .from('user_scammer_interactions')
+        .update({
+          liked: !wasLiked,
+          disliked: false // Reset dislike if setting like
+        })
+        .eq('id', existingInteraction.id);
+        
+      if (error) {
+        throw error;
+      }
+      
+      // Update scammer likes count
+      if (wasLiked) {
+        // User is un-liking the scammer
+        await supabase.rpc('decrement_scammer_likes', { scammer_id: scammerId });
+      } else {
+        // User is liking the scammer
+        await supabase.rpc('increment_scammer_likes', { scammer_id: scammerId });
+        
+        // Decrement dislikes if it was disliked
+        if (existingInteraction.disliked) {
+          await supabase.rpc('decrement_scammer_dislikes', { scammer_id: scammerId });
+        }
+        
+        // Send notification to the scammer creator
+        if (scammer && scammer.added_by && scammer.added_by !== userId) {
+          await notifyScammerLike(
+            scammerId,
+            scammer.name,
+            scammer.added_by,
+            userId,
+            userName,
+            userUsername,
+            userProfilePic
+          );
+        }
+      }
+      
+      return !wasLiked;
+    } else {
+      // First interaction with this scammer
+      const { error } = await supabase
+        .from('user_scammer_interactions')
+        .insert({
+          user_id: userId,
+          scammer_id: scammerId,
+          liked: true,
+          disliked: false
+        });
+        
+      if (error) {
+        throw error;
+      }
+      
+      // Increment scammer likes count
+      await supabase.rpc('increment_scammer_likes', { scammer_id: scammerId });
+      
+      // Send notification to the scammer creator
+      if (scammer && scammer.added_by && scammer.added_by !== userId) {
+        await notifyScammerLike(
+          scammerId,
+          scammer.name,
+          scammer.added_by,
+          userId,
+          userName,
+          userUsername,
+          userProfilePic
+        );
+      }
+      
+      return true;
+    }
+  } catch (error) {
+    handleError(error, 'Error toggling scammer like');
+    return false;
+  }
+};
+
+// Toggle dislike on a scammer post
+export const toggleScammerDislike = async (scammerId: string, userId: string) => {
+  try {
+    // First check if user has already interacted with this scammer
+    const { data: existingInteraction } = await supabase
+      .from('user_scammer_interactions')
+      .select('id, liked, disliked')
+      .eq('user_id', userId)
+      .eq('scammer_id', scammerId)
+      .maybeSingle();
+    
+    if (existingInteraction) {
+      // User has already interacted with this scammer
+      const wasDisliked = existingInteraction.disliked;
+      
+      // Update existing interaction
+      const { error } = await supabase
+        .from('user_scammer_interactions')
+        .update({
+          disliked: !wasDisliked,
+          liked: false // Reset like if setting dislike
+        })
+        .eq('id', existingInteraction.id);
+        
+      if (error) {
+        throw error;
+      }
+      
+      // Update scammer dislikes count
+      if (wasDisliked) {
+        // User is un-disliking the scammer
+        await supabase.rpc('decrement_scammer_dislikes', { scammer_id: scammerId });
+      } else {
+        // User is disliking the scammer
+        await supabase.rpc('increment_scammer_dislikes', { scammer_id: scammerId });
+        
+        // Decrement likes if it was liked
+        if (existingInteraction.liked) {
+          await supabase.rpc('decrement_scammer_likes', { scammer_id: scammerId });
+        }
+      }
+      
+      return !wasDisliked;
+    } else {
+      // First interaction with this scammer
+      const { error } = await supabase
+        .from('user_scammer_interactions')
+        .insert({
+          user_id: userId,
+          scammer_id: scammerId,
+          liked: false,
+          disliked: true
+        });
+        
+      if (error) {
+        throw error;
+      }
+      
+      // Increment scammer dislikes count
+      await supabase.rpc('increment_scammer_dislikes', { scammer_id: scammerId });
+      
+      return true;
+    }
+  } catch (error) {
+    handleError(error, 'Error toggling scammer dislike');
+    return false;
+  }
+};
+
+// Toggle like on a comment
+export const toggleCommentLike = async (
+  commentId: string, 
+  userId: string,
+  userName: string,
+  userUsername?: string,
+  userProfilePic?: string
+) => {
+  try {
+    // First check if user has already interacted with this comment
+    const { data: existingInteraction } = await supabase
+      .from('user_comment_interactions')
+      .select('id, liked, disliked')
+      .eq('user_id', userId)
+      .eq('comment_id', commentId)
+      .maybeSingle();
+    
+    // Get the comment details for notification
+    const { data: comment } = await supabase
+      .from('comments')
+      .select('author, content, scammer_id')
+      .eq('id', commentId)
+      .single();
+    
+    if (existingInteraction) {
+      // User has already interacted with this comment
+      const wasLiked = existingInteraction.liked;
+      
+      // Update existing interaction
+      const { error } = await supabase
+        .from('user_comment_interactions')
+        .update({
+          liked: !wasLiked,
+          disliked: false // Reset dislike if setting like
+        })
+        .eq('id', existingInteraction.id);
+        
+      if (error) {
+        throw error;
+      }
+      
+      // Update comment likes count
+      if (wasLiked) {
+        // User is un-liking the comment
+        await supabase.rpc('decrement_comment_likes', { comment_id: commentId });
+      } else {
+        // User is liking the comment
+        await supabase.rpc('increment_comment_likes', { comment_id: commentId });
+        
+        // Decrement dislikes if it was disliked
+        if (existingInteraction.disliked) {
+          await supabase.rpc('decrement_comment_dislikes', { comment_id: commentId });
+        }
+        
+        // Send notification to comment author
+        if (comment && comment.author && comment.author !== userId) {
+          await notifyReaction(
+            commentId,
+            EntityType.COMMENT,
+            comment.content.substring(0, 30) + '...',
+            '👍',
+            comment.author,
+            userId,
+            userName,
+            userUsername,
+            userProfilePic
+          );
+        }
+      }
+      
+      return !wasLiked;
+    } else {
+      // First interaction with this comment
+      const { error } = await supabase
+        .from('user_comment_interactions')
+        .insert({
+          user_id: userId,
+          comment_id: commentId,
+          liked: true,
+          disliked: false
+        });
+        
+      if (error) {
+        throw error;
+      }
+      
+      // Increment comment likes count
+      await supabase.rpc('increment_comment_likes', { comment_id: commentId });
+      
+      // Send notification to comment author
+      if (comment && comment.author && comment.author !== userId) {
+        await notifyReaction(
+          commentId,
+          EntityType.COMMENT,
+          comment.content.substring(0, 30) + '...',
+          '👍',
+          comment.author,
+          userId,
+          userName,
+          userUsername,
+          userProfilePic
+        );
+      }
+      
+      return true;
+    }
+  } catch (error) {
+    handleError(error, 'Error toggling comment like');
+    return false;
+  }
+};
+
+// Toggle dislike on a comment
+export const toggleCommentDislike = async (commentId: string, userId: string) => {
+  try {
+    // First check if user has already interacted with this comment
+    const { data: existingInteraction } = await supabase
+      .from('user_comment_interactions')
+      .select('id, liked, disliked')
+      .eq('user_id', userId)
+      .eq('comment_id', commentId)
+      .maybeSingle();
+    
+    if (existingInteraction) {
+      // User has already interacted with this comment
+      const wasDisliked = existingInteraction.disliked;
+      
+      // Update existing interaction
+      const { error } = await supabase
+        .from('user_comment_interactions')
+        .update({
+          disliked: !wasDisliked,
+          liked: false // Reset like if setting dislike
+        })
+        .eq('id', existingInteraction.id);
+        
+      if (error) {
+        throw error;
+      }
+      
+      // Update comment dislikes count
+      if (wasDisliked) {
+        // User is un-disliking the comment
+        await supabase.rpc('decrement_comment_dislikes', { comment_id: commentId });
+      } else {
+        // User is disliking the comment
+        await supabase.rpc('increment_comment_dislikes', { comment_id: commentId });
+        
+        // Decrement likes if it was liked
+        if (existingInteraction.liked) {
+          await supabase.rpc('decrement_comment_likes', { comment_id: commentId });
+        }
+      }
+      
+      return !wasDisliked;
+    } else {
+      // First interaction with this comment
+      const { error } = await supabase
+        .from('user_comment_interactions')
+        .insert({
+          user_id: userId,
+          comment_id: commentId,
+          liked: false,
+          disliked: true
+        });
+        
+      if (error) {
+        throw error;
+      }
+      
+      // Increment comment dislikes count
+      await supabase.rpc('increment_comment_dislikes', { comment_id: commentId });
+      
+      return true;
+    }
+  } catch (error) {
+    handleError(error, 'Error toggling comment dislike');
+    return false;
+  }
+};
+
+// Check if user has liked a scammer post
+export const hasUserLikedScammer = async (scammerId: string, userId: string) => {
+  try {
     const { data, error } = await supabase
       .from('user_scammer_interactions')
-      .select('liked, disliked')
+      .select('liked')
+      .eq('user_id', userId)
       .eq('scammer_id', scammerId)
-      .eq('user_id', walletAddress)
       .maybeSingle();
-
+      
     if (error) {
-      console.error('Error fetching user interaction:', error);
-      return null;
+      throw error;
     }
-
-    console.log('Found interaction:', data);
-    return data;
-  } catch (err) {
-    console.error('Exception in getUserScammerInteraction:', err);
-    return null;
-  }
-};
-
-export const likeScammer = async (scammerId: string, walletAddress: string): Promise<{ likes: number; dislikes: number } | void> => {
-  if (!walletAddress) {
-    console.error('No wallet address provided for likeScammer');
-    return;
-  }
-  if (!scammerId) {
-    console.error('No scammer ID provided for likeScammer');
-    return;
-  }
-  
-  console.log(`Processing like for scammer ${scammerId} by user ${walletAddress}`);
-  
-  // Get existing interaction if any
-  const { data: existingInteraction, error: fetchError } = await supabase
-    .from('user_scammer_interactions')
-    .select('*')
-    .eq('scammer_id', scammerId)
-    .eq('user_id', walletAddress)
-    .maybeSingle();
-
-  if (fetchError) {
-    console.error('Error fetching interaction:', fetchError);
-    throw fetchError;
-  }
-
-  try {
-    // Using a transaction to ensure atomic operations
-    if (existingInteraction) {
-      console.log('Existing interaction found:', existingInteraction);
-      
-      // Toggle like - if already liked, unlike it; if disliked, switch to like
-      const liked = !existingInteraction.liked;
-      const disliked = liked ? false : existingInteraction.disliked; // Can't be both liked and disliked
-      
-      console.log(`Updating interaction: liked=${liked}, disliked=${disliked}`);
-      
-      const { error: updateError } = await supabase
-        .from('user_scammer_interactions')
-        .update({ 
-          liked, 
-          disliked,
-          last_updated: new Date().toISOString() 
-        })
-        .eq('id', existingInteraction.id);
-        
-      if (updateError) {
-        console.error('Error updating interaction:', updateError);
-        throw updateError;
-      }
-      
-      console.log(`Updated interaction: liked=${liked}, disliked=${disliked}`);
-    } else {
-      // No existing interaction, create new with liked=true
-      console.log('No existing interaction, creating new one with liked=true');
-      
-      const { data: newInteraction, error: insertError } = await supabase
-        .from('user_scammer_interactions')
-        .insert({ 
-          scammer_id: scammerId, 
-          user_id: walletAddress, 
-          liked: true, 
-          disliked: false 
-        })
-        .select();
-        
-      if (insertError) {
-        console.error('Error inserting interaction:', insertError);
-        throw insertError;
-      }
-      
-      console.log('Created new interaction:', newInteraction);
-    }
-
-    // Always update scammer like/dislike counts and return the updated counts
-    const updatedCounts = await updateScammerLikes(scammerId);
     
-    console.log('Updated scammer counts:', updatedCounts);
-    return updatedCounts;
+    return data?.liked || false;
   } catch (error) {
-    console.error('Error in likeScammer:', error);
-    throw error;
+    handleError(error, 'Error checking if user liked scammer');
+    return false;
   }
 };
 
-export const dislikeScammer = async (scammerId: string, walletAddress: string): Promise<{ likes: number; dislikes: number } | void> => {
-  if (!walletAddress) {
-    console.error('No wallet address provided for dislikeScammer');
-    return;
-  }
-  if (!scammerId) {
-    console.error('No scammer ID provided for dislikeScammer');
-    return;
-  }
-  
-  console.log(`Processing dislike for scammer ${scammerId} by user ${walletAddress}`);
-  
+// Check if user has disliked a scammer post
+export const hasUserDislikedScammer = async (scammerId: string, userId: string) => {
   try {
-    // Get existing interaction if any
-    const { data: existingInteraction, error: fetchError } = await supabase
+    const { data, error } = await supabase
       .from('user_scammer_interactions')
-      .select('*')
+      .select('disliked')
+      .eq('user_id', userId)
       .eq('scammer_id', scammerId)
-      .eq('user_id', walletAddress)
       .maybeSingle();
-
-    if (fetchError) {
-      console.error('Error fetching interaction:', fetchError);
-      throw fetchError;
+      
+    if (error) {
+      throw error;
     }
-
-    // Using a transaction to ensure atomic operations
-    if (existingInteraction) {
-      console.log('Existing interaction found:', existingInteraction);
-      
-      // Toggle dislike - if already disliked, un-dislike it; if liked, switch to dislike
-      const disliked = !existingInteraction.disliked;
-      const liked = disliked ? false : existingInteraction.liked; // Can't be both liked and disliked
-      
-      console.log(`Updating interaction: disliked=${disliked}, liked=${liked}`);
-      
-      const { error: updateError } = await supabase
-        .from('user_scammer_interactions')
-        .update({ 
-          disliked,
-          liked,
-          last_updated: new Date().toISOString() 
-        })
-        .eq('id', existingInteraction.id);
-        
-      if (updateError) {
-        console.error('Error updating interaction:', updateError);
-        throw updateError;
-      }
-      
-      console.log(`Updated interaction: disliked=${disliked}, liked=${liked}`);
-    } else {
-      // No existing interaction, create new with disliked=true
-      console.log('No existing interaction, creating new one with disliked=true');
-      
-      const { data: newInteraction, error: insertError } = await supabase
-        .from('user_scammer_interactions')
-        .insert({ 
-          scammer_id: scammerId, 
-          user_id: walletAddress, 
-          disliked: true, 
-          liked: false 
-        })
-        .select();
-        
-      if (insertError) {
-        console.error('Error inserting interaction:', insertError);
-        throw insertError;
-      }
-      
-      console.log('Created new interaction:', newInteraction);
-    }
-
-    // Always update scammer like/dislike counts
-    const updatedCounts = await updateScammerLikes(scammerId);
     
-    console.log('Updated scammer counts:', updatedCounts);
-    return updatedCounts;
+    return data?.disliked || false;
   } catch (error) {
-    console.error('Error in dislikeScammer:', error);
-    throw error;
+    handleError(error, 'Error checking if user disliked scammer');
+    return false;
   }
 };
 
-const updateScammerLikes = async (scammerId: string): Promise<{ likes: number; dislikes: number }> => {
-  console.log(`Updating like counts for scammer ${scammerId}`);
-  
+// Check if user has liked a comment
+export const hasUserLikedComment = async (commentId: string, userId: string) => {
   try {
-    // Count likes
-    const { count: likeCount, error: likeError } = await supabase
-      .from('user_scammer_interactions')
-      .select('*', { count: 'exact', head: true })
-      .eq('scammer_id', scammerId)
-      .eq('liked', true);
-
-    if (likeError) {
-      console.error('Error counting likes:', likeError);
-      throw likeError;
-    }
-
-    // Count dislikes
-    const { count: dislikeCount, error: dislikeError } = await supabase
-      .from('user_scammer_interactions')
-      .select('*', { count: 'exact', head: true })
-      .eq('scammer_id', scammerId)
-      .eq('disliked', true);
-
-    if (dislikeError) {
-      console.error('Error counting dislikes:', dislikeError);
-      throw dislikeError;
-    }
-
-    // Make sure counts are actual numbers, not null
-    const likes = likeCount || 0;
-    const dislikes = dislikeCount || 0;
-
-    console.log(`New like count: ${likes}, new dislike count: ${dislikes}`);
-
-    // Debug: Log the scammer ID and the update values for debugging
-    console.log(`Attempting to update scammer ID: ${scammerId} with likes: ${likes}, dislikes: ${dislikes}`);
-    
-    // Fetch the scammer first to verify it exists
-    const { data: existingScammer, error: fetchError } = await supabase
-      .from('scammers')
-      .select('id, likes, dislikes')
-      .eq('id', scammerId)
-      .single();
-    
-    if (fetchError) {
-      console.error(`Error fetching scammer with ID ${scammerId}:`, fetchError);
-      throw fetchError;
-    }
-    
-    console.log(`Found existing scammer:`, existingScammer);
-    
-    // Explicitly update likes and dislikes as numbers
-    const { data: updateData, error: updateError } = await supabase
-      .from('scammers')
-      .update({ 
-        likes: likes, 
-        dislikes: dislikes 
-      })
-      .eq('id', scammerId)
-      .select();
-
-    if (updateError) {
-      console.error('Error updating scammer like/dislike counts:', updateError);
-      throw updateError;
-    } 
-    
-    console.log(`Successfully updated scammer like/dislike counts:`, updateData);
-    
-    // Verify the update
-    const { data: verifyData, error: verifyError } = await supabase
-      .from('scammers')
-      .select('likes, dislikes')
-      .eq('id', scammerId)
-      .single();
+    const { data, error } = await supabase
+      .from('user_comment_interactions')
+      .select('liked')
+      .eq('user_id', userId)
+      .eq('comment_id', commentId)
+      .maybeSingle();
       
-    if (verifyError) {
-      console.error('Error verifying update:', verifyError);
-    } else {
-      console.log('Verified scammer data after update:', verifyData);
+    if (error) {
+      throw error;
     }
     
-    return { likes, dislikes };
+    return data?.liked || false;
   } catch (error) {
-    console.error('Error in updateScammerLikes:', error);
-    // Return default 0 counts in case of error
-    return { likes: 0, dislikes: 0 };
+    handleError(error, 'Error checking if user liked comment');
+    return false;
+  }
+};
+
+// Check if user has disliked a comment
+export const hasUserDislikedComment = async (commentId: string, userId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('user_comment_interactions')
+      .select('disliked')
+      .eq('user_id', userId)
+      .eq('comment_id', commentId)
+      .maybeSingle();
+      
+    if (error) {
+      throw error;
+    }
+    
+    return data?.disliked || false;
+  } catch (error) {
+    handleError(error, 'Error checking if user disliked comment');
+    return false;
   }
 };

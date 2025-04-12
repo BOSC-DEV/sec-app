@@ -7,6 +7,8 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { handleError } from '@/utils/errorHandling';
 import { sanitizeHtml } from '@/utils/securityUtils';
+import { notifyReaction } from '@/services/notificationService';
+import { EntityType } from '@/types/dataTypes';
 
 // Announcement Services
 export const getAnnouncements = async (): Promise<Announcement[]> => {
@@ -29,7 +31,6 @@ export const getAnnouncements = async (): Promise<Announcement[]> => {
 
 export const createAnnouncement = async (announcement: Omit<Announcement, 'id' | 'created_at' | 'views'>): Promise<Announcement | null> => {
   try {
-    // Sanitize content
     const sanitizedContent = sanitizeHtml(announcement.content);
     
     const { data, error } = await supabase
@@ -55,7 +56,6 @@ export const createAnnouncement = async (announcement: Omit<Announcement, 'id' |
   }
 };
 
-// Increment announcement views
 export const incrementAnnouncementViews = async (announcementId: string): Promise<boolean> => {
   try {
     const { error } = await supabase.rpc('increment_announcement_views', {
@@ -95,7 +95,6 @@ export const getAnnouncementReplies = async (announcementId: string): Promise<An
 
 export const addAnnouncementReply = async (reply: Omit<AnnouncementReply, 'id' | 'created_at'>): Promise<AnnouncementReply | null> => {
   try {
-    // Sanitize content
     const sanitizedContent = sanitizeHtml(reply.content);
     
     const { data, error } = await supabase
@@ -125,7 +124,6 @@ export const addAnnouncementReply = async (reply: Omit<AnnouncementReply, 'id' |
 // Chat Message Services
 export const getChatMessages = async (): Promise<ChatMessage[]> => {
   try {
-    // Get messages from the last 24 hours
     const oneDayAgo = new Date();
     oneDayAgo.setDate(oneDayAgo.getDate() - 1);
     
@@ -157,7 +155,6 @@ export const sendChatMessage = async (message: {
   try {
     let imageUrl = null;
     
-    // Upload image if provided
     if (message.image_file) {
       const timestamp = Date.now();
       const fileExt = message.image_file.name.split('.').pop();
@@ -174,7 +171,6 @@ export const sendChatMessage = async (message: {
         throw uploadError;
       }
       
-      // Get public URL
       const { data: urlData } = supabase.storage
         .from('community')
         .getPublicUrl(filePath);
@@ -182,10 +178,8 @@ export const sendChatMessage = async (message: {
       imageUrl = urlData.publicUrl;
     }
     
-    // Sanitize content
     const sanitizedContent = sanitizeHtml(message.content);
     
-    // Insert message
     const { data, error } = await supabase
       .from('chat_messages')
       .insert({
@@ -214,10 +208,12 @@ export const sendChatMessage = async (message: {
 export const toggleAnnouncementReaction = async (
   announcementId: string, 
   userId: string, 
-  reactionType: string
+  reactionType: string,
+  userName: string,
+  userUsername?: string,
+  userProfilePic?: string
 ): Promise<boolean> => {
   try {
-    // Check if reaction already exists
     const { data: existingReaction, error: checkError } = await supabase
       .from('announcement_reactions')
       .select('*')
@@ -230,7 +226,12 @@ export const toggleAnnouncementReaction = async (
       throw checkError;
     }
     
-    // If reaction exists, remove it
+    const { data: announcement } = await supabase
+      .from('announcements')
+      .select('author_id, content')
+      .eq('id', announcementId)
+      .single();
+    
     if (existingReaction) {
       const { error: deleteError } = await supabase
         .from('announcement_reactions')
@@ -241,10 +242,9 @@ export const toggleAnnouncementReaction = async (
         throw deleteError;
       }
       
-      return false; // Reaction removed
+      return false;
     }
     
-    // If reaction doesn't exist, add it
     const { error: insertError } = await supabase
       .from('announcement_reactions')
       .insert({
@@ -257,7 +257,21 @@ export const toggleAnnouncementReaction = async (
       throw insertError;
     }
     
-    return true; // Reaction added
+    if (announcement && announcement.author_id && announcement.author_id !== userId) {
+      await notifyReaction(
+        announcementId,
+        EntityType.ANNOUNCEMENT,
+        announcement.content.substring(0, 30) + '...',
+        reactionType,
+        announcement.author_id,
+        userId,
+        userName,
+        userUsername,
+        userProfilePic
+      );
+    }
+    
+    return true;
   } catch (error) {
     handleError(error, 'Error toggling announcement reaction');
     return false;
@@ -267,10 +281,12 @@ export const toggleAnnouncementReaction = async (
 export const toggleChatMessageReaction = async (
   messageId: string, 
   userId: string, 
-  reactionType: string
+  reactionType: string,
+  userName: string,
+  userUsername?: string,
+  userProfilePic?: string
 ): Promise<boolean> => {
   try {
-    // Check if reaction already exists
     const { data: existingReaction, error: checkError } = await supabase
       .from('chat_message_reactions')
       .select('*')
@@ -283,7 +299,12 @@ export const toggleChatMessageReaction = async (
       throw checkError;
     }
     
-    // If reaction exists, remove it
+    const { data: message } = await supabase
+      .from('chat_messages')
+      .select('author_id, content')
+      .eq('id', messageId)
+      .single();
+    
     if (existingReaction) {
       const { error: deleteError } = await supabase
         .from('chat_message_reactions')
@@ -294,10 +315,9 @@ export const toggleChatMessageReaction = async (
         throw deleteError;
       }
       
-      return false; // Reaction removed
+      return false;
     }
     
-    // If reaction doesn't exist, add it
     const { error: insertError } = await supabase
       .from('chat_message_reactions')
       .insert({
@@ -310,7 +330,21 @@ export const toggleChatMessageReaction = async (
       throw insertError;
     }
     
-    return true; // Reaction added
+    if (message && message.author_id && message.author_id !== userId) {
+      await notifyReaction(
+        messageId,
+        EntityType.CHAT_MESSAGE,
+        message.content.substring(0, 30) + '...',
+        reactionType,
+        message.author_id,
+        userId,
+        userName,
+        userUsername,
+        userProfilePic
+      );
+    }
+    
+    return true;
   } catch (error) {
     handleError(error, 'Error toggling chat message reaction');
     return false;
@@ -320,10 +354,12 @@ export const toggleChatMessageReaction = async (
 export const toggleReplyReaction = async (
   replyId: string, 
   userId: string, 
-  reactionType: string
+  reactionType: string,
+  userName: string,
+  userUsername?: string,
+  userProfilePic?: string
 ): Promise<boolean> => {
   try {
-    // Check if reaction already exists
     const { data: existingReaction, error: checkError } = await supabase
       .from('reply_reactions')
       .select('*')
@@ -336,7 +372,12 @@ export const toggleReplyReaction = async (
       throw checkError;
     }
     
-    // If reaction exists, remove it
+    const { data: reply } = await supabase
+      .from('announcement_replies')
+      .select('author_id, content')
+      .eq('id', replyId)
+      .single();
+    
     if (existingReaction) {
       const { error: deleteError } = await supabase
         .from('reply_reactions')
@@ -347,10 +388,9 @@ export const toggleReplyReaction = async (
         throw deleteError;
       }
       
-      return false; // Reaction removed
+      return false;
     }
     
-    // If reaction doesn't exist, add it
     const { error: insertError } = await supabase
       .from('reply_reactions')
       .insert({
@@ -363,7 +403,21 @@ export const toggleReplyReaction = async (
       throw insertError;
     }
     
-    return true; // Reaction added
+    if (reply && reply.author_id && reply.author_id !== userId) {
+      await notifyReaction(
+        replyId,
+        EntityType.REPLY,
+        reply.content.substring(0, 30) + '...',
+        reactionType,
+        reply.author_id,
+        userId,
+        userName,
+        userUsername,
+        userProfilePic
+      );
+    }
+    
+    return true;
   } catch (error) {
     handleError(error, 'Error toggling reply reaction');
     return false;
@@ -373,7 +427,6 @@ export const toggleReplyReaction = async (
 // Admin Management Functions
 export const deleteAnnouncement = async (announcementId: string): Promise<boolean> => {
   try {
-    // First, delete all replies to this announcement
     const { error: repliesError } = await supabase
       .from('announcement_replies')
       .delete()
@@ -383,7 +436,6 @@ export const deleteAnnouncement = async (announcementId: string): Promise<boolea
       throw repliesError;
     }
     
-    // Then delete all reactions to this announcement
     const { error: reactionsError } = await supabase
       .from('announcement_reactions')
       .delete()
@@ -393,7 +445,6 @@ export const deleteAnnouncement = async (announcementId: string): Promise<boolea
       throw reactionsError;
     }
     
-    // Finally delete the announcement
     const { error } = await supabase
       .from('announcements')
       .delete()
@@ -415,7 +466,6 @@ export const editAnnouncement = async (
   content: string
 ): Promise<Announcement | null> => {
   try {
-    // Sanitize content
     const sanitizedContent = sanitizeHtml(content);
     
     const { data, error } = await supabase
@@ -438,7 +488,6 @@ export const editAnnouncement = async (
 
 export const deleteAnnouncementReply = async (replyId: string): Promise<boolean> => {
   try {
-    // First delete all reactions to this reply
     const { error: reactionsError } = await supabase
       .from('reply_reactions')
       .delete()
@@ -448,7 +497,6 @@ export const deleteAnnouncementReply = async (replyId: string): Promise<boolean>
       throw reactionsError;
     }
     
-    // Then delete the reply
     const { error } = await supabase
       .from('announcement_replies')
       .delete()
@@ -470,7 +518,6 @@ export const editAnnouncementReply = async (
   content: string
 ): Promise<AnnouncementReply | null> => {
   try {
-    // Sanitize content
     const sanitizedContent = sanitizeHtml(content);
     
     const { data, error } = await supabase
@@ -493,7 +540,6 @@ export const editAnnouncementReply = async (
 
 export const deleteChatMessage = async (messageId: string): Promise<boolean> => {
   try {
-    // First delete all reactions to this message
     const { error: reactionsError } = await supabase
       .from('chat_message_reactions')
       .delete()
@@ -503,7 +549,6 @@ export const deleteChatMessage = async (messageId: string): Promise<boolean> => 
       throw reactionsError;
     }
     
-    // Then delete the message
     const { error } = await supabase
       .from('chat_messages')
       .delete()
@@ -520,7 +565,6 @@ export const deleteChatMessage = async (messageId: string): Promise<boolean> => 
   }
 };
 
-// Updated isUserAdmin function to be accessible
 export const isUserAdmin = async (username: string): Promise<boolean> => {
   const ADMIN_USERNAMES = ['sec', 'thesec'];
   return ADMIN_USERNAMES.includes(username);
