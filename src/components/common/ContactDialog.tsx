@@ -65,7 +65,7 @@ const ContactDialog: React.FC<ContactDialogProps> = ({
                 <AlertTriangle className="h-6 w-6 text-amber-600 mr-3 flex-shrink-0 mt-1" />
                 <div>
                   
-                  <p className="text-rose-600">
+                  <p className="text-orange-700">
                     For urgent reports involving active fraud or significant financial loss, please also contact your local law enforcement agency. The SEC platform is for informational purposes only and does not replace proper legal channels.
                   </p>
                 </div>
