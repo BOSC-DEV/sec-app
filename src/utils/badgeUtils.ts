@@ -47,14 +47,18 @@ export const BADGE_TIERS: { [key in BadgeTier]: { minPercent: number, color: str
  * @returns Badge information including tier, next tier, etc.
  */
 export const calculateBadgeTier = (secHolding: number): BadgeInfo => {
+  // Calculate percentage of supply
   const holdingPercent = (secHolding / TOTAL_SEC_SUPPLY) * 100;
   
+  // Get all tiers sorted by minimum percentage (highest to lowest)
   const tiers = Object.entries(BADGE_TIERS).sort(
     (a, b) => b[1].minPercent - a[1].minPercent
   );
   
+  // Default to lowest tier (Shrimp)
   let userTier = tiers[tiers.length - 1];
   
+  // Find the highest tier the user qualifies for
   for (const [tier, { minPercent }] of tiers) {
     if (holdingPercent >= minPercent) {
       userTier = [tier, BADGE_TIERS[tier as BadgeTier]];
@@ -62,6 +66,7 @@ export const calculateBadgeTier = (secHolding: number): BadgeInfo => {
     }
   }
   
+  // Find current tier index and next tier info
   const currentTierIndex = tiers.findIndex(([t]) => t === userTier[0]);
   const nextTierInfo = currentTierIndex > 0 ? {
     name: tiers[currentTierIndex - 1][0] as BadgeTier,

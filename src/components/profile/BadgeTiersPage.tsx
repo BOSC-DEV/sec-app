@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatSecAmount, BADGE_TIERS, BadgeTier, TOTAL_SEC_SUPPLY } from '@/utils/badgeUtils';
@@ -11,7 +11,13 @@ import { Progress } from '@/components/ui/progress';
 const BadgeTiersPage = () => {
   const { profile } = useProfile();
   const secBalance = profile?.sec_balance || 0;
-  const currentBadgeInfo = calculateBadgeTier(secBalance);
+  const [currentBadgeInfo, setCurrentBadgeInfo] = useState(calculateBadgeTier(secBalance));
+  
+  // Update badge info when secBalance changes
+  useEffect(() => {
+    setCurrentBadgeInfo(calculateBadgeTier(secBalance));
+    console.log(`Current SEC balance: ${secBalance}, Badge tier: ${calculateBadgeTier(secBalance).tier}`);
+  }, [secBalance]);
 
   // Get all badge tiers
   const tiers = Object.entries(BADGE_TIERS).map(([tier, details]) => ({
