@@ -2,13 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useProfile } from '@/contexts/ProfileContext';
-import { getAnnouncements, createAnnouncement } from '@/services/communityService';
+import { getAnnouncements, createAnnouncement, incrementAnnouncementViews } from '@/services/communityService';
 import { Announcement } from '@/types/dataTypes';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Megaphone, Calendar, AlertCircle } from 'lucide-react';
+import { Megaphone, Calendar, AlertCircle, Eye } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import ReactionButton from './ReactionButton';
@@ -21,6 +21,7 @@ const AnnouncementFeed = () => {
   const { profile, isConnected } = useProfile();
   const [newAnnouncement, setNewAnnouncement] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [viewedAnnouncements, setViewedAnnouncements] = useState<Set<string>>(new Set());
   
   const isAdmin = profile?.username && ADMIN_USERNAMES.includes(profile.username);
   
@@ -82,6 +83,34 @@ const AnnouncementFeed = () => {
     }
   };
   
+  // Increment view count when announcement is visible
+  useEffect(() => {
+    if (!announcements.length) return;
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const announcementId = entry.target.getAttribute('data-announcement-id');
+            if (announcementId && !viewedAnnouncements.has(announcementId)) {
+              incrementAnnouncementViews(announcementId);
+              setViewedAnnouncements(prev => new Set(prev).add(announcementId));
+            }
+          }
+        });
+      },
+      { threshold: 0.7 } // Register view when 70% of the announcement is visible
+    );
+    
+    // Observe all announcement elements
+    const elements = document.querySelectorAll('.announcement-card');
+    elements.forEach(el => observer.observe(el));
+    
+    return () => {
+      elements.forEach(el => observer.unobserve(el));
+    };
+  }, [announcements, viewedAnnouncements]);
+  
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
@@ -139,7 +168,11 @@ const AnnouncementFeed = () => {
       ) : (
         <div className="space-y-4">
           {announcements.map((announcement: Announcement) => (
-            <Card key={announcement.id} className="overflow-hidden">
+            <Card 
+              key={announcement.id} 
+              className="announcement-card overflow-hidden"
+              data-announcement-id={announcement.id}
+            >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center">
@@ -171,8 +204,14 @@ const AnnouncementFeed = () => {
               <CardFooter className="pt-0 px-6 pb-3 flex flex-col items-start">
                 <div className="w-full bg-muted/30 py-2 px-3 rounded-md flex justify-between items-center">
                   <ReactionButton itemId={announcement.id} itemType="announcement" />
-                  <div className="text-xs text-muted-foreground">
-                    Official SEC Announcement
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <div className="flex items-center">
+                      <Eye className="h-3 w-3 mr-1" />
+                      {announcement.views || 0}
+                    </div>
+                    <div>
+                      Official SEC Announcement
+                    </div>
                   </div>
                 </div>
                 

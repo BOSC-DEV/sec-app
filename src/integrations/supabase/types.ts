@@ -91,6 +91,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          views: number
         }
         Insert: {
           author_id: string
@@ -100,6 +101,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          views?: number
         }
         Update: {
           author_id?: string
@@ -109,6 +111,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          views?: number
         }
         Relationships: []
       }
@@ -548,6 +551,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      increment_announcement_views: {
+        Args: { p_announcement_id: string }
+        Returns: undefined
+      }
       is_duplicate_view: {
         Args: { p_scammer_id: string; p_ip_hash: string }
         Returns: boolean

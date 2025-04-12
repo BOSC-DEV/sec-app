@@ -79,6 +79,7 @@ export interface Announcement {
   author_username: string;
   author_profile_pic?: string;
   created_at: string;
+  views: number;
 }
 
 export interface AnnouncementReply {

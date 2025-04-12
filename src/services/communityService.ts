@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { 
   Announcement, 
@@ -28,7 +27,7 @@ export const getAnnouncements = async (): Promise<Announcement[]> => {
   }
 };
 
-export const createAnnouncement = async (announcement: Omit<Announcement, 'id' | 'created_at'>): Promise<Announcement | null> => {
+export const createAnnouncement = async (announcement: Omit<Announcement, 'id' | 'created_at' | 'views'>): Promise<Announcement | null> => {
   try {
     // Sanitize content
     const sanitizedContent = sanitizeHtml(announcement.content);
@@ -53,6 +52,24 @@ export const createAnnouncement = async (announcement: Omit<Announcement, 'id' |
   } catch (error) {
     handleError(error, 'Error creating announcement');
     return null;
+  }
+};
+
+// Increment announcement views
+export const incrementAnnouncementViews = async (announcementId: string): Promise<boolean> => {
+  try {
+    const { error } = await supabase.rpc('increment_announcement_views', {
+      p_announcement_id: announcementId
+    });
+    
+    if (error) {
+      throw error;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error incrementing views:', error);
+    return false;
   }
 };
 
