@@ -1,22 +1,29 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Button } from '@/components/ui/button';
 import { Wallet, ExternalLink, Copy, LogOut } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import BadgeTier from './BadgeTier';
+import { useBadgeTier } from '@/hooks/useBadgeTier';
 
 interface WalletInfoProps {
   walletAddress?: string | null;
   isOwnProfile?: boolean;
+  secBalance?: number | null;
 }
 
 const WalletInfo: React.FC<WalletInfoProps> = ({
   walletAddress,
-  isOwnProfile = false
+  isOwnProfile = false,
+  secBalance = null
 }) => {
   const {
     disconnectWallet
   } = useProfile();
+
+  const badgeInfo = useBadgeTier(secBalance);
 
   const copyWalletAddress = () => {
     if (walletAddress) {
@@ -55,7 +62,7 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
         {walletAddress ? (
           <div className="space-y-4">
             <div>
-              <div className="text-sm font-medium mb-1 text-gray-500 dark:text-gray-400 px-0 my-[20px]">Address</div>
+              <div className="text-sm font-medium mb-1 text-gray-500 dark:text-gray-400 px-0 mt-[20px]">Address</div>
               <div className="flex items-center gap-2">
                 <div className="bg-gray-100 dark:bg-gray-800 p-2 rounded flex-1 font-mono text-sm truncate">
                   {walletAddress}
@@ -80,6 +87,22 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
                 </Button>
               </div>
             </div>
+
+            {badgeInfo && (
+              <div className="pt-2">
+                <div className="text-sm font-medium mb-2 text-gray-500 dark:text-gray-400">Holder Badge</div>
+                <div className="flex flex-col gap-3">
+                  <BadgeTier 
+                    badgeInfo={badgeInfo} 
+                    showProgress={true}
+                    size="lg"
+                  />
+                  <div className="text-xs text-muted-foreground">
+                    Based on your current SEC balance
+                  </div>
+                </div>
+              </div>
+            )}
 
             {isOwnProfile && (
               <div className="pt-4">

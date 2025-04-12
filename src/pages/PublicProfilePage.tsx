@@ -362,14 +362,18 @@ const PublicProfilePage = () => {
                   <div className="space-y-8">
                     {profile?.wallet_address ? <>
                         <WalletBalance walletAddress={profile.wallet_address} />
-                        <WalletInfo walletAddress={profile.wallet_address} isOwnProfile={isOwnProfile} />
+                        <WalletInfo 
+                          walletAddress={profile.wallet_address} 
+                          isOwnProfile={isOwnProfile} 
+                          secBalance={profile?.wallet_address ? bountyContributions?.totalBountyAmount || 0 : null}
+                        />
                       </> : <div className="text-center py-12">
                         <p className="text-muted-foreground text-lg">No wallet information available</p>
                       </div>}
                   </div>
                 </div>
               </TabsContent>
-                
+              
               <TabsContent value="info" className="mt-0">
                 <div className="bg-background/60 backdrop-blur-sm rounded-lg p-6 border">
                   <h2 className="text-2xl font-bold text-icc-gold mb-6">User Information</h2>
@@ -406,7 +410,7 @@ const PublicProfilePage = () => {
                     </div>}
                 </div>
               </TabsContent>
-                
+              
               <TabsContent value="activity" className="mt-0">
                 <div className="bg-background/60 backdrop-blur-sm rounded-lg p-6 border">
                   <h2 className="text-2xl font-bold text-icc-gold mb-6 flex items-center">
@@ -426,7 +430,7 @@ const PublicProfilePage = () => {
                     </div>}
                 </div>
               </TabsContent>
-                
+              
               <TabsContent value="comments" className="mt-0">
                 <div className="bg-background/60 backdrop-blur-sm rounded-lg p-6 border">
                   <h2 className="text-2xl font-bold text-icc-gold mb-6">Comments</h2>

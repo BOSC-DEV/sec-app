@@ -2,11 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CreditCard, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
+import BadgeTier from './BadgeTier';
+import { useBadgeTier } from '@/hooks/useBadgeTier';
 
 // Import from phantomWallet utility
 import { getConnection } from '@/utils/phantomWallet';
@@ -22,6 +24,8 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
   const [solBalance, setSolBalance] = useState<number | null>(null);
   const [secBalance, setSecBalance] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  
+  const badgeInfo = useBadgeTier(secBalance);
 
   const fetchSolBalance = async (address: string) => {
     try {
@@ -109,6 +113,9 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
             <CardTitle className="text-lg dark:text-white">Balance</CardTitle>
             <CardDescription className="dark:text-gray-200">Current balances in your wallet</CardDescription>
           </div>
+          {badgeInfo && (
+            <BadgeTier badgeInfo={badgeInfo} size="md" />
+          )}
         </div>
       </CardHeader>
       <CardContent className="dark:bg-transparent">
@@ -144,4 +151,3 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
     </Card>;
 };
 export default WalletBalance;
-
