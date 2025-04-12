@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -763,4 +764,15 @@ const ScammerDetailPage = () => {
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>Based on {likes + dislikes} community votes</p>
-                    </TooltipContent
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>;
+};
+
+export default ScammerDetailPage;
