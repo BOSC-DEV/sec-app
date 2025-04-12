@@ -60,12 +60,12 @@ const ContactDialog: React.FC<ContactDialogProps> = ({
               </p>
             </div>
             
-            <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg">
+            <div className="border border-amber-200 p-4 rounded-lg bg-zinc-50">
               <div className="flex items-start">
                 <AlertTriangle className="h-6 w-6 text-amber-600 mr-3 flex-shrink-0 mt-1" />
                 <div>
-                  <h4 className="font-bold text-amber-800">Important Notice</h4>
-                  <p className="text-amber-700">
+                  
+                  <p className="text-rose-600">
                     For urgent reports involving active fraud or significant financial loss, please also contact your local law enforcement agency. The SEC platform is for informational purposes only and does not replace proper legal channels.
                   </p>
                 </div>
