@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { handleError, ErrorSeverity } from '@/utils/errorHandling';
 import { notifyScammerLike } from '@/services/notificationService';
@@ -28,12 +27,41 @@ interface UserCommentInteraction {
 }
 
 /**
+ * First check if the scammer exists before any like/dislike operation
+ */
+const checkScammerExists = async (scammerId: string): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase
+      .from('scammers')
+      .select('id')
+      .eq('id', scammerId)
+      .maybeSingle();
+      
+    if (error) {
+      console.error('Error checking scammer existence:', error);
+      return false;
+    }
+    
+    return !!data;
+  } catch (error) {
+    console.error('Exception checking scammer existence:', error);
+    return false;
+  }
+};
+
+/**
  * Toggle like for a scammer
  * If already liked, it will unlike
  * If disliked, it will undislike and like
  */
 export const likeScammer = async (scammerId: string, userId: string): Promise<ScammerInteractionResult> => {
   try {
+    // First check if the scammer exists
+    const scammerExists = await checkScammerExists(scammerId);
+    if (!scammerExists) {
+      throw new Error(`Scammer with ID ${scammerId} does not exist`);
+    }
+    
     // Check if user already liked or disliked
     const { data: existingInteraction } = await supabase
       .from('user_scammer_interactions')
@@ -239,6 +267,12 @@ export const likeScammer = async (scammerId: string, userId: string): Promise<Sc
  */
 export const dislikeScammer = async (scammerId: string, userId: string): Promise<ScammerInteractionResult> => {
   try {
+    // First check if the scammer exists
+    const scammerExists = await checkScammerExists(scammerId);
+    if (!scammerExists) {
+      throw new Error(`Scammer with ID ${scammerId} does not exist`);
+    }
+    
     // Check if user already liked or disliked
     const { data: existingInteraction } = await supabase
       .from('user_scammer_interactions')
@@ -386,6 +420,13 @@ const getScammerLikesDislikes = async (scammerId: string): Promise<ScammerIntera
  */
 export const getUserScammerInteraction = async (scammerId: string, userId: string): Promise<UserScammerInteraction | null> => {
   try {
+    // First check if the scammer exists
+    const scammerExists = await checkScammerExists(scammerId);
+    if (!scammerExists) {
+      console.warn(`Attempting to get interaction for non-existent scammer ID: ${scammerId}`);
+      return null;
+    }
+    
     const { data: interaction } = await supabase
       .from('user_scammer_interactions')
       .select('liked, disliked')

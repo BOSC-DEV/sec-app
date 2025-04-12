@@ -62,20 +62,16 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
     try {
       let success = false;
       
-      // Check if the user already has the same reaction
       if (itemType === 'announcement') {
-        const { data: existing, error: checkError } = await supabase
+        // Handle announcement reactions
+        const { data: existing } = await supabase
           .from('announcement_reactions')
           .select('id')
           .eq('announcement_id', itemId)
           .eq('user_id', profile?.wallet_address || '')
           .eq('reaction_type', reactionType)
-          .single();
+          .maybeSingle();
           
-        if (checkError && checkError.code !== 'PGRST116') {
-          throw checkError;
-        }
-        
         if (existing) {
           // Remove reaction if it exists
           const { error: deleteError } = await supabase
@@ -99,18 +95,15 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
           success = true;
         }
       } else if (itemType === 'message') {
-        const { data: existing, error: checkError } = await supabase
+        // Handle message reactions
+        const { data: existing } = await supabase
           .from('chat_message_reactions')
           .select('id')
           .eq('message_id', itemId)
           .eq('user_id', profile?.wallet_address || '')
           .eq('reaction_type', reactionType)
-          .single();
+          .maybeSingle();
           
-        if (checkError && checkError.code !== 'PGRST116') {
-          throw checkError;
-        }
-        
         if (existing) {
           // Remove reaction if it exists
           const { error: deleteError } = await supabase
@@ -134,19 +127,15 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
           success = true;
         }
       } else {
-        // Item type is 'reply'
-        const { data: existing, error: checkError } = await supabase
+        // Handle reply reactions
+        const { data: existing } = await supabase
           .from('reply_reactions')
           .select('id')
           .eq('reply_id', itemId)
           .eq('user_id', profile?.wallet_address || '')
           .eq('reaction_type', reactionType)
-          .single();
+          .maybeSingle();
           
-        if (checkError && checkError.code !== 'PGRST116') {
-          throw checkError;
-        }
-        
         if (existing) {
           // Remove reaction if it exists
           const { error: deleteError } = await supabase
@@ -182,14 +171,14 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
   const fetchReactions = async () => {
     try {
       // Using explicit typing to avoid excessive type instantiation
-      interface ReactionRow {
+      type ReactionRow = {
         reaction_type: string;
         user_id: string;
-      }
+      };
       
       let reactionData: ReactionRow[] = [];
       
-      // Direct table queries to avoid excessive type instantiation
+      // Direct table queries based on item type
       if (itemType === 'announcement') {
         const { data, error } = await supabase
           .from('announcement_reactions')
