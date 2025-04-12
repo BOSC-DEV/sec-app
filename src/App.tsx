@@ -11,6 +11,7 @@ import MostWantedPage from "./pages/MostWantedPage";
 import ScammerDetailPage from "./pages/ScammerDetailPage";
 import ReportPage from "./pages/ReportPage";
 import LeaderboardPage from "./pages/LeaderboardPage";
+import CommunityPage from "./pages/CommunityPage";
 import ProfilePage from "./pages/ProfilePage";
 import PublicProfilePage from "./pages/PublicProfilePage";
 import LegalPages from "./pages/LegalPages";
@@ -92,6 +93,7 @@ const App = () => (
                     </ProtectedRoute>
                   } />
                   <Route path="/leaderboard" element={<LeaderboardPage />} />
+                  <Route path="/community" element={<CommunityPage />} />
                   <Route path="/profile" element={
                     <ProtectedRoute>
                       <ProfilePage />

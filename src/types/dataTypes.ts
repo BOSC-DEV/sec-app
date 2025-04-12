@@ -69,3 +69,25 @@ export interface BountyContribution {
   transferred_from_id?: string;
   transferred_to_id?: string;
 }
+
+// New types for Community feature
+export interface Announcement {
+  id: string;
+  content: string;
+  author_id: string;
+  author_name: string;
+  author_username: string;
+  author_profile_pic?: string;
+  created_at: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  content: string;
+  author_id: string;
+  author_name: string;
+  author_username?: string;
+  author_profile_pic?: string;
+  image_url?: string;
+  created_at: string;
+}

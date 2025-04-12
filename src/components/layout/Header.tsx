@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, User, Shield, Wallet, LogOut, LogIn } from 'lucide-react';
+import { Menu, X, User, Shield, Wallet, LogOut, LogIn, Users } from 'lucide-react';
 import ICCLogo from '../common/ICCLogo';
 import { useProfile } from '@/contexts/ProfileContext';
 import ThemeToggle from '@/components/common/ThemeToggle';
@@ -43,6 +44,7 @@ const Header = () => {
     { label: 'Most Wanted', path: '/most-wanted' },
     { label: 'Report', path: '/report' },
     { label: 'Leaderboard', path: '/leaderboard' },
+    { label: 'Community', path: '/community', icon: <Users className="h-3 w-3 mr-1" /> },
   ];
 
   return (
@@ -62,10 +64,11 @@ const Header = () => {
                 <Link 
                   key={item.path}
                   to={item.path} 
-                  className={`text-white hover:text-icc-gold transition-colors ${
+                  className={`text-white hover:text-icc-gold transition-colors flex items-center ${
                     location.pathname === item.path ? 'text-icc-gold font-medium' : ''
                   }`}
                 >
+                  {item.icon}
                   {item.label}
                 </Link>
               ))}
@@ -122,11 +125,12 @@ const Header = () => {
                 <Link 
                   key={item.path}
                   to={item.path} 
-                  className={`text-white hover:text-icc-gold transition-colors px-2 py-1 ${
+                  className={`text-white hover:text-icc-gold transition-colors px-2 py-1 flex items-center ${
                     location.pathname === item.path ? 'text-icc-gold font-medium' : ''
                   }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
+                  {item.icon}
                   {item.label}
                 </Link>
               ))}
