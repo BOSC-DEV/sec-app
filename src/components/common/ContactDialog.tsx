@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -101,7 +100,7 @@ const ContactDialog: React.FC<ContactDialogProps> = ({
               </ul>
             </div>
             
-            <div className="bg-gray-100 p-4 rounded-lg">
+            <div className="p-2">
               <h3 className="font-bold text-lg mb-2">Response Time</h3>
               <p>
                 We aim to respond to all inquiries within 2-3 business days. However, response times may vary based on the volume of messages and the complexity of your inquiry.
