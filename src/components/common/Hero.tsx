@@ -1,9 +1,7 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, Search } from 'lucide-react';
-import ICCLogo from './ICCLogo';
 
 interface HeroProps {
   title?: string;
@@ -13,7 +11,7 @@ interface HeroProps {
 
 const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
   return (
-    <div className="relative bg-icc-blue text-white" role="banner">
+    <div className="relative bg-icc-blue text-white dark:bg-icc-blue" role="banner">
       <div className="absolute inset-0 bg-[url('/images/cyber-pattern.png')] opacity-10" aria-hidden="true"></div>
       <div className="icc-container py-16 md:py-24 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
