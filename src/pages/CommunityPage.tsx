@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import SEO from '@/components/common/SEO';
@@ -14,9 +13,8 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/componen
 const CommunityPage = () => {
   const { profile, isConnected } = useProfile();
   const [activeTab, setActiveTab] = useState("announcements");
-  const [splitView, setSplitView] = useState(false);
+  const [splitScreen, setSplitScreen] = useState(false);
 
-  // Effect to show toast for unconnected users
   useEffect(() => {
     if (!isConnected) {
       toast({
@@ -27,8 +25,8 @@ const CommunityPage = () => {
     }
   }, [isConnected]);
 
-  const toggleSplitView = () => {
-    setSplitView(!splitView);
+  const toggleSplitScreen = () => {
+    setSplitScreen(!splitScreen);
   };
 
   return (
@@ -44,14 +42,14 @@ const CommunityPage = () => {
       />
       
       <div className="icc-container py-8">
-        {splitView ? (
+        {splitScreen ? (
           <>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold">Community</h2>
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={toggleSplitView}
+                onClick={toggleSplitScreen}
                 className="flex items-center gap-2"
               >
                 <LayoutPanelLeft className="h-4 w-4" />
@@ -91,11 +89,11 @@ const CommunityPage = () => {
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={toggleSplitView}
+                onClick={toggleSplitScreen}
                 className="ml-2 flex items-center gap-2"
               >
                 <Rows className="h-4 w-4" />
-                <span>Split View</span>
+                <span>Split Screen</span>
               </Button>
             </div>
             

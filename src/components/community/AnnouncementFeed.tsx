@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -203,7 +202,6 @@ const AnnouncementFeed = () => {
               
               <CardFooter className="pt-0 px-6 pb-3 flex flex-col items-start">
                 <div className="w-full bg-muted/30 py-2 px-3 rounded-md flex justify-between items-center">
-                  <ReactionButton itemId={announcement.id} itemType="announcement" />
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <div className="flex items-center">
                       <Eye className="h-3 w-3 mr-1" />
@@ -213,6 +211,7 @@ const AnnouncementFeed = () => {
                       Official SEC Announcement
                     </div>
                   </div>
+                  <ReactionButton itemId={announcement.id} itemType="announcement" />
                 </div>
                 
                 <AnnouncementReplies announcementId={announcement.id} />
