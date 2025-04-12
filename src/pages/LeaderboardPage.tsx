@@ -1,13 +1,15 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Trophy, Medal, ThumbsUp, Eye, MessageSquare, Clock, Globe } from 'lucide-react';
+import { Trophy, Medal, ThumbsUp, Eye, MessageSquare, Clock, Globe, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import CompactHero from '@/components/common/CompactHero';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { getProfileStatistics } from '@/services/statisticsService';
 import { Profile } from '@/types/dataTypes';
 import { formatNumber, formatProfileAge } from '@/lib/utils';
@@ -19,6 +21,7 @@ type SortOrder = 'asc' | 'desc';
 const LeaderboardPage = () => {
   const [sortField, setSortField] = useState<SortField>('total_bounty');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  const [searchTerm, setSearchTerm] = useState('');
   
   const {
     data: profiles = [],
@@ -49,46 +52,66 @@ const LeaderboardPage = () => {
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 ml-1"><path d="m19 9-7 7-7-7"/></svg>;
   };
   
-  const sortedProfiles = [...profilesWithTotalBounty].sort((a, b) => {
-    let comparison = 0;
-    switch (sortField) {
-      case 'total_bounty':
-        comparison = (b.total_bounty || 0) - (a.total_bounty || 0);
-        break;
-      case 'rank':
-        comparison = (b.points || 0) - (a.points || 0);
-        break;
-      case 'name':
-        comparison = a.display_name.localeCompare(b.display_name);
-        break;
-      case 'reports':
-        comparison = (b.reports_count || 0) - (a.reports_count || 0);
-        break;
-      case 'likes':
-        comparison = (b.likes_count || 0) - (a.likes_count || 0);
-        break;
-      case 'views':
-        comparison = (b.views_count || 0) - (a.views_count || 0);
-        break;
-      case 'comments':
-        comparison = (b.comments_count || 0) - (a.comments_count || 0);
-        break;
-      case 'bounty':
-        comparison = (b.bounty_amount || 0) - (a.bounty_amount || 0);
-        break;
-      case 'bounties_raised':
-        comparison = (b.bounties_raised || 0) - (a.bounties_raised || 0);
-        break;
-      case 'activity':
-        if (a.created_at && b.created_at) {
-          comparison = new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-        }
-        break;
-      default:
-        comparison = 0;
-    }
-    return sortOrder === 'asc' ? -comparison : comparison;
-  });
+  // Filter profiles based on search term
+  const filteredProfiles = useMemo(() => {
+    if (!searchTerm.trim()) return profilesWithTotalBounty;
+    
+    const term = searchTerm.toLowerCase().trim();
+    
+    return profilesWithTotalBounty.filter(profile => {
+      return (
+        // Search by display name
+        profile.display_name.toLowerCase().includes(term) ||
+        // Search by username
+        (profile.username && profile.username.toLowerCase().includes(term)) ||
+        // Search by wallet address (for pasting complete addresses)
+        (profile.wallet_address && profile.wallet_address.toLowerCase().includes(term))
+      );
+    });
+  }, [profilesWithTotalBounty, searchTerm]);
+  
+  const sortedProfiles = useMemo(() => {
+    return [...filteredProfiles].sort((a, b) => {
+      let comparison = 0;
+      switch (sortField) {
+        case 'total_bounty':
+          comparison = (b.total_bounty || 0) - (a.total_bounty || 0);
+          break;
+        case 'rank':
+          comparison = (b.points || 0) - (a.points || 0);
+          break;
+        case 'name':
+          comparison = a.display_name.localeCompare(b.display_name);
+          break;
+        case 'reports':
+          comparison = (b.reports_count || 0) - (a.reports_count || 0);
+          break;
+        case 'likes':
+          comparison = (b.likes_count || 0) - (a.likes_count || 0);
+          break;
+        case 'views':
+          comparison = (b.views_count || 0) - (a.views_count || 0);
+          break;
+        case 'comments':
+          comparison = (b.comments_count || 0) - (a.comments_count || 0);
+          break;
+        case 'bounty':
+          comparison = (b.bounty_amount || 0) - (a.bounty_amount || 0);
+          break;
+        case 'bounties_raised':
+          comparison = (b.bounties_raised || 0) - (a.bounties_raised || 0);
+          break;
+        case 'activity':
+          if (a.created_at && b.created_at) {
+            comparison = new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          }
+          break;
+        default:
+          comparison = 0;
+      }
+      return sortOrder === 'asc' ? -comparison : comparison;
+    });
+  }, [filteredProfiles, sortField, sortOrder]);
   
   const renderRankIcon = (rank: number) => {
     if (rank === 0) return <Trophy className="h-6 w-6 text-yellow-500" />;
@@ -103,6 +126,40 @@ const LeaderboardPage = () => {
 
       <section className="py-12 bg-gradient-to-b from-white to-gray-50 dark:from-icc-blue-dark dark:to-icc-blue">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Search Input */}
+          <div className="mb-6">
+            <div className="relative w-full md:w-1/2 lg:w-1/3 mx-auto">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 h-4 w-4" />
+              <Input
+                type="text"
+                placeholder="Search by name, username or wallet address..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 pr-4 py-2 w-full border-icc-gold/30 focus:border-icc-gold focus:ring focus:ring-icc-gold/20 rounded-lg"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 6 6 18"></path>
+                    <path d="m6 6 12 12"></path>
+                  </svg>
+                </button>
+              )}
+            </div>
+          </div>
+          
+          {/* Results Summary */}
+          {searchTerm && (
+            <div className="mb-4 text-center">
+              <Badge variant="coin" className="inline-flex">
+                {sortedProfiles.length} {sortedProfiles.length === 1 ? 'hunter' : 'hunters'} found
+              </Badge>
+            </div>
+          )}
+          
           {isLoading ? (
             <div className="p-6 space-y-4">
               <Skeleton className="h-12 w-full" />
@@ -248,8 +305,17 @@ const LeaderboardPage = () => {
                         <TableCell colSpan={10} className="text-center py-12">
                           <div className="flex flex-col items-center justify-center text-gray-500 space-y-3">
                             <Trophy className="h-12 w-12 text-gray-300" />
-                            <p className="text-lg font-medium">No hunters found</p>
-                            <p>Be the first to start hunting scammers!</p>
+                            {searchTerm ? (
+                              <>
+                                <p className="text-lg font-medium">No hunters found matching "{searchTerm}"</p>
+                                <p>Try a different search term or clear the search</p>
+                              </>
+                            ) : (
+                              <>
+                                <p className="text-lg font-medium">No hunters found</p>
+                                <p>Be the first to start hunting scammers!</p>
+                              </>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>
