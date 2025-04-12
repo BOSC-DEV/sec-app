@@ -5,8 +5,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { formatSecAmount, BADGE_TIERS, BadgeTier, TOTAL_SEC_SUPPLY } from '@/utils/badgeUtils';
 import BadgeTierComponent from '@/components/profile/BadgeTier';
 import { calculateBadgeTier } from '@/utils/badgeUtils';
+import { useProfile } from '@/contexts/ProfileContext';
+import { Progress } from '@/components/ui/progress';
 
 const BadgeTiersPage = () => {
+  const { profile } = useProfile();
+  const secBalance = profile?.sec_balance || 0;
+  const currentBadgeInfo = calculateBadgeTier(secBalance);
+
   // Get all badge tiers
   const tiers = Object.entries(BADGE_TIERS).map(([tier, details]) => ({
     tier: tier as BadgeTier,
@@ -18,6 +24,43 @@ const BadgeTiersPage = () => {
 
   // Sort tiers from lowest to highest
   const sortedTiers = [...tiers].sort((a, b) => a.minPercent - b.minPercent);
+
+  // Calculate progress towards next tier for each badge
+  const tiersWithProgress = sortedTiers.map((tierInfo, index) => {
+    // Find the next tier (if any)
+    const nextTier = index < sortedTiers.length - 1 ? sortedTiers[index + 1] : null;
+    
+    // Calculate progress percentage
+    let progressPercentage = 0;
+    let progressText = '';
+    
+    if (secBalance >= tierInfo.minHolding) {
+      // User has already achieved this tier
+      if (nextTier) {
+        // Calculate progress towards next tier
+        const range = nextTier.minHolding - tierInfo.minHolding;
+        const progress = secBalance - tierInfo.minHolding;
+        progressPercentage = Math.min(100, (progress / range) * 100);
+        progressText = `${formatSecAmount(secBalance)} / ${formatSecAmount(nextTier.minHolding)} SEC`;
+      } else {
+        // User has achieved the highest tier
+        progressPercentage = 100;
+        progressText = `${formatSecAmount(secBalance)} SEC (Max Tier)`;
+      }
+    } else {
+      // User hasn't achieved this tier yet
+      progressPercentage = Math.min(100, (secBalance / tierInfo.minHolding) * 100);
+      progressText = `${formatSecAmount(secBalance)} / ${formatSecAmount(tierInfo.minHolding)} SEC`;
+    }
+    
+    return {
+      ...tierInfo,
+      progress: progressPercentage,
+      progressText,
+      isCurrentTier: currentBadgeInfo.tier === tierInfo.tier,
+      isUnlocked: secBalance >= tierInfo.minHolding
+    };
+  });
 
   return (
     <div className="space-y-8">
@@ -36,11 +79,11 @@ const BadgeTiersPage = () => {
                   <TableHead>Badge</TableHead>
                   <TableHead>Minimum Holding</TableHead>
                   <TableHead>% of Supply</TableHead>
-                  <TableHead>Holders</TableHead>
+                  <TableHead>Progress</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sortedTiers.map((tierInfo) => {
+                {tiersWithProgress.map((tierInfo) => {
                   // Create sample badge info for each tier
                   const badgeInfo = {
                     tier: tierInfo.tier,
@@ -52,13 +95,14 @@ const BadgeTiersPage = () => {
                   };
 
                   return (
-                    <TableRow key={tierInfo.tier}>
+                    <TableRow key={tierInfo.tier} className={tierInfo.isCurrentTier ? "bg-primary/5" : ""}>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <BadgeTierComponent
                             badgeInfo={badgeInfo}
-                            showTooltip={false}
+                            showTooltip={true}
                           />
+                          <span className="font-medium">{tierInfo.tier}</span>
                         </div>
                       </TableCell>
                       <TableCell className="font-mono">
@@ -67,8 +111,11 @@ const BadgeTiersPage = () => {
                       <TableCell>
                         {tierInfo.minPercent}%
                       </TableCell>
-                      <TableCell>
-                        {tierInfo.tier === BadgeTier.SHRIMP ? 'Unknown' : tierInfo.tier === BadgeTier.BLUE_WHALE ? '<5' : 'Unknown'}
+                      <TableCell className="w-64">
+                        <div className="space-y-1">
+                          <Progress value={tierInfo.progress} className={`h-2 ${tierInfo.isUnlocked ? "bg-primary/20" : "bg-muted"}`} />
+                          <p className="text-xs text-muted-foreground">{tierInfo.progressText}</p>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
