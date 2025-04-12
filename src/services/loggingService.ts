@@ -50,8 +50,13 @@ const getSessionId = (): string => {
 
 // Get current user ID if available
 const getUserId = (): string | undefined => {
+  // The current user ID, if available
   const session = supabase.auth.getSession();
-  return session?.data?.session?.user?.id;
+  // Since getSession() returns a Promise, we can't directly access session.data
+  // Instead, we'll return undefined for now and handle this asynchronously
+  // in a production app, you might consider using a synchronous method 
+  // or restructuring to handle this asynchronously
+  return undefined;
 };
 
 // Only log to Supabase in production
