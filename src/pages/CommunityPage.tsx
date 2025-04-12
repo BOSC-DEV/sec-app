@@ -31,6 +31,13 @@ const CommunityPage = () => {
     setSplitScreen(!splitScreen);
   };
 
+  const handleBadgeButtonClick = () => {
+    setActiveTab("badges");
+    if (splitScreen) {
+      setSplitScreen(false);
+    }
+  };
+
   return (
     <>
       <SEO 
@@ -52,7 +59,7 @@ const CommunityPage = () => {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={() => setActiveTab("badges")}
+                  onClick={handleBadgeButtonClick}
                   className="flex items-center gap-2"
                 >
                   <Trophy className="h-4 w-4" />
