@@ -5,24 +5,27 @@ import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Toggle } from '@/components/ui/toggle';
 
-const ThemeToggle: React.FC = () => {
+const ThemeToggle: React.FC<{
+  variant?: 'default' | 'outline' | 'gold';
+  size?: 'default' | 'sm' | 'lg' | 'icon';
+  className?: string;
+}> = ({ variant = 'outline', size = 'sm', className = '' }) => {
   const { theme, toggleTheme } = useTheme();
   
   return (
-    <Toggle
+    <Button
+      variant={variant}
+      size={size}
+      onClick={toggleTheme}
+      className={`flex items-center justify-center ${className}`}
       aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-      pressed={theme === 'dark'}
-      onPressedChange={toggleTheme}
-      variant="outline"
-      size="sm"
-      className="ml-2"
     >
       {theme === 'dark' ? (
         <Sun className="h-4 w-4" />
       ) : (
         <Moon className="h-4 w-4" />
       )}
-    </Toggle>
+    </Button>
   );
 };
 

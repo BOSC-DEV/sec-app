@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -58,7 +57,6 @@ const Header = () => {
               </div>
             </Link>
 
-            {/* Added ml-6 to create spacing between logo and navigation */}
             <nav className="hidden md:flex items-center space-x-6 ml-6">
               {navigationItems.map((item) => (
                 <Link 
@@ -75,7 +73,7 @@ const Header = () => {
           </div>
 
           <div className="flex items-center space-x-2">
-            <ThemeToggle />
+            <ThemeToggle variant="outline" size="sm" className="mr-2" />
             {isLoading ? (
               <Button variant="outline" size="sm" disabled className="opacity-75">
                 Loading...
@@ -93,6 +91,7 @@ const Header = () => {
                 </Button>
                 <Button 
                   variant="outline" 
+                  size="sm"
                   className="border-icc-gold text-icc-gold hover:bg-icc-blue-light flex items-center gap-2"
                   onClick={handleWalletButtonClick}
                 >
@@ -102,7 +101,9 @@ const Header = () => {
               </div>
             ) : (
               <Button 
-                className="bg-icc-gold text-icc-blue hover:bg-icc-gold-light flex items-center gap-2"
+                variant="gold"
+                size="sm"
+                className="flex items-center gap-2"
                 onClick={connectWallet}
               >
                 <LogIn className="h-4 w-4" />
