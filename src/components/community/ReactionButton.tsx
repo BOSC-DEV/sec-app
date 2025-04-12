@@ -223,7 +223,7 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
         )}
         onClick={() => handleToggleReaction('like')}
       >
-        <Heart className={cn(
+        <ThumbsUp className={cn(
           size === 'xs' ? 'h-3.5 w-3.5' : size === 'sm' ? 'h-4 w-4' : 'h-5 w-5',
           'text-muted-foreground'
         )} />
