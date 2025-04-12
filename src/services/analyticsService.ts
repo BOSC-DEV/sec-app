@@ -108,8 +108,8 @@ const collectPerformanceMetrics = (): PerformanceMetrics => {
       });
     }
     
-    // Memory info
-    if (performance as any).memory) {
+    // Memory info - fixed parentheses placement
+    if ((performance as any).memory) {
       const memory = (performance as any).memory;
       metrics.memoryUsage = memory.usedJSHeapSize;
     }
