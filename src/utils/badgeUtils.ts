@@ -1,15 +1,14 @@
-
 // Define the badge tier enum
 export enum BadgeTier {
-  SHRIMP = 'SHRIMP',
-  BULL = 'BULL',
-  LION = 'LION',
-  KING_COBRA = 'KING_COBRA',
-  BULL_SHARK = 'BULL_SHARK',
-  GREAT_APE = 'GREAT_APE',
-  GOLDEN_EAGLE = 'GOLDEN_EAGLE',
-  TREX = 'TREX',
-  BLUE_WHALE = 'BLUE_WHALE'
+  Shrimp = 'Shrimp',
+  Bull = 'Bull',
+  Lion = 'Lion',
+  KingCobra = 'KingCobra',
+  BullShark = 'BullShark',
+  GreatApe = 'GreatApe',
+  GoldenEagle = 'GoldenEagle',
+  TRex = 'TRex',
+  BlueWhale = 'BlueWhale'
 }
 
 // Define total SEC supply constant
@@ -31,15 +30,15 @@ export interface BadgeInfo {
 
 // Define badge tiers with their properties
 export const BADGE_TIERS: { [key in BadgeTier]: { minPercent: number, color: string, icon: string } } = {
-  [BadgeTier.SHRIMP]: { minPercent: 0, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦐' },
-  [BadgeTier.BULL]: { minPercent: 0.01, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🐂' },
-  [BadgeTier.LION]: { minPercent: 0.03, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦁' },
-  [BadgeTier.KING_COBRA]: { minPercent: 0.06, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🐍' },
-  [BadgeTier.BULL_SHARK]: { minPercent: 0.1, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦈' },
-  [BadgeTier.GREAT_APE]: { minPercent: 0.3, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦍' },
-  [BadgeTier.GOLDEN_EAGLE]: { minPercent: 0.2, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦅' },
-  [BadgeTier.TREX]: { minPercent: 0.5, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦖' },
-  [BadgeTier.BLUE_WHALE]: { minPercent: 1.0, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🐳' }
+  [BadgeTier.Shrimp]: { minPercent: 0, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦐' },
+  [BadgeTier.Bull]: { minPercent: 0.01, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🐂' },
+  [BadgeTier.Lion]: { minPercent: 0.03, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦁' },
+  [BadgeTier.KingCobra]: { minPercent: 0.06, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🐍' },
+  [BadgeTier.BullShark]: { minPercent: 0.1, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦈' },
+  [BadgeTier.GreatApe]: { minPercent: 0.3, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦍' },
+  [BadgeTier.GoldenEagle]: { minPercent: 0.2, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦅' },
+  [BadgeTier.TRex]: { minPercent: 0.5, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦖' },
+  [BadgeTier.BlueWhale]: { minPercent: 1.0, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🐳' }
 };
 
 /**
