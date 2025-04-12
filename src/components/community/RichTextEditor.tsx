@@ -20,12 +20,19 @@ import {
   ToggleGroupItem 
 } from '@/components/ui/toggle-group';
 
-interface RichTextEditorProps {
+export interface RichTextEditorProps {
   value: string;
   onChange: (value: string) => void;
+  placeholder?: string;
+  minHeight?: string;
 }
 
-const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange }) => {
+const RichTextEditor: React.FC<RichTextEditorProps> = ({ 
+  value, 
+  onChange,
+  placeholder = 'Write something...',
+  minHeight = '120px'
+}) => {
   const editorRef = React.useRef<HTMLDivElement>(null);
 
   // Format handlers
@@ -112,10 +119,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange }) => {
       
       <div
         ref={editorRef}
-        className="p-3 min-h-[120px] focus:outline-none"
+        className="p-3 focus:outline-none"
+        style={{ minHeight }}
         contentEditable={true}
         onInput={handleInput}
         onBlur={handleInput}
+        data-placeholder={placeholder}
       />
     </div>
   );

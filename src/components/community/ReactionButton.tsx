@@ -101,17 +101,17 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
         success = true;
       } else {
         // Add new reaction
+        const insertData: Record<string, any> = {
+          reaction_type: reactionType,
+          user_id: profile?.wallet_address || ''
+        };
+        
+        // Set the appropriate ID column
+        insertData[idColumn] = itemId;
+        
         const { error: insertError } = await supabase
           .from(table)
-          .insert({
-            [idColumn]: itemId,
-            user_id: profile?.wallet_address || '',
-            user_name: profile?.display_name || '',
-            user_username: profile?.username || null,
-            user_profile_pic: profile?.profile_pic_url || null,
-            reaction_type: reactionType,
-            created_at: new Date().toISOString()
-          });
+          .insert(insertData);
           
         if (insertError) throw insertError;
         success = true;
@@ -127,8 +127,8 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
   
   const fetchReactions = async () => {
     try {
-      let data: { reaction_type: string; user_id: string }[] = [];
-      let table: string;
+      // Determine which table to use based on itemType
+      let table: 'announcement_reactions' | 'chat_message_reactions' | 'reply_reactions';
       let idColumn: string;
       
       if (itemType === 'announcement') {
@@ -148,7 +148,6 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
         .eq(idColumn, itemId);
         
       if (reactionError) throw reactionError;
-      data = reactionData || [];
       
       const reactionCounts: ReactionCount[] = [];
       const reactionMap = new Map<string, { count: number, has_reacted: boolean }>();
@@ -157,8 +156,8 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
         reactionMap.set(type, { count: 0, has_reacted: false });
       });
       
-      if (data) {
-        data.forEach(reaction => {
+      if (reactionData) {
+        reactionData.forEach((reaction: {reaction_type: string, user_id: string}) => {
           const type = reaction.reaction_type;
           const currentData = reactionMap.get(type) || { count: 0, has_reacted: false };
           
