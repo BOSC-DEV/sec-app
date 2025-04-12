@@ -54,6 +54,12 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   
   const fetchReactions = async () => {
     try {
+      // Fix: Explicitly define the type for the query result
+      interface ReactionData {
+        user_id: string;
+        reaction_type: string;
+      }
+      
       const { data } = await supabase
         .from(itemType === 'announcement' ? 'announcement_reactions' : 'chat_message_reactions')
         .select('user_id, reaction_type')
@@ -63,7 +69,7 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
         // Group by reaction type
         const groupedReactions: Record<string, string[]> = {};
         
-        data.forEach(reaction => {
+        (data as ReactionData[]).forEach(reaction => {
           if (!groupedReactions[reaction.reaction_type]) {
             groupedReactions[reaction.reaction_type] = [];
           }
