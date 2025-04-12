@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Button } from '@/components/ui/button';
@@ -12,6 +11,11 @@ interface ReactionButtonProps {
   itemType: 'announcement' | 'chat';
   initialReactions?: Record<string, string[]>;
 }
+
+type ReactionData = {
+  user_id: string;
+  reaction_type: string;
+};
 
 const REACTION_EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '😡'];
 
@@ -54,12 +58,6 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   
   const fetchReactions = async () => {
     try {
-      // Fix: Explicitly define the type for the query result
-      interface ReactionData {
-        user_id: string;
-        reaction_type: string;
-      }
-      
       const { data } = await supabase
         .from(itemType === 'announcement' ? 'announcement_reactions' : 'chat_message_reactions')
         .select('user_id, reaction_type')
@@ -98,7 +96,6 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
         ? await toggleAnnouncementReaction(itemId, profile.wallet_address, emoji)
         : await toggleChatMessageReaction(itemId, profile.wallet_address, emoji);
       
-      // UI will be updated via the real-time subscription
       setOpen(false);
     } catch (error) {
       console.error('Error toggling reaction:', error);
@@ -150,7 +147,6 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
         </PopoverContent>
       </Popover>
       
-      {/* Display reactions */}
       <div className="flex space-x-1">
         {Object.entries(reactions)
           .filter(([_, users]) => users.length > 0)
