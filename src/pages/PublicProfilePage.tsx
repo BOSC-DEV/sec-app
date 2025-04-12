@@ -20,6 +20,7 @@ import { useProfile } from '@/contexts/ProfileContext';
 import WalletBalance from '@/components/profile/WalletBalance';
 import WalletInfo from '@/components/profile/WalletInfo';
 import { useBadgeTier } from '@/hooks/useBadgeTier';
+import BadgeTier from '@/components/profile/BadgeTier';
 
 const PublicProfilePage = () => {
   
@@ -51,7 +52,6 @@ const PublicProfilePage = () => {
   
   const isOwnProfile = currentUserProfile?.wallet_address === profile?.wallet_address;
   
-  // Get badge tier information based on SEC balance
   const {
     data: bountyContributions,
     isLoading: isLoadingBounties
