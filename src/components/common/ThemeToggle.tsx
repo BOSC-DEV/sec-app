@@ -16,7 +16,7 @@ const ThemeToggle: React.FC<{
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      className={`text-foreground/70 hover:text-foreground ${className}`}
+      className={`text-gray-300 hover:text-gray-100 ${className}`}
       aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
     >
       {theme === 'dark' ? (
