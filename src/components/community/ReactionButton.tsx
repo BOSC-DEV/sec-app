@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Button } from '@/components/ui/button';
-import { Heart, ThumbsUp, Star, Smile } from 'lucide-react';
+import { Smile } from 'lucide-react';
 import EmojiPicker from './EmojiPicker';
 import { 
   toggleAnnouncementReaction, 
@@ -123,21 +123,6 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
     enabled: !!itemId && !!profile?.wallet_address,
   });
   
-  // Get counts of each reaction type
-  const getReactionCounts = () => {
-    const counts: Record<string, number> = {};
-    
-    // First convert to unknown and then to our Reaction type for safety
-    (reactions as unknown as Reaction[]).forEach(reaction => {
-      const type = reaction.reaction_type;
-      if (type) {
-        counts[type] = (counts[type] || 0) + 1;
-      }
-    });
-    
-    return counts;
-  };
-  
   // Check if user has already reacted with a specific emoji
   const hasUserReacted = (emoji: string) => {
     return (reactions as unknown as Reaction[]).some(
@@ -192,12 +177,27 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   };
   
   // Get reaction counts
+  const getReactionCounts = () => {
+    const counts: Record<string, number> = {};
+    
+    // First convert to unknown and then to our Reaction type for safety
+    (reactions as unknown as Reaction[]).forEach(reaction => {
+      const type = reaction.reaction_type;
+      if (type) {
+        counts[type] = (counts[type] || 0) + 1;
+      }
+    });
+    
+    return counts;
+  };
+  
+  // Get reaction counts
   const reactionCounts = getReactionCounts();
   
-  // Sort reactions by count (descending)
+  // Sort reactions by count (descending) and limit to 6
   const sortedReactions = Object.entries(reactionCounts)
     .sort(([, countA], [, countB]) => countB - countA)
-    .slice(0, 3); // Show top 3 reactions
+    .slice(0, 6); // Show top 6 reactions
   
   // Function to determine the optimal positioning for the emoji picker
   const getEmojiPickerPosition = () => {
@@ -224,21 +224,23 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   
   return (
     <div className="relative" ref={containerRef}>
-      <div className="flex items-center gap-2">
-        {sortedReactions.length > 0 ? (
-          sortedReactions.map(([emoji, count]) => (
-            <Button
-              key={emoji}
-              variant={hasUserReacted(emoji) ? "secondary" : "outline"}
-              size={size}
-              className={`px-2 py-1 h-auto border shadow-sm ${hasUserReacted(emoji) ? 'bg-accent/50' : 'bg-background hover:bg-accent/30'}`}
-              onClick={() => handleEmojiSelect(emoji)}
-            >
-              <span>{emoji}</span>
-              <span className="ml-1 text-xs font-medium">{count}</span>
-            </Button>
-          ))
-        ) : null}
+      <div className="flex items-center gap-1">
+        {sortedReactions.length > 0 && (
+          <div className="flex items-center gap-1 bg-accent/10 rounded-full px-2 py-0.5 mr-1">
+            {sortedReactions.map(([emoji, count]) => (
+              <Button
+                key={emoji}
+                variant={hasUserReacted(emoji) ? "secondary" : "ghost"}
+                size="sm"
+                className={`px-1 py-0 h-auto text-sm bg-transparent hover:bg-transparent ${hasUserReacted(emoji) ? 'opacity-100' : 'opacity-70'}`}
+                onClick={() => handleEmojiSelect(emoji)}
+              >
+                <span className="mr-0.5">{emoji}</span>
+                <span className="text-xs text-muted-foreground">{count}</span>
+              </Button>
+            ))}
+          </div>
+        )}
         
         <Button
           ref={buttonRef}
