@@ -85,9 +85,11 @@ const CommunityPage = () => {
                   <CardHeader className="pb-3">
                     <h3 className="text-lg font-semibold">Announcements</h3>
                   </CardHeader>
-                  <CardContent className="p-0 flex-1">
-                    <ScrollArea className="h-full p-4">
-                      <AnnouncementFeed useCarousel={true} />
+                  <CardContent className="p-0 h-full">
+                    <ScrollArea className="h-[calc(100vh-380px)]">
+                      <div className="p-4">
+                        <AnnouncementFeed useCarousel={false} />
+                      </div>
                     </ScrollArea>
                   </CardContent>
                 </Card>
