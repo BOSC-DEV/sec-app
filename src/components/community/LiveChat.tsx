@@ -319,7 +319,7 @@ const LiveChat = () => {
               <span className={`font-semibold text-sm ${isCurrentUser ? 'text-icc-gold' : 'text-icc-gold'}`}>
                 {message.author_name}
               </span>
-              {userBadge && <BadgeTier badgeInfo={userBadge} size="xs" showTooltip={true} />}
+              {userBadge && <BadgeTier badgeInfo={userBadge} size="sm" showTooltip={true} />}
               {isAdmin && message.author_username === 'sec' && 
                 <span className="text-xs bg-icc-gold/20 text-icc-gold px-1 rounded ml-1">admin</span>
               }

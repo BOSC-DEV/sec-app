@@ -4,7 +4,7 @@ import { useProfile } from '@/contexts/ProfileContext';
 import { toggleAnnouncementReaction, toggleChatMessageReaction, toggleReplyReaction } from '@/services/communityService';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Heart, Fire, PartyPopper, ThumbsUp, MessagesSquare } from 'lucide-react';
+import { Heart, Flame, PartyPopper, ThumbsUp, MessagesSquare } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
@@ -27,7 +27,7 @@ const getReactionIcon = (type: ReactionType, active: boolean, size: 'xs' | 'sm' 
     case 'like':
       return <Heart className={cn(sizeClass, activeClass)} />;
     case 'fire':
-      return <Fire className={cn(sizeClass, activeClass)} />;
+      return <Flame className={cn(sizeClass, activeClass)} />;
     case 'party':
       return <PartyPopper className={cn(sizeClass, activeClass)} />;
     case 'applause':
@@ -118,18 +118,49 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
       
       if (!table) return;
       
-      const { data, error } = await supabase.rpc('get_reaction_counts', {
-        p_item_id: itemId,
-        p_table_name: table,
-        p_id_column: idColumn,
-        p_user_id: profile?.wallet_address || ''
-      });
+      // Use raw SQL query instead of rpc function
+      const { data, error } = await supabase
+        .from(table)
+        .select('reaction_type, user_id')
+        .eq(idColumn, itemId);
       
       if (error) {
         throw error;
       }
       
-      setReactions(data || []);
+      // Process the data to get counts and user reaction status
+      const reactionCounts: ReactionCount[] = [];
+      const reactionMap = new Map<string, { count: number, has_reacted: boolean }>();
+      
+      // Initialize with all reaction types
+      reactionTypes.forEach(type => {
+        reactionMap.set(type, { count: 0, has_reacted: false });
+      });
+      
+      // Count reactions and check if user has reacted
+      data.forEach(reaction => {
+        const type = reaction.reaction_type;
+        const currentData = reactionMap.get(type) || { count: 0, has_reacted: false };
+        
+        currentData.count += 1;
+        
+        if (reaction.user_id === profile?.wallet_address) {
+          currentData.has_reacted = true;
+        }
+        
+        reactionMap.set(type, currentData);
+      });
+      
+      // Convert map to array
+      reactionMap.forEach((value, key) => {
+        reactionCounts.push({
+          reaction_type: key,
+          count: value.count,
+          has_reacted: value.has_reacted
+        });
+      });
+      
+      setReactions(reactionCounts);
     } catch (error) {
       console.error('Error fetching reactions:', error);
     }
