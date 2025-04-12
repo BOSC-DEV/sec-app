@@ -9,6 +9,36 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      announcements: {
+        Row: {
+          author_id: string
+          author_name: string
+          author_profile_pic: string | null
+          author_username: string
+          content: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          author_id: string
+          author_name: string
+          author_profile_pic?: string | null
+          author_username: string
+          content: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          author_id?: string
+          author_name?: string
+          author_profile_pic?: string | null
+          author_username?: string
+          content?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
       bounty_contributions: {
         Row: {
           amount: number
@@ -61,6 +91,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      chat_messages: {
+        Row: {
+          author_id: string
+          author_name: string
+          author_profile_pic: string | null
+          author_username: string | null
+          content: string
+          created_at: string
+          id: string
+          image_url: string | null
+        }
+        Insert: {
+          author_id: string
+          author_name: string
+          author_profile_pic?: string | null
+          author_username?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+        }
+        Update: {
+          author_id?: string
+          author_name?: string
+          author_profile_pic?: string | null
+          author_username?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+        }
+        Relationships: []
       }
       comments: {
         Row: {
