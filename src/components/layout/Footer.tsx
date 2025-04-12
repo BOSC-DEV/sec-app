@@ -32,13 +32,13 @@ const Footer = () => {
                 <div className="text-base font-bold leading-tight">Scams & E-crimes Commission</div>
               </div>
             </Link>
-            <p className="text-sm text-gray-300 mt-4">A decentralized crime registry bringing accountability and self governance to the new digital world.</p>
+            <p className="text-sm text-gray-300 dark:text-gray-400 mt-4">A decentralized crime registry bringing accountability and self governance to the new digital world.</p>
             <div className="flex space-x-4 mt-6">
               <a 
                 href="https://x.com/sandecommission" 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="text-white hover:text-icc-gold"
+                className="text-white hover:text-icc-gold dark:text-gray-300 dark:hover:text-icc-gold"
                 aria-label="SEC on X"
               >
                 <img 
@@ -51,22 +51,22 @@ const Footer = () => {
           </div>
           
           <div>
-            <h4 className="text-white font-serif font-bold mb-4">Quick Links</h4>
+            <h4 className="text-white dark:text-gray-200 font-serif font-bold mb-4">Quick Links</h4>
             <ul className="space-y-2">
-              <li><Link to="/" className="text-gray-300 hover:text-icc-gold text-sm">Home</Link></li>
-              <li><Link to="/most-wanted" className="text-gray-300 hover:text-icc-gold text-sm">Most Wanted</Link></li>
-              <li><Link to="/report" className="text-gray-300 hover:text-icc-gold text-sm">Report a Scammer</Link></li>
-              <li><Link to="/leaderboard" className="text-gray-300 hover:text-icc-gold text-sm">Leaderboard</Link></li>
+              <li><Link to="/" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm">Home</Link></li>
+              <li><Link to="/most-wanted" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm">Most Wanted</Link></li>
+              <li><Link to="/report" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm">Report a Scammer</Link></li>
+              <li><Link to="/leaderboard" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm">Leaderboard</Link></li>
             </ul>
           </div>
           
           <div>
-            <h4 className="text-white font-serif font-bold mb-4">Resources</h4>
+            <h4 className="text-white dark:text-gray-200 font-serif font-bold mb-4">Resources</h4>
             <ul className="space-y-2">
               <li>
                 <button 
                   onClick={() => setAboutOpen(true)} 
-                  className="text-gray-300 hover:text-icc-gold text-sm text-left"
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left"
                 >
                   About SEC
                 </button>
@@ -74,7 +74,7 @@ const Footer = () => {
               <li>
                 <button 
                   onClick={() => setFaqOpen(true)} 
-                  className="text-gray-300 hover:text-icc-gold text-sm text-left"
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left"
                 >
                   FAQ
                 </button>
@@ -82,7 +82,7 @@ const Footer = () => {
               <li>
                 <button 
                   onClick={() => setContactOpen(true)} 
-                  className="text-gray-300 hover:text-icc-gold text-sm text-left"
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left"
                 >
                   Contact Us
                 </button>
@@ -90,7 +90,7 @@ const Footer = () => {
               <li>
                 <button 
                   onClick={() => setSafetyOpen(true)} 
-                  className="text-gray-300 hover:text-icc-gold text-sm text-left"
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left"
                 >
                   Safety Guidelines
                 </button>
@@ -99,12 +99,12 @@ const Footer = () => {
           </div>
           
           <div>
-            <h4 className="text-white font-serif font-bold mb-4">Legal</h4>
+            <h4 className="text-white dark:text-gray-200 font-serif font-bold mb-4">Legal</h4>
             <ul className="space-y-2">
               <li>
                 <button 
                   onClick={() => setTermsOpen(true)} 
-                  className="text-gray-300 hover:text-icc-gold text-sm text-left"
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left"
                 >
                   Terms of Service
                 </button>
@@ -112,7 +112,7 @@ const Footer = () => {
               <li>
                 <button 
                   onClick={() => setPrivacyOpen(true)} 
-                  className="text-gray-300 hover:text-icc-gold text-sm text-left"
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left"
                 >
                   Privacy Policy
                 </button>
@@ -120,7 +120,7 @@ const Footer = () => {
               <li>
                 <button 
                   onClick={() => setDisclaimerOpen(true)} 
-                  className="text-gray-300 hover:text-icc-gold text-sm text-left"
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left"
                 >
                   Disclaimer
                 </button>
@@ -128,7 +128,7 @@ const Footer = () => {
               <li>
                 <button 
                   onClick={() => setCookiesOpen(true)} 
-                  className="text-gray-300 hover:text-icc-gold text-sm text-left"
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left"
                 >
                   Cookie Policy
                 </button>
@@ -137,7 +137,7 @@ const Footer = () => {
           </div>
         </div>
         
-        <div className="border-t border-icc-blue-light mt-8 pt-8 text-sm text-gray-300">
+        <div className="border-t border-icc-blue-light dark:border-gray-700 mt-8 pt-8 text-sm text-gray-300 dark:text-gray-500">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p>&copy; {new Date().getFullYear()} Scams & E-crimes Commission. All rights reserved.</p>
             <p className="mt-2 md:mt-0"></p>
