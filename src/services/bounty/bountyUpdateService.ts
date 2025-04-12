@@ -151,3 +151,31 @@ export const updateScammerBounty = async (
     return false;
   }
 };
+
+// Adding a function with the alternative name to fix the import errors
+export const updateScammerBountyAmount = async (scammerId: string): Promise<boolean> => {
+  try {
+    // Calculate the total bounty amount from all active contributions
+    const { data, error } = await supabase
+      .from('bounty_contributions')
+      .select('amount')
+      .eq('scammer_id', scammerId)
+      .eq('is_active', true);
+      
+    if (error) throw error;
+    
+    const totalAmount = data.reduce((sum, contribution) => sum + Number(contribution.amount), 0);
+    
+    // Update the scammer's bounty_amount field
+    const { error: updateError } = await supabase
+      .from('scammers')
+      .update({ bounty_amount: totalAmount })
+      .eq('id', scammerId);
+      
+    if (updateError) throw updateError;
+    return true;
+  } catch (error) {
+    console.error('Error updating scammer bounty amount:', error);
+    return false;
+  }
+};

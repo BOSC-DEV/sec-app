@@ -6,6 +6,7 @@ import { handleError } from '@/utils/errorHandling';
 // Get notifications for the current user
 export const getUserNotifications = async (userId: string): Promise<Notification[]> => {
   try {
+    console.log("Fetching notifications for user:", userId);
     // Check if the notifications table exists
     const { data, error } = await supabase
       .from('notifications')
@@ -29,6 +30,7 @@ export const getUserNotifications = async (userId: string): Promise<Notification
 // Get unread notifications count
 export const getUnreadNotificationsCount = async (userId: string): Promise<number> => {
   try {
+    console.log("Counting unread notifications for user:", userId);
     const { count, error } = await supabase
       .from('notifications')
       .select('*', { count: 'exact', head: true })
@@ -50,6 +52,7 @@ export const getUnreadNotificationsCount = async (userId: string): Promise<numbe
 // Mark notification as read
 export const markNotificationAsRead = async (notificationId: string): Promise<boolean> => {
   try {
+    console.log("Marking notification as read:", notificationId);
     const { error } = await supabase
       .from('notifications')
       .update({ is_read: true })
@@ -70,6 +73,7 @@ export const markNotificationAsRead = async (notificationId: string): Promise<bo
 // Mark all notifications as read
 export const markAllNotificationsAsRead = async (userId: string): Promise<boolean> => {
   try {
+    console.log("Marking all notifications as read for user:", userId);
     const { error } = await supabase
       .from('notifications')
       .update({ is_read: true })
@@ -92,9 +96,11 @@ export const createNotification = async (notification: Omit<Notification, 'id' |
   try {
     // Don't notify if the actor is the same as the recipient
     if (notification.actor_id === notification.recipient_id) {
+      console.log("Skipping self-notification");
       return null;
     }
     
+    console.log("Creating notification:", notification);
     const { data, error } = await supabase
       .from('notifications')
       .insert({
@@ -135,6 +141,7 @@ export const notifyScammerLike = async (
   actorProfilePic?: string
 ): Promise<void> => {
   try {
+    console.log(`Creating like notification for ${scammerName} from ${actorName} to ${recipientId}`);
     await createNotification({
       recipient_id: recipientId,
       type: NotificationType.LIKE,
@@ -164,6 +171,7 @@ export const notifyScammerComment = async (
   actorProfilePic?: string
 ): Promise<void> => {
   try {
+    console.log(`Creating comment notification for ${scammerName} from ${actorName} to ${recipientId}`);
     await createNotification({
       recipient_id: recipientId,
       type: NotificationType.COMMENT,
@@ -193,6 +201,7 @@ export const notifyScammerBounty = async (
   actorProfilePic?: string
 ): Promise<void> => {
   try {
+    console.log(`Creating bounty notification for ${scammerName} from ${actorName} to ${recipientId}`);
     await createNotification({
       recipient_id: recipientId,
       type: NotificationType.BOUNTY,
@@ -241,6 +250,7 @@ export const notifyReaction = async (
         content = `${actorName} reacted with ${reactionType} to your post`;
     }
     
+    console.log(`Creating reaction notification for ${entityType} from ${actorName} to ${recipientId}`);
     await createNotification({
       recipient_id: recipientId,
       type: NotificationType.REACTION,
