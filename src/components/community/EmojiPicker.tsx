@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -14,7 +13,6 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('reactions');
 
-  // Core reaction emojis - limited to 6 as per previous implementation
   const reactionEmojis = [
     '👍', '❤️', '😂', '😮', '😢', '😡'
   ];
@@ -77,7 +75,6 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect }) => {
     '🎯', '🎳', '🎮', '🎰', '🧩', '🎭', '🎨', '🧵', '🧶', '👕'
   ];
 
-  // New emoji category with all the available categories
   const allEmojiCategories = [
     { id: 'reactions', name: 'Reactions', emojis: reactionEmojis },
     { id: 'popular', name: 'Popular', emojis: popularEmojis },
@@ -95,7 +92,6 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect }) => {
     : allEmojiCategories.find(category => category.id === activeTab)?.emojis || [];
 
   function getEmojiName(emoji: string): string {
-    // This is a simplistic mapping for search purposes
     const emojiMap: Record<string, string> = {
       '🐶': 'dog',
       '🐱': 'cat',
@@ -113,7 +109,6 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect }) => {
       '😮': 'wow surprised',
       '😢': 'sad crying',
       '😡': 'angry mad',
-      // ... other mappings could be added as needed
     };
     
     return emojiMap[emoji] || emoji;
@@ -148,12 +143,12 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect }) => {
           </ScrollArea>
         ) : (
           <Tabs defaultValue="reactions" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="w-full mb-2 flex justify-start overflow-x-auto">
+            <TabsList className="w-full mb-2 flex justify-start overflow-x-auto h-10 bg-muted/50 p-0.5 rounded-md">
               {allEmojiCategories.map(category => (
                 <TabsTrigger 
                   key={category.id} 
                   value={category.id}
-                  className="text-xs flex-shrink-0"
+                  className="text-xs flex-shrink-0 px-2 py-1 data-[state=active]:bg-background"
                 >
                   {category.name}
                 </TabsTrigger>
