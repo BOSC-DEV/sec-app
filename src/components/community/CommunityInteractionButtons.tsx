@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Button } from '@/components/ui/button';
@@ -41,7 +42,9 @@ export const InteractionButton: React.FC<InteractionButtonProps> = ({
     onClick={onClick}
     title={label}
   >
-    {icon}
+    {React.cloneElement(icon, { 
+      className: 'text-white' 
+    })}
     <span>{count > 999 ? `${(count / 1000).toFixed(1)}k` : count}</span>
   </Button>
 );
