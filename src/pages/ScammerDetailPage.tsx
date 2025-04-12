@@ -41,6 +41,7 @@ import { PROFILE_UPDATED_EVENT } from '@/contexts/ProfileContext';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
 import { Link } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
+import BountyForm from '@/components/scammer/BountyForm';
 
 const ScammerDetailPage = () => {
   const { id } = useParams<{ id: string; }>();
@@ -701,6 +702,13 @@ const ScammerDetailPage = () => {
                   <div className="text-icc-gray">No official response yet.</div>
                 </TabsContent>
               </Tabs>
+              
+              {/* Add Bounty Form */}
+              <BountyForm 
+                scammerId={scammer.id} 
+                scammerName={scammer.name}
+                developerWalletAddress={developerWalletAddress}
+              />
             </div>
 
             <div>
@@ -747,6 +755,33 @@ const ScammerDetailPage = () => {
               <div className="mt-6">
                 <h3 className="text-lg font-semibold text-icc-blue mb-3">Take Action</h3>
                 
+                <div className="flex space-x-2 mb-4">
+                  <Button 
+                    variant={isLiked ? "default" : "outline"} 
+                    size="sm" 
+                    className={`flex-1 ${isLiked ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                    onClick={handleLike}
+                    disabled={isLoading}
+                    aria-pressed={isLiked}
+                    aria-label="Like this report"
+                  >
+                    <ThumbsUp className="h-4 w-4 mr-1" aria-hidden="true" />
+                    <span>{likes}</span>
+                  </Button>
+                  <Button 
+                    variant={isDisliked ? "default" : "outline"} 
+                    size="sm" 
+                    className={`flex-1 ${isDisliked ? 'bg-red-600 hover:bg-red-700' : ''}`}
+                    onClick={handleDislike}
+                    disabled={isLoading}
+                    aria-pressed={isDisliked}
+                    aria-label="Dislike this report"
+                  >
+                    <ThumbsDown className="h-4 w-4 mr-1" aria-hidden="true" />
+                    <span>{dislikes}</span>
+                  </Button>
+                </div>
+                
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -772,6 +807,24 @@ const ScammerDetailPage = () => {
           </div>
         </div>
       </section>
+      
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this scammer report?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. The report will be permanently deleted from our database.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+              {deleteScammerMutation.isPending ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>;
 };
 
