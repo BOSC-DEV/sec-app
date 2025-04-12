@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { toggleAnnouncementReaction, toggleChatMessageReaction, toggleReplyReaction } from '@/services/communityService';
@@ -184,7 +183,6 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
       return;
     }
     
-    // Fix the excessive type instantiation by simplifying the channel creation and type handling
     const channelName = `${tableName}_${itemId}`;
     const channel = supabase.channel(channelName);
     

@@ -37,7 +37,7 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
     lg: 'text-base'
   };
 
-  // Create the badge element
+  // Create the badge element - showing only the icon
   const badge = (
     <Badge className={`${color} ${sizeClasses[size]} flex items-center gap-1`}>
       <span className={iconSizes[size]}>{icon}</span>
