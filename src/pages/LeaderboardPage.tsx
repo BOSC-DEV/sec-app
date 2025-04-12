@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Trophy, Medal, ThumbsUp, Eye, MessageSquare, Clock, Globe } from 'lucide-react';
@@ -93,7 +94,7 @@ const LeaderboardPage = () => {
     if (rank === 0) return <Trophy className="h-6 w-6 text-yellow-500" />;
     if (rank === 1) return <Medal className="h-6 w-6 text-gray-400" />;
     if (rank === 2) return <Medal className="h-6 w-6 text-amber-700" />;
-    return <span className="text-gray-700 font-medium">{rank + 1}</span>;
+    return <span className="text-gray-700 dark:text-gray-300 font-medium">{rank + 1}</span>;
   };
   
   return (
@@ -110,7 +111,7 @@ const LeaderboardPage = () => {
               <Skeleton className="h-16 w-full" />
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-hidden rounded-lg border border-icc-gold/50">
               <TooltipProvider>
                 <Table>
                   <TableHeader>
@@ -147,7 +148,7 @@ const LeaderboardPage = () => {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center cursor-pointer">
-                              <ThumbsUp className="h-4 w-4 text-gray-500" />
+                              <ThumbsUp className="h-4 w-4 text-gray-500 dark:text-gray-300" />
                               {getSortIcon('likes')}
                             </div>
                           </TooltipTrigger>
@@ -161,7 +162,7 @@ const LeaderboardPage = () => {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center cursor-pointer">
-                              <Eye className="h-4 w-4 text-gray-500" />
+                              <Eye className="h-4 w-4 text-gray-500 dark:text-gray-300" />
                               {getSortIcon('views')}
                             </div>
                           </TooltipTrigger>
@@ -175,7 +176,7 @@ const LeaderboardPage = () => {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center cursor-pointer">
-                              <MessageSquare className="h-4 w-4 text-gray-500" />
+                              <MessageSquare className="h-4 w-4 text-gray-500 dark:text-gray-300" />
                               {getSortIcon('comments')}
                             </div>
                           </TooltipTrigger>
@@ -185,11 +186,11 @@ const LeaderboardPage = () => {
                         </Tooltip>
                       </TableHead>
                       
-                      <TableHead className="font-bold text-icc-blue text-center">
+                      <TableHead className="font-bold text-icc-blue text-center dark:text-white">
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center">
-                              <Globe className="h-4 w-4 text-gray-500" />
+                              <Globe className="h-4 w-4 text-gray-500 dark:text-gray-300" />
                             </div>
                           </TooltipTrigger>
                           <TooltipContent>
@@ -230,7 +231,7 @@ const LeaderboardPage = () => {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center cursor-pointer">
-                              <Clock className="h-4 w-4 text-gray-500" />
+                              <Clock className="h-4 w-4 text-gray-500 dark:text-gray-300" />
                               {getSortIcon('activity')}
                             </div>
                           </TooltipTrigger>
@@ -278,25 +279,25 @@ const LeaderboardPage = () => {
                             </Link>
                           </TableCell>
                           
-                          <TableCell className="text-center font-medium">
+                          <TableCell className="text-center font-medium dark:text-white">
                             <Link to={`/profile/${profile.username || profile.wallet_address}`} className="hover:underline">
                               {profile.reports_count || 0}
                             </Link>
                           </TableCell>
                           
-                          <TableCell className="text-center">
+                          <TableCell className="text-center dark:text-white">
                             <Link to={`/profile/${profile.username || profile.wallet_address}`} className="hover:underline">
                               {profile.likes_count || 0}
                             </Link>
                           </TableCell>
                           
-                          <TableCell className="text-center">
+                          <TableCell className="text-center dark:text-white">
                             <Link to={`/profile/${profile.username || profile.wallet_address}`} className="hover:underline">
                               {formatNumber(profile.views_count || 0)}
                             </Link>
                           </TableCell>
                           
-                          <TableCell className="text-center">
+                          <TableCell className="text-center dark:text-white">
                             <Link to={`/profile/${profile.username || profile.wallet_address}`} className="hover:underline">
                               {profile.comments_count || 0}
                             </Link>
@@ -316,11 +317,11 @@ const LeaderboardPage = () => {
                                   <Globe className="h-4 w-4 text-white" />
                                 </a>
                               )}
-                              {!profile.x_link && !profile.website_link && <span className="text-gray-400">-</span>}
+                              {!profile.x_link && !profile.website_link && <span className="text-gray-400 dark:text-gray-500">-</span>}
                             </div>
                           </TableCell>
                           
-                          <TableCell className="text-center font-semibold text-icc-primary">
+                          <TableCell className="text-center font-semibold text-icc-primary dark:text-white">
                             <Link to={`/profile/${profile.username || profile.wallet_address}`} className="hover:underline">
                               {profile.bounty_amount ? (
                                 <span className="flex items-center justify-center">
@@ -334,7 +335,7 @@ const LeaderboardPage = () => {
                             </Link>
                           </TableCell>
                           
-                          <TableCell className="text-center font-semibold text-icc-primary">
+                          <TableCell className="text-center font-semibold text-icc-primary dark:text-white">
                             <Link to={`/profile/${profile.username || profile.wallet_address}`} className="hover:underline">
                               {profile.bounties_raised ? (
                                 <span className="flex items-center justify-center">
@@ -348,7 +349,7 @@ const LeaderboardPage = () => {
                             </Link>
                           </TableCell>
                           
-                          <TableCell className="text-center text-gray-500">
+                          <TableCell className="text-center text-gray-500 dark:text-gray-300">
                             {profile.created_at ? formatProfileAge(profile.created_at) : '-'}
                           </TableCell>
                         </TableRow>

@@ -275,24 +275,24 @@ const MostWantedPage = () => {
                       <TableHead className="font-bold text-icc-blue">Outlaw</TableHead>
                       <TableHead className="font-bold text-icc-blue text-center">
                         <div className="flex items-center justify-center">
-                          <CurrencyIcon className="h-4 w-4 text-gray-500" />
+                          <CurrencyIcon className="h-4 w-4 text-gray-500 dark:text-gray-300" />
                         </div>
                       </TableHead>
                       <TableHead className="font-bold text-icc-blue">Accused Of</TableHead>
                       <TableHead className="font-bold text-icc-blue">Aliases</TableHead>
                       <TableHead className="font-bold text-icc-blue text-center">
                         <div className="flex items-center justify-center">
-                          <Globe className="h-4 w-4 text-gray-500" />
+                          <Globe className="h-4 w-4 text-gray-500 dark:text-gray-300" />
                         </div>
                       </TableHead>
                       <TableHead className="font-bold text-icc-blue text-center">
                         <div className="flex items-center justify-center">
-                          <ThumbsUp className="h-4 w-4 text-gray-500" />
+                          <ThumbsUp className="h-4 w-4 text-gray-500 dark:text-gray-300" />
                         </div>
                       </TableHead>
                       <TableHead className="font-bold text-icc-blue text-center">
                         <div className="flex items-center justify-center">
-                          <Eye className="h-4 w-4 text-gray-500" />
+                          <Eye className="h-4 w-4 text-gray-500 dark:text-gray-300" />
                         </div>
                       </TableHead>
                       <TableHead className="font-bold text-icc-blue">Posted</TableHead>
@@ -366,7 +366,7 @@ const MostWantedPage = () => {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center cursor-pointer">
-                              <CurrencyIcon className="h-4 w-4 text-gray-500" />
+                              <CurrencyIcon className="h-4 w-4 text-gray-500 dark:text-gray-300" />
                               {renderSortIndicator('bounty')}
                             </div>
                           </TooltipTrigger>
@@ -393,11 +393,11 @@ const MostWantedPage = () => {
                           {renderSortIndicator('aliases')}
                         </div>
                       </TableHead>
-                      <TableHead className="font-bold text-icc-blue text-center">
+                      <TableHead className="font-bold text-icc-blue text-center dark:text-white">
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center cursor-pointer">
-                              <Globe className="h-4 w-4 text-gray-500" />
+                              <Globe className="h-4 w-4 text-gray-500 dark:text-gray-300" />
                             </div>
                           </TooltipTrigger>
                           <TooltipContent>
@@ -412,7 +412,7 @@ const MostWantedPage = () => {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center cursor-pointer">
-                              <ThumbsUp className="h-4 w-4 text-gray-500" />
+                              <ThumbsUp className="h-4 w-4 text-gray-500 dark:text-gray-300" />
                               {renderSortIndicator('likes')}
                             </div>
                           </TooltipTrigger>
@@ -428,7 +428,7 @@ const MostWantedPage = () => {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-center cursor-pointer">
-                              <Eye className="h-4 w-4 text-gray-500" />
+                              <Eye className="h-4 w-4 text-gray-500 dark:text-gray-300" />
                               {renderSortIndicator('views')}
                             </div>
                           </TooltipTrigger>
@@ -474,7 +474,7 @@ const MostWantedPage = () => {
                               <span className="font-medium text-icc-blue dark:text-white">{scammer.name}</span>
                             </div>
                           </TableCell>
-                          <TableCell className="text-center font-semibold text-icc-primary">
+                          <TableCell className="text-center font-semibold text-icc-primary dark:text-white">
                             {scammer.bounty_amount ? (
                               <span className="flex items-center justify-center">
                                 {scammer.bounty_amount} <CurrencyIcon size="sm" className="ml-1" />
