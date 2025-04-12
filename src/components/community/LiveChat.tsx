@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Link } from 'react-router-dom';
-import { MessageSquare, Image as ImageIcon, Send, Smile, AlertCircle, Download, Info, X, Clock } from 'lucide-react';
+import { MessageSquare, Image as ImageIcon, Send, Smile, AlertCircle, Download, Info, X, Clock, Heart } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { getChatMessages, sendChatMessage, deleteChatMessage, isUserAdmin } from '@/services/communityService';
@@ -21,6 +21,7 @@ import { Textarea } from '@/components/ui/textarea';
 import BadgeTier from '@/components/profile/BadgeTier';
 import { calculateBadgeTier } from '@/utils/badgeUtils';
 import { getUserTotalBountyAmount } from '@/services/bountyService';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const SLOW_MODE_DELAY = 30; // 30 seconds
 const SLOW_MODE_STORAGE_KEY = 'chat_slow_mode';
@@ -43,6 +44,7 @@ const LiveChat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const slowModeTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -292,6 +294,73 @@ const LiveChat = () => {
     };
   }, []);
 
+  const renderMessage = (message: ChatMessage, index: number) => {
+    const userBadge = message.author_id ? userBounties[message.author_id] !== undefined ? calculateBadgeTier(userBounties[message.author_id]) : null : null;
+    const isCurrentUser = message.author_id === profile?.wallet_address;
+    const time = formatDistanceToNow(new Date(message.created_at), { addSuffix: false });
+    const formattedTime = time.includes('minute') ? time.replace(' minutes', 'm').replace(' minute', 'm') : 
+                          time.includes('second') ? time.replace(' seconds', 's').replace(' second', 's') : 
+                          time.includes('hour') ? time.replace(' hours', 'h').replace(' hour', 'h') : time;
+    
+    const messageContent = (
+      <div key={message.id} className={`flex mb-3 ${isCurrentUser ? 'justify-end' : 'justify-start'}`}>
+        <div className={`flex ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'}`}>
+          <div className={`flex-shrink-0 ${isCurrentUser ? 'ml-2' : 'mr-2'}`}>
+            <Link to={message.author_username ? `/profile/${message.author_username}` : '#'}>
+              <Avatar className="h-10 w-10 cursor-pointer border-2 border-background">
+                <AvatarImage src={message.author_profile_pic} alt={message.author_name} />
+                <AvatarFallback className="text-xs">{message.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
+              </Avatar>
+            </Link>
+          </div>
+          
+          <div className={`max-w-[75%] md:max-w-[60%] rounded-lg px-3 py-2 ${isCurrentUser ? 'bg-icc-blue-light text-white rounded-tr-none' : 'bg-card rounded-tl-none'}`}>
+            <div className="flex items-center gap-1 mb-1">
+              <span className={`font-semibold text-sm ${isCurrentUser ? 'text-icc-gold' : 'text-icc-gold'}`}>
+                {message.author_name}
+              </span>
+              {userBadge && <BadgeTier badgeInfo={userBadge} size="xs" showTooltip={true} />}
+              {isAdmin && message.author_username === 'sec' && 
+                <span className="text-xs bg-icc-gold/20 text-icc-gold px-1 rounded ml-1">admin</span>
+              }
+            </div>
+            
+            <div className="text-sm break-words">
+              {message.content}
+            </div>
+            
+            {message.image_url && (
+              <div className="mt-2 relative group">
+                <img src={message.image_url} alt="Chat attachment" 
+                  className="max-h-40 rounded-md object-contain bg-muted/20" />
+                <a href={message.image_url} target="_blank" rel="noopener noreferrer" 
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity 
+                  bg-background/80 rounded-full p-1" title="View full image">
+                  <Download className="h-4 w-4" />
+                </a>
+              </div>
+            )}
+            
+            <div className="flex justify-between items-center mt-1">
+              <div className="flex gap-1">
+                <ReactionButton itemId={message.id} itemType="message" size="xs" iconOnly />
+              </div>
+              <span className="text-xs text-muted-foreground">
+                {formattedTime}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+    
+    return isAdmin ? (
+      <AdminContextMenu key={message.id} onDelete={() => handleDeleteMessage(message.id)} canEdit={false}>
+        {messageContent}
+      </AdminContextMenu>
+    ) : messageContent;
+  };
+
   if (isLoading) {
     return <div className="flex justify-center py-12">
         <div className="animate-pulse flex flex-col space-y-4 w-full">
@@ -306,8 +375,9 @@ const LiveChat = () => {
       </div>;
   }
 
-  return <Card className="h-full flex flex-col">
-      <CardHeader className="pb-3">
+  return (
+    <Card className="h-full flex flex-col">
+      <CardHeader className={`pb-2 ${isMobile ? 'px-3 py-2' : 'px-4 py-3'}`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <MessageSquare className="h-5 w-5 mr-2 text-icc-gold" />
@@ -323,102 +393,62 @@ const LiveChat = () => {
       <Separator />
       
       <CardContent className="p-0 flex-grow overflow-hidden">
-        <ScrollArea className="h-[calc(100%-1rem)] p-4">
-          {messages.length === 0 ? <div className="flex flex-col items-center justify-center h-full py-10">
-              <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-xl font-medium text-center">No Messages Yet</h3>
-              <p className="text-muted-foreground text-center mt-1">
-                Be the first to start the conversation!
-              </p>
-            </div> : <div className="space-y-4">
-              {messages.map(message => {
-            const userBadge = message.author_id ? userBounties[message.author_id] !== undefined ? calculateBadgeTier(userBounties[message.author_id]) : null : null;
-            const messageContent = <div key={message.id} className="flex items-start space-x-3">
-                    {message.author_username ? <Link to={`/profile/${message.author_username}`}>
-                        <Avatar className="h-8 w-8 cursor-pointer hover:opacity-80 transition-opacity">
-                          <AvatarImage src={message.author_profile_pic} alt={message.author_name} />
-                          <AvatarFallback>{message.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                      </Link> : <Avatar className="h-8 w-8">
-                        <AvatarImage src={message.author_profile_pic} alt={message.author_name} />
-                        <AvatarFallback>{message.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                      </Avatar>}
-                    
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2">
-                        {message.author_username ? <Link to={`/profile/${message.author_username}`} className="font-medium hover:underline">
-                            {message.author_name}
-                          </Link> : <span className="font-medium">{message.author_name}</span>}
-                        
-                        {userBadge && <BadgeTier badgeInfo={userBadge} size="sm" showTooltip={true} />}
-                        
-                        {message.author_username && <Link to={`/profile/${message.author_username}`} className="text-icc-gold text-sm hover:underline">
-                            @{message.author_username}
-                          </Link>}
-                        
-                        <span className="text-xs text-muted-foreground">
-                          {formatDistanceToNow(new Date(message.created_at), {
-                      addSuffix: true
-                    })}
-                        </span>
-                      </div>
-                      
-                      <div className="mt-1 text-sm">
-                        {message.content}
-                      </div>
-                      
-                      {message.image_url && <div className="mt-2 relative group">
-                          <img src={message.image_url} alt="Chat attachment" className="max-h-60 rounded-md object-contain bg-muted/50" />
-                          <a href={message.image_url} target="_blank" rel="noopener noreferrer" className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 rounded-full p-1" title="View full image">
-                            <Download className="h-4 w-4" />
-                          </a>
-                        </div>}
-                      
-                      <div className="mt-1">
-                        <ReactionButton itemId={message.id} itemType="message" size="sm" />
-                      </div>
-                    </div>
-                  </div>;
-            return isAdmin ? <AdminContextMenu key={message.id} onDelete={() => handleDeleteMessage(message.id)} canEdit={false}>
-                    {messageContent}
-                  </AdminContextMenu> : messageContent;
-          })}
-              <div ref={messagesEndRef} />
-            </div>}
+        <ScrollArea className="h-[calc(100%-1rem)]">
+          <div className={`space-y-0 p-${isMobile ? '2' : '4'}`}>
+            {messages.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full py-10">
+                <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-xl font-medium text-center">No Messages Yet</h3>
+                <p className="text-muted-foreground text-center mt-1">
+                  Be the first to start the conversation!
+                </p>
+              </div>
+            ) : (
+              messages.map((message, index) => renderMessage(message, index))
+            )}
+            <div ref={messagesEndRef} />
+          </div>
         </ScrollArea>
       </CardContent>
       
-      <CardFooter className="border-t p-4 mt-auto">
-        {!isConnected ? <div className="w-full flex justify-center">
+      <CardFooter className={`border-t ${isMobile ? 'p-2' : 'p-4'} mt-auto`}>
+        {!isConnected ? (
+          <div className="w-full flex justify-center">
             <Button variant="outline" onClick={() => toast({
-          title: "Connect Wallet",
-          description: "Please connect your wallet to participate in the chat"
-        })}>
+              title: "Connect Wallet",
+              description: "Please connect your wallet to participate in the chat"
+            })}>
               Connect Wallet to Chat
             </Button>
-          </div> : <form onSubmit={handleSubmit} className="w-full space-y-2">
-            {slowModeCountdown > 0 && !isAdmin && <div className="flex items-center bg-muted/50 p-2 rounded text-sm text-muted-foreground mb-2">
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="w-full space-y-2">
+            {slowModeCountdown > 0 && !isAdmin && (
+              <div className="flex items-center bg-muted/50 p-2 rounded text-sm text-muted-foreground mb-2">
                 <Clock className="h-4 w-4 mr-2 text-yellow-500" />
-                <span>Slow mode active: wait {slowModeCountdown} seconds before sending another message</span>
-              </div>}
+                <span>Slow mode active: wait {slowModeCountdown}s</span>
+              </div>
+            )}
             
-            {imagePreview && <div className="relative inline-block">
+            {imagePreview && (
+              <div className="relative inline-block">
                 <img src={imagePreview} alt="Upload preview" className="max-h-32 rounded-md object-contain bg-muted/50" />
                 <Button type="button" variant="ghost" size="icon" className="absolute top-1 right-1 h-6 w-6 rounded-full bg-background/80" onClick={removeImage}>
                   <X className="h-4 w-4" />
                 </Button>
-              </div>}
+              </div>
+            )}
             
             <div className="flex space-x-2">
-              <div className="flex items-center space-x-2">
-                <Button type="button" variant="outline" size="icon" onClick={() => fileInputRef.current?.click()} disabled={slowModeCountdown > 0 && !isAdmin}>
+              <div className="flex items-center space-x-1">
+                <Button type="button" variant="outline" size="icon" className="h-9 w-9" onClick={() => fileInputRef.current?.click()} disabled={slowModeCountdown > 0 && !isAdmin}>
                   <ImageIcon className="h-4 w-4" />
                 </Button>
                 <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
                 
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button type="button" variant="outline" size="icon" disabled={slowModeCountdown > 0 && !isAdmin}>
+                    <Button type="button" variant="outline" size="icon" className="h-9 w-9" disabled={slowModeCountdown > 0 && !isAdmin}>
                       <Smile className="h-4 w-4" />
                     </Button>
                   </PopoverTrigger>
@@ -428,15 +458,29 @@ const LiveChat = () => {
                 </Popover>
               </div>
               
-              <Textarea placeholder={slowModeCountdown > 0 && !isAdmin ? `Wait ${slowModeCountdown}s to send another message...` : "Type your message..."} value={newMessage} onChange={e => setNewMessage(e.target.value)} disabled={isSubmitting || slowModeCountdown > 0 && !isAdmin} className="flex-1 min-h-[40px] max-h-[100px]" rows={1} />
+              <Textarea 
+                placeholder={slowModeCountdown > 0 && !isAdmin ? `Wait ${slowModeCountdown}s...` : "Type your message..."} 
+                value={newMessage} 
+                onChange={e => setNewMessage(e.target.value)} 
+                disabled={isSubmitting || (slowModeCountdown > 0 && !isAdmin)} 
+                className="flex-1 min-h-[38px] max-h-[80px] py-2 text-sm resize-none"
+                rows={1}
+                style={{lineHeight: '1.2'}}
+              />
               
-              <Button type="submit" disabled={isSubmitting || !newMessage.trim() && !imageFile || slowModeCountdown > 0 && !isAdmin}>
-                {isSubmitting ? <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" /> : <Send className="h-4 w-4" />}
+              <Button type="submit" size="icon" className="h-9 w-9" disabled={isSubmitting || !newMessage.trim() && !imageFile || slowModeCountdown > 0 && !isAdmin}>
+                {isSubmitting ? (
+                  <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
               </Button>
             </div>
-          </form>}
+          </form>
+        )}
       </CardFooter>
-    </Card>;
+    </Card>
+  );
 };
 
 export default LiveChat;
