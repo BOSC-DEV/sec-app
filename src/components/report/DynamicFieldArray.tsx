@@ -50,37 +50,39 @@ const DynamicFieldArray = ({
                 <FormControl>
                   <Input placeholder={`Enter ${label.toLowerCase()}`} {...field} />
                 </FormControl>
+                <div className="flex justify-between mt-2">
+                  {index === fieldValues.length - 1 && (
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={addField}
+                      className="text-xs"
+                    >
+                      <Plus className="h-3 w-3 mr-1" /> 
+                      {name === 'wallet_addresses' ? 'Add Address' : `Add ${label}`}
+                    </Button>
+                  )}
+                  <div className="flex justify-end flex-grow">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => removeField(index)}
+                      disabled={fieldValues.length <= 1}
+                      className="text-xs ml-auto"
+                    >
+                      <Trash className="h-3 w-3 mr-1" /> Remove
+                    </Button>
+                  </div>
+                </div>
               </FormItem>
             )}
           />
-          <div className="flex justify-end">
-            <Button 
-              type="button" 
-              variant="outline" 
-              size="sm" 
-              onClick={() => removeField(index)}
-              disabled={fieldValues.length <= 1}
-              className="text-xs"
-            >
-              <Trash className="h-3 w-3 mr-1" /> Remove
-            </Button>
-          </div>
         </div>
       ))}
-      
-      <Button 
-        type="button" 
-        variant="outline" 
-        size="sm" 
-        onClick={addField}
-        className="w-full mt-2"
-      >
-        <Plus className="h-4 w-4 mr-1" /> 
-        {name === 'wallet_addresses' ? 'Add Address' : `Add ${label}`}
-      </Button>
     </div>
   );
 };
 
 export default DynamicFieldArray;
-
