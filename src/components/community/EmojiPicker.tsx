@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -11,7 +11,12 @@ interface EmojiPickerProps {
 
 const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('popular');
+  const [activeTab, setActiveTab] = useState('reactions');
+
+  // Core reaction emojis - limited to 6 as per previous implementation
+  const reactionEmojis = [
+    '👍', '❤️', '😂', '😮', '😢', '😡'
+  ];
 
   const popularEmojis = [
     '👍', '❤️', '😂', '🔥', '👏', 
@@ -71,7 +76,9 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect }) => {
     '🎯', '🎳', '🎮', '🎰', '🧩', '🎭', '🎨', '🧵', '🧶', '👕'
   ];
 
+  // New emoji category with all the available categories
   const allEmojiCategories = [
+    { id: 'reactions', name: 'Reactions', emojis: reactionEmojis },
     { id: 'popular', name: 'Popular', emojis: popularEmojis },
     { id: 'animals', name: 'Animals', emojis: animalEmojis },
     { id: 'food', name: 'Food', emojis: foodEmojis },
@@ -99,6 +106,12 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect }) => {
       '🐼': 'panda',
       '🐨': 'koala',
       '🐯': 'tiger', 
+      '👍': 'thumbs up like',
+      '❤️': 'heart love',
+      '😂': 'laugh joy',
+      '😮': 'wow surprised',
+      '😢': 'sad crying',
+      '😡': 'angry mad',
       // ... other mappings could be added as needed
     };
     
@@ -133,7 +146,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect }) => {
             </div>
           </ScrollArea>
         ) : (
-          <Tabs defaultValue="popular" value={activeTab} onValueChange={setActiveTab}>
+          <Tabs defaultValue="reactions" value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="w-full mb-2">
               {allEmojiCategories.map(category => (
                 <TabsTrigger 

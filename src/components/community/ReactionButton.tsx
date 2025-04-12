@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Button } from '@/components/ui/button';
 import { Heart, ThumbsUp, Star, Smile } from 'lucide-react';
@@ -34,6 +33,30 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
 }) => {
   const { profile } = useProfile();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  
+  // Add click outside handler
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        pickerRef.current && 
+        !pickerRef.current.contains(event.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
+        setShowEmojiPicker(false);
+      }
+    };
+
+    if (showEmojiPicker) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showEmojiPicker]);
   
   // Get the appropriate table name based on item type
   const getTableName = (): string => {
@@ -194,6 +217,7 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
         ) : null}
         
         <Button
+          ref={buttonRef}
           variant="outline"
           size={size}
           className="px-2 py-1 h-auto"
@@ -204,7 +228,7 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
       </div>
       
       {showEmojiPicker && (
-        <div className="absolute right-0 bottom-full mb-2 z-10">
+        <div ref={pickerRef} className="absolute right-0 bottom-full mb-2 z-10">
           <EmojiPicker onEmojiSelect={handleEmojiSelect} />
         </div>
       )}
