@@ -102,30 +102,38 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
   
   const fetchReactions = async () => {
     try {
-      let tableName: string;
-      let idColumn: string;
+      let data: { reaction_type: string; user_id: string }[] = [];
       
       if (itemType === 'announcement') {
-        tableName = 'announcement_reactions';
-        idColumn = 'announcement_id';
-      } else if (itemType === 'message') {
-        tableName = 'chat_message_reactions';
-        idColumn = 'message_id';
-      } else if (itemType === 'reply') {
-        tableName = 'reply_reactions';
-        idColumn = 'reply_id';
-      } else {
+        const { data: announcementData, error: announcementError } = await supabase
+          .from('announcement_reactions')
+          .select('reaction_type, user_id')
+          .eq('announcement_id', itemId);
+          
+        if (announcementError) throw announcementError;
+        data = announcementData || [];
+      } 
+      else if (itemType === 'message') {
+        const { data: messageData, error: messageError } = await supabase
+          .from('chat_message_reactions')
+          .select('reaction_type, user_id')
+          .eq('message_id', itemId);
+          
+        if (messageError) throw messageError;
+        data = messageData || [];
+      } 
+      else if (itemType === 'reply') {
+        const { data: replyData, error: replyError } = await supabase
+          .from('reply_reactions')
+          .select('reaction_type, user_id')
+          .eq('reply_id', itemId);
+          
+        if (replyError) throw replyError;
+        data = replyData || [];
+      } 
+      else {
         console.error('Invalid item type:', itemType);
         return;
-      }
-      
-      const { data, error } = await supabase
-        .from(tableName)
-        .select('reaction_type, user_id')
-        .eq(idColumn, itemId);
-      
-      if (error) {
-        throw error;
       }
       
       const reactionCounts: ReactionCount[] = [];
@@ -167,25 +175,33 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
   useEffect(() => {
     fetchReactions();
     
-    // Fixed type instantiation issue by simplifying channel creation
+    // Create a unique channel name to avoid collisions
     const channelName = `reactions_${itemType}_${itemId}`;
     
-    let tableSource: string;
+    // Determine the table to listen to based on itemType
+    let tableName: 'announcement_reactions' | 'chat_message_reactions' | 'reply_reactions';
+    let filterColumn: string;
+    
     if (itemType === 'announcement') {
-      tableSource = 'announcement_reactions';
+      tableName = 'announcement_reactions';
+      filterColumn = 'announcement_id';
     } else if (itemType === 'message') {
-      tableSource = 'chat_message_reactions';
+      tableName = 'chat_message_reactions';
+      filterColumn = 'message_id';
     } else {
-      tableSource = 'reply_reactions';
+      tableName = 'reply_reactions';
+      filterColumn = 'reply_id';
     }
     
+    // Set up the realtime subscription
     const channel = supabase.channel(channelName);
     
     channel
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
-        table: tableSource
+        table: tableName,
+        filter: `${filterColumn}=eq.${itemId}`
       }, () => {
         fetchReactions();
       })
