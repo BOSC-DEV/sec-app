@@ -41,7 +41,7 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
   const badge = (
     <Badge className={`${color} ${sizeClasses[size]} flex items-center gap-1`}>
       <span className={iconSizes[size]}>{icon}</span>
-      {!isMobile && <span>{tier}</span>}
+      {!isMobile && <span className="truncate">{icon}</span>}
     </Badge>
   );
   
@@ -57,9 +57,9 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
           </TooltipTrigger>
           <TooltipContent side="right" align="start" className="p-4 max-w-sm">
             <div className="space-y-3">
-              <div className="font-semibold text-center">
-                <span className="mr-2 text-lg">{icon}</span>
-                {tier} Badge
+              <div className="font-semibold text-center flex items-center justify-center gap-2">
+                <span className="text-lg">{icon}</span>
+                <span className="truncate">{tier} Badge</span>
               </div>
               
               <div className="text-sm text-muted-foreground">
@@ -87,4 +87,3 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
 };
 
 export default BadgeTier;
-
