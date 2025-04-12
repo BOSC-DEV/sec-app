@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { toggleAnnouncementReaction, toggleChatMessageReaction, toggleReplyReaction } from '@/services/communityService';
@@ -102,8 +101,8 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
   
   const fetchReactions = async () => {
     try {
-      let tableName: 'announcement_reactions' | 'chat_message_reactions' | 'reply_reactions';
-      let idColumn: string;
+      let tableName = '';
+      let idColumn = '';
       
       if (itemType === 'announcement') {
         tableName = 'announcement_reactions';
@@ -119,7 +118,6 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
         return;
       }
       
-      // Use typesafe query with the correct table name
       const { data, error } = await supabase
         .from(tableName)
         .select('reaction_type, user_id')
@@ -129,16 +127,13 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
         throw error;
       }
       
-      // Process the data to get counts and user reaction status
       const reactionCounts: ReactionCount[] = [];
       const reactionMap = new Map<string, { count: number, has_reacted: boolean }>();
       
-      // Initialize with all reaction types
       reactionTypes.forEach(type => {
         reactionMap.set(type, { count: 0, has_reacted: false });
       });
       
-      // Count reactions and check if user has reacted
       if (data) {
         data.forEach(reaction => {
           const type = reaction.reaction_type;
@@ -154,7 +149,6 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
         });
       }
       
-      // Convert map to array
       reactionMap.forEach((value, key) => {
         reactionCounts.push({
           reaction_type: key,
@@ -172,9 +166,8 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
   useEffect(() => {
     fetchReactions();
     
-    // Set up real-time subscription
-    let tableName: string;
-    let idColumn: string;
+    let tableName = '';
+    let idColumn = '';
     
     if (itemType === 'announcement') {
       tableName = 'announcement_reactions';
