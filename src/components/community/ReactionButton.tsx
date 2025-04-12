@@ -59,19 +59,21 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   
   const fetchReactions = async () => {
     try {
-      // Use type assertion to fix TypeScript depth error
-      const response = await supabase
+      // Fix TypeScript depth error by using explicit typing for the query response
+      const { data, error } = await supabase
         .from(itemType === 'announcement' ? 'announcement_reactions' : 'chat_message_reactions')
-        .select('user_id, reaction_type')
-        .eq(itemType === 'announcement' ? 'announcement_id' : 'message_id', itemId);
-      
-      const data = response.data as ReactionData[] | null;
+        .select('user_id, reaction_type');
         
-      if (data) {
+      if (error) throw error;
+      
+      // Explicitly cast data as ReactionData[] to avoid deep type resolution
+      const typedData = data as ReactionData[];
+      
+      if (typedData) {
         // Group by reaction type
         const groupedReactions: Record<string, string[]> = {};
         
-        data.forEach(reaction => {
+        typedData.forEach(reaction => {
           if (!groupedReactions[reaction.reaction_type]) {
             groupedReactions[reaction.reaction_type] = [];
           }
