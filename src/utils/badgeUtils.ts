@@ -104,7 +104,12 @@ export const getBadgeTier = (secHolding: number): BadgeTier => {
  * @param amount SEC amount
  * @returns Formatted string with appropriate units (K, M, B)
  */
-export const formatSecAmount = (amount: number): string => {
+export const formatSecAmount = (amount: number | null | undefined): string => {
+  // Handle null or undefined values
+  if (amount === null || amount === undefined) {
+    return '0';
+  }
+  
   if (amount >= 1_000_000_000) {
     return `${(amount / 1_000_000_000).toFixed(2)}B`;
   } else if (amount >= 1_000_000) {

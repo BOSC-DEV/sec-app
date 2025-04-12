@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -69,13 +70,15 @@ const LiveChat = () => {
         return badgeInfo;
       }
       
-      const bountyData = await getUserBountyContributions(authorId, 1, 1);
+      // This is the key change - we're now properly fetching bounty contributions to get the accurate badge tier
+      const bountyData = await getUserBountyContributions(authorId, 1, 100);  // Increased perPage to ensure we get all contributions
       const total = bountyData?.totalBountyAmount || 0;
       
-      const badgeTier = calculateBadgeTier(total).tier;
+      console.log(`Fetched bounty total for ${authorId}: ${total}`);
+      
       const badgeInfo = calculateBadgeTier(total);
       
-      setUserBadgeTiers(prev => ({...prev, [authorId]: badgeTier}));
+      setUserBadgeTiers(prev => ({...prev, [authorId]: badgeInfo.tier}));
       setUserBadgeInfos(prev => ({...prev, [authorId]: badgeInfo}));
       
       return badgeInfo;
@@ -87,11 +90,13 @@ const LiveChat = () => {
     }
   };
   
+  // Pre-load all badge info for messages when they're loaded
   useEffect(() => {
     const fetchAllBadgeInfo = async () => {
       if (messages.length === 0) return;
       
       const uniqueAuthorIds = [...new Set(messages.map(m => m.author_id).filter(Boolean))];
+      console.log(`Fetching badge info for ${uniqueAuthorIds.length} unique authors`);
       
       for (const authorId of uniqueAuthorIds) {
         if (!userBadgeInfos[authorId]) {

@@ -12,9 +12,16 @@ export const useBadgeTier = (secBalance: number | null): BadgeInfo | null => {
   
   useEffect(() => {
     if (secBalance !== null && secBalance !== undefined) {
-      // Ensure we're using the same calculation logic everywhere
-      const calculatedBadgeInfo = calculateBadgeTier(secBalance);
-      setBadgeInfo(calculatedBadgeInfo);
+      try {
+        // Ensure we're using the same calculation logic everywhere
+        const calculatedBadgeInfo = calculateBadgeTier(secBalance);
+        setBadgeInfo(calculatedBadgeInfo);
+        console.log(`Badge tier calculated: ${calculatedBadgeInfo.tier} for balance: ${secBalance}`);
+      } catch (error) {
+        console.error("Error calculating badge tier:", error);
+        // Set a default badge info in case of error
+        setBadgeInfo(calculateBadgeTier(0));
+      }
     }
   }, [secBalance]);
   
