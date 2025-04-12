@@ -12,6 +12,7 @@ import { toast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import OptimizedImage from '@/components/common/OptimizedImage';
+
 interface ProfileFormValues {
   display_name: string;
   username: string;
@@ -19,6 +20,7 @@ interface ProfileFormValues {
   x_link: string;
   website_link: string;
 }
+
 const ProfilePage = () => {
   const {
     isConnected,
@@ -35,6 +37,7 @@ const ProfilePage = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarKey, setAvatarKey] = useState(Date.now()); // Add a key for forcing re-render
   const fileInputRef = useRef<HTMLInputElement>(null);
+
   const form = useForm<ProfileFormValues>({
     defaultValues: {
       display_name: '',
@@ -44,11 +47,13 @@ const ProfilePage = () => {
       website_link: ''
     }
   });
+
   useEffect(() => {
     if (!isConnected && !isLoading) {
       navigate('/');
     }
   }, [isConnected, isLoading, navigate]);
+
   useEffect(() => {
     if (profile) {
       setAvatarUrl(profile.profile_pic_url || null);
@@ -61,9 +66,11 @@ const ProfilePage = () => {
       });
     }
   }, [profile, form]);
+
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
   };
+
   const handleDisconnect = () => {
     disconnectWallet();
     navigate('/');
@@ -72,6 +79,7 @@ const ProfilePage = () => {
       description: 'Your wallet has been disconnected'
     });
   };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -106,6 +114,7 @@ const ProfilePage = () => {
       });
     }
   };
+
   const onSubmit = async (data: ProfileFormValues) => {
     if (!walletAddress || !profile) return;
     try {
@@ -133,6 +142,7 @@ const ProfilePage = () => {
       setIsSaving(false);
     }
   };
+
   if (isLoading) {
     return <div className="container py-10">
         <Card>
@@ -147,16 +157,18 @@ const ProfilePage = () => {
         </Card>
       </div>;
   }
+
   const isNewProfile = !profile;
   const getInitials = (name: string) => {
     return name?.substring(0, 2).toUpperCase() || '👤';
   };
+
   return <div className="container py-10">
       <Card className="max-w-3xl mx-auto">
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle className="text-2xl">
+              <CardTitle className="text-2xl flex items-center gap-2">
                 {isNewProfile ? 'Create Your Profile' : 'Edit Your Profile'}
               </CardTitle>
               <CardDescription>
@@ -260,4 +272,5 @@ const ProfilePage = () => {
       </Card>
     </div>;
 };
+
 export default ProfilePage;

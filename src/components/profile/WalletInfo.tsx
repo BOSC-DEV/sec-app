@@ -12,12 +12,14 @@ interface WalletInfoProps {
   walletAddress?: string | null;
   isOwnProfile?: boolean;
   secBalance?: number | null;
+  displayName?: string;
 }
 
 const WalletInfo: React.FC<WalletInfoProps> = ({
   walletAddress,
   isOwnProfile = false,
-  secBalance = null
+  secBalance = null,
+  displayName = ''
 }) => {
   const {
     disconnectWallet
@@ -61,6 +63,17 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
       <CardContent>
         {walletAddress ? (
           <div className="space-y-4">
+            {displayName && badgeInfo && (
+              <div className="flex items-center gap-2 mt-[20px]">
+                <h2 className="text-xl font-semibold">{displayName}</h2>
+                <BadgeTier 
+                  badgeInfo={badgeInfo} 
+                  size="md"
+                  showTooltip={true}
+                />
+              </div>
+            )}
+            
             <div>
               <div className="text-sm font-medium mb-1 text-gray-500 dark:text-gray-400 px-0 mt-[20px]">Address</div>
               <div className="flex items-center gap-2">

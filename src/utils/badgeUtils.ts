@@ -49,6 +49,8 @@ export const calculateBadgeTier = (secHolding: number): BadgeInfo => {
   const holdingPercent = (secHolding / TOTAL_SEC_SUPPLY) * 100;
   
   // Find the highest tier the user qualifies for
+  // We'll sort from highest to lowest tier (by minPercent)
+  // and find the first tier that the user meets the requirements for
   const tiers = Object.entries(BADGE_TIERS).sort(
     (a, b) => b[1].minPercent - a[1].minPercent
   );

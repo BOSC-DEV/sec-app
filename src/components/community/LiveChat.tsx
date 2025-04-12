@@ -24,6 +24,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ScrollArea } from '@/components/ui/scroll-area';
 import EmojiPicker from '@/components/community/EmojiPicker';
 import ReactionButton from './ReactionButton';
+import BadgeTier from '@/components/ui/badge-tier';
 
 const LiveChat = () => {
   const { profile, isConnected } = useProfile();
@@ -35,6 +36,28 @@ const LiveChat = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // This function calculates badge tier based on wallet address
+  // In a real app, this would be based on actual token balance
+  const getUserBadge = (address: string) => {
+    // Mock balance for demo - we'll use a larger value to simulate whale status
+    // for wallet addresses that include certain characters
+    const mockBalanceBase = 100000; // Basic balance (0.01% of supply)
+    
+    // For the current user's address (the one with 15.8M tokens),
+    // or addresses that include specific patterns, assign whale status
+    if (address === '5.8%' || address.includes('58') || address.includes('15')) {
+      return calculateBadgeTier(58000000); // 5.8% of supply - whale status
+    } 
+    
+    // Deterministically generate a balance based on the address
+    const hash = address.split('').reduce((acc, char) => {
+      return acc + char.charCodeAt(0);
+    }, 0);
+    
+    const mockBalance = mockBalanceBase * (hash % 200);
+    return calculateBadgeTier(mockBalance);
+  };
   
   useEffect(() => {
     const fetchMessages = async () => {
@@ -216,71 +239,80 @@ const LiveChat = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {messages.map((message) => (
-                <div key={message.id} className="flex items-start space-x-3">
-                  {message.author_username ? (
-                    <Link to={`/profile/${message.author_username}`}>
-                      <Avatar className="h-8 w-8 cursor-pointer hover:opacity-80 transition-opacity">
+              {messages.map((message) => {
+                const userBadge = message.author_id ? getUserBadge(message.author_id) : null;
+                
+                return (
+                  <div key={message.id} className="flex items-start space-x-3">
+                    {message.author_username ? (
+                      <Link to={`/profile/${message.author_username}`}>
+                        <Avatar className="h-8 w-8 cursor-pointer hover:opacity-80 transition-opacity">
+                          <AvatarImage src={message.author_profile_pic} alt={message.author_name} />
+                          <AvatarFallback>{message.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                      </Link>
+                    ) : (
+                      <Avatar className="h-8 w-8">
                         <AvatarImage src={message.author_profile_pic} alt={message.author_name} />
                         <AvatarFallback>{message.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
                       </Avatar>
-                    </Link>
-                  ) : (
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={message.author_profile_pic} alt={message.author_name} />
-                      <AvatarFallback>{message.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                  )}
-                  
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2">
-                      {message.author_username ? (
-                        <Link to={`/profile/${message.author_username}`} className="font-medium hover:underline">
-                          {message.author_name}
-                        </Link>
-                      ) : (
-                        <span className="font-medium">{message.author_name}</span>
-                      )}
-                      
-                      {message.author_username && (
-                        <Link to={`/profile/${message.author_username}`} className="text-icc-gold text-sm hover:underline">
-                          @{message.author_username}
-                        </Link>
-                      )}
-                      <span className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}
-                      </span>
-                    </div>
-                    
-                    <div className="mt-1 text-sm">
-                      {message.content}
-                    </div>
-                    
-                    {message.image_url && (
-                      <div className="mt-2 relative group">
-                        <img 
-                          src={message.image_url} 
-                          alt="Chat attachment" 
-                          className="max-h-60 rounded-md object-contain bg-muted/50"
-                        />
-                        <a 
-                          href={message.image_url} 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 rounded-full p-1"
-                          title="View full image"
-                        >
-                          <Download className="h-4 w-4" />
-                        </a>
-                      </div>
                     )}
                     
-                    <div className="mt-1">
-                      <ReactionButton itemId={message.id} itemType="chat" />
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2">
+                        {message.author_username ? (
+                          <Link to={`/profile/${message.author_username}`} className="font-medium hover:underline">
+                            {message.author_name}
+                          </Link>
+                        ) : (
+                          <span className="font-medium">{message.author_name}</span>
+                        )}
+                        
+                        {userBadge && (
+                          <BadgeTier badgeInfo={userBadge} size="sm" showTooltip={true} />
+                        )}
+                        
+                        {message.author_username && (
+                          <Link to={`/profile/${message.author_username}`} className="text-icc-gold text-sm hover:underline">
+                            @{message.author_username}
+                          </Link>
+                        )}
+                        
+                        <span className="text-xs text-muted-foreground">
+                          {formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}
+                        </span>
+                      </div>
+                      
+                      <div className="mt-1 text-sm">
+                        {message.content}
+                      </div>
+                      
+                      {message.image_url && (
+                        <div className="mt-2 relative group">
+                          <img 
+                            src={message.image_url} 
+                            alt="Chat attachment" 
+                            className="max-h-60 rounded-md object-contain bg-muted/50"
+                          />
+                          <a 
+                            href={message.image_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 rounded-full p-1"
+                            title="View full image"
+                          >
+                            <Download className="h-4 w-4" />
+                          </a>
+                        </div>
+                      )}
+                      
+                      <div className="mt-1">
+                        <ReactionButton itemId={message.id} itemType="chat" />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
               <div ref={messagesEndRef} />
             </div>
           )}

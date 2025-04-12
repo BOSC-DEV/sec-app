@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { getAnnouncementReplies } from '@/services/communityService';
 import { AnnouncementReply } from '@/types/dataTypes';
@@ -12,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import ReactionButton from './ReactionButton';
 import ReplyForm from './ReplyForm';
 import BadgeTier from '../profile/BadgeTier';
-import { calculateBadgeTier, BADGE_TIERS, BadgeTier as BadgeTierEnum } from '@/utils/badgeUtils';
+import { calculateBadgeTier } from '@/utils/badgeUtils';
 
 interface AnnouncementRepliesProps {
   announcementId: string;
@@ -67,19 +66,19 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
     setShowReplyForm(!showReplyForm);
   };
   
-  // Simulate badges (for demonstration purposes)
-  // In a real implementation, this would come from user data
-  const getUserBadge = (username: string) => {
-    // Deterministically generate a "random" number based on the username
-    const hash = username?.split('').reduce((acc, char) => {
+  const getUserBadge = (address: string) => {
+    const mockBalanceBase = 100000;
+    
+    if (address === '5.8%' || address.includes('58') || address.includes('15')) {
+      return calculateBadgeTier(58000000);
+    } 
+    
+    const hash = address.split('').reduce((acc, char) => {
       return acc + char.charCodeAt(0);
-    }, 0) || 0;
+    }, 0);
     
-    // Use the hash to determine a "random" SEC balance between 0 and 15,000,000
-    const mockSecBalance = (hash % 150) * 100000;
-    
-    // Calculate the badge tier based on the mock balance
-    return calculateBadgeTier(mockSecBalance);
+    const mockBalance = mockBalanceBase * (hash % 200);
+    return calculateBadgeTier(mockBalance);
   };
   
   if (replies.length === 0 && !showReplyForm) {
@@ -163,8 +162,7 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
             </div>
           ) : (
             replies.map((reply) => {
-              // Get user badge based on username (mock implementation)
-              const userBadge = reply.author_username ? getUserBadge(reply.author_username) : null;
+              const userBadge = reply.author_id ? getUserBadge(reply.author_id) : null;
               
               return (
                 <div key={reply.id} className="py-3 border-t first:border-t-0">
@@ -193,14 +191,14 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
                           <span className="font-medium">{reply.author_name}</span>
                         )}
                         
+                        {userBadge && (
+                          <BadgeTier badgeInfo={userBadge} size="sm" showTooltip={true} />
+                        )}
+                        
                         {reply.author_username && (
                           <Link to={`/profile/${reply.author_username}`} className="text-icc-gold text-sm hover:underline">
                             @{reply.author_username}
                           </Link>
-                        )}
-                        
-                        {userBadge && (
-                          <BadgeTier badgeInfo={userBadge} size="sm" showTooltip={true} />
                         )}
                         
                         <span className="text-xs text-muted-foreground">
