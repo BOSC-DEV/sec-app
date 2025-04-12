@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -102,7 +101,7 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
     });
   };
 
-  return <Card className="w-full dark:border-gray-700">
+  return <Card className="w-full dark:border-transparent dark:bg-transparent">
       <CardHeader>
         <div className="flex justify-between items-center">
           <div>
@@ -111,11 +110,11 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="dark:bg-transparent">
         {walletAddress ? <div className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* SOL Balance */}
-              <div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:bg-gray-800 rounded-xl p-4 border border-blue-100 dark:border-none shadow-sm">
+              <div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:bg-transparent dark:border-none rounded-xl p-4 shadow-sm">
                 <div className="text-sm text-gray-500 dark:text-gray-100 mb-1">SOL Balance</div>
                 {isLoading ? <Skeleton className="h-7 w-24 dark:bg-gray-700" /> : <div className="font-mono text-xl font-bold text-blue-700 dark:text-white">
                     {formatBalance(solBalance)} <span className="text-xs font-normal dark:text-gray-300">SOL</span>
@@ -123,7 +122,7 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
               </div>
 
               {/* SEC Balance */}
-              <div className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:bg-gray-800 rounded-xl p-4 border border-amber-100 dark:border-none shadow-sm">
+              <div className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:bg-transparent dark:border-none rounded-xl p-4 shadow-sm">
                 <div className="text-sm text-gray-500 dark:text-gray-100 mb-1">SEC Balance</div>
                 {isLoading ? <Skeleton className="h-7 w-24 dark:bg-gray-700" /> : <div className="font-mono text-xl font-bold text-amber-700 dark:text-white">
                     {formatBalance(secBalance)} <span className="text-xs font-normal dark:text-gray-300">SEC</span>
@@ -144,4 +143,3 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
     </Card>;
 };
 export default WalletBalance;
-
