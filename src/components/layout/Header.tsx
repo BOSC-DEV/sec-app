@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -152,13 +151,12 @@ const Header = () => {
                   <User className="h-5 w-5" />
                 </Button>
                 <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="border-icc-gold text-icc-gold hover:bg-icc-blue-light flex items-center gap-2"
+                  variant="ghost" 
+                  size="icon"
+                  className="text-white hover:bg-transparent hover:text-gray-200 border-none"
                   onClick={handleWalletButtonClick}
                 >
-                  <Wallet className="h-4 w-4" />
-                  {/* Always use just wallet icon on mobile */}
+                  <Wallet className="h-5 w-5" />
                 </Button>
                 {/* Add burger menu button for mobile */}
                 {isMobile && (
@@ -181,7 +179,7 @@ const Header = () => {
                   className="flex items-center gap-2"
                   onClick={connectWallet}
                 >
-                  {isMobile ? <Wallet className="h-4 w-4" /> : (
+                  {isMobile ? <Wallet className="h-4 w-4 text-white" /> : (
                     <>
                       <LogIn className="h-4 w-4" />
                       Connect Wallet
