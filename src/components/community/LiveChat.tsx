@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,14 +9,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Link } from 'react-router-dom';
-import { MessageSquare, Image as ImageIcon, Send, Smile, AlertCircle, Download, Info, X, Clock, Heart } from 'lucide-react';
+import { MessageSquare, Image as ImageIcon, Send, Smile, AlertCircle, Download, Info, X, Clock } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { getChatMessages, sendChatMessage, deleteChatMessage, isUserAdmin } from '@/services/communityService';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import EmojiPicker from '@/components/community/EmojiPicker';
-import ReactionButton from './ReactionButton';
+import CommunityInteractionButtons from './CommunityInteractionButtons';
 import AdminContextMenu from './AdminContextMenu';
 import { Textarea } from '@/components/ui/textarea';
 import BadgeTier from '@/components/profile/BadgeTier';
@@ -300,6 +301,20 @@ const LiveChat = () => {
     const formatTimeStamp = (dateString: string) => {
       const distance = formatDistanceToNow(new Date(dateString), { addSuffix: false });
       
+      if (distance.includes('about')) {
+        const cleanedDistance = distance.replace('about ', '');
+        
+        if (cleanedDistance.includes('second')) return cleanedDistance.replace(' seconds', 's').replace(' second', 's');
+        if (cleanedDistance.includes('minute')) return cleanedDistance.replace(' minutes', 'm').replace(' minute', 'm');
+        if (cleanedDistance.includes('hour')) return cleanedDistance.replace(' hours', 'h').replace(' hour', 'h');
+        if (cleanedDistance.includes('day')) return cleanedDistance.replace(' days', 'd').replace(' day', 'd');
+        if (cleanedDistance.includes('week')) return cleanedDistance.replace(' weeks', 'w').replace(' week', 'w');
+        if (cleanedDistance.includes('month')) return cleanedDistance.replace(' months', 'mo').replace(' month', 'mo');
+        if (cleanedDistance.includes('year')) return cleanedDistance.replace(' years', 'y').replace(' year', 'y');
+        
+        return cleanedDistance;
+      }
+      
       if (distance.includes('second')) return distance.replace(' seconds', 's').replace(' second', 's');
       if (distance.includes('minute')) return distance.replace(' minutes', 'm').replace(' minute', 'm');
       if (distance.includes('hour')) return distance.replace(' hours', 'h').replace(' hour', 'h');
@@ -353,9 +368,12 @@ const LiveChat = () => {
             )}
             
             <div className="flex justify-between items-center mt-1">
-              <div className="flex gap-1">
-                <ReactionButton itemId={message.id} itemType="message" size="xs" iconOnly />
-              </div>
+              <CommunityInteractionButtons 
+                itemId={message.id} 
+                itemType="message"
+                initialLikes={message.likes}
+                initialDislikes={message.dislikes}
+              />
               <span className="text-xs text-muted-foreground">
                 {time}
               </span>

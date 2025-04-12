@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { 
   Announcement, 
@@ -204,223 +205,183 @@ export const sendChatMessage = async (message: {
   }
 };
 
-// Reaction Services
-export const toggleAnnouncementReaction = async (
-  announcementId: string, 
-  userId: string, 
-  reactionType: string,
-  userName: string,
-  userUsername?: string,
-  userProfilePic?: string
-): Promise<boolean> => {
+// Like/Dislike Functions for Announcements
+export const likeAnnouncement = async (announcementId: string, userId: string): Promise<{likes: number, dislikes: number} | null> => {
   try {
-    const { data: existingReaction, error: checkError } = await supabase
-      .from('announcement_reactions')
-      .select('*')
+    const { data, error } = await supabase.rpc('toggle_announcement_like', {
+      p_announcement_id: announcementId,
+      p_user_id: userId
+    });
+    
+    if (error) {
+      throw error;
+    }
+    
+    return data as {likes: number, dislikes: number};
+  } catch (error) {
+    handleError(error, 'Error liking announcement');
+    return null;
+  }
+};
+
+export const dislikeAnnouncement = async (announcementId: string, userId: string): Promise<{likes: number, dislikes: number} | null> => {
+  try {
+    const { data, error } = await supabase.rpc('toggle_announcement_dislike', {
+      p_announcement_id: announcementId,
+      p_user_id: userId
+    });
+    
+    if (error) {
+      throw error;
+    }
+    
+    return data as {likes: number, dislikes: number};
+  } catch (error) {
+    handleError(error, 'Error disliking announcement');
+    return null;
+  }
+};
+
+// Like/Dislike Functions for Replies
+export const likeReply = async (replyId: string, userId: string): Promise<{likes: number, dislikes: number} | null> => {
+  try {
+    const { data, error } = await supabase.rpc('toggle_reply_like', {
+      p_reply_id: replyId,
+      p_user_id: userId
+    });
+    
+    if (error) {
+      throw error;
+    }
+    
+    return data as {likes: number, dislikes: number};
+  } catch (error) {
+    handleError(error, 'Error liking reply');
+    return null;
+  }
+};
+
+export const dislikeReply = async (replyId: string, userId: string): Promise<{likes: number, dislikes: number} | null> => {
+  try {
+    const { data, error } = await supabase.rpc('toggle_reply_dislike', {
+      p_reply_id: replyId,
+      p_user_id: userId
+    });
+    
+    if (error) {
+      throw error;
+    }
+    
+    return data as {likes: number, dislikes: number};
+  } catch (error) {
+    handleError(error, 'Error disliking reply');
+    return null;
+  }
+};
+
+// Like/Dislike Functions for Chat Messages
+export const likeChatMessage = async (messageId: string, userId: string): Promise<{likes: number, dislikes: number} | null> => {
+  try {
+    const { data, error } = await supabase.rpc('toggle_chat_message_like', {
+      p_message_id: messageId,
+      p_user_id: userId
+    });
+    
+    if (error) {
+      throw error;
+    }
+    
+    return data as {likes: number, dislikes: number};
+  } catch (error) {
+    handleError(error, 'Error liking chat message');
+    return null;
+  }
+};
+
+export const dislikeChatMessage = async (messageId: string, userId: string): Promise<{likes: number, dislikes: number} | null> => {
+  try {
+    const { data, error } = await supabase.rpc('toggle_chat_message_dislike', {
+      p_message_id: messageId,
+      p_user_id: userId
+    });
+    
+    if (error) {
+      throw error;
+    }
+    
+    return data as {likes: number, dislikes: number};
+  } catch (error) {
+    handleError(error, 'Error disliking chat message');
+    return null;
+  }
+};
+
+// Check if user has liked or disliked an announcement
+export const getUserAnnouncementInteraction = async (announcementId: string, userId: string): Promise<{liked: boolean, disliked: boolean}> => {
+  try {
+    const { data, error } = await supabase
+      .from('announcement_interactions')
+      .select('interaction_type')
       .eq('announcement_id', announcementId)
-      .eq('user_id', userId)
-      .eq('reaction_type', reactionType)
-      .maybeSingle();
+      .eq('user_id', userId);
       
-    if (checkError) {
-      throw checkError;
+    if (error) {
+      throw error;
     }
     
-    const { data: announcement } = await supabase
-      .from('announcements')
-      .select('author_id, content')
-      .eq('id', announcementId)
-      .single();
+    const liked = data?.some(interaction => interaction.interaction_type === 'like') || false;
+    const disliked = data?.some(interaction => interaction.interaction_type === 'dislike') || false;
     
-    if (existingReaction) {
-      const { error: deleteError } = await supabase
-        .from('announcement_reactions')
-        .delete()
-        .eq('id', existingReaction.id);
-        
-      if (deleteError) {
-        throw deleteError;
-      }
-      
-      return false;
-    }
-    
-    const { error: insertError } = await supabase
-      .from('announcement_reactions')
-      .insert({
-        announcement_id: announcementId,
-        user_id: userId,
-        reaction_type: reactionType,
-      });
-      
-    if (insertError) {
-      throw insertError;
-    }
-    
-    if (announcement && announcement.author_id && announcement.author_id !== userId) {
-      await notifyReaction(
-        announcementId,
-        EntityType.ANNOUNCEMENT,
-        announcement.content.substring(0, 30) + '...',
-        reactionType,
-        announcement.author_id,
-        userId,
-        userName,
-        userUsername,
-        userProfilePic
-      );
-    }
-    
-    return true;
+    return { liked, disliked };
   } catch (error) {
-    handleError(error, 'Error toggling announcement reaction');
-    return false;
+    console.error('Error getting user announcement interaction:', error);
+    return { liked: false, disliked: false };
   }
 };
 
-export const toggleChatMessageReaction = async (
-  messageId: string, 
-  userId: string, 
-  reactionType: string,
-  userName: string,
-  userUsername?: string,
-  userProfilePic?: string
-): Promise<boolean> => {
+// Check if user has liked or disliked a reply
+export const getUserReplyInteraction = async (replyId: string, userId: string): Promise<{liked: boolean, disliked: boolean}> => {
   try {
-    const { data: existingReaction, error: checkError } = await supabase
-      .from('chat_message_reactions')
-      .select('*')
-      .eq('message_id', messageId)
-      .eq('user_id', userId)
-      .eq('reaction_type', reactionType)
-      .maybeSingle();
-      
-    if (checkError) {
-      throw checkError;
-    }
-    
-    const { data: message } = await supabase
-      .from('chat_messages')
-      .select('author_id, content')
-      .eq('id', messageId)
-      .single();
-    
-    if (existingReaction) {
-      const { error: deleteError } = await supabase
-        .from('chat_message_reactions')
-        .delete()
-        .eq('id', existingReaction.id);
-        
-      if (deleteError) {
-        throw deleteError;
-      }
-      
-      return false;
-    }
-    
-    const { error: insertError } = await supabase
-      .from('chat_message_reactions')
-      .insert({
-        message_id: messageId,
-        user_id: userId,
-        reaction_type: reactionType,
-      });
-      
-    if (insertError) {
-      throw insertError;
-    }
-    
-    if (message && message.author_id && message.author_id !== userId) {
-      await notifyReaction(
-        messageId,
-        EntityType.CHAT_MESSAGE,
-        message.content.substring(0, 30) + '...',
-        reactionType,
-        message.author_id,
-        userId,
-        userName,
-        userUsername,
-        userProfilePic
-      );
-    }
-    
-    return true;
-  } catch (error) {
-    handleError(error, 'Error toggling chat message reaction');
-    return false;
-  }
-};
-
-export const toggleReplyReaction = async (
-  replyId: string, 
-  userId: string, 
-  reactionType: string,
-  userName: string,
-  userUsername?: string,
-  userProfilePic?: string
-): Promise<boolean> => {
-  try {
-    const { data: existingReaction, error: checkError } = await supabase
-      .from('reply_reactions')
-      .select('*')
+    const { data, error } = await supabase
+      .from('reply_interactions')
+      .select('interaction_type')
       .eq('reply_id', replyId)
-      .eq('user_id', userId)
-      .eq('reaction_type', reactionType)
-      .maybeSingle();
+      .eq('user_id', userId);
       
-    if (checkError) {
-      throw checkError;
+    if (error) {
+      throw error;
     }
     
-    const { data: reply } = await supabase
-      .from('announcement_replies')
-      .select('author_id, content')
-      .eq('id', replyId)
-      .single();
+    const liked = data?.some(interaction => interaction.interaction_type === 'like') || false;
+    const disliked = data?.some(interaction => interaction.interaction_type === 'dislike') || false;
     
-    if (existingReaction) {
-      const { error: deleteError } = await supabase
-        .from('reply_reactions')
-        .delete()
-        .eq('id', existingReaction.id);
-        
-      if (deleteError) {
-        throw deleteError;
-      }
-      
-      return false;
-    }
-    
-    const { error: insertError } = await supabase
-      .from('reply_reactions')
-      .insert({
-        reply_id: replyId,
-        user_id: userId,
-        reaction_type: reactionType,
-      });
-      
-    if (insertError) {
-      throw insertError;
-    }
-    
-    if (reply && reply.author_id && reply.author_id !== userId) {
-      await notifyReaction(
-        replyId,
-        EntityType.REPLY,
-        reply.content.substring(0, 30) + '...',
-        reactionType,
-        reply.author_id,
-        userId,
-        userName,
-        userUsername,
-        userProfilePic
-      );
-    }
-    
-    return true;
+    return { liked, disliked };
   } catch (error) {
-    handleError(error, 'Error toggling reply reaction');
-    return false;
+    console.error('Error getting user reply interaction:', error);
+    return { liked: false, disliked: false };
+  }
+};
+
+// Check if user has liked or disliked a chat message
+export const getUserChatMessageInteraction = async (messageId: string, userId: string): Promise<{liked: boolean, disliked: boolean}> => {
+  try {
+    const { data, error } = await supabase
+      .from('chat_message_interactions')
+      .select('interaction_type')
+      .eq('message_id', messageId)
+      .eq('user_id', userId);
+      
+    if (error) {
+      throw error;
+    }
+    
+    const liked = data?.some(interaction => interaction.interaction_type === 'like') || false;
+    const disliked = data?.some(interaction => interaction.interaction_type === 'dislike') || false;
+    
+    return { liked, disliked };
+  } catch (error) {
+    console.error('Error getting user chat message interaction:', error);
+    return { liked, disliked: false };
   }
 };
 
@@ -436,13 +397,13 @@ export const deleteAnnouncement = async (announcementId: string): Promise<boolea
       throw repliesError;
     }
     
-    const { error: reactionsError } = await supabase
-      .from('announcement_reactions')
+    const { error: interactionsError } = await supabase
+      .from('announcement_interactions')
       .delete()
       .eq('announcement_id', announcementId);
     
-    if (reactionsError) {
-      throw reactionsError;
+    if (interactionsError) {
+      throw interactionsError;
     }
     
     const { error } = await supabase
@@ -488,13 +449,13 @@ export const editAnnouncement = async (
 
 export const deleteAnnouncementReply = async (replyId: string): Promise<boolean> => {
   try {
-    const { error: reactionsError } = await supabase
-      .from('reply_reactions')
+    const { error: interactionsError } = await supabase
+      .from('reply_interactions')
       .delete()
       .eq('reply_id', replyId);
     
-    if (reactionsError) {
-      throw reactionsError;
+    if (interactionsError) {
+      throw interactionsError;
     }
     
     const { error } = await supabase
@@ -540,13 +501,13 @@ export const editAnnouncementReply = async (
 
 export const deleteChatMessage = async (messageId: string): Promise<boolean> => {
   try {
-    const { error: reactionsError } = await supabase
-      .from('chat_message_reactions')
+    const { error: interactionsError } = await supabase
+      .from('chat_message_interactions')
       .delete()
       .eq('message_id', messageId);
     
-    if (reactionsError) {
-      throw reactionsError;
+    if (interactionsError) {
+      throw interactionsError;
     }
     
     const { error } = await supabase
@@ -569,3 +530,4 @@ export const isUserAdmin = async (username: string): Promise<boolean> => {
   const ADMIN_USERNAMES = ['sec', 'thesec'];
   return ADMIN_USERNAMES.includes(username);
 };
+

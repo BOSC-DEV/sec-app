@@ -1,118 +1,107 @@
 
 import React, { useState, useEffect } from 'react';
+import { useProfile } from '@/contexts/ProfileContext';
 import { 
-  getAnnouncementReplies,
+  getAnnouncementReplies, 
+  addAnnouncementReply,
   deleteAnnouncementReply,
   editAnnouncementReply
 } from '@/services/communityService';
 import { AnnouncementReply } from '@/types/dataTypes';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { formatDistanceToNow } from 'date-fns';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
+import { ChevronDown, ChevronUp, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { 
-  MessageSquareReply, 
-  ChevronDown, 
-  ChevronUp
-} from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import ReactionButton from './ReactionButton';
-import ReplyForm from './ReplyForm';
-import BadgeTier from '@/components/profile/BadgeTier';
-import { calculateBadgeTier } from '@/utils/badgeUtils';
-import AdminContextMenu from './AdminContextMenu';
+import { formatDistanceToNow } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
+import CommunityInteractionButtons from './CommunityInteractionButtons';
+import AdminContextMenu from './AdminContextMenu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import ReplyForm from './ReplyForm';
 import RichTextEditor from './RichTextEditor';
-import { getUserTotalBountyAmount } from '@/services/bountyService';
 
 interface AnnouncementRepliesProps {
   announcementId: string;
-  isAdmin?: boolean;
+  isAdmin: boolean;
 }
 
-const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ 
-  announcementId,
-  isAdmin = false
-}) => {
+const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementId, isAdmin }) => {
+  const { profile, isConnected } = useProfile();
   const [replies, setReplies] = useState<AnnouncementReply[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isOpen, setIsOpen] = useState(false);
-  const [showReplyForm, setShowReplyForm] = useState(false);
-  const [userBounties, setUserBounties] = useState<Record<string, number>>({});
-  
-  // Edit dialog state
+  const [showReplies, setShowReplies] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editContent, setEditContent] = useState('');
   const [editingReplyId, setEditingReplyId] = useState<string | null>(null);
   
-  const fetchReplies = async () => {
-    setIsLoading(true);
-    try {
-      const data = await getAnnouncementReplies(announcementId);
-      setReplies(data);
-      
-      // Fetch bounty info for all reply authors
-      const uniqueAuthors = new Set(data.map(reply => reply.author_id));
-      Array.from(uniqueAuthors).forEach(authorId => {
-        if (authorId) fetchUserBounty(authorId);
-      });
-    } catch (error) {
-      console.error('Error fetching replies:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const fetchUserBounty = async (walletAddress: string) => {
-    try {
-      if (userBounties[walletAddress]) return;
-      
-      const bountyAmount = await getUserTotalBountyAmount(walletAddress);
-      setUserBounties(prev => ({
-        ...prev,
-        [walletAddress]: bountyAmount || 0
-      }));
-    } catch (error) {
-      console.error('Error fetching user bounty:', error);
-    }
-  };
-  
   useEffect(() => {
-    fetchReplies();
-  }, [announcementId]);
-  
-  useEffect(() => {
-    const channelName = `announcement-replies-${announcementId}`;
-    
-    const channel = supabase
-      .channel(channelName)
-      .on('postgres_changes', 
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'announcement_replies',
-          filter: `announcement_id=eq.${announcementId}`
-        }, 
-        (payload) => {
-          fetchReplies();
-          
-          // If it's a new reply, fetch bounty for the author
-          if (payload.eventType === 'INSERT' && payload.new.author_id) {
-            fetchUserBounty(payload.new.author_id);
-          }
-        }
-      )
-      .subscribe();
-      
-    return () => {
-      supabase.removeChannel(channel);
+    const fetchReplies = async () => {
+      setIsLoading(true);
+      try {
+        const data = await getAnnouncementReplies(announcementId);
+        setReplies(data || []);
+      } catch (error) {
+        console.error('Error fetching replies:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
-  }, [announcementId]);
+    
+    if (showReplies) {
+      fetchReplies();
+    }
+  }, [announcementId, showReplies]);
   
-  const toggleReplyForm = () => {
-    setShowReplyForm(!showReplyForm);
+  const handleAddReply = async (content: string) => {
+    if (!isConnected) {
+      toast({
+        title: "Not connected",
+        description: "Please connect your wallet to reply",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!content.trim()) {
+      toast({
+        title: "Empty reply",
+        description: "Please enter a reply",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      const newReply = await addAnnouncementReply({
+        announcement_id: announcementId,
+        content,
+        author_id: profile?.wallet_address || '',
+        author_name: profile?.display_name || '',
+        author_username: profile?.username || '',
+        author_profile_pic: profile?.profile_pic_url || '',
+      });
+      
+      if (newReply) {
+        // Add the new reply to the list
+        setReplies(prev => [...prev, newReply]);
+        
+        toast({
+          title: "Reply added",
+          description: "Your reply has been added successfully",
+          variant: "default",
+        });
+      } else {
+        throw new Error("Failed to add reply");
+      }
+    } catch (error) {
+      console.error('Error adding reply:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add reply. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
   
   const handleDeleteReply = async (replyId: string) => {
@@ -126,7 +115,8 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({
           description: "The reply has been deleted successfully",
           variant: "default",
         });
-        fetchReplies();
+        // Remove the deleted reply from the list
+        setReplies(prev => prev.filter(reply => reply.id !== replyId));
       } else {
         throw new Error("Failed to delete reply");
       }
@@ -158,7 +148,11 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({
           variant: "default",
         });
         setEditDialogOpen(false);
-        fetchReplies();
+        
+        // Update the edited reply in the list
+        setReplies(prev => prev.map(reply => 
+          reply.id === editingReplyId ? { ...reply, content: editContent } : reply
+        ));
       } else {
         throw new Error("Failed to update reply");
       }
@@ -172,165 +166,152 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({
     }
   };
   
-  if (replies.length === 0 && !showReplyForm) {
-    return (
-      <div className="mt-3">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="text-xs flex items-center gap-1" 
-          onClick={toggleReplyForm}
-        >
-          <MessageSquareReply className="h-3.5 w-3.5" />
-          Reply
-        </Button>
-      </div>
-    );
-  }
+  const formatTimeAgo = (dateString: string) => {
+    const distance = formatDistanceToNow(new Date(dateString), { addSuffix: false });
+    
+    if (distance.includes('about')) {
+      const cleanedDistance = distance.replace('about ', '');
+      
+      if (cleanedDistance.includes('second')) return cleanedDistance.replace(' seconds', 's').replace(' second', 's');
+      if (cleanedDistance.includes('minute')) return cleanedDistance.replace(' minutes', 'm').replace(' minute', 'm');
+      if (cleanedDistance.includes('hour')) return cleanedDistance.replace(' hours', 'h').replace(' hour', 'h');
+      if (cleanedDistance.includes('day')) return cleanedDistance.replace(' days', 'd').replace(' day', 'd');
+      if (cleanedDistance.includes('week')) return cleanedDistance.replace(' weeks', 'w').replace(' week', 'w');
+      if (cleanedDistance.includes('month')) return cleanedDistance.replace(' months', 'mo').replace(' month', 'mo');
+      if (cleanedDistance.includes('year')) return cleanedDistance.replace(' years', 'y').replace(' year', 'y');
+      
+      return cleanedDistance;
+    }
+    
+    if (distance.includes('second')) return distance.replace(' seconds', 's').replace(' second', 's');
+    if (distance.includes('minute')) return distance.replace(' minutes', 'm').replace(' minute', 'm');
+    if (distance.includes('hour')) return distance.replace(' hours', 'h').replace(' hour', 'h');
+    if (distance.includes('day')) return distance.replace(' days', 'd').replace(' day', 'd');
+    if (distance.includes('week')) return distance.replace(' weeks', 'w').replace(' week', 'w');
+    if (distance.includes('month')) return distance.replace(' months', 'mo').replace(' month', 'mo');
+    if (distance.includes('year')) return distance.replace(' years', 'y').replace(' year', 'y');
+    
+    return distance;
+  };
+  
+  const repliesCount = replies.length;
   
   return (
-    <div className="mt-3">
-      <Collapsible 
-        open={isOpen} 
-        onOpenChange={setIsOpen}
-        className="border-t pt-3 mt-3"
+    <div className="w-full mt-2">
+      <Button 
+        variant="ghost"
+        size="sm"
+        className="text-muted-foreground py-1 px-2 h-auto text-xs"
+        onClick={() => setShowReplies(!showReplies)}
       >
-        <div className="flex items-center justify-between">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="text-xs flex items-center gap-1" 
-            onClick={toggleReplyForm}
-          >
-            <MessageSquareReply className="h-3.5 w-3.5" />
-            Reply
-          </Button>
-          
-          {replies.length > 0 && (
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-xs flex items-center">
-                {isOpen ? (
-                  <>
-                    <ChevronUp className="h-3.5 w-3.5 mr-1" />
-                    Hide Replies
-                  </>
-                ) : (
-                  <>
-                    <ChevronDown className="h-3.5 w-3.5 mr-1" />
-                    Show Replies ({replies.length})
-                  </>
-                )}
-              </Button>
-            </CollapsibleTrigger>
-          )}
-        </div>
-        
-        {showReplyForm && (
-          <div className="mt-3">
-            <ReplyForm 
-              announcementId={announcementId} 
-              onReplySubmitted={() => {
-                fetchReplies();
-                setIsOpen(true);
-                setShowReplyForm(false);
-              }}
-            />
-          </div>
+        {showReplies ? (
+          <>
+            <ChevronUp className="h-3 w-3 mr-1" />
+            Hide Replies ({repliesCount})
+          </>
+        ) : (
+          <>
+            <ChevronDown className="h-3 w-3 mr-1" />
+            Show Replies ({repliesCount})
+          </>
         )}
-        
-        <CollapsibleContent className="mt-3 space-y-3">
+      </Button>
+      
+      {showReplies && (
+        <div className="mt-2">
           {isLoading ? (
-            <div className="animate-pulse space-y-3">
+            <div className="space-y-2">
               {[1, 2].map((i) => (
-                <div key={i} className="flex gap-3">
-                  <div className="rounded-full bg-muted h-8 w-8"></div>
-                  <div className="flex-1 space-y-2">
+                <div key={i} className="animate-pulse flex items-start space-x-2">
+                  <div className="bg-muted rounded-full h-6 w-6"></div>
+                  <div className="flex-1 space-y-1">
                     <div className="h-2 bg-muted rounded w-1/4"></div>
-                    <div className="h-4 bg-muted rounded w-3/4"></div>
+                    <div className="h-2 bg-muted rounded"></div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            replies.map((reply) => {
-              const userBadge = reply.author_id ? 
-                userBounties[reply.author_id] !== undefined ? 
-                  calculateBadgeTier(userBounties[reply.author_id]) : 
-                  null : 
-                null;
-              
-              const replyContent = (
-                <div key={reply.id} className="py-3 border-t first:border-t-0">
-                  <div className="flex items-start gap-3">
-                    {reply.author_username ? (
-                      <Link to={`/profile/${reply.author_username}`}>
-                        <Avatar className="h-8 w-8 cursor-pointer hover:opacity-80 transition-opacity">
-                          <AvatarImage src={reply.author_profile_pic} alt={reply.author_name} />
-                          <AvatarFallback>{reply.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                      </Link>
-                    ) : (
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={reply.author_profile_pic} alt={reply.author_name} />
-                        <AvatarFallback>{reply.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                      </Avatar>
-                    )}
-                    
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {reply.author_username ? (
-                          <Link to={`/profile/${reply.author_username}`} className="font-medium hover:underline">
-                            {reply.author_name}
-                          </Link>
-                        ) : (
-                          <span className="font-medium">{reply.author_name}</span>
-                        )}
+            <>
+              {replies.length > 0 ? (
+                <div className="space-y-3 mb-3">
+                  {replies.map((reply) => {
+                    const replyContent = (
+                      <div key={reply.id} className="border rounded-md p-3 bg-card">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center">
+                            {reply.author_username ? (
+                              <Link to={`/profile/${reply.author_username}`}>
+                                <Avatar className="h-6 w-6 mr-2">
+                                  <AvatarImage src={reply.author_profile_pic} alt={reply.author_name} />
+                                  <AvatarFallback>{reply.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                                </Avatar>
+                              </Link>
+                            ) : (
+                              <Avatar className="h-6 w-6 mr-2">
+                                <AvatarImage src={reply.author_profile_pic} alt={reply.author_name} />
+                                <AvatarFallback>{reply.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                              </Avatar>
+                            )}
+                            <div>
+                              {reply.author_username ? (
+                                <Link to={`/profile/${reply.author_username}`} className="hover:underline">
+                                  <span className="text-sm font-medium">{reply.author_name}</span>
+                                </Link>
+                              ) : (
+                                <span className="text-sm font-medium">{reply.author_name}</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-xs text-muted-foreground flex items-center">
+                            <Calendar className="h-3 w-3 mr-1" />
+                            {formatTimeAgo(reply.created_at)}
+                          </div>
+                        </div>
                         
-                        {userBadge && (
-                          <BadgeTier badgeInfo={userBadge} size="sm" showTooltip={true} />
-                        )}
-                        
-                        {reply.author_username && (
-                          <Link to={`/profile/${reply.author_username}`} className="text-icc-gold text-sm hover:underline">
-                            @{reply.author_username}
-                          </Link>
-                        )}
-                        
-                        <span className="text-xs text-muted-foreground">
-                          {formatDistanceToNow(new Date(reply.created_at), { addSuffix: true })}
-                        </span>
-                      </div>
-                      
-                      <div className="mt-1 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: reply.content }} />
-                      
-                      <div className="mt-2">
-                        <ReactionButton 
-                          itemId={reply.id} 
-                          itemType="reply" 
+                        <div 
+                          className="text-sm mt-2 prose prose-sm max-w-none" 
+                          dangerouslySetInnerHTML={{ __html: reply.content }}
                         />
+                        
+                        <div className="mt-2">
+                          <CommunityInteractionButtons 
+                            itemId={reply.id}
+                            itemType="reply"
+                            initialLikes={reply.likes}
+                            initialDislikes={reply.dislikes}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  </div>
+                    );
+                    
+                    return isAdmin ? (
+                      <AdminContextMenu 
+                        key={reply.id}
+                        onEdit={() => openEditDialog(reply)}
+                        onDelete={() => handleDeleteReply(reply.id)}
+                      >
+                        {replyContent}
+                      </AdminContextMenu>
+                    ) : replyContent;
+                  })}
                 </div>
-              );
+              ) : (
+                <div className="text-center text-sm text-muted-foreground my-2">
+                  No replies yet. Be the first to reply!
+                </div>
+              )}
               
-              return isAdmin ? (
-                <AdminContextMenu 
-                  key={reply.id}
-                  onEdit={() => openEditDialog(reply)}
-                  onDelete={() => handleDeleteReply(reply.id)}
-                >
-                  {replyContent}
-                </AdminContextMenu>
-              ) : replyContent;
-            })
+              <Separator className="my-3" />
+              
+              <ReplyForm onSubmit={handleAddReply} />
+            </>
           )}
-        </CollapsibleContent>
-      </Collapsible>
-
-      {/* Edit Reply Dialog */}
+        </div>
+      )}
+      
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="sm:max-w-[700px]">
+        <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Edit Reply</DialogTitle>
           </DialogHeader>

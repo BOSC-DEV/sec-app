@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -28,10 +29,10 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { Link } from 'react-router-dom';
-import ReactionButton from './ReactionButton';
-import RichTextEditor from './RichTextEditor';
 import AnnouncementReplies from './AnnouncementReplies';
+import CommunityInteractionButtons from './CommunityInteractionButtons';
 import AdminContextMenu from './AdminContextMenu';
+import RichTextEditor from './RichTextEditor';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 
@@ -359,14 +360,17 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         
         <CardFooter className="pt-0 px-6 pb-3 flex flex-col items-start">
           <div className="w-full flex justify-between items-center">
+            <CommunityInteractionButtons 
+              itemId={announcement.id} 
+              itemType="announcement"
+              initialLikes={announcement.likes}
+              initialDislikes={announcement.dislikes}
+            />
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <div className="flex items-center">
                 <Eye className="h-3 w-3 mr-1" />
                 {announcement.views || 0}
               </div>
-            </div>
-            <div className="bg-accent/10 rounded-md py-1.5 px-2">
-              <ReactionButton itemId={announcement.id} itemType="announcement" />
             </div>
           </div>
           

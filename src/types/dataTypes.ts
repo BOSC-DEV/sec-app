@@ -80,6 +80,8 @@ export interface Announcement {
   author_profile_pic?: string;
   created_at: string;
   views: number;
+  likes?: number;
+  dislikes?: number;
 }
 
 export interface AnnouncementReply {
@@ -91,6 +93,8 @@ export interface AnnouncementReply {
   author_username?: string;
   author_profile_pic?: string;
   created_at: string;
+  likes?: number;
+  dislikes?: number;
 }
 
 export interface ChatMessage {
@@ -102,41 +106,8 @@ export interface ChatMessage {
   author_profile_pic?: string;
   image_url?: string;
   created_at: string;
-}
-
-export interface MessageReaction {
-  id: string;
-  announcement_id?: string;
-  message_id?: string;
-  reply_id?: string;
-  user_id: string;
-  reaction_type: string;
-  created_at: string;
-}
-
-// New interfaces for reactions (typed specifically for each context)
-export interface AnnouncementReaction {
-  id: string;
-  announcement_id: string;
-  user_id: string;
-  reaction_type: string;
-  created_at: string;
-}
-
-export interface ChatMessageReaction {
-  id: string;
-  message_id: string;
-  user_id: string;
-  reaction_type: string;
-  created_at: string;
-}
-
-export interface ReplyReaction {
-  id: string;
-  reply_id: string;
-  user_id: string;
-  reaction_type: string;
-  created_at: string;
+  likes?: number;
+  dislikes?: number;
 }
 
 // Notification system types
@@ -161,7 +132,8 @@ export enum NotificationType {
   BOUNTY = 'bounty',
   REACTION = 'reaction',
   MENTION = 'mention',
-  SYSTEM = 'system'
+  SYSTEM = 'system',
+  DISLIKE = 'dislike'
 }
 
 export enum EntityType {
