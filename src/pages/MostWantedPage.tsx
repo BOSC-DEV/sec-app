@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import CompactHero from '@/components/common/CompactHero';
 import ScammerCard from '@/components/common/ScammerCard';
@@ -343,7 +342,7 @@ const MostWantedPage = () => {
                   <TableHeader>
                     <TableRow className="bg-icc-gold/30 border-b border-icc-gold">
                       <TableHead 
-                        className="w-12 font-bold text-icc-blue cursor-pointer"
+                        className="w-12 font-bold text-icc-blue dark:text-white cursor-pointer"
                         onClick={() => handleSort('rank')}
                       >
                         <div className="flex items-center">
@@ -352,7 +351,7 @@ const MostWantedPage = () => {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="font-bold text-icc-blue cursor-pointer"
+                        className="font-bold text-icc-blue dark:text-white cursor-pointer"
                         onClick={() => handleSort('name')}
                       >
                         <div className="flex items-center">
@@ -361,7 +360,7 @@ const MostWantedPage = () => {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="font-bold text-icc-blue text-center cursor-pointer"
+                        className="font-bold text-icc-blue text-center dark:text-white cursor-pointer"
                         onClick={() => handleSort('bounty')}
                       >
                         <Tooltip>
@@ -377,7 +376,7 @@ const MostWantedPage = () => {
                         </Tooltip>
                       </TableHead>
                       <TableHead 
-                        className="font-bold text-icc-blue cursor-pointer"
+                        className="font-bold text-icc-blue dark:text-white cursor-pointer"
                         onClick={() => handleSort('accused_of')}
                       >
                         <div className="flex items-center">
@@ -386,7 +385,7 @@ const MostWantedPage = () => {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="font-bold text-icc-blue cursor-pointer"
+                        className="font-bold text-icc-blue dark:text-white cursor-pointer"
                         onClick={() => handleSort('aliases')}
                       >
                         <div className="flex items-center">
@@ -407,7 +406,7 @@ const MostWantedPage = () => {
                         </Tooltip>
                       </TableHead>
                       <TableHead 
-                        className="font-bold text-icc-blue text-center cursor-pointer"
+                        className="font-bold text-icc-blue text-center dark:text-white cursor-pointer"
                         onClick={() => handleSort('likes')}
                       >
                         <Tooltip>
@@ -423,7 +422,7 @@ const MostWantedPage = () => {
                         </Tooltip>
                       </TableHead>
                       <TableHead 
-                        className="font-bold text-icc-blue text-center cursor-pointer"
+                        className="font-bold text-icc-blue text-center dark:text-white cursor-pointer"
                         onClick={() => handleSort('views')}
                       >
                         <Tooltip>
@@ -439,7 +438,7 @@ const MostWantedPage = () => {
                         </Tooltip>
                       </TableHead>
                       <TableHead 
-                        className="font-bold text-icc-blue cursor-pointer"
+                        className="font-bold text-icc-blue dark:text-white cursor-pointer"
                         onClick={() => handleSort('date')}
                       >
                         <div className="flex items-center">
@@ -447,7 +446,7 @@ const MostWantedPage = () => {
                           {renderSortIndicator('date')}
                         </div>
                       </TableHead>
-                      <TableHead className="font-bold text-icc-blue text-center">
+                      <TableHead className="font-bold text-icc-blue text-center dark:text-white">
                         <div className="flex items-center justify-center">
                           By
                         </div>
