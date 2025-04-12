@@ -248,8 +248,8 @@ export const likeAnnouncement = async (announcementId: string, userId: string): 
           throw fetchAnnouncementError;
         }
         
-        likes = Math.max(0, (announcement?.likes || 1) - 1);
-        dislikes = announcement?.dislikes || 0;
+        likes = Math.max(0, (announcement.likes || 1) - 1);
+        dislikes = announcement.dislikes || 0;
         
         const { error: updateAnnouncementError } = await supabase
           .from('announcements')
@@ -289,10 +289,10 @@ export const likeAnnouncement = async (announcementId: string, userId: string): 
           throw fetchAnnouncementError;
         }
         
-        likes = (announcement?.likes || 0) + 1;
+        likes = (announcement.likes || 0) + 1;
         dislikes = existingInteractions.disliked 
-          ? Math.max(0, (announcement?.dislikes || 1) - 1) 
-          : (announcement?.dislikes || 0);
+          ? Math.max(0, (announcement.dislikes || 1) - 1) 
+          : (announcement.dislikes || 0);
         
         const { error: updateAnnouncementError } = await supabase
           .from('announcements')
@@ -334,7 +334,7 @@ export const likeAnnouncement = async (announcementId: string, userId: string): 
         throw fetchAnnouncementError;
       }
       
-      likes = (announcement?.likes || 0) + 1;
+      likes = (announcement.likes || 0) + 1;
       
       const { error: updateAnnouncementError } = await supabase
         .from('announcements')
@@ -395,8 +395,8 @@ export const dislikeAnnouncement = async (announcementId: string, userId: string
           throw fetchAnnouncementError;
         }
         
-        dislikes = Math.max(0, (announcement?.dislikes || 1) - 1);
-        likes = announcement?.likes || 0;
+        dislikes = Math.max(0, (announcement.dislikes || 1) - 1);
+        likes = announcement.likes || 0;
         
         const { error: updateAnnouncementError } = await supabase
           .from('announcements')
@@ -436,10 +436,10 @@ export const dislikeAnnouncement = async (announcementId: string, userId: string
           throw fetchAnnouncementError;
         }
         
-        dislikes = (announcement?.dislikes || 0) + 1;
+        dislikes = (announcement.dislikes || 0) + 1;
         likes = existingInteractions.liked 
-          ? Math.max(0, (announcement?.likes || 1) - 1) 
-          : (announcement?.likes || 0);
+          ? Math.max(0, (announcement.likes || 1) - 1) 
+          : (announcement.likes || 0);
         
         const { error: updateAnnouncementError } = await supabase
           .from('announcements')
@@ -481,7 +481,7 @@ export const dislikeAnnouncement = async (announcementId: string, userId: string
         throw fetchAnnouncementError;
       }
       
-      dislikes = (announcement?.dislikes || 0) + 1;
+      dislikes = (announcement.dislikes || 0) + 1;
       
       const { error: updateAnnouncementError } = await supabase
         .from('announcements')
@@ -543,8 +543,8 @@ export const likeReply = async (replyId: string, userId: string): Promise<{likes
           throw fetchReplyError;
         }
         
-        likes = Math.max(0, (reply?.likes || 1) - 1);
-        dislikes = reply?.dislikes || 0;
+        likes = Math.max(0, (reply.likes || 1) - 1);
+        dislikes = reply.dislikes || 0;
         
         const { error: updateReplyError } = await supabase
           .from('announcement_replies')
@@ -584,10 +584,10 @@ export const likeReply = async (replyId: string, userId: string): Promise<{likes
           throw fetchReplyError;
         }
         
-        likes = (reply?.likes || 0) + 1;
+        likes = (reply.likes || 0) + 1;
         dislikes = existingInteractions.disliked 
-          ? Math.max(0, (reply?.dislikes || 1) - 1) 
-          : (reply?.dislikes || 0);
+          ? Math.max(0, (reply.dislikes || 1) - 1) 
+          : (reply.dislikes || 0);
         
         const { error: updateReplyError } = await supabase
           .from('announcement_replies')
@@ -629,7 +629,7 @@ export const likeReply = async (replyId: string, userId: string): Promise<{likes
         throw fetchReplyError;
       }
       
-      likes = (reply?.likes || 0) + 1;
+      likes = (reply.likes || 0) + 1;
       
       const { error: updateReplyError } = await supabase
         .from('announcement_replies')
@@ -690,8 +690,8 @@ export const dislikeReply = async (replyId: string, userId: string): Promise<{li
           throw fetchReplyError;
         }
         
-        dislikes = Math.max(0, (reply?.dislikes || 1) - 1);
-        likes = reply?.likes || 0;
+        dislikes = Math.max(0, (reply.dislikes || 1) - 1);
+        likes = reply.likes || 0;
         
         const { error: updateReplyError } = await supabase
           .from('announcement_replies')
@@ -731,10 +731,10 @@ export const dislikeReply = async (replyId: string, userId: string): Promise<{li
           throw fetchReplyError;
         }
         
-        dislikes = (reply?.dislikes || 0) + 1;
+        dislikes = (reply.dislikes || 0) + 1;
         likes = existingInteractions.liked 
-          ? Math.max(0, (reply?.likes || 1) - 1) 
-          : (reply?.likes || 0);
+          ? Math.max(0, (reply.likes || 1) - 1) 
+          : (reply.likes || 0);
         
         const { error: updateReplyError } = await supabase
           .from('announcement_replies')
@@ -776,7 +776,7 @@ export const dislikeReply = async (replyId: string, userId: string): Promise<{li
         throw fetchReplyError;
       }
       
-      dislikes = (reply?.dislikes || 0) + 1;
+      dislikes = (reply.dislikes || 0) + 1;
       
       const { error: updateReplyError } = await supabase
         .from('announcement_replies')
@@ -838,8 +838,8 @@ export const likeChatMessage = async (messageId: string, userId: string): Promis
           throw fetchMessageError;
         }
         
-        likes = Math.max(0, (message?.likes || 1) - 1);
-        dislikes = message?.dislikes || 0;
+        likes = Math.max(0, (message.likes || 1) - 1);
+        dislikes = message.dislikes || 0;
         
         const { error: updateMessageError } = await supabase
           .from('chat_messages')
@@ -879,10 +879,10 @@ export const likeChatMessage = async (messageId: string, userId: string): Promis
           throw fetchMessageError;
         }
         
-        likes = (message?.likes || 0) + 1;
+        likes = (message.likes || 0) + 1;
         dislikes = existingInteractions.disliked 
-          ? Math.max(0, (message?.dislikes || 1) - 1) 
-          : (message?.dislikes || 0);
+          ? Math.max(0, (message.dislikes || 1) - 1) 
+          : (message.dislikes || 0);
         
         const { error: updateMessageError } = await supabase
           .from('chat_messages')
@@ -924,7 +924,7 @@ export const likeChatMessage = async (messageId: string, userId: string): Promis
         throw fetchMessageError;
       }
       
-      likes = (message?.likes || 0) + 1;
+      likes = (message.likes || 0) + 1;
       
       const { error: updateMessageError } = await supabase
         .from('chat_messages')
@@ -985,8 +985,8 @@ export const dislikeChatMessage = async (messageId: string, userId: string): Pro
           throw fetchMessageError;
         }
         
-        dislikes = Math.max(0, (message?.dislikes || 1) - 1);
-        likes = message?.likes || 0;
+        dislikes = Math.max(0, (message.dislikes || 1) - 1);
+        likes = message.likes || 0;
         
         const { error: updateMessageError } = await supabase
           .from('chat_messages')
@@ -1026,10 +1026,10 @@ export const dislikeChatMessage = async (messageId: string, userId: string): Pro
           throw fetchMessageError;
         }
         
-        dislikes = (message?.dislikes || 0) + 1;
+        dislikes = (message.dislikes || 0) + 1;
         likes = existingInteractions.liked 
-          ? Math.max(0, (message?.likes || 1) - 1) 
-          : (message?.likes || 0);
+          ? Math.max(0, (message.likes || 1) - 1) 
+          : (message.likes || 0);
         
         const { error: updateMessageError } = await supabase
           .from('chat_messages')
@@ -1071,7 +1071,7 @@ export const dislikeChatMessage = async (messageId: string, userId: string): Pro
         throw fetchMessageError;
       }
       
-      dislikes = (message?.dislikes || 0) + 1;
+      dislikes = (message.dislikes || 0) + 1;
       
       const { error: updateMessageError } = await supabase
         .from('chat_messages')

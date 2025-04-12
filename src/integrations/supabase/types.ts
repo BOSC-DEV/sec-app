@@ -50,7 +50,9 @@ export type Database = {
           author_username: string | null
           content: string
           created_at: string
+          dislikes: number
           id: string
+          likes: number
         }
         Insert: {
           announcement_id: string
@@ -60,7 +62,9 @@ export type Database = {
           author_username?: string | null
           content: string
           created_at?: string
+          dislikes?: number
           id?: string
+          likes?: number
         }
         Update: {
           announcement_id?: string
@@ -70,7 +74,9 @@ export type Database = {
           author_username?: string | null
           content?: string
           created_at?: string
+          dislikes?: number
           id?: string
+          likes?: number
         }
         Relationships: [
           {
@@ -90,7 +96,9 @@ export type Database = {
           author_username: string
           content: string
           created_at: string
+          dislikes: number
           id: string
+          likes: number
           views: number
         }
         Insert: {
@@ -100,7 +108,9 @@ export type Database = {
           author_username: string
           content: string
           created_at?: string
+          dislikes?: number
           id?: string
+          likes?: number
           views?: number
         }
         Update: {
@@ -110,7 +120,9 @@ export type Database = {
           author_username?: string
           content?: string
           created_at?: string
+          dislikes?: number
           id?: string
+          likes?: number
           views?: number
         }
         Relationships: []
@@ -208,8 +220,10 @@ export type Database = {
           author_username: string | null
           content: string
           created_at: string
+          dislikes: number
           id: string
           image_url: string | null
+          likes: number
         }
         Insert: {
           author_id: string
@@ -218,8 +232,10 @@ export type Database = {
           author_username?: string | null
           content: string
           created_at?: string
+          dislikes?: number
           id?: string
           image_url?: string | null
+          likes?: number
         }
         Update: {
           author_id?: string
@@ -228,8 +244,10 @@ export type Database = {
           author_username?: string | null
           content?: string
           created_at?: string
+          dislikes?: number
           id?: string
           image_url?: string | null
+          likes?: number
         }
         Relationships: []
       }

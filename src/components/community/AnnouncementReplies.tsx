@@ -82,7 +82,6 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
       });
       
       if (newReply) {
-        // Add the new reply to the list
         setReplies(prev => [...prev, newReply]);
         
         toast({
@@ -114,7 +113,6 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
           description: "The reply has been deleted successfully",
           variant: "default",
         });
-        // Remove the deleted reply from the list
         setReplies(prev => prev.filter(reply => reply.id !== replyId));
       } else {
         throw new Error("Failed to delete reply");
@@ -148,7 +146,6 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
         });
         setEditDialogOpen(false);
         
-        // Update the edited reply in the list
         setReplies(prev => prev.map(reply => 
           reply.id === editingReplyId ? { ...reply, content: editContent } : reply
         ));
@@ -290,8 +287,8 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
               <Separator className="my-3" />
               
               <ReplyForm 
-                onSubmit={handleAddReply}
                 announcementId={announcementId}
+                onSubmit={handleAddReply}
               />
             </>
           )}
