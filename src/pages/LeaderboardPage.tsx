@@ -100,7 +100,7 @@ const LeaderboardPage = () => {
     <div>
       <CompactHero title="Leaderboard" subtitle="Top hunters tracking and reporting cryptocurrency scammers." />
 
-      <section className="py-12 bg-gradient-to-b from-white to-gray-50">
+      <section className="py-12 bg-gradient-to-b from-white to-gray-50 dark:from-icc-blue-dark dark:to-icc-blue">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {isLoading ? (
             <div className="p-6 space-y-4">
@@ -271,8 +271,8 @@ const LeaderboardPage = () => {
                                   </AvatarFallback>
                                 </Avatar>
                                 <div>
-                                  <div className="font-medium text-icc-blue">{profile.display_name}</div>
-                                  <div className="text-sm text-gray-500">@{profile.username || profile.display_name.toLowerCase().replace(/\s/g, '')}</div>
+                                  <div className="font-medium text-icc-blue dark:text-white">{profile.display_name}</div>
+                                  <div className="text-sm text-gray-500 dark:text-gray-300">@{profile.username || profile.display_name.toLowerCase().replace(/\s/g, '')}</div>
                                 </div>
                               </div>
                             </Link>

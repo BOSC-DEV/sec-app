@@ -471,7 +471,7 @@ const MostWantedPage = () => {
                                 alt={scammer.name} 
                                 className="w-10 h-10 rounded-full object-cover border-2 border-icc-gold"
                               />
-                              <span className="font-medium text-icc-blue">{scammer.name}</span>
+                              <span className="font-medium text-icc-blue dark:text-white">{scammer.name}</span>
                             </div>
                           </TableCell>
                           <TableCell className="text-center font-semibold text-icc-primary">
@@ -485,24 +485,24 @@ const MostWantedPage = () => {
                               </span>
                             )}
                           </TableCell>
-                          <TableCell className="max-w-[200px] truncate">
+                          <TableCell className="max-w-[200px] truncate dark:text-white">
                             {scammer.accused_of || '-'}
                           </TableCell>
                           <TableCell>
                             {scammer.aliases && scammer.aliases.length > 0 ? (
                               <div className="flex flex-wrap gap-1">
-                                <Badge variant="gold" className="text-xs">
+                                <Badge variant="gold" className="text-xs dark:text-white">
                                   {scammer.aliases[0]}
                                 </Badge>
                                 {scammer.aliases.length > 1 && (
-                                  <Badge variant="gold" className="text-xs flex items-center gap-0.5">
+                                  <Badge variant="gold" className="text-xs flex items-center gap-0.5 dark:text-white">
                                     <Plus className="h-3 w-3" />
                                     {scammer.aliases.length - 1}
                                   </Badge>
                                 )}
                               </div>
                             ) : (
-                              <span className="text-gray-400">-</span>
+                              <span className="text-gray-400 dark:text-gray-300">-</span>
                             )}
                           </TableCell>
                           <TableCell className="text-center">
@@ -521,7 +521,7 @@ const MostWantedPage = () => {
                                   </a>
                                 ))
                               ) : (
-                                <span className="text-gray-400">-</span>
+                                <span className="text-gray-400 dark:text-gray-300">-</span>
                               )}
                             </div>
                           </TableCell>

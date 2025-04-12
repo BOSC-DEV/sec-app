@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -57,7 +58,8 @@ const Header = () => {
               </div>
             </Link>
 
-            <nav className="hidden md:flex items-center space-x-6">
+            {/* Added ml-6 to create spacing between logo and navigation */}
+            <nav className="hidden md:flex items-center space-x-6 ml-6">
               {navigationItems.map((item) => (
                 <Link 
                   key={item.path}
