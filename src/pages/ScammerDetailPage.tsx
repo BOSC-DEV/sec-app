@@ -703,12 +703,14 @@ const ScammerDetailPage = () => {
                 </TabsContent>
               </Tabs>
               
-              {/* Add Bounty Form */}
-              <BountyForm 
-                scammerId={scammer.id} 
-                scammerName={scammer.name}
-                developerWalletAddress={developerWalletAddress}
-              />
+              {/* Display the BountyForm only on mobile */}
+              {isMobile && (
+                <BountyForm 
+                  scammerId={scammer.id} 
+                  scammerName={scammer.name}
+                  developerWalletAddress={developerWalletAddress}
+                />
+              )}
             </div>
 
             <div>
@@ -802,6 +804,17 @@ const ScammerDetailPage = () => {
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
+                
+                {/* Display the BountyForm on desktop under the likes bar */}
+                {!isMobile && (
+                  <div className="mt-6">
+                    <BountyForm 
+                      scammerId={scammer.id} 
+                      scammerName={scammer.name}
+                      developerWalletAddress={developerWalletAddress}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>
