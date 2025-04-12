@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import SEO from '@/components/common/SEO';
@@ -13,7 +14,7 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/componen
 const CommunityPage = () => {
   const { profile, isConnected } = useProfile();
   const [activeTab, setActiveTab] = useState("announcements");
-  const [splitScreen, setSplitScreen] = useState(false);
+  const [splitScreen, setSplitScreen] = useState(true); // Changed to true to make split screen default
 
   useEffect(() => {
     if (!isConnected) {

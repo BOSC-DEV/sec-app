@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -184,6 +185,9 @@ const AnnouncementFeed = () => {
                         {announcement.author_name}
                         <span className="text-icc-gold ml-1 font-bold">@{announcement.author_username}</span>
                       </div>
+                      <div className="text-xs text-icc-gold font-medium mt-0.5">
+                        Official SEC Announcement
+                      </div>
                     </div>
                   </div>
                   
@@ -206,9 +210,6 @@ const AnnouncementFeed = () => {
                     <div className="flex items-center">
                       <Eye className="h-3 w-3 mr-1" />
                       {announcement.views || 0}
-                    </div>
-                    <div>
-                      Official SEC Announcement
                     </div>
                   </div>
                   <ReactionButton itemId={announcement.id} itemType="announcement" />
