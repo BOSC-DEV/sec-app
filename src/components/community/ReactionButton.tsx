@@ -103,7 +103,8 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   const getReactionCounts = () => {
     const counts: Record<string, number> = {};
     
-    (reactions as Reaction[]).forEach(reaction => {
+    // First convert to unknown and then to our Reaction type for safety
+    (reactions as unknown as Reaction[]).forEach(reaction => {
       const type = reaction.reaction_type;
       if (type) {
         counts[type] = (counts[type] || 0) + 1;
@@ -115,7 +116,7 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   
   // Check if user has already reacted with a specific emoji
   const hasUserReacted = (emoji: string) => {
-    return (reactions as Reaction[]).some(
+    return (reactions as unknown as Reaction[]).some(
       r => r.user_id === profile?.wallet_address && r.reaction_type === emoji
     );
   };
