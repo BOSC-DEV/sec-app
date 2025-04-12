@@ -3,7 +3,23 @@ import React from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { HelpCircle } from 'lucide-react';
+import { 
+  HelpCircle, 
+  UserCheck, 
+  Globe, 
+  FileText, 
+  Search, 
+  Wallet, 
+  CheckCircle, 
+  List, 
+  DollarSign, 
+  UserCircle, 
+  AlertTriangle, 
+  Scale, 
+  TrendingUp, 
+  BadgeHelp, 
+  Shield 
+} from 'lucide-react';
 
 interface FAQDialogProps {
   open: boolean;

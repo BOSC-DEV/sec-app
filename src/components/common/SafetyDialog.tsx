@@ -1,9 +1,20 @@
-
 import React from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Shield } from 'lucide-react';
+import { 
+  Shield, 
+  Lock, 
+  AlertTriangle, 
+  Search, 
+  ClipboardCheck, 
+  Wallet, 
+  Scale, 
+  FileText, 
+  BadgeHelp, 
+  BookOpen, 
+  Globe 
+} from 'lucide-react';
 
 interface SafetyDialogProps {
   open: boolean;
