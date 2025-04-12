@@ -30,6 +30,7 @@ export interface Profile {
   website_link: string;
   bio: string;
   points: number;
+  sec_balance?: number; // Added this property
   // Additional fields for leaderboard
   reports_count?: number;
   likes_count?: number;
