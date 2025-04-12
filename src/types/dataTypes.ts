@@ -112,3 +112,28 @@ export interface MessageReaction {
   reaction_type: string;
   created_at: string;
 }
+
+// New interfaces for reactions (typed specifically for each context)
+export interface AnnouncementReaction {
+  id: string;
+  announcement_id: string;
+  user_id: string;
+  reaction_type: string;
+  created_at: string;
+}
+
+export interface ChatMessageReaction {
+  id: string;
+  message_id: string;
+  user_id: string;
+  reaction_type: string;
+  created_at: string;
+}
+
+export interface ReplyReaction {
+  id: string;
+  reply_id: string;
+  user_id: string;
+  reaction_type: string;
+  created_at: string;
+}

@@ -3,9 +3,18 @@ import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { toggleAnnouncementReaction, toggleChatMessageReaction, toggleReplyReaction } from '@/services/communityService';
+import { 
+  toggleAnnouncementReaction, 
+  toggleChatMessageReaction, 
+  toggleReplyReaction 
+} from '@/services/communityService';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { 
+  AnnouncementReaction, 
+  ChatMessageReaction, 
+  ReplyReaction 
+} from '@/types/dataTypes';
 
 interface ReactionButtonProps {
   itemId: string;
@@ -78,10 +87,26 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   
   const fetchReactions = async () => {
     try {
-      const { data, error } = await supabase
-        .from(config.tableName)
-        .select('user_id, reaction_type')
-        .eq(config.idField, itemId);
+      let query;
+      
+      if (itemType === 'announcement') {
+        query = supabase
+          .from('announcement_reactions')
+          .select('user_id, reaction_type')
+          .eq('announcement_id', itemId);
+      } else if (itemType === 'chat') {
+        query = supabase
+          .from('chat_message_reactions')
+          .select('user_id, reaction_type')
+          .eq('message_id', itemId);
+      } else if (itemType === 'reply') {
+        query = supabase
+          .from('reply_reactions')
+          .select('user_id, reaction_type')
+          .eq('reply_id', itemId);
+      }
+      
+      const { data, error } = await query!;
         
       if (error) throw error;
       
@@ -89,7 +114,7 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
         // Group by reaction type
         const groupedReactions: Record<string, string[]> = {};
         
-        data.forEach(reaction => {
+        data.forEach((reaction: any) => {
           if (!groupedReactions[reaction.reaction_type]) {
             groupedReactions[reaction.reaction_type] = [];
           }

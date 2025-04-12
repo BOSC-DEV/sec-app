@@ -3,8 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { 
   Announcement, 
   ChatMessage, 
-  MessageReaction, 
-  AnnouncementReply 
+  AnnouncementReply
 } from '@/types/dataTypes';
 import { toast } from '@/hooks/use-toast';
 import { handleError } from '@/utils/errorHandling';
@@ -70,7 +69,7 @@ export const getAnnouncementReplies = async (announcementId: string): Promise<An
       throw error;
     }
     
-    return data || [];
+    return data as AnnouncementReply[] || [];
   } catch (error) {
     handleError(error, 'Error fetching announcement replies');
     return [];
@@ -99,7 +98,7 @@ export const addAnnouncementReply = async (reply: Omit<AnnouncementReply, 'id' |
       throw error;
     }
     
-    return data;
+    return data as AnnouncementReply;
   } catch (error) {
     handleError(error, 'Error adding announcement reply');
     return null;

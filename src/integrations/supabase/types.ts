@@ -41,6 +41,47 @@ export type Database = {
           },
         ]
       }
+      announcement_replies: {
+        Row: {
+          announcement_id: string
+          author_id: string
+          author_name: string
+          author_profile_pic: string | null
+          author_username: string | null
+          content: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          announcement_id: string
+          author_id: string
+          author_name: string
+          author_profile_pic?: string | null
+          author_username?: string | null
+          content: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          announcement_id?: string
+          author_id?: string
+          author_name?: string
+          author_profile_pic?: string | null
+          author_username?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcement_replies_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "announcements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       announcements: {
         Row: {
           author_id: string
@@ -307,6 +348,38 @@ export type Database = {
           x_link?: string | null
         }
         Relationships: []
+      }
+      reply_reactions: {
+        Row: {
+          created_at: string
+          id: string
+          reaction_type: string
+          reply_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reaction_type: string
+          reply_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reaction_type?: string
+          reply_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reply_reactions_reply_id_fkey"
+            columns: ["reply_id"]
+            isOneToOne: false
+            referencedRelation: "announcement_replies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       scammer_views: {
         Row: {
