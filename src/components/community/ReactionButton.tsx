@@ -42,25 +42,6 @@ interface ReactionCount {
   has_reacted: boolean;
 }
 
-// Simplified types for different reaction inserts
-type AnnouncementReactionInsert = {
-  reaction_type: string;
-  user_id: string;
-  announcement_id: string;
-};
-
-type MessageReactionInsert = {
-  reaction_type: string;
-  user_id: string;
-  message_id: string;
-};
-
-type ReplyReactionInsert = {
-  reaction_type: string;
-  user_id: string;
-  reply_id: string;
-};
-
 const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: ReactionButtonProps) => {
   const { profile, isConnected } = useProfile();
   const [reactions, setReactions] = useState<ReactionCount[]>([]);
@@ -81,7 +62,7 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
     try {
       let success = false;
       
-      // Check if the user already has the same reaction - with explicit table references
+      // Check if the user already has the same reaction
       if (itemType === 'announcement') {
         const { data: existing, error: checkError } = await supabase
           .from('announcement_reactions')
@@ -106,15 +87,13 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
           success = true;
         } else {
           // Add new announcement reaction
-          const insertData: AnnouncementReactionInsert = {
-            reaction_type: reactionType,
-            user_id: profile?.wallet_address || '',
-            announcement_id: itemId
-          };
-          
           const { error: insertError } = await supabase
             .from('announcement_reactions')
-            .insert(insertData);
+            .insert({
+              reaction_type: reactionType,
+              user_id: profile?.wallet_address || '',
+              announcement_id: itemId
+            });
             
           if (insertError) throw insertError;
           success = true;
@@ -143,15 +122,13 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
           success = true;
         } else {
           // Add new message reaction
-          const insertData: MessageReactionInsert = {
-            reaction_type: reactionType,
-            user_id: profile?.wallet_address || '',
-            message_id: itemId
-          };
-          
           const { error: insertError } = await supabase
             .from('chat_message_reactions')
-            .insert(insertData);
+            .insert({
+              reaction_type: reactionType,
+              user_id: profile?.wallet_address || '',
+              message_id: itemId
+            });
             
           if (insertError) throw insertError;
           success = true;
@@ -181,15 +158,13 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
           success = true;
         } else {
           // Add new reply reaction
-          const insertData: ReplyReactionInsert = {
-            reaction_type: reactionType,
-            user_id: profile?.wallet_address || '',
-            reply_id: itemId
-          };
-          
           const { error: insertError } = await supabase
             .from('reply_reactions')
-            .insert(insertData);
+            .insert({
+              reaction_type: reactionType,
+              user_id: profile?.wallet_address || '',
+              reply_id: itemId
+            });
             
           if (insertError) throw insertError;
           success = true;

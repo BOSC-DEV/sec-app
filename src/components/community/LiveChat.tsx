@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Link } from 'react-router-dom';
-import { MessageSquare, Image as ImageIcon, Send, Smile, AlertCircle, Download, Info, X, Clock } from 'lucide-react';
+import { MessageSquare, Image as ImageIcon, Send, Smile, AlertCircle, Download, Info, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { getChatMessages, sendChatMessage, deleteChatMessage, isUserAdmin } from '@/services/communityService';
@@ -24,14 +24,8 @@ import { calculateBadgeTier } from '@/utils/badgeUtils';
 import { getUserTotalBountyAmount } from '@/services/bountyService';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-const SLOW_MODE_DELAY = 30; // 30 seconds
-const SLOW_MODE_STORAGE_KEY = 'chat_slow_mode';
-
 const LiveChat = () => {
-  const {
-    profile,
-    isConnected
-  } = useProfile();
+  const { profile, isConnected } = useProfile();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,11 +34,8 @@ const LiveChat = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [userBounties, setUserBounties] = useState<Record<string, number>>({});
-  const [slowModeCountdown, setSlowModeCountdown] = useState(0);
-  const [slowModeExpiry, setSlowModeExpiry] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const slowModeTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -59,63 +50,6 @@ const LiveChat = () => {
     checkAdmin();
   }, [profile?.username]);
 
-  useEffect(() => {
-    const loadSlowModeState = () => {
-      if (isAdmin) return; // Admins don't need slow mode
-
-      try {
-        const storedData = localStorage.getItem(SLOW_MODE_STORAGE_KEY);
-        if (storedData) {
-          const {
-            expiry,
-            userId
-          } = JSON.parse(storedData);
-          if (userId === profile?.wallet_address && expiry > Date.now()) {
-            const remainingSeconds = Math.ceil((expiry - Date.now()) / 1000);
-            setSlowModeCountdown(remainingSeconds);
-            setSlowModeExpiry(expiry);
-          } else if (userId !== profile?.wallet_address || expiry <= Date.now()) {
-            localStorage.removeItem(SLOW_MODE_STORAGE_KEY);
-          }
-        }
-      } catch (error) {
-        console.error('Error loading slow mode state:', error);
-        localStorage.removeItem(SLOW_MODE_STORAGE_KEY);
-      }
-    };
-    if (profile?.wallet_address) {
-      loadSlowModeState();
-    }
-  }, [profile?.wallet_address, isAdmin]);
-
-  useEffect(() => {
-    if (slowModeExpiry && slowModeCountdown > 0 && profile?.wallet_address && !isAdmin) {
-      try {
-        localStorage.setItem(SLOW_MODE_STORAGE_KEY, JSON.stringify({
-          expiry: slowModeExpiry,
-          userId: profile.wallet_address
-        }));
-      } catch (error) {
-        console.error('Error saving slow mode state:', error);
-      }
-    } else if (slowModeCountdown === 0 && !isAdmin) {
-      localStorage.removeItem(SLOW_MODE_STORAGE_KEY);
-    }
-  }, [slowModeExpiry, slowModeCountdown, profile?.wallet_address, isAdmin]);
-
-  useEffect(() => {
-    if (slowModeCountdown > 0) {
-      slowModeTimerRef.current = setTimeout(() => {
-        setSlowModeCountdown(prev => prev - 1);
-      }, 1000);
-      return () => {
-        if (slowModeTimerRef.current) {
-          clearTimeout(slowModeTimerRef.current);
-        }
-      };
-    }
-  }, [slowModeCountdown]);
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({
       behavior: 'smooth'
@@ -128,14 +62,6 @@ const LiveChat = () => {
       toast({
         title: "Not connected",
         description: "Please connect your wallet to chat",
-        variant: "destructive"
-      });
-      return;
-    }
-    if (slowModeCountdown > 0 && !isAdmin) {
-      toast({
-        title: "Slow mode active",
-        description: `Please wait ${slowModeCountdown} seconds before sending another message`,
         variant: "destructive"
       });
       return;
@@ -161,11 +87,6 @@ const LiveChat = () => {
       setNewMessage('');
       setImageFile(null);
       setImagePreview(null);
-      if (!isAdmin) {
-        const expiryTime = Date.now() + SLOW_MODE_DELAY * 1000;
-        setSlowModeCountdown(SLOW_MODE_DELAY);
-        setSlowModeExpiry(expiryTime);
-      }
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
@@ -289,9 +210,6 @@ const LiveChat = () => {
     }).subscribe();
     return () => {
       supabase.removeChannel(channel);
-      if (slowModeTimerRef.current) {
-        clearTimeout(slowModeTimerRef.current);
-      }
     };
   }, []);
 
@@ -452,13 +370,6 @@ const LiveChat = () => {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="w-full space-y-2">
-            {slowModeCountdown > 0 && !isAdmin && (
-              <div className="flex items-center bg-muted/50 p-2 rounded text-sm text-muted-foreground mb-2">
-                <Clock className="h-4 w-4 mr-2 text-yellow-500" />
-                <span>Slow mode active: wait {slowModeCountdown}s</span>
-              </div>
-            )}
-            
             {imagePreview && (
               <div className="relative inline-block">
                 <img src={imagePreview} alt="Upload preview" className="max-h-32 rounded-md object-contain bg-muted/50" />
@@ -470,14 +381,14 @@ const LiveChat = () => {
             
             <div className="flex space-x-2">
               <div className="flex items-center space-x-1">
-                <Button type="button" variant="outline" size="icon" className="h-9 w-9" onClick={() => fileInputRef.current?.click()} disabled={slowModeCountdown > 0 && !isAdmin}>
+                <Button type="button" variant="outline" size="icon" className="h-9 w-9" onClick={() => fileInputRef.current?.click()}>
                   <ImageIcon className="h-4 w-4" />
                 </Button>
                 <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
                 
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button type="button" variant="outline" size="icon" className="h-9 w-9" disabled={slowModeCountdown > 0 && !isAdmin}>
+                    <Button type="button" variant="outline" size="icon" className="h-9 w-9">
                       <Smile className="h-4 w-4" />
                     </Button>
                   </PopoverTrigger>
@@ -488,16 +399,16 @@ const LiveChat = () => {
               </div>
               
               <Textarea 
-                placeholder={slowModeCountdown > 0 && !isAdmin ? `Wait ${slowModeCountdown}s...` : "Type your message..."} 
+                placeholder="Type your message..." 
                 value={newMessage} 
                 onChange={e => setNewMessage(e.target.value)} 
-                disabled={isSubmitting || (slowModeCountdown > 0 && !isAdmin)} 
+                disabled={isSubmitting} 
                 className="flex-1 min-h-[38px] max-h-[80px] py-2 text-sm resize-none"
                 rows={1}
                 style={{lineHeight: '1.2'}}
               />
               
-              <Button type="submit" size="icon" className="h-9 w-9" disabled={isSubmitting || !newMessage.trim() && !imageFile || slowModeCountdown > 0 && !isAdmin}>
+              <Button type="submit" size="icon" className="h-9 w-9" disabled={isSubmitting || (!newMessage.trim() && !imageFile)}>
                 {isSubmitting ? (
                   <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
                 ) : (
