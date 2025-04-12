@@ -70,7 +70,7 @@ const BadgeTiersPage = () => {
                           {tierInfo.minPercent}%
                         </TableCell>
                         <TableCell>
-                          {tierInfo.tier === BadgeTier.SHARK ? 'Unknown' : tierInfo.tier === BadgeTier.BLUE_WHALE ? '<5' : 'Unknown'}
+                          {tierInfo.tier === BadgeTier.SHRIMP ? 'Unknown' : tierInfo.tier === BadgeTier.BLUE_WHALE ? '<5' : 'Unknown'}
                         </TableCell>
                       </TableRow>
                     );
