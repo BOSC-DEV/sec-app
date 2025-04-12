@@ -11,6 +11,23 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { 
+  HelpCircle, 
+  UserCheck, 
+  Search, 
+  FileText, 
+  Wallet, 
+  CheckCircle, 
+  List, 
+  DollarSign, 
+  UserCircle, 
+  AlertTriangle,
+  Scale,
+  TrendingUp,
+  Globe,
+  BadgeHelp,
+  Shield
+} from 'lucide-react';
 
 interface FAQDialogProps {
   open: boolean;
@@ -25,33 +42,49 @@ const FAQDialog: React.FC<FAQDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-serif text-icc-blue">Frequently Asked Questions</DialogTitle>
+          <DialogTitle className="text-2xl font-serif text-icc-blue flex items-center gap-2">
+            <HelpCircle className="h-6 w-6" />
+            Frequently Asked Questions
+          </DialogTitle>
           <DialogDescription>
             Find answers to common questions about the Scams & E-crimes Commission.
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className="h-[60vh] pr-4">
           <div className="space-y-6 text-sm">
+            <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-center">
+              <p className="font-medium">Last Updated: April 2025</p>
+            </div>
+            
             <div>
-              <h3 className="font-bold text-lg">1. What is the Scams & E-crimes Commission (SEC)?</h3>
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <UserCheck className="h-5 w-5 text-icc-blue" />
+                1. What is the Scams & E-crimes Commission (SEC)?
+              </h3>
               <p>
                 The SEC is a community-driven platform designed to identify, report, and track cryptocurrency fraudsters and scammers. We provide a decentralized registry to bring accountability to the digital space and help protect users from fraud.
               </p>
             </div>
             
             <div>
-              <h3 className="font-bold text-lg">2. Is the SEC affiliated with any government organization?</h3>
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <Globe className="h-5 w-5 text-icc-blue" />
+                2. Is the SEC affiliated with any government organization?
+              </h3>
               <p>
                 No, the SEC is not affiliated with, endorsed by, or connected to any governmental or law enforcement agency. We are an independent, community-based platform that allows users to report and track suspected fraudulent activities.
               </p>
             </div>
             
             <div>
-              <h3 className="font-bold text-lg">3. How do I report a scammer?</h3>
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <FileText className="h-5 w-5 text-icc-blue" />
+                3. How do I report a scammer?
+              </h3>
               <p>
                 To report a scammer, you need to:
               </p>
-              <ol className="list-decimal pl-5 space-y-1">
+              <ol className="list-decimal pl-5 space-y-1 mt-2">
                 <li>Connect your wallet to our platform</li>
                 <li>Navigate to the "Report" section</li>
                 <li>Fill out the reporting form with as much detail as possible</li>
@@ -61,11 +94,14 @@ const FAQDialog: React.FC<FAQDialogProps> = ({
             </div>
             
             <div>
-              <h3 className="font-bold text-lg">4. What kinds of evidence should I include in a report?</h3>
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <Search className="h-5 w-5 text-icc-blue" />
+                4. What kinds of evidence should I include in a report?
+              </h3>
               <p>
                 Effective evidence includes:
               </p>
-              <ul className="list-disc pl-5 space-y-1">
+              <ul className="list-disc pl-5 space-y-1 mt-2">
                 <li>Screenshots of communications</li>
                 <li>Blockchain transaction IDs</li>
                 <li>Website URLs and social media profiles</li>
@@ -76,111 +112,164 @@ const FAQDialog: React.FC<FAQDialogProps> = ({
             </div>
             
             <div>
-              <h3 className="font-bold text-lg">5. Why do I need to connect a wallet to use the platform?</h3>
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <Wallet className="h-5 w-5 text-icc-blue" />
+                5. Why do I need to connect a wallet to use the platform?
+              </h3>
               <p>
                 Wallet connection serves multiple purposes:
               </p>
-              <ul className="list-disc pl-5 space-y-1">
+              <ul className="list-disc pl-5 space-y-1 mt-2">
                 <li>Provides a secure method of authentication</li>
                 <li>Prevents spam and fraudulent reports</li>
                 <li>Enables reputation building within the platform</li>
                 <li>Allows for potential future token-based governance</li>
+                <li>Facilitates bounty contributions and withdrawals</li>
               </ul>
             </div>
             
             <div>
-              <h3 className="font-bold text-lg">6. What happens after I submit a report?</h3>
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-icc-blue" />
+                6. What happens after I submit a report?
+              </h3>
               <p>
                 After submission, your report is:
               </p>
-              <ol className="list-decimal pl-5 space-y-1">
+              <ol className="list-decimal pl-5 space-y-1 mt-2">
                 <li>Published on the platform with your username as the reporter</li>
                 <li>Available for community review and verification</li>
                 <li>Potentially added to the Most Wanted list if it receives sufficient verification</li>
                 <li>Permanently stored in our database for future reference</li>
+                <li>Possibly eligible for bounty placements by other users</li>
               </ol>
             </div>
             
             <div>
-              <h3 className="font-bold text-lg">7. What is the Most Wanted list?</h3>
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <List className="h-5 w-5 text-icc-blue" />
+                7. What is the Most Wanted list?
+              </h3>
               <p>
-                The Most Wanted list highlights scammers who have been reported multiple times or who have allegedly committed large-scale fraud. These profiles receive more visibility to warn the wider community about potential threats.
+                The Most Wanted list highlights scammers who have been reported multiple times or who have allegedly committed large-scale fraud. These profiles receive more visibility to warn the wider community about potential threats. As of April 2025, profiles on this list have a combined reported fraud value of over $150 million.
               </p>
             </div>
             
             <div>
-              <h3 className="font-bold text-lg">8. How does the bounty system work?</h3>
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-icc-blue" />
+                8. How does the bounty system work?
+              </h3>
               <p>
-                Our bounty system allows users to place monetary rewards on confirmed scammers. These bounties incentivize the community to provide additional evidence and information that could lead to accountability or recovery of funds.
+                Our bounty system allows users to place monetary rewards on confirmed scammers. These bounties incentivize the community to provide additional evidence and information that could lead to accountability or recovery of funds. The 2025 update includes multi-chain bounty support and automated verification for bounty claims.
               </p>
             </div>
             
             <div>
-              <h3 className="font-bold text-lg">9. Can I be anonymous when reporting?</h3>
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <UserCircle className="h-5 w-5 text-icc-blue" />
+                9. Can I be anonymous when reporting?
+              </h3>
               <p>
-                While your wallet address is required for authentication, you can create a pseudonymous username and profile. We do not require your real name or personal information, but keep in mind that wallet addresses are publicly viewable on the blockchain.
+                While your wallet address is required for authentication, you can create a pseudonymous username and profile. We do not require your real name or personal information, but keep in mind that wallet addresses are publicly viewable on the blockchain. Our enhanced privacy features (added in 2025) provide additional protection for whistleblowers.
               </p>
             </div>
             
             <div>
-              <h3 className="font-bold text-lg">10. What if I'm falsely reported as a scammer?</h3>
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-icc-blue" />
+                10. What if I'm falsely reported as a scammer?
+              </h3>
               <p>
                 If you believe you've been falsely reported:
               </p>
-              <ol className="list-decimal pl-5 space-y-1">
+              <ol className="list-decimal pl-5 space-y-1 mt-2">
                 <li>You can create an account and respond to the allegations</li>
                 <li>Provide evidence countering the claims</li>
                 <li>Request a review from the community</li>
+                <li>Utilize our new dispute resolution system (introduced in 2025)</li>
                 <li>Contact us directly at gov@sec.digital for serious cases</li>
               </ol>
             </div>
             
             <div>
-              <h3 className="font-bold text-lg">11. Is the information on the platform legally admissible?</h3>
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <Scale className="h-5 w-5 text-icc-blue" />
+                11. Is the information on the platform legally admissible?
+              </h3>
               <p>
-                Our platform is for informational purposes only. While the information may be useful for identifying patterns of fraud, it may not meet legal standards for evidence in all jurisdictions. Always consult with legal authorities for formal proceedings.
+                Our platform is for informational purposes only. While the information may be useful for identifying patterns of fraud, it may not meet legal standards for evidence in all jurisdictions. However, our 2025 evidence certification system now creates standardized reports that have been accepted by courts in several jurisdictions. Always consult with legal authorities for formal proceedings.
               </p>
             </div>
             
             <div>
-              <h3 className="font-bold text-lg">12. How can I improve my reputation on the platform?</h3>
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-icc-blue" />
+                12. How can I improve my reputation on the platform?
+              </h3>
               <p>
                 You can build reputation by:
               </p>
-              <ul className="list-disc pl-5 space-y-1">
+              <ul className="list-disc pl-5 space-y-1 mt-2">
                 <li>Submitting well-documented, factual reports</li>
                 <li>Having your reports verified by the community</li>
                 <li>Contributing constructively to discussions</li>
                 <li>Helping to verify or provide additional evidence for existing reports</li>
+                <li>Participating in the new reputation staking system (launched Q1 2025)</li>
               </ul>
             </div>
             
             <div>
-              <h3 className="font-bold text-lg">13. Can I report scams that occurred outside of cryptocurrency?</h3>
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <BadgeHelp className="h-5 w-5 text-icc-blue" />
+                13. Are there any new features in 2025?
+              </h3>
               <p>
-                While our primary focus is on cryptocurrency-related scams, you can report other digital and electronic crimes. However, reports should have some connection to digital assets, online platforms, or electronic communications.
+                Yes, we've introduced several new features in 2025:
               </p>
+              <ul className="list-disc pl-5 space-y-1 mt-2">
+                <li><span className="font-semibold">Advanced AI Scam Detection:</span> Machine learning tools to identify potential scams</li>
+                <li><span className="font-semibold">Cross-Chain Monitoring:</span> Expanded tracking across multiple blockchain networks</li>
+                <li><span className="font-semibold">Mobile Alerts:</span> Real-time notifications for high-risk scam activities</li>
+                <li><span className="font-semibold">Enhanced Recovery Tools:</span> Resources for victims seeking to recover funds</li>
+                <li><span className="font-semibold">Educational Hub:</span> Comprehensive learning resources about crypto safety</li>
+              </ul>
             </div>
             
             <div>
-              <h3 className="font-bold text-lg">14. How does the platform prevent misuse or false reporting?</h3>
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <Shield className="h-5 w-5 text-icc-blue" />
+                14. How does the platform prevent misuse or false reporting?
+              </h3>
               <p>
                 We employ several measures:
               </p>
-              <ul className="list-disc pl-5 space-y-1">
+              <ul className="list-disc pl-5 space-y-1 mt-2">
                 <li>Requiring wallet authentication to prevent anonymous false reports</li>
-                <li>Community verification processes</li>
-                <li>Evidence requirements for all reports</li>
-                <li>Reputation systems for reporters</li>
-                <li>Moderation for clearly false or malicious content</li>
+                <li>Community verification processes with multi-stage validation</li>
+                <li>Evidence requirements for all reports with standardized evaluation</li>
+                <li>Reputation systems for reporters with stake-based accountability</li>
+                <li>AI-assisted moderation for clearly false or malicious content</li>
+                <li>Dispute resolution system with independent reviewers</li>
               </ul>
             </div>
             
             <div>
-              <h3 className="font-bold text-lg">15. Who is behind the SEC platform?</h3>
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <Globe className="h-5 w-5 text-icc-blue" />
+                15. How can I contribute to the SEC beyond reporting?
+              </h3>
               <p>
-                The SEC was created by a team of cryptocurrency enthusiasts, security experts, and developers concerned about the prevalence of scams in the digital asset space. Our mission is to create a safer ecosystem through community-driven accountability.
+                There are multiple ways to contribute:
               </p>
+              <ul className="list-disc pl-5 space-y-1 mt-2">
+                <li>Participate in community verification of reports</li>
+                <li>Contribute to bounties on confirmed scammers</li>
+                <li>Help develop educational content for the platform</li>
+                <li>Participate in governance discussions and proposals</li>
+                <li>Spread awareness about crypto safety in your networks</li>
+                <li>Join our developer community to improve platform tools</li>
+              </ul>
             </div>
           </div>
         </ScrollArea>
