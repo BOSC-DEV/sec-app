@@ -1,29 +1,17 @@
-
 import React from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogClose
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ShieldCheck, Globe, BookOpen } from 'lucide-react';
-
 interface AboutDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-const AboutDialog: React.FC<AboutDialogProps> = ({ 
-  open, 
-  onOpenChange 
+const AboutDialog: React.FC<AboutDialogProps> = ({
+  open,
+  onOpenChange
 }) => {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+  return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-serif text-icc-blue flex items-center gap-2">
@@ -151,12 +139,10 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
         </ScrollArea>
         <DialogFooter>
           <DialogClose asChild>
-            <Button className="bg-icc-blue hover:bg-icc-blue-dark">Close</Button>
+            <Button className="bg-neutral-50">Close</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
-
 export default AboutDialog;
