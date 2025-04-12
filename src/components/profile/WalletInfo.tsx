@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Button } from '@/components/ui/button';
 import { Wallet, ExternalLink, Copy, LogOut } from 'lucide-react';
@@ -56,7 +55,7 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
         {walletAddress ? (
           <div className="space-y-4">
             <div>
-              <div className="text-sm font-medium mb-1 text-gray-500 dark:text-gray-400 px-0 my-[20px]">Wallet Address</div>
+              <div className="text-sm font-medium mb-1 text-gray-500 dark:text-gray-400 px-0 my-[20px]">Address</div>
               <div className="flex items-center gap-2">
                 <div className="bg-gray-100 dark:bg-gray-800 p-2 rounded flex-1 font-mono text-sm truncate">
                   {walletAddress}
