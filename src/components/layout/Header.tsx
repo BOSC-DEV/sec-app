@@ -137,7 +137,7 @@ const Header = () => {
                     <Bell className="h-5 w-5" />
                   </Button>
                   {showNotifications && (
-                    <div className={`absolute ${isMobile ? 'left-1/2 -translate-x-1/2' : 'right-0'} mt-2 w-80`}>
+                    <div className={`absolute ${isMobile ? 'left-0 right-0 mx-auto w-80 max-w-[90vw]' : 'right-0'} mt-2 w-80`}>
                       <NotificationDropdown onClose={() => setShowNotifications(false)} />
                     </div>
                   )}
@@ -158,7 +158,7 @@ const Header = () => {
                   onClick={handleWalletButtonClick}
                 >
                   <Wallet className="h-4 w-4" />
-                  {isMobile ? '' : (profile ? profile.display_name.substring(0, 10) || 'Profile' : 'Profile')}
+                  {/* Always use just wallet icon on mobile */}
                 </Button>
               </div>
             ) : (
@@ -258,7 +258,7 @@ const Header = () => {
                 )}
               </div>
               
-              {/* Mobile notification dropdown - center it in mobile view */}
+              {/* Center notification dropdown in mobile view */}
               {showNotifications && isConnected && (
                 <div className="mt-2 flex justify-center">
                   <div className="w-full max-w-xs">
