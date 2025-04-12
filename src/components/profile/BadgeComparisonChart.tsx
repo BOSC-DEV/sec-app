@@ -39,6 +39,9 @@ const BadgeComparisonChart: React.FC = () => {
                   <p className="text-sm text-muted-foreground">
                     Min: {formatSecAmount(minHolding)} SEC
                   </p>
+                  <p className="text-xs text-muted-foreground">
+                    {tierData.minPercent}% of total supply
+                  </p>
                 </div>
               </div>
             );

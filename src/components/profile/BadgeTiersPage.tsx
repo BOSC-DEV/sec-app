@@ -5,7 +5,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { formatSecAmount, BADGE_TIERS, BadgeTier, TOTAL_SEC_SUPPLY } from '@/utils/badgeUtils';
 import BadgeTierComponent from '@/components/profile/BadgeTier';
 import { calculateBadgeTier } from '@/utils/badgeUtils';
-import BadgeComparisonChart from './BadgeComparisonChart';
 
 const BadgeTiersPage = () => {
   // Get all badge tiers
@@ -30,58 +29,60 @@ const BadgeTiersPage = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-8">
-            <div className="overflow-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Badge</TableHead>
-                    <TableHead>Minimum Holding</TableHead>
-                    <TableHead>% of Supply</TableHead>
-                    <TableHead>Holders</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sortedTiers.map((tierInfo) => {
-                    // Create sample badge info for each tier
-                    const badgeInfo = {
-                      tier: tierInfo.tier,
-                      color: tierInfo.color,
-                      icon: tierInfo.icon,
-                      minHolding: tierInfo.minHolding,
-                      percentOfSupply: tierInfo.minPercent,
-                      nextTier: undefined, // Not needed for display
-                    };
+          <div className="overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Badge</TableHead>
+                  <TableHead>Minimum Holding</TableHead>
+                  <TableHead>% of Supply</TableHead>
+                  <TableHead>Holders</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sortedTiers.map((tierInfo) => {
+                  // Create sample badge info for each tier
+                  const badgeInfo = {
+                    tier: tierInfo.tier,
+                    color: tierInfo.color,
+                    icon: tierInfo.icon,
+                    minHolding: tierInfo.minHolding,
+                    percentOfSupply: tierInfo.minPercent,
+                    nextTier: undefined, // Not needed for display
+                  };
 
-                    return (
-                      <TableRow key={tierInfo.tier}>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <BadgeTierComponent
-                              badgeInfo={badgeInfo}
-                              showTooltip={false}
-                            />
-                          </div>
-                        </TableCell>
-                        <TableCell className="font-mono">
-                          {formatSecAmount(tierInfo.minHolding)} SEC
-                        </TableCell>
-                        <TableCell>
-                          {tierInfo.minPercent}%
-                        </TableCell>
-                        <TableCell>
-                          {tierInfo.tier === BadgeTier.SHRIMP ? 'Unknown' : tierInfo.tier === BadgeTier.BLUE_WHALE ? '<5' : 'Unknown'}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
+                  return (
+                    <TableRow key={tierInfo.tier}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <BadgeTierComponent
+                            badgeInfo={badgeInfo}
+                            showTooltip={false}
+                          />
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-mono">
+                        {formatSecAmount(tierInfo.minHolding)} SEC
+                      </TableCell>
+                      <TableCell>
+                        {tierInfo.minPercent}%
+                      </TableCell>
+                      <TableCell>
+                        {tierInfo.tier === BadgeTier.SHRIMP ? 'Unknown' : tierInfo.tier === BadgeTier.BLUE_WHALE ? '<5' : 'Unknown'}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
 
-            <div className="pt-6">
-              <BadgeComparisonChart />
-            </div>
+          <div className="mt-6 p-4 bg-muted/30 rounded-lg border border-dashed text-sm">
+            <h4 className="font-medium mb-2">About Badges</h4>
+            <p className="text-muted-foreground">
+              Badges are automatically assigned based on your SEC token holdings. Higher tier badges 
+              grant exclusive benefits and increased visibility in the community.
+            </p>
           </div>
         </CardContent>
       </Card>
