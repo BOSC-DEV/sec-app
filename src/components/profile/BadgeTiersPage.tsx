@@ -97,17 +97,17 @@ const BadgeTiersPage: React.FC = () => {
                     ))}
                   </Pie>
                   <ChartTooltip 
-                    content={(props) => (
-                      <ChartTooltipContent 
-                        {...props} 
-                        formatter={(value, name) => {
-                          const tier = badgeTierData.find(t => t.name === name);
-                          if (!tier) return [value, name];
-                          return [
-                            <div key={name} className="space-y-1">
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const tier = badgeTierData.find(t => t.name === payload[0].name);
+                        if (!tier) return null;
+                        
+                        return (
+                          <div className="p-2 bg-background border border-border/50 rounded-lg shadow-md">
+                            <div className="space-y-1">
                               <div className="flex items-center">
                                 <span className="mr-2">{tier.icon}</span>
-                                <span className="font-semibold">{name}</span>
+                                <span className="font-semibold">{tier.name}</span>
                               </div>
                               <div className="text-xs">
                                 Min: {formatSecAmount(tier.minHolding)} SEC
@@ -115,12 +115,12 @@ const BadgeTiersPage: React.FC = () => {
                                   <span> ({(tier.minHolding / TOTAL_SEC_SUPPLY * 100).toFixed(2)}%)</span>
                                 )}
                               </div>
-                            </div>,
-                            ''
-                          ];
-                        }}
-                      />
-                    )}
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
                   />
                 </PieChart>
               </ChartContainer>
