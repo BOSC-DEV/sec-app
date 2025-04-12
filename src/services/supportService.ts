@@ -36,7 +36,7 @@ export const createSupportTicket = async (ticket: SupportTicket): Promise<Suppor
       .single();
 
     if (error) throw error;
-    return data;
+    return data as SupportTicket;
   } catch (error) {
     handleError(error, {
       fallbackMessage: 'Failed to create support ticket',
@@ -56,7 +56,7 @@ export const getKeyUpdates = async (): Promise<KeyUpdate[]> => {
       .gt('expires_at', new Date().toISOString());
 
     if (error) throw error;
-    return data || [];
+    return data as KeyUpdate[] || [];
   } catch (error) {
     handleError(error, {
       fallbackMessage: 'Failed to fetch key updates',

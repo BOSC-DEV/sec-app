@@ -25,6 +25,8 @@ import {
 import { useProfile } from '@/contexts/ProfileContext';
 import { createSupportTicket } from '@/services/supportService';
 import { toast } from '@/hooks/use-toast';
+import { AlertCircle } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 
 const supportTicketSchema = z.object({
   subject: z.string().min(5, "Subject must be at least 5 characters"),
@@ -73,6 +75,7 @@ const SupportTicketForm = () => {
         form.reset();
       }
     } catch (error) {
+      console.error("Support ticket submission error:", error);
       toast({
         title: "Error",
         description: "Failed to submit support ticket",
@@ -82,6 +85,20 @@ const SupportTicketForm = () => {
       setIsSubmitting(false);
     }
   };
+
+  if (!profile) {
+    return (
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center py-8">
+          <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
+          <h3 className="text-xl font-medium text-center">Wallet Not Connected</h3>
+          <p className="text-muted-foreground text-center mt-1">
+            Please connect your wallet to submit a support ticket
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Form {...form}>
@@ -109,6 +126,7 @@ const SupportTicketForm = () => {
                 <Textarea 
                   placeholder="Please provide detailed information about your issue" 
                   {...field} 
+                  rows={5}
                 />
               </FormControl>
               <FormMessage />
