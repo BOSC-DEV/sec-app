@@ -1,8 +1,12 @@
+
 import { toast } from "@/hooks/use-toast";
 import analyticsService from "@/services/analyticsService";
 import log from "@/services/loggingService";
 import { sanitizeHtml, sanitizeInput } from "./securityUtils";
 import { ErrorSeverity } from "./errorSeverity";
+
+// Re-export ErrorSeverity so existing imports continue to work
+export { ErrorSeverity };
 
 interface ErrorHandlingOptions {
   fallbackMessage?: string;
