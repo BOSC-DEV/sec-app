@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import ICCLogo from '../common/ICCLogo';
@@ -66,7 +65,7 @@ const Footer = () => {
               <li>
                 <button 
                   onClick={() => setAboutOpen(true)} 
-                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full"
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full hover:bg-white/10 py-1 px-2 rounded transition-colors"
                 >
                   About SEC
                 </button>
@@ -74,7 +73,7 @@ const Footer = () => {
               <li>
                 <button 
                   onClick={() => setFaqOpen(true)} 
-                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full"
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full hover:bg-white/10 py-1 px-2 rounded transition-colors"
                 >
                   FAQ
                 </button>
@@ -82,7 +81,7 @@ const Footer = () => {
               <li>
                 <button 
                   onClick={() => setContactOpen(true)} 
-                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full"
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full hover:bg-white/10 py-1 px-2 rounded transition-colors"
                 >
                   Contact Us
                 </button>
@@ -90,7 +89,7 @@ const Footer = () => {
               <li>
                 <button 
                   onClick={() => setSafetyOpen(true)} 
-                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full"
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full hover:bg-white/10 py-1 px-2 rounded transition-colors"
                 >
                   Safety Guidelines
                 </button>
@@ -104,7 +103,7 @@ const Footer = () => {
               <li>
                 <button 
                   onClick={() => setTermsOpen(true)} 
-                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full"
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full hover:bg-white/10 py-1 px-2 rounded transition-colors"
                 >
                   Terms of Service
                 </button>
@@ -112,7 +111,7 @@ const Footer = () => {
               <li>
                 <button 
                   onClick={() => setPrivacyOpen(true)} 
-                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full"
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full hover:bg-white/10 py-1 px-2 rounded transition-colors"
                 >
                   Privacy Policy
                 </button>
@@ -120,7 +119,7 @@ const Footer = () => {
               <li>
                 <button 
                   onClick={() => setDisclaimerOpen(true)} 
-                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full"
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full hover:bg-white/10 py-1 px-2 rounded transition-colors"
                 >
                   Disclaimer
                 </button>
@@ -128,7 +127,7 @@ const Footer = () => {
               <li>
                 <button 
                   onClick={() => setCookiesOpen(true)} 
-                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full"
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full hover:bg-white/10 py-1 px-2 rounded transition-colors"
                 >
                   Cookie Policy
                 </button>
@@ -145,7 +144,6 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Legal Dialogs */}
       <TermsDialog open={termsOpen} onOpenChange={setTermsOpen} />
       <PrivacyDialog open={privacyOpen} onOpenChange={setPrivacyOpen} />
       <DisclaimerDialog open={disclaimerOpen} onOpenChange={setDisclaimerOpen} />
