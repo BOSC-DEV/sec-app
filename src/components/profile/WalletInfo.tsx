@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -74,10 +73,7 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
             </div>
 
             {/* Render a BadgeTier component instead of the badgeInfo object directly */}
-            {badgeInfo && <div className="mt-4">
-                <div className="text-sm font-medium mb-1 text-gray-500 dark:text-gray-400">Badge Tier</div>
-                <BadgeTier badgeInfo={badgeInfo} showProgress={true} />
-              </div>}
+            {badgeInfo}
 
             {isOwnProfile && <div className="pt-4">
                 <Button variant="outline" className="w-full border-icc-red text-icc-red hover:bg-icc-red-light/10 hover:text-icc-red dark:border-red-700 dark:text-red-500 dark:hover:bg-red-900/20 flex items-center justify-center gap-2" onClick={handleDisconnect}>
