@@ -33,20 +33,30 @@ const SEO: React.FC<SEOProps> = ({
     ? `${title} | Scams & E-crimes Commission` 
     : "Scams & E-crimes Commission";
     
+  // Get current URL safely for both server and client environments
+  const getUrl = () => {
+    if (typeof window !== 'undefined') {
+      return window.location.href;
+    }
+    return '';
+  };
+  
+  const currentUrl = getUrl();
+  
   const absoluteCanonical = canonical ? 
-    (canonical.startsWith('http') ? canonical : `${window.location.origin}${canonical}`) : 
-    window.location.href;
+    (canonical.startsWith('http') ? canonical : `${typeof window !== 'undefined' ? window.location.origin : ''}${canonical}`) : 
+    currentUrl;
     
   const absoluteOgImage = ogImage ? 
-    (ogImage.startsWith('http') ? ogImage : `${window.location.origin}${ogImage}`) : 
-    `${window.location.origin}/lovable-uploads/3f23090d-4e36-43fc-b230-a8f898d7edd2.png`;
+    (ogImage.startsWith('http') ? ogImage : `${typeof window !== 'undefined' ? window.location.origin : ''}${ogImage}`) : 
+    `${typeof window !== 'undefined' ? window.location.origin : ''}/lovable-uploads/3f23090d-4e36-43fc-b230-a8f898d7edd2.png`;
 
   // Create structured data for schema.org
   const defaultSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "Scams & E-crimes Commission",
-    url: window.location.origin,
+    url: typeof window !== 'undefined' ? window.location.origin : '',
     description,
     ...(schema || {})
   };

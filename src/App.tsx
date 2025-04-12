@@ -21,6 +21,7 @@ import { ProfileProvider, useProfile } from "./contexts/ProfileContext";
 import EnhancedErrorBoundary from "./components/common/EnhancedErrorBoundary";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import analyticsService from "./services/analyticsService";
+import { HelmetProvider } from "react-helmet-async";
 
 // Initialize analytics service
 analyticsService.initAnalytics();
@@ -72,51 +73,53 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <ProfileProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <AnalyticsTracker />
-            <Layout>
-              <EnhancedErrorBoundary>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/most-wanted" element={<MostWantedPage />} />
-                  <Route path="/scammer/:id" element={<ScammerDetailPage />} />
-                  <Route path="/report" element={
-                    <ProtectedRoute>
-                      <ReportPage />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/report/:id" element={
-                    <ProtectedRoute>
-                      <ReportPage />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/leaderboard" element={<LeaderboardPage />} />
-                  <Route path="/community" element={<CommunityPage />} />
-                  <Route path="/profile" element={
-                    <ProtectedRoute>
-                      <ProfilePage />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/profile/:username" element={<PublicProfilePage />} />
-                  <Route path="/:username" element={<PublicProfilePage />} />
-                  
-                  {/* Legal and Information Pages */}
-                  <Route path="/terms" element={<LegalPages />} />
-                  <Route path="/privacy" element={<LegalPages />} />
-                  <Route path="/disclaimer" element={<LegalPages />} />
-                  <Route path="/cookies" element={<LegalPages />} />
-                  <Route path="/safety" element={<LegalPages />} />
-                  <Route path="/faq" element={<LegalPages />} />
-                  <Route path="/about" element={<LegalPages />} />
-                  <Route path="/contact" element={<LegalPages />} />
-                  
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </EnhancedErrorBoundary>
-            </Layout>
-          </BrowserRouter>
+          <HelmetProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AnalyticsTracker />
+              <Layout>
+                <EnhancedErrorBoundary>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/most-wanted" element={<MostWantedPage />} />
+                    <Route path="/scammer/:id" element={<ScammerDetailPage />} />
+                    <Route path="/report" element={
+                      <ProtectedRoute>
+                        <ReportPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/report/:id" element={
+                      <ProtectedRoute>
+                        <ReportPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/leaderboard" element={<LeaderboardPage />} />
+                    <Route path="/community" element={<CommunityPage />} />
+                    <Route path="/profile" element={
+                      <ProtectedRoute>
+                        <ProfilePage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/profile/:username" element={<PublicProfilePage />} />
+                    <Route path="/:username" element={<PublicProfilePage />} />
+                    
+                    {/* Legal and Information Pages */}
+                    <Route path="/terms" element={<LegalPages />} />
+                    <Route path="/privacy" element={<LegalPages />} />
+                    <Route path="/disclaimer" element={<LegalPages />} />
+                    <Route path="/cookies" element={<LegalPages />} />
+                    <Route path="/safety" element={<LegalPages />} />
+                    <Route path="/faq" element={<LegalPages />} />
+                    <Route path="/about" element={<LegalPages />} />
+                    <Route path="/contact" element={<LegalPages />} />
+                    
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </EnhancedErrorBoundary>
+              </Layout>
+            </BrowserRouter>
+          </HelmetProvider>
         </ProfileProvider>
       </TooltipProvider>
       {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
