@@ -6,7 +6,7 @@ interface CompactHeroProps {
   subtitle?: string;
 }
 
-const CompactHero: React.FC<CompactHeroProps> = ({ title, subtitle = "More details help prevent harm to future victims." }) => {
+const CompactHero: React.FC<CompactHeroProps> = ({ title, subtitle = "Stay up to date with live chats & announcements." }) => {
   return (
     <div className="relative bg-icc-blue dark:bg-icc-blue-dark text-white">
       <div className="absolute inset-0 bg-[url('/images/cyber-pattern.png')] opacity-10"></div>
