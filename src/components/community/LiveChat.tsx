@@ -220,8 +220,8 @@ const LiveChat = () => {
       
       if (
         distance.includes('second') || 
-        distance.includes('minute') || 
-        distance.includes('about a minute')
+        distance.includes('1 minute') ||
+        distance.includes('a minute')
       ) {
         return '1m';
       }
