@@ -27,6 +27,9 @@ import EmojiPicker from '@/components/community/EmojiPicker';
 import ReactionButton from './ReactionButton';
 import AdminContextMenu from './AdminContextMenu';
 import { Textarea } from '@/components/ui/textarea';
+import BadgeTier from '@/components/profile/BadgeTier';
+import { calculateBadgeTier } from '@/utils/badgeUtils';
+import { getUserTotalBountyAmount } from '@/services/bountyService';
 
 const LiveChat = () => {
   const { profile, isConnected } = useProfile();
@@ -37,6 +40,7 @@ const LiveChat = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [userBounties, setUserBounties] = useState<Record<string, number>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -175,12 +179,32 @@ const LiveChat = () => {
     setNewMessage(prev => prev + emoji);
   };
   
+  const fetchUserBounty = async (walletAddress: string) => {
+    try {
+      if (userBounties[walletAddress]) return;
+      
+      const bountyAmount = await getUserTotalBountyAmount(walletAddress);
+      setUserBounties(prev => ({
+        ...prev,
+        [walletAddress]: bountyAmount || 0
+      }));
+    } catch (error) {
+      console.error('Error fetching user bounty:', error);
+    }
+  };
+  
   useEffect(() => {
     const fetchMessages = async () => {
       try {
         const data = await getChatMessages();
         setMessages(data);
         setIsLoading(false);
+        
+        // Fetch bounty info for all message authors
+        const uniqueAuthors = new Set(data.map(message => message.author_id));
+        uniqueAuthors.forEach(authorId => {
+          if (authorId) fetchUserBounty(authorId);
+        });
         
         setTimeout(() => {
           scrollToBottom();
@@ -199,6 +223,11 @@ const LiveChat = () => {
         { event: 'INSERT', schema: 'public', table: 'chat_messages' }, 
         payload => {
           setMessages(prev => [...prev, payload.new as ChatMessage]);
+          
+          // Fetch bounty for new message author
+          if (payload.new.author_id) {
+            fetchUserBounty(payload.new.author_id);
+          }
           
           setTimeout(() => {
             scrollToBottom();
@@ -260,6 +289,12 @@ const LiveChat = () => {
           ) : (
             <div className="space-y-4">
               {messages.map((message) => {
+                const userBadge = message.author_id ? 
+                  userBounties[message.author_id] !== undefined ? 
+                    calculateBadgeTier(userBounties[message.author_id]) : 
+                    null : 
+                  null;
+                
                 const messageContent = (
                   <div key={message.id} className="flex items-start space-x-3">
                     {message.author_username ? (
@@ -284,6 +319,10 @@ const LiveChat = () => {
                           </Link>
                         ) : (
                           <span className="font-medium">{message.author_name}</span>
+                        )}
+                        
+                        {userBadge && (
+                          <BadgeTier badgeInfo={userBadge} size="sm" showTooltip={true} />
                         )}
                         
                         {message.author_username && (

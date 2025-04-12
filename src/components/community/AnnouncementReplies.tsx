@@ -25,6 +25,7 @@ import AdminContextMenu from './AdminContextMenu';
 import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import RichTextEditor from './RichTextEditor';
+import { getUserTotalBountyAmount } from '@/services/bountyService';
 
 interface AnnouncementRepliesProps {
   announcementId: string;
@@ -39,6 +40,7 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [showReplyForm, setShowReplyForm] = useState(false);
+  const [userBounties, setUserBounties] = useState<Record<string, number>>({});
   
   // Edit dialog state
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -50,10 +52,30 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({
     try {
       const data = await getAnnouncementReplies(announcementId);
       setReplies(data);
+      
+      // Fetch bounty info for all reply authors
+      const uniqueAuthors = new Set(data.map(reply => reply.author_id));
+      Array.from(uniqueAuthors).forEach(authorId => {
+        if (authorId) fetchUserBounty(authorId);
+      });
     } catch (error) {
       console.error('Error fetching replies:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+  
+  const fetchUserBounty = async (walletAddress: string) => {
+    try {
+      if (userBounties[walletAddress]) return;
+      
+      const bountyAmount = await getUserTotalBountyAmount(walletAddress);
+      setUserBounties(prev => ({
+        ...prev,
+        [walletAddress]: bountyAmount || 0
+      }));
+    } catch (error) {
+      console.error('Error fetching user bounty:', error);
     }
   };
   
@@ -73,8 +95,13 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({
           table: 'announcement_replies',
           filter: `announcement_id=eq.${announcementId}`
         }, 
-        () => {
+        (payload) => {
           fetchReplies();
+          
+          // If it's a new reply, fetch bounty for the author
+          if (payload.eventType === 'INSERT' && payload.new.author_id) {
+            fetchUserBounty(payload.new.author_id);
+          }
         }
       )
       .subscribe();
@@ -143,21 +170,6 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({
         variant: "destructive",
       });
     }
-  };
-  
-  const getUserBadge = (address: string) => {
-    const mockBalanceBase = 100000;
-    
-    if (address === '5.8%' || address.includes('58') || address.includes('15')) {
-      return calculateBadgeTier(15800000);
-    } 
-    
-    const hash = address.split('').reduce((acc, char) => {
-      return acc + char.charCodeAt(0);
-    }, 0);
-    
-    const mockBalance = mockBalanceBase * (hash % 200);
-    return calculateBadgeTier(mockBalance);
   };
   
   if (replies.length === 0 && !showReplyForm) {
@@ -241,7 +253,11 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({
             </div>
           ) : (
             replies.map((reply) => {
-              const userBadge = reply.author_id ? getUserBadge(reply.author_id) : null;
+              const userBadge = reply.author_id ? 
+                userBounties[reply.author_id] !== undefined ? 
+                  calculateBadgeTier(userBounties[reply.author_id]) : 
+                  null : 
+                null;
               
               const replyContent = (
                 <div key={reply.id} className="py-3 border-t first:border-t-0">
