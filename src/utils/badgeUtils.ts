@@ -1,4 +1,3 @@
-
 // Badge tier thresholds based on SEC coin holdings
 // Total supply: 1,000,000,000 SEC
 
@@ -9,7 +8,7 @@ export enum BadgeTier {
   BULL = 'Bull',
   LION = 'Lion',
   KING_COBRA = 'King Cobra',
-  WHALE = 'Whale',
+  HARK = 'Hark',
   GREAT_APE = 'Great Ape',
   BLUE_WHALE = 'Blue Whale'
 }
@@ -33,7 +32,7 @@ export const BADGE_TIERS: { [key in BadgeTier]: { minPercent: number, color: str
   [BadgeTier.BULL]: { minPercent: 0.01, color: 'text-red-500 bg-red-100 border-red-200 dark:bg-red-900/20 dark:border-red-800', icon: '🐂' },
   [BadgeTier.LION]: { minPercent: 0.03, color: 'text-yellow-600 bg-yellow-100 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800', icon: '🦁' },
   [BadgeTier.KING_COBRA]: { minPercent: 0.06, color: 'text-green-600 bg-green-100 border-green-200 dark:bg-green-900/20 dark:border-green-800', icon: '🐍' },
-  [BadgeTier.WHALE]: { minPercent: 0.1, color: 'text-indigo-500 bg-indigo-100 border-indigo-200 dark:bg-indigo-900/20 dark:border-indigo-800', icon: '🐋' },
+  [BadgeTier.HARK]: { minPercent: 0.1, color: 'text-indigo-500 bg-indigo-100 border-indigo-200 dark:bg-indigo-900/20 dark:border-indigo-800', icon: '🦈' },
   [BadgeTier.GREAT_APE]: { minPercent: 0.3, color: 'text-amber-700 bg-amber-100 border-amber-200 dark:bg-amber-900/20 dark:border-amber-700', icon: '🦍' },
   [BadgeTier.BLUE_WHALE]: { minPercent: 1.0, color: 'text-icc-gold bg-icc-gold/10 border-icc-gold/30 dark:bg-icc-gold/20', icon: '🐳' }
 };
@@ -89,7 +88,7 @@ export const getBadgeTier = (secHolding: number): BadgeTier => {
   
   if (holdingPercent >= BADGE_TIERS[BadgeTier.BLUE_WHALE].minPercent) return BadgeTier.BLUE_WHALE;
   if (holdingPercent >= BADGE_TIERS[BadgeTier.GREAT_APE].minPercent) return BadgeTier.GREAT_APE;
-  if (holdingPercent >= BADGE_TIERS[BadgeTier.WHALE].minPercent) return BadgeTier.WHALE;
+  if (holdingPercent >= BADGE_TIERS[BadgeTier.HARK].minPercent) return BadgeTier.HARK;
   if (holdingPercent >= BADGE_TIERS[BadgeTier.KING_COBRA].minPercent) return BadgeTier.KING_COBRA;
   if (holdingPercent >= BADGE_TIERS[BadgeTier.LION].minPercent) return BadgeTier.LION;
   if (holdingPercent >= BADGE_TIERS[BadgeTier.BULL].minPercent) return BadgeTier.BULL;
