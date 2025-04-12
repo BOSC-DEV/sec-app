@@ -6,21 +6,25 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
+import TokenPrice from '@/components/token/TokenPrice';
 
 // Import from phantomWallet utility
 import { getConnection } from '@/utils/phantomWallet';
 
 // SEC token mint address
 const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump');
+
 interface WalletBalanceProps {
   walletAddress?: string | null;
 }
+
 const WalletBalance: React.FC<WalletBalanceProps> = ({
   walletAddress
 }) => {
   const [solBalance, setSolBalance] = useState<number | null>(null);
   const [secBalance, setSecBalance] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
   const fetchSolBalance = async (address: string) => {
     try {
       const connection = getConnection();
@@ -32,6 +36,7 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
       return 0;
     }
   };
+
   const fetchSecBalance = async (address: string) => {
     try {
       const connection = getConnection();
@@ -56,6 +61,7 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
       return 0;
     }
   };
+
   const fetchBalances = async () => {
     if (!walletAddress) return;
     setIsLoading(true);
@@ -75,11 +81,13 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
       setIsLoading(false);
     }
   };
+
   useEffect(() => {
     if (walletAddress) {
       fetchBalances();
     }
   }, [walletAddress]);
+
   const handleRefresh = () => {
     fetchBalances();
     toast({
@@ -87,6 +95,7 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
       description: 'Updating wallet balances...'
     });
   };
+
   const formatBalance = (balance: number | null): string => {
     if (balance === null) return '-';
     return balance.toLocaleString(undefined, {
@@ -94,6 +103,7 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
       maximumFractionDigits: 6
     });
   };
+
   return <Card className="w-full dark:border-gray-700">
       <CardHeader>
         <div className="flex justify-between items-center">
@@ -123,6 +133,11 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
               </div>
             </div>
 
+            {/* SEC Token Price (New) */}
+            <div className="mt-4">
+              <TokenPrice />
+            </div>
+
             <div className="flex justify-center">
               <Button variant="outline" size="sm" className="text-xs flex items-center gap-1 dark:border-gray-700 dark:text-gray-300" onClick={handleRefresh} disabled={isLoading}>
                 <RefreshCw className="h-3 w-3" />
@@ -135,4 +150,5 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
       </CardContent>
     </Card>;
 };
+
 export default WalletBalance;
