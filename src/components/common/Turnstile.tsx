@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 
@@ -26,8 +27,7 @@ const Turnstile: React.FC<TurnstileProps> = ({
   refreshExpired = 'auto'
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const widgetIdRef = useRef<string>('');
-  const [isRendered, setIsRendered] = useState(false);
+  const widgetIdRef = useRef<string | null>(null);
   const [scriptLoaded, setScriptLoaded] = useState(false);
 
   useEffect(() => {
@@ -50,19 +50,19 @@ const Turnstile: React.FC<TurnstileProps> = ({
       };
       
       document.head.appendChild(script);
-      setScriptLoaded(true);
     } else if (window.turnstile) {
       setScriptLoaded(true);
     }
   }, [scriptLoaded]);
 
   useEffect(() => {
-    if (!scriptLoaded || isRendered || !containerRef.current) return;
+    if (!scriptLoaded || !containerRef.current) return;
 
     const renderWidget = () => {
       if (!window.turnstile) return;
       
       try {
+        // Remove any existing widget
         if (widgetIdRef.current) {
           try {
             window.turnstile.reset(widgetIdRef.current);
@@ -71,7 +71,7 @@ const Turnstile: React.FC<TurnstileProps> = ({
           }
         }
         
-        console.log("Rendering Turnstile widget");
+        // Render new widget
         widgetIdRef.current = window.turnstile.render(containerRef.current!, {
           sitekey: siteKey,
           callback: (token: string) => {
@@ -84,31 +84,15 @@ const Turnstile: React.FC<TurnstileProps> = ({
           'expired-callback': () => {
             console.log("Turnstile token expired");
             onVerify('');
-            setIsRendered(false);
           }
         });
-        
-        setIsRendered(true);
       } catch (error) {
         console.error('Failed to render Turnstile:', error);
       }
     };
 
-    if (window.turnstile) {
-      renderWidget();
-    } else {
-      const checkInterval = setInterval(() => {
-        if (window.turnstile) {
-          clearInterval(checkInterval);
-          renderWidget();
-        }
-      }, 100);
-      
-      setTimeout(() => clearInterval(checkInterval), 10000);
-      
-      return () => clearInterval(checkInterval);
-    }
-  }, [scriptLoaded, isRendered, siteKey, onVerify, theme, size, refreshExpired]);
+    renderWidget();
+  }, [scriptLoaded, siteKey, onVerify, theme, size, refreshExpired]);
 
   useEffect(() => {
     return () => {
