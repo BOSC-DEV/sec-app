@@ -6,6 +6,7 @@ import { handleError } from '@/utils/errorHandling';
 // Get notifications for the current user
 export const getUserNotifications = async (userId: string): Promise<Notification[]> => {
   try {
+    // Check if the notifications table exists
     const { data, error } = await supabase
       .from('notifications')
       .select('*')
@@ -14,10 +15,11 @@ export const getUserNotifications = async (userId: string): Promise<Notification
       .limit(50);
       
     if (error) {
-      throw error;
+      console.error("Error fetching notifications:", error);
+      return [];
     }
     
-    return data || [];
+    return data as Notification[] || [];
   } catch (error) {
     handleError(error, 'Error fetching notifications');
     return [];
@@ -34,7 +36,8 @@ export const getUnreadNotificationsCount = async (userId: string): Promise<numbe
       .eq('is_read', false);
       
     if (error) {
-      throw error;
+      console.error("Error counting unread notifications:", error);
+      return 0;
     }
     
     return count || 0;
@@ -53,7 +56,8 @@ export const markNotificationAsRead = async (notificationId: string): Promise<bo
       .eq('id', notificationId);
       
     if (error) {
-      throw error;
+      console.error("Error marking notification as read:", error);
+      return false;
     }
     
     return true;
@@ -72,7 +76,8 @@ export const markAllNotificationsAsRead = async (userId: string): Promise<boolea
       .eq('recipient_id', userId);
       
     if (error) {
-      throw error;
+      console.error("Error marking all notifications as read:", error);
+      return false;
     }
     
     return true;
@@ -108,10 +113,11 @@ export const createNotification = async (notification: Omit<Notification, 'id' |
       .single();
       
     if (error) {
-      throw error;
+      console.error("Error creating notification:", error);
+      return null;
     }
     
-    return data;
+    return data as Notification;
   } catch (error) {
     handleError(error, 'Error creating notification');
     return null;

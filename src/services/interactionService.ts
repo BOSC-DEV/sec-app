@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { handleError } from '@/utils/errorHandling';
 import { toast } from '@/hooks/use-toast';
@@ -448,5 +447,88 @@ export const hasUserDislikedComment = async (commentId: string, userId: string) 
   } catch (error) {
     handleError(error, 'Error checking if user disliked comment');
     return false;
+  }
+};
+
+// Get user's interaction with a scammer
+export const getUserScammerInteraction = async (scammerId: string, userId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('user_scammer_interactions')
+      .select('liked, disliked')
+      .eq('user_id', userId)
+      .eq('scammer_id', scammerId)
+      .maybeSingle();
+      
+    if (error) {
+      throw error;
+    }
+    
+    return data || null;
+  } catch (error) {
+    handleError(error, 'Error getting user scammer interaction');
+    return null;
+  }
+};
+
+// Wrapper functions for like/dislike to simplify the API
+export const likeScammer = async (scammerId: string, userId: string): Promise<any> => {
+  try {
+    // Get user profile
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('display_name, username, profile_pic_url')
+      .eq('wallet_address', userId)
+      .single();
+    
+    // Check existing interaction
+    const { data: interaction } = await supabase
+      .from('user_scammer_interactions')
+      .select('liked, disliked')
+      .eq('user_id', userId)
+      .eq('scammer_id', scammerId)
+      .maybeSingle();
+    
+    const isLiked = interaction?.liked || false;
+    
+    // Toggle like
+    await toggleScammerLike(
+      scammerId, 
+      userId, 
+      profile?.display_name || 'Anonymous',
+      profile?.username,
+      profile?.profile_pic_url
+    );
+    
+    // Get updated scammer stats
+    const { data: scammer } = await supabase
+      .from('scammers')
+      .select('likes, dislikes')
+      .eq('id', scammerId)
+      .single();
+    
+    return scammer;
+  } catch (error) {
+    handleError(error, 'Error liking scammer');
+    throw error;
+  }
+};
+
+export const dislikeScammer = async (scammerId: string, userId: string): Promise<any> => {
+  try {
+    // Toggle dislike
+    await toggleScammerDislike(scammerId, userId);
+    
+    // Get updated scammer stats
+    const { data: scammer } = await supabase
+      .from('scammers')
+      .select('likes, dislikes')
+      .eq('id', scammerId)
+      .single();
+    
+    return scammer;
+  } catch (error) {
+    handleError(error, 'Error disliking scammer');
+    throw error;
   }
 };

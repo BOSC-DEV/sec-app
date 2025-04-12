@@ -32,12 +32,8 @@ export const addBountyContribution = async (
     if (error) throw error;
     
     // Update total bounty amount for the scammer
-    const { error: updateError } = await supabase.rpc('increment_scammer_bounty', {
-      scammer_id: scammerId,
-      amount_to_add: amount
-    });
-    
-    if (updateError) throw updateError;
+    // Use the async updateScammerBounty function instead of direct RPC call
+    await updateScammerBounty(scammerId, amount, true);
     
     // Get the scammer details to send a notification
     const { data: scammer } = await supabase
@@ -83,7 +79,7 @@ export const updateBountyContributionStatus = async (
   try {
     const { data, error } = await supabase
       .from('bounty_contributions')
-      .update({ is_active })
+      .update({ is_active: isActive })
       .eq('id', contributionId)
       .select()
       .single();
@@ -104,10 +100,7 @@ export const deleteBountyContribution = async (
 ): Promise<boolean> => {
   try {
     // Update total bounty amount for the scammer (subtract the amount)
-    await supabase.rpc('decrement_scammer_bounty', {
-      scammer_id: scammerId,
-      amount_to_subtract: amount
-    });
+    await updateScammerBounty(scammerId, amount, false);
     
     // Delete the contribution
     const { error } = await supabase
@@ -119,6 +112,42 @@ export const deleteBountyContribution = async (
     return true;
   } catch (error) {
     console.error('Error deleting bounty contribution:', error);
+    return false;
+  }
+};
+
+// Helper function to update scammer bounty amount
+export const updateScammerBounty = async (
+  scammerId: string,
+  amount: number,
+  isAddition: boolean
+): Promise<boolean> => {
+  try {
+    // Instead of using RPC functions that don't exist, use direct update
+    const { data: scammer } = await supabase
+      .from('scammers')
+      .select('bounty_amount')
+      .eq('id', scammerId)
+      .single();
+      
+    if (!scammer) {
+      throw new Error('Scammer not found');
+    }
+    
+    const currentAmount = scammer.bounty_amount || 0;
+    const newAmount = isAddition 
+      ? currentAmount + amount 
+      : Math.max(currentAmount - amount, 0);
+      
+    const { error } = await supabase
+      .from('scammers')
+      .update({ bounty_amount: newAmount })
+      .eq('id', scammerId);
+      
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error(`Error ${isAddition ? 'incrementing' : 'decrementing'} scammer bounty:`, error);
     return false;
   }
 };
