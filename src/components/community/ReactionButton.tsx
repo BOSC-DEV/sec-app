@@ -19,6 +19,14 @@ type ReactionButtonProps = {
   size?: 'sm' | 'default';
 };
 
+// Define reaction type for type safety
+interface Reaction {
+  id: string;
+  user_id: string;
+  reaction_type: string;
+  [key: string]: any; // For other properties that might exist
+}
+
 const ReactionButton: React.FC<ReactionButtonProps> = ({ 
   itemId, 
   itemType,
@@ -95,9 +103,9 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   const getReactionCounts = () => {
     const counts: Record<string, number> = {};
     
-    reactions.forEach(reaction => {
-      if ('reaction_type' in reaction) {
-        const type = reaction.reaction_type;
+    (reactions as Reaction[]).forEach(reaction => {
+      const type = reaction.reaction_type;
+      if (type) {
         counts[type] = (counts[type] || 0) + 1;
       }
     });
@@ -107,8 +115,8 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   
   // Check if user has already reacted with a specific emoji
   const hasUserReacted = (emoji: string) => {
-    return reactions.some(
-      r => 'user_id' in r && 'reaction_type' in r && r.user_id === profile?.wallet_address && r.reaction_type === emoji
+    return (reactions as Reaction[]).some(
+      r => r.user_id === profile?.wallet_address && r.reaction_type === emoji
     );
   };
   
