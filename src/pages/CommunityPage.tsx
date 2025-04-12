@@ -8,7 +8,7 @@ import LiveChat from '@/components/community/LiveChat';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { LayoutPanelLeft, Rows, Trophy, MessagesSquare, BellRing } from 'lucide-react';
+import { LayoutPanelLeft, Rows, Trophy } from 'lucide-react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import BadgeTiersPage from '@/components/profile/BadgeTiersPage';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
@@ -90,12 +90,9 @@ const CommunityPage = () => {
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="h-[600px] flex flex-col">
-                <Card className="flex-1 overflow-hidden shadow-md">
-                  <CardHeader className="pb-3 border-b bg-gradient-to-r from-slate-50 to-gray-100 dark:from-slate-800 dark:to-slate-900">
-                    <div className="flex items-center gap-2">
-                      <BellRing className="h-5 w-5 text-icc-gold" />
-                      <h3 className="text-lg font-semibold">Announcements</h3>
-                    </div>
+                <Card className="flex-1 overflow-hidden">
+                  <CardHeader className="pb-3">
+                    <h3 className="text-lg font-semibold">Announcements</h3>
                   </CardHeader>
                   <CardContent className="p-0 h-full">
                     <ScrollArea className="h-[520px]">
@@ -116,14 +113,8 @@ const CommunityPage = () => {
           <Tabs defaultValue="announcements" value={activeTab} onValueChange={setActiveTab}>
             <div className="flex justify-between items-center mb-4">
               <TabsList className="flex-1 w-full">
-                <TabsTrigger value="announcements" className="flex-1 flex items-center">
-                  <BellRing className="h-4 w-4 mr-2" />
-                  Announcements
-                </TabsTrigger>
-                <TabsTrigger value="chat" className="flex-1 flex items-center">
-                  <MessagesSquare className="h-4 w-4 mr-2" />
-                  Live Chat
-                </TabsTrigger>
+                <TabsTrigger value="announcements" className="flex-1">Announcements</TabsTrigger>
+                <TabsTrigger value="chat" className="flex-1">Live Chat</TabsTrigger>
                 <TabsTrigger value="badges" className="flex-1 flex items-center">
                   <Trophy className="h-4 w-4 mr-2" />
                   Badge Tiers
