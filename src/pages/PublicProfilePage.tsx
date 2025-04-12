@@ -235,7 +235,7 @@ const PublicProfilePage = () => {
                           </>}
                         <Button variant="outline" size="sm" className="flex items-center gap-1" onClick={shareProfile}>
                           <Share2 size={16} />
-                          Share Profile
+                          Share
                         </Button>
                       </div>
                     </div>
