@@ -218,20 +218,12 @@ const LiveChat = () => {
     const formatTimeStamp = (dateString: string) => {
       const distance = formatDistanceToNow(new Date(dateString), { addSuffix: false });
       
-      if (distance.includes('second') || distance.includes('minute ago')) {
+      if (
+        distance.includes('second') || 
+        distance.includes('minute') || 
+        distance.includes('about a minute')
+      ) {
         return '1m';
-      }
-      
-      if (distance.includes('about')) {
-        const cleanedDistance = distance.replace('about ', '');
-        
-        if (cleanedDistance.includes('hour')) return cleanedDistance.replace(' hours', 'h').replace(' hour', 'h');
-        if (cleanedDistance.includes('day')) return cleanedDistance.replace(' days', 'd').replace(' day', 'd');
-        if (cleanedDistance.includes('week')) return cleanedDistance.replace(' weeks', 'w').replace(' week', 'w');
-        if (cleanedDistance.includes('month')) return cleanedDistance.replace(' months', 'mo').replace(' month', 'mo');
-        if (cleanedDistance.includes('year')) return cleanedDistance.replace(' years', 'y').replace(' year', 'y');
-        
-        return cleanedDistance;
       }
       
       if (distance.includes('hour')) return distance.replace(' hours', 'h').replace(' hour', 'h');
