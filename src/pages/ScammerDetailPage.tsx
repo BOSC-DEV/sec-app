@@ -612,7 +612,7 @@ const ScammerDetailPage = () => {
                       Official Response
                     </TabsTrigger>
                   </TabsList>
-                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-icc-gray/50 flex items-center">
+                  <div className="w-full flex justify-center text-icc-gray/50 mt-2">
                     <ArrowLeftRight 
                       size={20} 
                       className="animate-pulse" 
