@@ -19,6 +19,7 @@ import AdminContextMenu from './AdminContextMenu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import ReplyForm from './ReplyForm';
 import RichTextEditor from './RichTextEditor';
+import { formatTimeAgo } from '@/utils/formatTime';
 
 interface AnnouncementRepliesProps {
   announcementId: string;
@@ -218,6 +219,8 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
               {replies.length > 0 ? (
                 <div className="space-y-3 mb-3">
                   {replies.map((reply) => {
+                    const timeAgo = formatTimeAgo(reply.created_at);
+                    
                     const replyContent = (
                       <div key={reply.id} className="border rounded-md p-3 bg-card">
                         <div className="flex items-start justify-between">
@@ -247,7 +250,7 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
                           </div>
                           <div className="text-xs text-muted-foreground flex items-center">
                             <Calendar className="h-3 w-3 mr-1" />
-                            {formatTimeAgo(reply.created_at)}
+                            {timeAgo}
                           </div>
                         </div>
                         

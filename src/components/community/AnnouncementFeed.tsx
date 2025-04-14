@@ -34,6 +34,7 @@ import AdminContextMenu from './AdminContextMenu';
 import RichTextEditor from './RichTextEditor';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { formatTimeAgo } from '@/utils/formatTime';
 
 const ADMIN_USERNAMES = ['sec', 'thesec'];
 
@@ -272,28 +273,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   }
   
   const renderAnnouncementCard = (announcement: Announcement) => {
-    const formatTimeStamp = (dateString: string) => {
-      const distance = formatDistanceToNow(new Date(dateString), { addSuffix: false });
-      
-      // If it's less than 2 minutes, show as "1m"
-      if (
-        distance.includes('second') || 
-        distance.includes('1 minute') ||
-        distance.includes('a minute')
-      ) {
-        return '1m';
-      }
-      
-      if (distance.includes('hour')) return distance.replace(' hours', 'h').replace(' hour', 'h');
-      if (distance.includes('day')) return distance.replace(' days', 'd').replace(' day', 'd');
-      if (distance.includes('week')) return distance.replace(' weeks', 'w').replace(' week', 'w');
-      if (distance.includes('month')) return distance.replace(' months', 'mo').replace(' month', 'mo');
-      if (distance.includes('year')) return distance.replace(' years', 'y').replace(' year', 'y');
-      
-      return distance;
-    };
-
-    const time = formatTimeStamp(announcement.created_at);
+    const time = formatTimeAgo(announcement.created_at);
 
     const cardContent = (
       <Card 

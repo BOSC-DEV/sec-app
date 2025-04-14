@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,8 +24,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 import { getConnection } from '@/utils/phantomWallet';
+import { formatTimeAgo } from '@/utils/formatTime';
 
-// SEC token mint address
 const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump');
 
 const LiveChat = () => {
@@ -175,20 +174,16 @@ const LiveChat = () => {
       const connection = getConnection();
       const publicKey = new PublicKey(walletAddress);
 
-      // Get the associated token account address
       const tokenAccountAddress = await getAssociatedTokenAddress(SEC_TOKEN_MINT, publicKey);
       
       try {
-        // Get the token account info
         const tokenAccount = await getAccount(connection, tokenAccountAddress);
-        // Convert amount (BigInt) to human-readable format with 6 decimals
         const balance = Number(tokenAccount.amount) / Math.pow(10, 6);
         setUserSecBalances(prev => ({
           ...prev,
           [walletAddress]: balance
         }));
       } catch (error) {
-        // Token account might not exist yet, set balance to 0
         console.log('Token account not found for user, likely zero balance');
         setUserSecBalances(prev => ({
           ...prev,
@@ -197,7 +192,6 @@ const LiveChat = () => {
       }
     } catch (error) {
       console.error('Error fetching SEC balance:', error);
-      // Set to 0 in case of error
       setUserSecBalances(prev => ({
         ...prev,
         [walletAddress]: 0
@@ -212,7 +206,6 @@ const LiveChat = () => {
         setMessages(data);
         setIsLoading(false);
         
-        // Get unique authors and fetch their SEC balances
         const uniqueAuthors = new Set(data.map(message => message.author_id));
         uniqueAuthors.forEach(authorId => {
           if (authorId) fetchUserSecBalance(authorId);
@@ -249,27 +242,7 @@ const LiveChat = () => {
   const renderMessage = (message: ChatMessage, index: number) => {
     const userBadge = message.author_id ? userSecBalances[message.author_id] !== undefined ? calculateBadgeTier(userSecBalances[message.author_id]) : null : null;
     const isCurrentUser = message.author_id === profile?.wallet_address;
-    const formatTimeStamp = (dateString: string) => {
-      const distance = formatDistanceToNow(new Date(dateString), { addSuffix: false });
-      
-      if (
-        distance.includes('second') || 
-        distance.includes('1 minute') ||
-        distance.includes('a minute')
-      ) {
-        return '1m';
-      }
-      
-      if (distance.includes('hour')) return distance.replace(' hours', 'h').replace(' hour', 'h');
-      if (distance.includes('day')) return distance.replace(' days', 'd').replace(' day', 'd');
-      if (distance.includes('week')) return distance.replace(' weeks', 'w').replace(' week', 'w');
-      if (distance.includes('month')) return distance.replace(' months', 'mo').replace(' month', 'mo');
-      if (distance.includes('year')) return distance.replace(' years', 'y').replace(' year', 'y');
-      
-      return distance;
-    };
-
-    const time = formatTimeStamp(message.created_at);
+    const time = formatTimeAgo(message.created_at);
 
     const messageContent = (
       <div key={message.id} className={`flex my-4 ${isCurrentUser ? 'justify-end' : 'justify-start'}`}>
