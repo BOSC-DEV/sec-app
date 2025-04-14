@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -211,80 +210,6 @@ const Header = () => {
                   {item.label}
                 </Link>
               ))}
-              
-              <div className="flex items-center justify-between pt-2">
-                {isLoading ? (
-                  <Button variant="outline" size="sm" disabled className="opacity-75 w-full">
-                    Loading...
-                  </Button>
-                ) : isConnected ? (
-                  <div className="flex items-center justify-around space-x-2 w-full">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="text-white hover:bg-icc-blue"
-                      onClick={toggleNotifications}
-                      aria-label="Notifications"
-                    >
-                      <Bell className="h-5 w-5" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      className="text-white hover:bg-icc-blue"
-                      onClick={copyToClipboard}
-                      aria-label="Copy Contract Address"
-                    >
-                      <Copy className="h-5 w-5" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="text-white hover:bg-icc-blue"
-                      onClick={handleProfileClick}
-                      aria-label="Profile"
-                    >
-                      <User className="h-5 w-5" />
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="border-icc-gold text-icc-gold hover:bg-icc-blue flex items-center justify-center gap-2"
-                      onClick={handleWalletButtonClick}
-                      size="sm"
-                    >
-                      <Wallet className="h-3 w-3" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-around space-x-2 w-full">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="text-white hover:bg-icc-blue"
-                      onClick={copyToClipboard}
-                      aria-label="Copy Contract Address"
-                    >
-                      <Copy className="h-5 w-5" />
-                    </Button>
-                    <Button 
-                      className="bg-icc-gold text-icc-blue hover:bg-icc-gold-light flex items-center gap-2 w-full"
-                      onClick={connectWallet}
-                      size="sm"
-                    >
-                      <Wallet className="h-3 w-3" />
-                      Connect Wallet
-                    </Button>
-                  </div>
-                )}
-              </div>
-              
-              {showNotifications && isConnected && (
-                <div className="mt-2 flex justify-center">
-                  <div className="w-full">
-                    <NotificationDropdown onClose={() => setShowNotifications(false)} isMobile />
-                  </div>
-                </div>
-              )}
             </nav>
           </div>
         </div>
