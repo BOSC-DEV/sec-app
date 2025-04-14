@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import SEO from '@/components/common/SEO';
@@ -31,7 +30,6 @@ const CommunityPage = () => {
     }
   }, [isConnected]);
 
-  // Use tab view on mobile by default
   useEffect(() => {
     if (isMobile) {
       setSplitScreen(false);
