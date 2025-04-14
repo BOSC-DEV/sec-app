@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -11,20 +10,11 @@ import NotificationDropdown from '../notifications/NotificationDropdown';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const { isConnected, connectWallet, profile, isPhantomAvailable, isLoading } = useProfile();
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
-
-  useEffect(() => {
-    setIsMenuOpen(false);
-  }, [location.pathname]);
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
 
   const handleProfileClick = () => {
     if (profile?.username) {
@@ -32,7 +22,6 @@ const Header = () => {
     } else {
       navigate('/profile');
     }
-    setIsMenuOpen(false);
   };
 
   const handleWalletButtonClick = () => {
@@ -41,7 +30,6 @@ const Header = () => {
     } else {
       connectWallet();
     }
-    setIsMenuOpen(false);
   };
 
   const copyToClipboard = async () => {
@@ -142,17 +130,6 @@ const Header = () => {
                 >
                   <User className="h-5 w-5" />
                 </Button>
-                {isMobile && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-white hover:bg-icc-blue-light md:hidden"
-                    onClick={toggleMenu}
-                    aria-label="Menu"
-                  >
-                    {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                  </Button>
-                )}
               </div>
             ) : (
               <div className="flex items-center space-x-3">
@@ -178,117 +155,11 @@ const Header = () => {
                     </>
                   )}
                 </Button>
-                {isMobile && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-white hover:bg-icc-blue-light md:hidden"
-                    onClick={toggleMenu}
-                    aria-label="Menu"
-                  >
-                    {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                  </Button>
-                )}
               </div>
             )}
           </div>
         </div>
       </div>
-
-      {isMenuOpen && (
-        <div className="md:hidden bg-icc-blue-light">
-          <div className="icc-container py-4">
-            <nav className="flex flex-col space-y-4">
-              {navigationItems.map((item) => (
-                <Link 
-                  key={item.path}
-                  to={item.path} 
-                  className={`text-white hover:text-icc-gold transition-colors px-2 py-1 flex items-center ${
-                    location.pathname === item.path ? 'text-icc-gold font-medium' : ''
-                  }`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.label}
-                </Link>
-              ))}
-              
-              <div className="flex items-center justify-between pt-2">
-                {isLoading ? (
-                  <Button variant="outline" size="sm" disabled className="opacity-75 w-full">
-                    Loading...
-                  </Button>
-                ) : isConnected ? (
-                  <div className="flex items-center justify-around space-x-2 w-full">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="text-white hover:bg-icc-blue"
-                      onClick={toggleNotifications}
-                      aria-label="Notifications"
-                    >
-                      <Bell className="h-5 w-5" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      className="text-white hover:bg-icc-blue"
-                      onClick={copyToClipboard}
-                      aria-label="Copy Contract Address"
-                    >
-                      <Copy className="h-5 w-5" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="text-white hover:bg-icc-blue"
-                      onClick={handleProfileClick}
-                      aria-label="Profile"
-                    >
-                      <User className="h-5 w-5" />
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="border-icc-gold text-icc-gold hover:bg-icc-blue flex items-center justify-center gap-2"
-                      onClick={handleWalletButtonClick}
-                      size="sm"
-                    >
-                      <Wallet className="h-3 w-3" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-around space-x-2 w-full">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="text-white hover:bg-icc-blue"
-                      onClick={copyToClipboard}
-                      aria-label="Copy Contract Address"
-                    >
-                      <Copy className="h-5 w-5" />
-                    </Button>
-                    <Button 
-                      className="bg-icc-gold text-icc-blue hover:bg-icc-gold-light flex items-center gap-2 w-full"
-                      onClick={connectWallet}
-                      size="sm"
-                    >
-                      <Wallet className="h-3 w-3" />
-                      Connect Wallet
-                    </Button>
-                  </div>
-                )}
-              </div>
-              
-              {showNotifications && isConnected && (
-                <div className="mt-2 flex justify-center">
-                  <div className="w-full">
-                    <NotificationDropdown onClose={() => setShowNotifications(false)} isMobile />
-                  </div>
-                </div>
-              )}
-            </nav>
-          </div>
-        </div>
-      )}
     </header>
   );
 };
