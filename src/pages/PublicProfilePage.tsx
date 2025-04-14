@@ -315,7 +315,7 @@ const PublicProfilePage = () => {
                   ) : (
                     <>
                       <ThumbsUp className="h-4 w-4 mr-2" />
-                      Likes
+                      Agreed
                     </>
                   )}
                 </TabsTrigger>
@@ -480,7 +480,7 @@ const PublicProfilePage = () => {
                 <div className="bg-background/60 backdrop-blur-sm rounded-lg p-6 border">
                   <h2 className="text-2xl font-bold text-icc-gold mb-6 flex items-center">
                     <ThumbsUp className="mr-2 h-6 w-6" />
-                    Liked Scammer Reports
+                    Agreed
                   </h2>
                   
                   {isLoadingLikedScammers ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
