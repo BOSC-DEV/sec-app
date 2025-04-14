@@ -657,15 +657,7 @@ export type Database = {
           liked?: boolean
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_comment_interactions_comment_id_fkey"
-            columns: ["comment_id"]
-            isOneToOne: false
-            referencedRelation: "comments"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_scammer_interactions: {
         Row: {

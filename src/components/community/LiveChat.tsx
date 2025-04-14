@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,8 +21,13 @@ import AdminContextMenu from './AdminContextMenu';
 import { Textarea } from '@/components/ui/textarea';
 import BadgeTier from '@/components/profile/BadgeTier';
 import { calculateBadgeTier } from '@/utils/badgeUtils';
-import { getUserTotalBountyAmount } from '@/services/bountyService';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
+import { getConnection } from '@/utils/phantomWallet';
+
+// SEC token mint address
+const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump');
 
 const LiveChat = () => {
   const { profile, isConnected } = useProfile();
@@ -32,7 +38,7 @@ const LiveChat = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [userBounties, setUserBounties] = useState<Record<string, number>>({});
+  const [userSecBalances, setUserSecBalances] = useState<Record<string, number>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
@@ -162,16 +168,40 @@ const LiveChat = () => {
     setNewMessage(prev => prev + emoji);
   };
 
-  const fetchUserBounty = async (walletAddress: string) => {
+  const fetchUserSecBalance = async (walletAddress: string) => {
     try {
-      if (userBounties[walletAddress]) return;
-      const bountyAmount = await getUserTotalBountyAmount(walletAddress);
-      setUserBounties(prev => ({
-        ...prev,
-        [walletAddress]: bountyAmount || 0
-      }));
+      if (userSecBalances[walletAddress] !== undefined) return;
+      
+      const connection = getConnection();
+      const publicKey = new PublicKey(walletAddress);
+
+      // Get the associated token account address
+      const tokenAccountAddress = await getAssociatedTokenAddress(SEC_TOKEN_MINT, publicKey);
+      
+      try {
+        // Get the token account info
+        const tokenAccount = await getAccount(connection, tokenAccountAddress);
+        // Convert amount (BigInt) to human-readable format with 6 decimals
+        const balance = Number(tokenAccount.amount) / Math.pow(10, 6);
+        setUserSecBalances(prev => ({
+          ...prev,
+          [walletAddress]: balance
+        }));
+      } catch (error) {
+        // Token account might not exist yet, set balance to 0
+        console.log('Token account not found for user, likely zero balance');
+        setUserSecBalances(prev => ({
+          ...prev,
+          [walletAddress]: 0
+        }));
+      }
     } catch (error) {
-      console.error('Error fetching user bounty:', error);
+      console.error('Error fetching SEC balance:', error);
+      // Set to 0 in case of error
+      setUserSecBalances(prev => ({
+        ...prev,
+        [walletAddress]: 0
+      }));
     }
   };
 
@@ -181,10 +211,13 @@ const LiveChat = () => {
         const data = await getChatMessages();
         setMessages(data);
         setIsLoading(false);
+        
+        // Get unique authors and fetch their SEC balances
         const uniqueAuthors = new Set(data.map(message => message.author_id));
         uniqueAuthors.forEach(authorId => {
-          if (authorId) fetchUserBounty(authorId);
+          if (authorId) fetchUserSecBalance(authorId);
         });
+        
         setTimeout(() => {
           scrollToBottom();
         }, 100);
@@ -194,6 +227,7 @@ const LiveChat = () => {
       }
     };
     fetchMessages();
+    
     const channel = supabase.channel('public:chat_messages').on('postgres_changes', {
       event: 'INSERT',
       schema: 'public',
@@ -201,7 +235,7 @@ const LiveChat = () => {
     }, payload => {
       setMessages(prev => [...prev, payload.new as ChatMessage]);
       if (payload.new.author_id) {
-        fetchUserBounty(payload.new.author_id);
+        fetchUserSecBalance(payload.new.author_id);
       }
       setTimeout(() => {
         scrollToBottom();
@@ -213,7 +247,7 @@ const LiveChat = () => {
   }, []);
 
   const renderMessage = (message: ChatMessage, index: number) => {
-    const userBadge = message.author_id ? userBounties[message.author_id] !== undefined ? calculateBadgeTier(userBounties[message.author_id]) : null : null;
+    const userBadge = message.author_id ? userSecBalances[message.author_id] !== undefined ? calculateBadgeTier(userSecBalances[message.author_id]) : null : null;
     const isCurrentUser = message.author_id === profile?.wallet_address;
     const formatTimeStamp = (dateString: string) => {
       const distance = formatDistanceToNow(new Date(dateString), { addSuffix: false });

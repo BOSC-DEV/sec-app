@@ -11,13 +11,15 @@ interface BadgeTierProps {
   showProgress?: boolean;
   size?: 'sm' | 'md' | 'lg';
   showTooltip?: boolean;
+  variant?: 'default' | 'tier';
 }
 
 const BadgeTier: React.FC<BadgeTierProps> = ({
   badgeInfo,
   showProgress = false,
   size = 'md',
-  showTooltip = true
+  showTooltip = true,
+  variant = 'default'
 }) => {
   const isMobile = useIsMobile();
   const {
@@ -39,7 +41,10 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
 
   // Create the badge element - showing only the icon
   const badge = (
-    <Badge className={`${color} ${sizeClasses[size]} flex items-center gap-1 shrink-0`}>
+    <Badge 
+      variant={variant === 'tier' ? 'tier' : undefined} 
+      className={`${variant === 'default' ? color : ''} ${sizeClasses[size]} flex items-center gap-1 shrink-0`}
+    >
       <span className={iconSizes[size]}>{icon}</span>
     </Badge>
   );
