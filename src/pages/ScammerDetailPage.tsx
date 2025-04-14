@@ -749,6 +749,19 @@ const ScammerDetailPage = () => {
         </div>
       </section>
       
+      {/* Recent Contributions section */}
+      <div className="mt-8">
+        <BountyContributionList
+          contributions={bountyContributions}
+          isLoading={isLoadingBountyContributions}
+          totalCount={totalContributions}
+          onPageChange={handlePageChange}
+          currentPage={contributionsPage}
+          itemsPerPage={contributionsPerPage}
+          userContributionAmount={userContributionAmount}
+        />
+      </div>
+      
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
@@ -766,15 +779,6 @@ const ScammerDetailPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <BountyContributionList
-        contributions={bountyContributions}
-        isLoading={isLoadingBountyContributions}
-        totalCount={totalContributions}
-        onPageChange={handlePageChange}
-        currentPage={contributionsPage}
-        itemsPerPage={contributionsPerPage}
-        userContributionAmount={userContributionAmount}
-      />
     </div>;
 };
 
