@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
@@ -20,7 +19,7 @@ import ScammerCard from '@/components/common/ScammerCard';
 import { useProfile } from '@/contexts/ProfileContext';
 import WalletBalance from '@/components/profile/WalletBalance';
 import WalletInfo from '@/components/profile/WalletInfo';
-import { useBadgeTier } from '@/hooks/useBadgeTier';
+import { useBadgeTier } from '@/hooks/use-badge-tier';
 import BadgeTier from '@/components/profile/BadgeTier';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -213,6 +212,7 @@ const PublicProfilePage = () => {
                     <div className="flex flex-wrap items-center justify-center md:justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <h1 className="text-3xl font-bold text-icc-gold">{profile?.display_name}</h1>
+                        {badgeInfo && <BadgeTier badgeInfo={badgeInfo} showTooltip size="lg" />}
                       </div>
                       <div className="flex items-center space-x-3 mt-3 md:mt-0 p-0">
                         {isOwnProfile && <>
