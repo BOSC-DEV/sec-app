@@ -29,14 +29,12 @@ const Footer = () => {
     try {
       await navigator.clipboard.writeText(contractAddress);
       toast({
-        title: "Copied to clipboard",
-        description: "Contract address copied to clipboard successfully",
+        title: "Copied CA",
         variant: "default",
       });
     } catch (err) {
       toast({
         title: "Copy failed",
-        description: "Failed to copy contract address to clipboard",
         variant: "destructive",
       });
       console.error("Failed to copy: ", err);
