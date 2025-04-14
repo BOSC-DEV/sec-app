@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { ReportFormValues } from '@/hooks/useReportForm';
@@ -132,10 +133,13 @@ export const createScammerReport = async (
     const accomplices = data.accomplices?.filter(item => item !== '') || [];
     const wallet_addresses = data.wallet_addresses?.filter(item => item !== '') || [];
     
+    // Convert the numeric ID to a string before inserting
+    const newIdString = newId.toString();
+    
     const { error } = await supabase
       .from('scammers')
       .insert({
-        id: newId,
+        id: newIdString,
         name: data.name,
         accused_of: data.accused_of,
         wallet_addresses,
@@ -163,7 +167,7 @@ export const createScammerReport = async (
       throw error;
     }
     
-    return newId;
+    return newIdString;
   } catch (error) {
     console.error("Error creating scammer report:", error);
     throw error;
@@ -173,7 +177,7 @@ export const createScammerReport = async (
 /**
  * Generates a new scammer ID
  */
-export const generateScammerId = async () => {
+export const generateScammerId = async (): Promise<number> => {
   try {
     const { data, error } = await supabase
       .from('scammers')
