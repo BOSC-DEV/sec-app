@@ -21,7 +21,7 @@ import WalletBalance from '@/components/profile/WalletBalance';
 import WalletInfo from '@/components/profile/WalletInfo';
 import { useBadgeTier } from '@/hooks/useBadgeTier';
 import BadgeTier from '@/components/profile/BadgeTier';
-import { FileText, Wallet as WalletIcon, Info, MessageSquare, Trophy } from 'lucide-react';
+import { FileText, Wallet as WalletIcon, Info, MessageSquare, Trophy, Bag } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const PublicProfilePage = () => {
@@ -281,10 +281,10 @@ const PublicProfilePage = () => {
                 </TabsTrigger>
                 <TabsTrigger value="bounties" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
                   {isMobile ? (
-                    <Trophy className="h-5 w-5" />
+                    <Bag className="h-5 w-5" />
                   ) : (
                     <>
-                      <Trophy className="h-4 w-4 mr-2" />
+                      <Bag className="h-4 w-4 mr-2" />
                       Bounties
                     </>
                   )}
