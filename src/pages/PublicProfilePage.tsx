@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
@@ -38,8 +39,6 @@ const PublicProfilePage = () => {
     disconnectWallet
   } = useProfile();
   
-  const [secBalance, setSecBalance] = useState<number | null>(null);
-  
   const {
     data: profile,
     isLoading,
@@ -66,7 +65,8 @@ const PublicProfilePage = () => {
     enabled: !!profile?.wallet_address
   });
   
-  const badgeInfo = useBadgeTier(secBalance);
+  const badgeInfo = useBadgeTier(profile?.wallet_address ? 
+    (bountyContributions?.totalBountyAmount || 0) : null);
   
   const {
     data: scammerReports,
@@ -213,7 +213,6 @@ const PublicProfilePage = () => {
                     <div className="flex flex-wrap items-center justify-center md:justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <h1 className="text-3xl font-bold text-icc-gold">{profile?.display_name}</h1>
-                        {badgeInfo && <BadgeTier badgeInfo={badgeInfo} showTooltip size="lg" />}
                       </div>
                       <div className="flex items-center space-x-3 mt-3 md:mt-0 p-0">
                         {isOwnProfile && <>
@@ -427,14 +426,11 @@ const PublicProfilePage = () => {
                   
                   <div className="space-y-8">
                     {profile?.wallet_address ? <>
-                        <WalletBalance 
-                          walletAddress={profile.wallet_address}
-                          onBalanceUpdate={(balance) => setSecBalance(balance)}
-                        />
+                        <WalletBalance walletAddress={profile.wallet_address} />
                         <WalletInfo 
                           walletAddress={profile.wallet_address} 
                           isOwnProfile={isOwnProfile} 
-                          secBalance={secBalance}
+                          secBalance={profile?.wallet_address ? bountyContributions?.totalBountyAmount || 0 : null}
                         />
                       </> : <div className="text-center py-12">
                         <p className="text-muted-foreground text-lg">No wallet information available</p>
