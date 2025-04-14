@@ -542,7 +542,7 @@ const ScammerDetailPage = () => {
               </div>
 
               <div className="mt-4 mb-6">
-                <h2 className="icc-title">{scammer.name} has been accused of</h2>
+                <h2 className="icc-title">{scammer.name}'s Accusations</h2>
                 <p className="text-lg text-icc-gray-dark mt-2">{scammer.accused_of}</p>
               </div>
 
