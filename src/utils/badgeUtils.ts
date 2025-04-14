@@ -1,3 +1,4 @@
+
 // Define the badge tier enum with proper spacing and capitalization
 export enum BadgeTier {
   'Frog' = 'Frog',
@@ -30,9 +31,9 @@ export interface BadgeInfo {
   };
 }
 
-// Define badge tiers with their properties
+// Define badge tiers with their properties - Shrimp now starts at 0
 export const BADGE_TIERS: { [key in BadgeTier]: { minPercent: number, color: string, icon: string } } = {
-  [BadgeTier.Shrimp]: { minPercent: 0.005, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦐' },
+  [BadgeTier.Shrimp]: { minPercent: 0, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦐' },
   [BadgeTier.Frog]: { minPercent: 0.01, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🐸' },
   [BadgeTier.Bull]: { minPercent: 0.03, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🐂' },
   [BadgeTier.Lion]: { minPercent: 0.03, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦁' },
@@ -78,7 +79,7 @@ export const calculateBadgeTier = (secBalance: number): BadgeInfo => {
     .sort((a, b) => a.minPercent - b.minPercent);
 
   // Find the highest tier the user qualifies for
-  let userTier = sortedTiers[0]; // Default to lowest tier
+  let userTier = sortedTiers[0]; // Default to lowest tier (Shrimp) for any balance
   for (let i = sortedTiers.length - 1; i >= 0; i--) {
     if (secBalance >= sortedTiers[i].minHolding) {
       userTier = sortedTiers[i];
