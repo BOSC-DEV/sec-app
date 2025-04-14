@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -246,17 +247,17 @@ const LiveChat = () => {
 
     const messageContent = (
       <div key={message.id} className="flex my-6">
-        <div className={`flex ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'} space-x-2 ${isCurrentUser ? 'space-x-reverse' : ''}`}>
+        <div className={`flex ${isCurrentUser ? 'flex-row-reverse self-end ml-auto' : 'flex-row'} space-x-2 ${isCurrentUser ? 'space-x-reverse' : ''}`}>
           <div className="flex-shrink-0">
             <Link to={message.author_username ? `/profile/${message.author_username}` : '#'}>
-              <Avatar className="h-10 w-10 cursor-pointer border-2 border-background">
+              <Avatar className={`h-10 w-10 cursor-pointer border-2 border-background ${isCurrentUser ? 'order-last' : ''}`}>
                 <AvatarImage src={message.author_profile_pic} alt={message.author_name} />
                 <AvatarFallback className="text-xs">{message.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
             </Link>
           </div>
           
-          <div className={`min-w-[180px] max-w-[75%] md:max-w-[60%] rounded-lg px-3 py-2 ${isCurrentUser ? 'bg-icc-blue-light text-white rounded-tr-none' : 'bg-card rounded-tl-none'}`}>
+          <div className={`min-w-[180px] max-w-[75%] md:max-w-[60%] rounded-lg px-3 py-2 ${isCurrentUser ? 'bg-icc-blue-light text-white rounded-tr-none self-end' : 'bg-card rounded-tl-none'}`}>
             <div className="flex items-center gap-1 mb-1 flex-wrap">
               <span className={`font-semibold text-sm ${isCurrentUser ? 'text-icc-gold' : 'text-icc-gold'}`}>
                 {message.author_name}
