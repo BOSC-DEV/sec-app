@@ -1,7 +1,7 @@
 
 import React from 'react';
+import { Coins } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { LucideProps } from 'lucide-react';
 
 interface CurrencyIconProps {
   className?: string;
@@ -19,9 +19,7 @@ const CurrencyIcon: React.FC<CurrencyIconProps> = ({
   };
 
   return (
-    <img 
-      src="/lovable-uploads/9a333e8e-a34b-4dfe-95fb-d1be3b6d56ca.png" 
-      alt="SEC" 
+    <Coins 
       className={cn(sizeClasses[size], 'inline-block', className)}
     />
   );
