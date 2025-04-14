@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, User, Copy, Bell, LogIn, Wallet } from 'lucide-react';
+import { Menu, X, User, Copy, Bell, LogIn, Wallet, MessageCircle } from 'lucide-react';
 import ICCLogo from '../common/ICCLogo';
 import { useProfile } from '@/contexts/ProfileContext';
 import ThemeToggle from '@/components/common/ThemeToggle';
@@ -72,7 +72,7 @@ const Header = () => {
     { label: 'Most Wanted', path: '/most-wanted' },
     { label: 'Report', path: '/report' },
     { label: 'Leaderboard', path: '/leaderboard' },
-    { label: 'Community', path: '/community' },
+    { label: 'Community', path: '/community', icon: <MessageCircle className="h-4 w-4 mr-2" /> },
   ];
 
   return (
@@ -125,21 +125,21 @@ const Header = () => {
                 </div>
                 <Button 
                   variant="ghost" 
-                  size="icon" 
-                  className="text-white hover:bg-icc-blue-light"
-                  onClick={handleProfileClick}
-                  aria-label="Profile"
-                >
-                  <User className="h-5 w-5" />
-                </Button>
-                <Button 
-                  variant="ghost" 
                   size="icon"
                   className="text-white hover:bg-icc-blue-light"
                   onClick={copyToClipboard}
                   aria-label="Copy Contract Address"
                 >
                   <Copy className="h-5 w-5" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-white hover:bg-icc-blue-light"
+                  onClick={handleProfileClick}
+                  aria-label="Profile"
+                >
+                  <User className="h-5 w-5" />
                 </Button>
                 {isMobile && (
                   <Button
@@ -207,6 +207,7 @@ const Header = () => {
                   }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
+                  {item.icon}
                   {item.label}
                 </Link>
               ))}
@@ -229,21 +230,21 @@ const Header = () => {
                     </Button>
                     <Button 
                       variant="ghost" 
+                      size="icon"
+                      className="text-white hover:bg-icc-blue"
+                      onClick={copyToClipboard}
+                      aria-label="Copy Contract Address"
+                    >
+                      <Copy className="h-5 w-5" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
                       size="icon" 
                       className="text-white hover:bg-icc-blue"
                       onClick={handleProfileClick}
                       aria-label="Profile"
                     >
                       <User className="h-5 w-5" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="text-white hover:bg-icc-blue"
-                      onClick={copyToClipboard}
-                      aria-label="Copy Contract Address"
-                    >
-                      <Copy className="h-5 w-5" />
                     </Button>
                     <Button 
                       variant="outline" 
