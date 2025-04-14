@@ -52,6 +52,7 @@ const LeaderboardPage = () => {
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 ml-1"><path d="m19 9-7 7-7-7"/></svg>;
   };
   
+  // Filter profiles based on search term
   const filteredProfiles = useMemo(() => {
     if (!searchTerm.trim()) return profilesWithTotalBounty;
     
@@ -59,8 +60,11 @@ const LeaderboardPage = () => {
     
     return profilesWithTotalBounty.filter(profile => {
       return (
+        // Search by display name
         profile.display_name.toLowerCase().includes(term) ||
+        // Search by username
         (profile.username && profile.username.toLowerCase().includes(term)) ||
+        // Search by wallet address (for pasting complete addresses)
         (profile.wallet_address && profile.wallet_address.toLowerCase().includes(term))
       );
     });
@@ -118,10 +122,11 @@ const LeaderboardPage = () => {
   
   return (
     <div>
-      <CompactHero title="Leaderboard" subtitle="Top hunters tracking and reporting cryptocurrency scammers" />
+      <CompactHero title="Leaderboard" subtitle="Top hunters tracking and reporting cryptocurrency scammers." />
 
       <section className="py-12 bg-gradient-to-b from-white to-gray-50 dark:from-icc-blue-dark dark:to-icc-blue">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Search Input */}
           <div className="mb-6">
             <div className="relative w-full md:w-1/2 lg:w-1/3 mx-auto">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 h-4 w-4" />
@@ -146,6 +151,7 @@ const LeaderboardPage = () => {
             </div>
           </div>
           
+          {/* Results Summary */}
           {searchTerm && (
             <div className="mb-4 text-center">
               <Badge variant="coin" className="inline-flex">
