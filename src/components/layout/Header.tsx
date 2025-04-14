@@ -118,7 +118,7 @@ const Header = () => {
                     <Bell className="h-5 w-5" />
                   </Button>
                   {showNotifications && (
-                    <div className="fixed left-1/2 transform -translate-x-1/2 mt-2 z-50">
+                    <div className={`absolute ${isMobile ? 'left-0 right-0 mx-auto w-80 max-w-[90vw]' : 'right-0'} mt-2 w-80`}>
                       <NotificationDropdown onClose={() => setShowNotifications(false)} />
                     </div>
                   )}
@@ -141,6 +141,25 @@ const Header = () => {
                 >
                   <Copy className="h-5 w-5" />
                 </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="text-white hover:bg-transparent hover:text-gray-200 border-none"
+                  onClick={handleWalletButtonClick}
+                >
+                  <Wallet className="h-5 w-5" />
+                </Button>
+                {isMobile && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-white hover:bg-icc-blue-light md:hidden"
+                    onClick={toggleMenu}
+                    aria-label="Menu"
+                  >
+                    {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="flex items-center space-x-3">
@@ -166,6 +185,17 @@ const Header = () => {
                     </>
                   )}
                 </Button>
+                {isMobile && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-white hover:bg-icc-blue-light md:hidden"
+                    onClick={toggleMenu}
+                    aria-label="Menu"
+                  >
+                    {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                  </Button>
+                )}
               </div>
             )}
           </div>
@@ -257,7 +287,7 @@ const Header = () => {
               
               {showNotifications && isConnected && (
                 <div className="mt-2 flex justify-center">
-                  <div className="w-full">
+                  <div className="w-full max-w-xs">
                     <NotificationDropdown onClose={() => setShowNotifications(false)} isMobile />
                   </div>
                 </div>

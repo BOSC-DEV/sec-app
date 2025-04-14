@@ -1,10 +1,10 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Button } from '@/components/ui/button';
 import { Wallet, ExternalLink, Copy, LogOut } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
 
 interface WalletInfoProps {
   walletAddress?: string | null;
@@ -20,7 +20,6 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
   const {
     disconnectWallet
   } = useProfile();
-  const navigate = useNavigate();
 
   const copyWalletAddress = () => {
     if (walletAddress) {
@@ -44,7 +43,6 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
       title: 'Wallet Disconnected',
       description: 'Your wallet has been disconnected'
     });
-    navigate('/');
   };
 
   const formatWalletAddress = (address: string) => {
