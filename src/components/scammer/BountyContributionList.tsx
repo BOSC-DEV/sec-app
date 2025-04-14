@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { BountyContribution } from '@/types/dataTypes';
 import { formatDate, formatCurrency } from '@/lib/utils';
@@ -22,6 +21,7 @@ interface BountyContributionListProps {
   onPageChange?: (page: number) => void;
   currentPage?: number;
   itemsPerPage?: number;
+  userContributionAmount?: number;
 }
 
 const BountyContributionList: React.FC<BountyContributionListProps> = ({
@@ -30,7 +30,8 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
   totalCount = 0,
   onPageChange,
   currentPage = 1,
-  itemsPerPage = 10
+  itemsPerPage = 10,
+  userContributionAmount = 0
 }) => {
   const [focused, setFocused] = useState<string | null>(null);
   const [contributorUsernames, setContributorUsernames] = useState<Record<string, string>>({});
@@ -95,7 +96,18 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
 
   return (
     <div className="space-y-4">
-      <h4 className="font-medium text-sm text-icc-blue" id="contributions-heading">Recent Contributors</h4>
+      {userContributionAmount > 0 && (
+        <div className="bg-icc-blue-dark/10 rounded-lg p-4 mb-4">
+          <h4 className="text-sm font-medium text-icc-blue mb-2">My Contributions</h4>
+          <div className="text-2xl font-bold text-icc-gold flex items-center gap-1">
+            {formatCurrency(userContributionAmount)} <CurrencyIcon />
+          </div>
+        </div>
+      )}
+
+      <h4 className="font-medium text-sm text-icc-blue" id="contributions-heading">
+        Recent Contributors
+      </h4>
       
       <div aria-labelledby="contributions-heading" className="space-y-3">
         {contributions.map((contribution) => {

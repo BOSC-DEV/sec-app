@@ -766,6 +766,16 @@ const ScammerDetailPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <BountyContributionList
+        contributions={bountyContributions}
+        isLoading={isLoadingBountyContributions}
+        totalCount={totalContributions}
+        onPageChange={handlePageChange}
+        currentPage={contributionsPage}
+        itemsPerPage={contributionsPerPage}
+        userContributionAmount={userContributionAmount}
+      />
     </div>;
 };
+
 export default ScammerDetailPage;
