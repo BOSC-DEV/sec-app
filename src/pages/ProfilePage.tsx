@@ -169,11 +169,8 @@ const ProfilePage = () => {
           <div className="flex justify-between items-center">
             <div>
               <CardTitle className="text-2xl flex items-center gap-2">
-                {isNewProfile ? 'Create Your Profile' : 'Edit Your Profile'}
+                Edit
               </CardTitle>
-              <CardDescription>
-                {isNewProfile ? 'Complete your profile to start participating in the community' : 'Update your profile information'}
-              </CardDescription>
             </div>
             <Button variant="outline" size="sm" onClick={handleDisconnect} className="text-icc-red border-icc-red-light hover:text-icc-red flex items-center gap-2 bg-neutral-50">
               <LogOut className="h-4 w-4" /> Disconnect
