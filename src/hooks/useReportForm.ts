@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -22,6 +21,7 @@ export const reportSchema = z.object({
   aliases: z.array(z.string()).optional(),
   links: z.array(z.string()).optional(),
   accomplices: z.array(z.string()).optional(),
+  official_response: z.string().optional(), // Added official_response field
 });
 
 export type ReportFormValues = z.infer<typeof reportSchema>;
@@ -46,6 +46,7 @@ export const useReportForm = (id?: string) => {
       aliases: [''],
       links: [''],
       accomplices: [''],
+      official_response: '', // Added default value
     }
   });
   
@@ -66,6 +67,7 @@ export const useReportForm = (id?: string) => {
               aliases: scammerData.aliases?.length ? scammerData.aliases : [''],
               links: scammerData.links?.length ? scammerData.links : [''],
               accomplices: scammerData.accomplices?.length ? scammerData.accomplices : [''],
+              official_response: scammerData.official_response || '',
             });
             
             if (scammerData.photo_url) {

@@ -1,24 +1,25 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { ReportFormValues } from '@/types/formTypes';
+import { ReportFormValues } from '@/hooks/useReportForm';
 import { Profile } from '@/types/dataTypes';
-import { generateScammerId } from './supabaseService';
 
 /**
- * Uploads a photo for a scammer report
+ * Uploads a scammer photo to storage
+ * @param file The photo file to upload
+ * @returns The public URL of the uploaded image
  */
 export const uploadScammerPhoto = async (
-  photoFile: File
+  file: File
 ): Promise<string | null> => {
   try {
-    const fileName = `scammer_photos/${Date.now()}_${photoFile.name}`;
+    const fileName = `scammer_photos/${Date.now()}_${file.name}`;
     
     console.log("Uploading file to bucket 'media':", fileName);
     
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('media')
-      .upload(fileName, photoFile);
+      .upload(fileName, file);
       
     if (uploadError) {
       console.error("Photo upload error:", uploadError);
@@ -33,13 +34,13 @@ export const uploadScammerPhoto = async (
       
     return publicUrlData.publicUrl;
   } catch (error) {
-    console.error("Photo upload exception:", error);
+    console.error("Error uploading photo:", error);
     throw error;
   }
 };
 
 /**
- * Fetches a scammer by ID for editing
+ * Fetches a scammer by ID
  */
 export const fetchScammerById = async (id: string) => {
   if (!id) return null;
@@ -74,7 +75,7 @@ export const isScammerCreator = async (scammerId: string, walletAddress: string)
     
     return data.added_by === walletAddress;
   } catch (error) {
-    console.error("Exception checking scammer creator:", error);
+    console.error("Error checking scammer creator:", error);
     return false;
   }
 };
@@ -104,6 +105,7 @@ export const updateScammerReport = async (
       aliases,
       links,
       accomplices,
+      official_response: data.official_response,
     })
     .eq('id', id);
     
@@ -131,10 +133,13 @@ export const createScammerReport = async (
     const accomplices = data.accomplices?.filter(item => item !== '') || [];
     const wallet_addresses = data.wallet_addresses?.filter(item => item !== '') || [];
     
+    // Convert the numeric ID to a string before inserting
+    const newIdString = newId.toString();
+    
     const { error } = await supabase
       .from('scammers')
       .insert({
-        id: newId,
+        id: newIdString,
         name: data.name,
         accused_of: data.accused_of,
         wallet_addresses,
@@ -149,21 +154,42 @@ export const createScammerReport = async (
         dislikes: 0,
         shares: 0,
         bounty_amount: 0,
+        official_response: data.official_response,
       });
       
     if (error) {
       console.error("Error inserting new scammer:", error);
       
-      if (error.code === '23505') { // Duplicate key error
+      if (error.code === '23505') {
         throw new Error("This scammer has already been reported. Please try with different information.");
-      } else {
-        throw error;
       }
+      
+      throw error;
     }
     
-    return newId;
+    return newIdString;
   } catch (error) {
-    console.error("ID generation or insertion error:", error);
+    console.error("Error creating scammer report:", error);
+    throw error;
+  }
+};
+
+/**
+ * Generates a new scammer ID
+ */
+export const generateScammerId = async (): Promise<number> => {
+  try {
+    const { data, error } = await supabase
+      .from('scammers')
+      .select('id')
+      .order('id', { ascending: false })
+      .limit(1);
+      
+    if (error) throw error;
+    
+    return data[0]?.id ? parseInt(data[0].id) + 1 : 1;
+  } catch (error) {
+    console.error("Error generating scammer ID:", error);
     throw error;
   }
 };

@@ -242,16 +242,10 @@ const LiveChat = () => {
   const renderMessage = (message: ChatMessage, index: number) => {
     const userBadge = message.author_id ? userSecBalances[message.author_id] !== undefined ? calculateBadgeTier(userSecBalances[message.author_id]) : null : null;
     const isCurrentUser = message.author_id === profile?.wallet_address;
+    const time = formatTimeAgo(message.created_at);
 
-    return (
-      <div 
-        key={message.id} 
-        className={`
-          ${index > 0 ? 'mt-4' : ''} 
-          flex 
-          ${isCurrentUser ? 'justify-end' : 'justify-start'}
-        `}
-      >
+    const messageContent = (
+      <div key={message.id} className={`flex my-4 ${isCurrentUser ? 'justify-end' : 'justify-start'}`}>
         <div className={`flex ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'} space-x-2 ${isCurrentUser ? 'space-x-reverse' : ''}`}>
           <div className="flex-shrink-0">
             <Link to={message.author_username ? `/profile/${message.author_username}` : '#'}>
@@ -297,13 +291,19 @@ const LiveChat = () => {
                 initialDislikes={message.dislikes}
               />
               <span className="text-xs text-muted-foreground">
-                {formatTimeAgo(message.created_at)}
+                {time}
               </span>
             </div>
           </div>
         </div>
       </div>
     );
+    
+    return isAdmin ? (
+      <AdminContextMenu key={message.id} onDelete={() => handleDeleteMessage(message.id)} canEdit={false}>
+        {messageContent}
+      </AdminContextMenu>
+    ) : messageContent;
   };
 
   if (isLoading) {
