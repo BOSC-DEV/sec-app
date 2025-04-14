@@ -245,7 +245,7 @@ const LiveChat = () => {
     const time = formatTimeAgo(message.created_at);
 
     const messageContent = (
-      <div key={message.id} className={`flex my-4 ${isCurrentUser ? 'justify-end' : 'justify-start'}`}>
+      <div key={message.id} className="flex my-6">
         <div className={`flex ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'} space-x-2 ${isCurrentUser ? 'space-x-reverse' : ''}`}>
           <div className="flex-shrink-0">
             <Link to={message.author_username ? `/profile/${message.author_username}` : '#'}>
