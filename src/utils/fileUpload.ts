@@ -1,6 +1,7 @@
 
 import { toast } from "@/hooks/use-toast";
 import { handleError, ErrorSeverity } from "./errorHandling";
+import { supabase } from "@/integrations/supabase/client";
 
 // Maximum file size in bytes (5MB default)
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -12,6 +13,65 @@ const SUPPORTED_IMAGE_TYPES = [
   'image/gif',
   'image/webp'
 ];
+
+// File upload service
+export const fileUpload = {
+  /**
+   * Upload a file to Supabase storage
+   * @param file The file to upload
+   * @param folderPath The folder path in the bucket
+   * @param fileName The file name to use in storage
+   * @returns The public URL of the uploaded file, or null if upload failed
+   */
+  async uploadFile(file: File, folderPath: string, fileName: string): Promise<string | null> {
+    try {
+      // Validate file before upload
+      const isValid = await validateFile(file);
+      if (!isValid) {
+        throw new Error('Invalid file');
+      }
+      
+      // Compress image if it's an image file
+      let fileToUpload = file;
+      if (file.type.startsWith('image/')) {
+        const compressedFile = await compressImage(file);
+        if (compressedFile) {
+          fileToUpload = compressedFile;
+        }
+      }
+      
+      // Create full path
+      const fullPath = `${folderPath}/${fileName}`;
+      
+      // Upload file to Supabase storage
+      const { data, error } = await supabase.storage
+        .from('uploads')
+        .upload(fullPath, fileToUpload, {
+          cacheControl: '3600',
+          upsert: true
+        });
+      
+      if (error) {
+        console.error('Error uploading file:', error);
+        throw error;
+      }
+      
+      // Get public URL
+      const { data: publicUrlData } = supabase.storage
+        .from('uploads')
+        .getPublicUrl(data.path);
+      
+      return publicUrlData.publicUrl;
+    } catch (error) {
+      handleError(error, {
+        fallbackMessage: 'Failed to upload file',
+        severity: ErrorSeverity.MEDIUM,
+        context: 'FILE_UPLOAD'
+      });
+      return null;
+    }
+  }
+};
 
 // Validate file type and size
 export const validateFile = (
