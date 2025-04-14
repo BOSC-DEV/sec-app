@@ -33,22 +33,9 @@ const PublicProfilePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const {
-    profile: currentUserProfile
+    profile: currentUserProfile,
+    disconnectWallet
   } = useProfile();
-  const {
-    data: profile,
-    isLoading,
-    error,
-    refetch
-  } = useQuery({
-    queryKey: ['profile', username],
-    queryFn: () => getProfileByUsername(username || ''),
-    enabled: !!username
-  });
-  
-  useEffect(() => {
-    refetch();
-  }, [location, refetch]);
   
   const isOwnProfile = currentUserProfile?.wallet_address === profile?.wallet_address;
   
@@ -112,8 +99,9 @@ const PublicProfilePage = () => {
   const handleEditProfile = () => {
     navigate('/profile');
   };
-  const disconnectWallet = () => {
-    // Implement wallet disconnection logic here
+  const handleDisconnectWallet = () => {
+    disconnectWallet();
+    navigate('/');
   };
 
   if (error) {
@@ -222,10 +210,7 @@ const PublicProfilePage = () => {
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              onClick={() => {
-                                disconnectWallet();
-                                navigate('/');
-                              }} 
+                              onClick={handleDisconnectWallet} 
                               className="flex items-center gap-1 border-red-500 text-red-700 hover:bg-red-50 hover:text-red-900
                                            dark:border-red-400 dark:text-red-300 dark:hover:bg-red-900/20 dark:hover:text-red-200"
                             >
