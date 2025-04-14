@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import SEO from '@/components/common/SEO';
@@ -7,7 +8,7 @@ import LiveChat from '@/components/community/LiveChat';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { LayoutPanelLeft, Rows, Trophy, Megaphone, Messages, Medal } from 'lucide-react';
+import { LayoutPanelLeft, Rows, Trophy, Megaphone, MessageSquare, Medal } from 'lucide-react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import BadgeTiersPage from '@/components/profile/BadgeTiersPage';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
@@ -124,10 +125,10 @@ const CommunityPage = () => {
                 </TabsTrigger>
                 <TabsTrigger value="chat" className="flex-1">
                   {isMobile ? (
-                    <Messages className="h-5 w-5" />
+                    <MessageSquare className="h-5 w-5" />
                   ) : (
                     <>
-                      <Messages className="h-4 w-4 mr-2" />
+                      <MessageSquare className="h-4 w-4 mr-2" />
                       Live Chat
                     </>
                   )}
