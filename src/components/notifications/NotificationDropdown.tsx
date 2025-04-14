@@ -134,7 +134,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   }, [onClose]);
   
   return (
-    <Card className={`notification-dropdown shadow-lg ${isMobile ? 'w-full' : 'w-80'}`}>
+    <Card className={`notification-dropdown shadow-lg ${isMobile ? 'w-full max-w-[95vw] mx-auto' : 'w-80'}`}>
       <CardHeader className="pb-2 flex flex-row items-center justify-between">
         <div className="flex items-center space-x-2">
           <Bell className="h-4 w-4" />
