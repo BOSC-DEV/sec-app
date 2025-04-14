@@ -741,7 +741,11 @@ const ScammerDetailPage = () => {
                 
                 {/* Display the BountyForm on desktop under the likes bar */}
                 {!isMobile && <div className="mt-6">
-                    <BountyForm scammerId={scammer.id} scammerName={scammer.name} developerWalletAddress={developerWalletAddress} />
+                    <BountyForm 
+                      scammerId={scammer.id} 
+                      scammerName={scammer.name} 
+                      developerWalletAddress={developerWalletAddress} 
+                    />
                   </div>}
               </div>
             </div>
