@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -207,7 +208,6 @@ const Header = () => {
                   }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  {item.icon}
                   {item.label}
                 </Link>
               ))}
