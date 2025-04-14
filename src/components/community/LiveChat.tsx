@@ -331,8 +331,8 @@ const LiveChat = () => {
             <MessageSquare className="h-5 w-5 mr-2 text-icc-gold" />
             <h3 className="text-lg font-medium">Chat</h3>
             <div className="flex items-center ml-4">
-              <CircleDot className="h-3 w-3 text-green-500 mr-1 animate-pulse" />
-              <span className="text-xs text-muted-foreground">{onlineCount}</span>
+              <CircleDot className="h-5 w-5 text-green-500 mr-2 animate-pulse" />
+              <span className="text-lg text-muted-foreground">{onlineCount}</span>
             </div>
           </div>
           <div className="bg-muted rounded-full px-3 py-1 text-xs text-muted-foreground flex items-center">
