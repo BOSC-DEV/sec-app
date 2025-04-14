@@ -10,7 +10,7 @@ export enum BadgeTier {
   'Bald Eagle' = 'Bald Eagle',
   'Goat' = 'Goat',
   'T-Rex' = 'T-Rex',
-  'Blue Whale' = 'Blue Whale'
+  'Whale' = 'Whale'
 }
 
 // Define total SEC supply constant
@@ -42,7 +42,7 @@ export const BADGE_TIERS: { [key in BadgeTier]: { minPercent: number, color: str
   [BadgeTier["Bald Eagle"]]: { minPercent: 0.2, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦅' },
   [BadgeTier.Goat]: { minPercent: 0.7, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🐐' },
   [BadgeTier["T-Rex"]]: { minPercent: 0.5, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦖' },
-  [BadgeTier["Blue Whale"]]: { minPercent: 1.0, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🐋' }
+  [BadgeTier.Whale]: { minPercent: 1.0, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🐋' }
 };
 
 /**

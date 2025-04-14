@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -13,13 +12,11 @@ const BadgeTiersPage = () => {
   const secBalance = profile?.sec_balance || 0;
   const [currentBadgeInfo, setCurrentBadgeInfo] = useState(calculateBadgeTier(secBalance));
   
-  // Update badge info when secBalance changes
   useEffect(() => {
     setCurrentBadgeInfo(calculateBadgeTier(secBalance));
     console.log(`Current SEC balance: ${secBalance}, Badge tier: ${calculateBadgeTier(secBalance).tier}`);
   }, [secBalance]);
 
-  // Get all badge tiers
   const tiers = Object.entries(BADGE_TIERS).map(([tier, details]) => ({
     tier: tier as BadgeTier,
     minPercent: details.minPercent,
@@ -28,33 +25,25 @@ const BadgeTiersPage = () => {
     icon: details.icon,
   }));
 
-  // Sort tiers from lowest to highest
   const sortedTiers = [...tiers].sort((a, b) => a.minPercent - b.minPercent);
 
-  // Calculate progress towards next tier for each badge
   const tiersWithProgress = sortedTiers.map((tierInfo, index) => {
-    // Find the next tier (if any)
     const nextTier = index < sortedTiers.length - 1 ? sortedTiers[index + 1] : null;
     
-    // Calculate progress percentage
     let progressPercentage = 0;
     let progressText = '';
     
     if (secBalance >= tierInfo.minHolding) {
-      // User has already achieved this tier
       if (nextTier) {
-        // Calculate progress towards next tier
         const range = nextTier.minHolding - tierInfo.minHolding;
         const progress = secBalance - tierInfo.minHolding;
         progressPercentage = Math.min(100, (progress / range) * 100);
         progressText = `${formatSecAmount(secBalance)} / ${formatSecAmount(nextTier.minHolding)} SEC`;
       } else {
-        // User has achieved the highest tier
         progressPercentage = 100;
         progressText = `${formatSecAmount(secBalance)} SEC (Max Tier)`;
       }
     } else {
-      // User hasn't achieved this tier yet
       progressPercentage = Math.min(100, (secBalance / tierInfo.minHolding) * 100);
       progressText = `${formatSecAmount(secBalance)} / ${formatSecAmount(tierInfo.minHolding)} SEC`;
     }
@@ -90,14 +79,13 @@ const BadgeTiersPage = () => {
               </TableHeader>
               <TableBody>
                 {tiersWithProgress.map((tierInfo) => {
-                  // Create sample badge info for each tier
                   const badgeInfo = {
-                    tier: tierInfo.tier,
+                    tier: tierInfo.tier === 'Blue Whale' ? 'Whale' : tierInfo.tier,
                     color: tierInfo.color,
                     icon: tierInfo.icon,
                     minHolding: tierInfo.minHolding,
                     percentOfSupply: tierInfo.minPercent,
-                    nextTier: undefined, // Not needed for display
+                    nextTier: undefined,
                   };
 
                   return (
@@ -108,7 +96,9 @@ const BadgeTiersPage = () => {
                             badgeInfo={badgeInfo}
                             showTooltip={true}
                           />
-                          <span className="font-medium">{tierInfo.tier}</span>
+                          <span className="font-medium">
+                            {badgeInfo.tier}
+                          </span>
                         </div>
                       </TableCell>
                       <TableCell className="font-mono">
