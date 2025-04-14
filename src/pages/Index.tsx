@@ -10,8 +10,10 @@ import { useQuery } from '@tanstack/react-query';
 import { formatNumber } from '@/lib/utils';
 import DisclaimerDialog from '@/components/common/DisclaimerDialog';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
+
 const Index = () => {
   const [disclaimerOpen, setDisclaimerOpen] = useState(false);
+
   const {
     data: topScammers = [],
     isLoading: isLoadingScammers,
@@ -20,6 +22,7 @@ const Index = () => {
     queryKey: ['topScammers'],
     queryFn: () => getTopScammers(3)
   });
+
   const {
     data: statistics = {
       totalBounty: 0,
@@ -33,12 +36,15 @@ const Index = () => {
     queryKey: ['statistics'],
     queryFn: getStatistics
   });
+
   if (scammersError) {
     console.error('Failed to load top scammers', scammersError);
   }
+
   if (statsError) {
     console.error('Failed to load statistics', statsError);
   }
+
   return <div>
       <Hero />
 
@@ -138,7 +144,7 @@ const Index = () => {
                   <div className="text-4xl font-bold text-icc-blue dark:text-white mb-2 flex items-center justify-center">
                     <CurrencyIcon size="lg" className="mr-1" />{formatNumber(statistics.totalBounty)}
                   </div>
-                  <div className="text-sm text-icc-gray dark:text-gray-400">Total Bounty Value</div>
+                  <div className="text-sm text-icc-gray dark:text-gray-400">Total Bounties</div>
                 </div>
                 <div className="text-center p-6">
                   <div className="text-4xl font-bold text-icc-blue dark:text-white mb-2">{formatNumber(statistics.scammersCount)}</div>
@@ -160,4 +166,5 @@ const Index = () => {
       <DisclaimerDialog open={disclaimerOpen} onOpenChange={setDisclaimerOpen} />
     </div>;
 };
+
 export default Index;
