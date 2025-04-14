@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { 
   Card, 
@@ -27,7 +28,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Link } from 'react-router-dom';
-import { getProfileByDisplayName } from '@/services/profileService';
+import { getProfilesByDisplayName } from '@/services/profileService';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
 
 interface BountyTransactionHistoryProps {
@@ -54,14 +55,18 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
       await Promise.all(
         contributions.map(async (contribution) => {
           try {
-            const profile = await getProfileByDisplayName(contribution.contributor_name);
-            if (profile && profile.username) {
-              usernamesMap[contribution.contributor_name] = profile.username;
+            // Get all profiles with this display name instead of trying to get a single one
+            const profiles = await getProfilesByDisplayName(contribution.contributor_name);
+            
+            // If profiles are found, use the first one's username or fallback to contributor_id
+            if (profiles && profiles.length > 0) {
+              const matchingProfile = profiles.find(p => p.wallet_address === contribution.contributor_id) || profiles[0];
+              usernamesMap[contribution.contributor_name] = matchingProfile.username || contribution.contributor_name;
             } else {
               usernamesMap[contribution.contributor_name] = contribution.contributor_name;
             }
           } catch (error) {
-            console.error(`Error fetching profile for ${contribution.contributor_name}:`, error);
+            console.error(`Error fetching profiles for ${contribution.contributor_name}:`, error);
             usernamesMap[contribution.contributor_name] = contribution.contributor_name;
           }
         })
