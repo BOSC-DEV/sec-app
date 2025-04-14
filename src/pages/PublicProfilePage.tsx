@@ -37,6 +37,21 @@ const PublicProfilePage = () => {
     disconnectWallet
   } = useProfile();
   
+  const {
+    data: profile,
+    isLoading,
+    error,
+    refetch
+  } = useQuery({
+    queryKey: ['profile', username],
+    queryFn: () => getProfileByUsername(username || ''),
+    enabled: !!username
+  });
+  
+  useEffect(() => {
+    refetch();
+  }, [location, refetch]);
+  
   const isOwnProfile = currentUserProfile?.wallet_address === profile?.wallet_address;
   
   const {
