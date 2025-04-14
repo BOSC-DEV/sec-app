@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import BountyForm from '@/components/scammer/BountyForm';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
+import { formatNumber } from '@/lib/utils';
 
 interface ScammerActionButtonProps {
   icon: React.ReactNode;
