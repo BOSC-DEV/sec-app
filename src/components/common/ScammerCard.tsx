@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Eye, ThumbsUp, ThumbsDown, MessageSquare, Edit, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
-import { truncateText } from '@/lib/utils';
+import { truncateText, formatNumber } from '@/lib/utils';
 import { Scammer } from '@/types/dataTypes';
 import { useProfile } from '@/contexts/ProfileContext';
 import { likeScammer, dislikeScammer, getUserScammerInteraction } from '@/services/interactionService';
@@ -241,7 +241,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
           )}
           <div className="absolute top-0 right-0 bg-icc-gold text-icc-blue-dark px-3 py-1 text-sm font-serif font-bold flex items-center rounded-bl-lg">
             <CurrencyIcon className="h-4 w-4 mr-1" />
-            <span>{scammer.bounty_amount.toLocaleString()}</span>
+            <span>{formatNumber(scammer.bounty_amount)}</span>
           </div>
         </div>
         
@@ -272,19 +272,19 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
             <div className="flex items-center space-x-3">
               <span className="flex items-center dark:text-white">
                 <Eye className="h-3.5 w-3.5 mr-1 dark:text-white" />
-                {viewCount}
+                {formatNumber(viewCount)}
               </span>
               <span className="flex items-center dark:text-white">
                 <ThumbsUp className="h-3.5 w-3.5 mr-1 dark:text-white" />
-                {likes}
+                {formatNumber(likes)}
               </span>
               <span className="flex items-center dark:text-white">
                 <ThumbsDown className="h-3.5 w-3.5 mr-1 dark:text-white" />
-                {dislikes}
+                {formatNumber(dislikes)}
               </span>
               <span className="flex items-center dark:text-white">
                 <MessageSquare className="h-3.5 w-3.5 mr-1 dark:text-white" />
-                {scammer.comments?.length || 0}
+                {formatNumber(scammer.comments?.length || 0)}
               </span>
             </div>
           </div>

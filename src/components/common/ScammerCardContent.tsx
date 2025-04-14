@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { Scammer } from '@/types/dataTypes';
 import { LucideIcon, User, AlertTriangle, Calendar, Tag, Plus } from 'lucide-react';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
+import { formatNumber } from '@/lib/utils';
 
 interface ScammerMetadataProps {
   icon: LucideIcon | typeof CurrencyIcon;
@@ -71,7 +71,7 @@ const ScammerCardContent: React.FC<ScammerCardContentProps> = ({
             label="Bounty"
             value={
               <div className="flex items-center gap-1">
-                <span>{scammer.bounty_amount ? scammer.bounty_amount.toLocaleString() : "0"}</span>
+                <span>{scammer.bounty_amount ? formatNumber(scammer.bounty_amount) : "0"}</span>
                 <CurrencyIcon size="sm" />
               </div>
             }

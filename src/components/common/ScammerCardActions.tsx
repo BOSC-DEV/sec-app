@@ -48,7 +48,7 @@ export const ScammerActionButton: React.FC<ScammerActionButtonProps> = ({
     title={label}
   >
     {icon}
-    <span>{count > 999 ? `${(count / 1000).toFixed(1)}k` : count}</span>
+    <span>{formatNumber(count)}</span>
   </Button>
 );
 
