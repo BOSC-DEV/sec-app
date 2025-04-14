@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
@@ -11,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { toast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import { getProfileByUsername } from '@/services/profileService';
-import { Twitter, Globe, Copy, ExternalLink, Share2, ThumbsUp, Edit, LogOut, ExternalLinkIcon } from 'lucide-react';
+import { Twitter, Globe, Copy, ExternalLink, Share2, Edit, LogOut, ExternalLinkIcon, ThumbsUp, MessageSquare, FileText, Trophy, Wallet as WalletIcon, Info, Package } from 'lucide-react';
 import { getScammersByReporter, getLikedScammersByUser } from '@/services/scammerService';
 import { getUserBountyContributions } from '@/services/bountyService';
 import { Profile, Scammer } from '@/types/dataTypes';
@@ -21,7 +22,6 @@ import WalletBalance from '@/components/profile/WalletBalance';
 import WalletInfo from '@/components/profile/WalletInfo';
 import { useBadgeTier } from '@/hooks/useBadgeTier';
 import BadgeTier from '@/components/profile/BadgeTier';
-import { FileText, Trophy, Wallet as WalletIcon, Info, ThumbsUp, MessageSquare, Package } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const PublicProfilePage = () => {
