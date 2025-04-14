@@ -142,7 +142,7 @@ const Index = () => {
                 </div>
                 <div className="text-center p-6">
                   <div className="text-4xl font-bold text-icc-blue dark:text-white mb-2">{formatNumber(statistics.scammersCount)}</div>
-                  <div className="text-sm text-icc-gray dark:text-gray-400">Scammers Reported</div>
+                  <div className="text-sm text-icc-gray dark:text-gray-400">Total Reports</div>
                 </div>
                 <div className="text-center p-6">
                   <div className="text-4xl font-bold text-icc-blue dark:text-white mb-2">{formatNumber(statistics.reportersCount)}</div>
