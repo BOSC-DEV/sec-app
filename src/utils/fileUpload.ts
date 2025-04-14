@@ -43,7 +43,7 @@ export const fileUpload = {
       // Create full path
       const fullPath = `${folderPath}/${fileName}`;
       
-      // Upload file to Supabase storage
+      // Upload file to Supabase storage - using the correct bucket name 'uploads'
       const { data, error } = await supabase.storage
         .from('uploads')
         .upload(fullPath, fileToUpload, {

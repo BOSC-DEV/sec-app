@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Profile } from '@/types/dataTypes';
 import { handleError, ErrorSeverity } from "@/utils/errorHandling";
@@ -176,12 +175,14 @@ export const uploadProfilePicture = async (walletAddress: string, file: File): P
     const folderPath = `profile-pics/${walletAddress}`;
     const fileName = `profile-${Date.now()}.${file.name.split('.').pop()}`;
     
+    // Use the fileUpload utility which now uses the correct 'uploads' bucket
     const publicUrl = await fileUpload.uploadFile(file, folderPath, fileName);
     
     if (!publicUrl) {
       throw new Error('Failed to get public URL for uploaded file');
     }
     
+    console.log('Profile picture uploaded successfully:', publicUrl);
     return publicUrl;
   } catch (error) {
     handleError(error, {
