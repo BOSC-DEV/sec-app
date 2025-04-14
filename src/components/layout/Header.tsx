@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -288,8 +287,11 @@ const Header = () => {
               
               {showNotifications && isConnected && (
                 <div className="mt-2 flex justify-center">
-                  <div className="w-full">
-                    <NotificationDropdown onClose={() => setShowNotifications(false)} isMobile={true} />
+                  <div className="w-full max-w-[95vw]">
+                    <NotificationDropdown 
+                      onClose={() => setShowNotifications(false)} 
+                      isMobile={true} 
+                    />
                   </div>
                 </div>
               )}
