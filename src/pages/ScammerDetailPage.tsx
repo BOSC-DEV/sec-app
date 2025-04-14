@@ -9,7 +9,7 @@ import { addBountyContribution, getScammerBountyContributions, getUserContributi
 import CompactHero from '@/components/common/CompactHero';
 import BountyContributionList from '@/components/scammer/BountyContributionList';
 import BountyTransferDialog from '@/components/scammer/BountyTransferDialog';
-import { ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, Link2, Eye, AlertTriangle, Shield, TrendingUp, Edit, Clipboard, Trash2, MessageSquare } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, Link2, Eye, AlertTriangle, Shield, TrendingUp, Edit, Clipboard, Trash2, MessageSquare, Link2, User, Users, FileText, Wallet2, ShieldCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
@@ -35,6 +35,7 @@ import { Link } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import BountyForm from '@/components/scammer/BountyForm';
 import { ArrowLeftRight } from 'lucide-react';
+
 const ScammerDetailPage = () => {
   const {
     id
@@ -549,25 +550,32 @@ const ScammerDetailPage = () => {
                 <div className="relative">
                   <TabsList className="w-full justify-start overflow-x-auto bg-background/60 backdrop-blur-sm rounded-lg border p-1 mb-4" aria-label="Scammer information tabs">
                     <TabsTrigger value="comments" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                      Comments
+                      <MessageSquare className="h-4 w-4 md:hidden" />
+                      <span className="hidden md:inline">Comments</span>
                     </TabsTrigger>
                     <TabsTrigger value="links" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                      Links
+                      <Link2 className="h-4 w-4 md:hidden" />
+                      <span className="hidden md:inline">Links</span>
                     </TabsTrigger>
                     <TabsTrigger value="aliases" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                      Aliases
+                      <User className="h-4 w-4 md:hidden" />
+                      <span className="hidden md:inline">Aliases</span>
                     </TabsTrigger>
                     <TabsTrigger value="accomplices" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                      Accomplices
+                      <Users className="h-4 w-4 md:hidden" />
+                      <span className="hidden md:inline">Accomplices</span>
                     </TabsTrigger>
                     <TabsTrigger value="evidence" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                      Evidence
+                      <FileText className="h-4 w-4 md:hidden" />
+                      <span className="hidden md:inline">Evidence</span>
                     </TabsTrigger>
                     <TabsTrigger value="wallet-addresses" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                      Wallets
+                      <Wallet2 className="h-4 w-4 md:hidden" />
+                      <span className="hidden md:inline">Wallets</span>
                     </TabsTrigger>
                     <TabsTrigger value="official" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                      Official Response
+                      <ShieldCheck className="h-4 w-4 md:hidden" />
+                      <span className="hidden md:inline">Official Response</span>
                     </TabsTrigger>
                   </TabsList>
                   
