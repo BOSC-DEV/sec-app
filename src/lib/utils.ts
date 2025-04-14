@@ -1,4 +1,3 @@
-
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -13,7 +12,13 @@ export function truncateText(text: string, maxLength: number) {
 }
 
 export function formatNumber(num: number) {
-  return new Intl.NumberFormat().format(num);
+  if (num >= 1_000_000) {
+    return `${(num / 1_000_000).toFixed(1)}m`;
+  }
+  if (num >= 1_000) {
+    return `${(num / 1_000).toFixed(1)}k`;
+  }
+  return num.toString();
 }
 
 export function formatDate(dateString: string) {
@@ -32,10 +37,7 @@ export function getRandomInt(min: number, max: number) {
 }
 
 export function formatCurrency(value: number): string {
-  return value.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
+  return formatNumber(value);
 }
 
 export function formatProfileAge(dateString: string): string {
