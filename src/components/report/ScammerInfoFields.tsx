@@ -110,7 +110,7 @@ const ScammerInfoFields = ({
         setValue={form.setValue} 
       />
       
-      {/* Add Official Response field */}
+      {/* Official Response field */}
       <FormField
         control={control}
         name="official_response"

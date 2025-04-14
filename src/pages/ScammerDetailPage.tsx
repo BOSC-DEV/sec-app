@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -699,7 +698,13 @@ const ScammerDetailPage = () => {
                 
                 <TabsContent value="official" className="mt-2">
                   <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="official-response-section">Official Response</h2>
-                  <div className="text-icc-gray">No official response yet.</div>
+                  {scammer?.official_response ? (
+                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                      <p className="text-icc-gray whitespace-pre-wrap">{scammer.official_response}</p>
+                    </div>
+                  ) : (
+                    <p className="text-icc-gray">No official response yet.</p>
+                  )}
                 </TabsContent>
               </Tabs>
               
