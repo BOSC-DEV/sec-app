@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -133,11 +134,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   }, [onClose]);
   
   return (
-    <Card className={`notification-dropdown shadow-lg ${
-      isMobile 
-        ? 'w-[90vw] max-w-[350px] mx-auto' 
-        : 'w-80'
-    }`}>
+    <Card className={`notification-dropdown shadow-lg w-80`}>
       <CardHeader className="pb-2 flex flex-row items-center justify-between">
         <div className="flex items-center space-x-2">
           <Bell className="h-4 w-4" />

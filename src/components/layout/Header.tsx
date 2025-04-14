@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -118,7 +119,7 @@ const Header = () => {
                     <Bell className="h-5 w-5" />
                   </Button>
                   {showNotifications && (
-                    <div className={`absolute ${isMobile ? 'left-0 right-0 mx-auto w-80 max-w-[90vw]' : 'right-0'} mt-2 w-80`}>
+                    <div className="fixed left-1/2 transform -translate-x-1/2 mt-2 z-50">
                       <NotificationDropdown onClose={() => setShowNotifications(false)} />
                     </div>
                   )}
@@ -287,7 +288,7 @@ const Header = () => {
               
               {showNotifications && isConnected && (
                 <div className="mt-2 flex justify-center">
-                  <div className="w-full max-w-xs">
+                  <div className="w-full">
                     <NotificationDropdown onClose={() => setShowNotifications(false)} isMobile />
                   </div>
                 </div>
