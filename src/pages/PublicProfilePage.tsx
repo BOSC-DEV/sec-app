@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
@@ -19,7 +20,7 @@ import ScammerCard from '@/components/common/ScammerCard';
 import { useProfile } from '@/contexts/ProfileContext';
 import WalletBalance from '@/components/profile/WalletBalance';
 import WalletInfo from '@/components/profile/WalletInfo';
-import { useBadgeTier } from '@/hooks/use-badge-tier';
+import { useBadgeTier } from '@/hooks/useBadgeTier';
 import BadgeTier from '@/components/profile/BadgeTier';
 import { useIsMobile } from '@/hooks/use-mobile';
 
