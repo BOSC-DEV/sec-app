@@ -3,16 +3,17 @@ import React from 'react';
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { UseFormReturn } from 'react-hook-form';
 import DynamicFieldArray from './DynamicFieldArray';
 import ScammerPhotoUpload from './ScammerPhotoUpload';
 import { Separator } from '@/components/ui/separator';
 
 interface ScammerInfoFieldsProps {
-  form: any;
+  form: UseFormReturn<any>;
   photoFile: File | null;
-  setPhotoFile: (file: File | null) => void;
+  setPhotoFile: React.Dispatch<React.SetStateAction<File | null>>;
   photoPreview: string;
-  setPhotoPreview: (url: string) => void;
+  setPhotoPreview: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const ScammerInfoFields = ({
@@ -22,8 +23,7 @@ const ScammerInfoFields = ({
   photoPreview,
   setPhotoPreview
 }: ScammerInfoFieldsProps) => {
-  const { control } = form;
-  const { errors } = form.formState;
+  const { control, formState: { errors } } = form;
   
   return (
     <>
@@ -36,6 +36,9 @@ const ScammerInfoFields = ({
             <FormControl>
               <Input placeholder="Enter the scammer's name" {...field} />
             </FormControl>
+            <FormDescription>
+              The name or handle the scammer is known by.
+            </FormDescription>
             <FormMessage />
           </FormItem>
         )}
@@ -50,7 +53,7 @@ const ScammerInfoFields = ({
             <FormControl>
               <Textarea 
                 placeholder="Describe what they did in detail..." 
-                className="min-h-120"
+                className="min-h-[120px]"
                 {...field} 
               />
             </FormControl>
@@ -62,7 +65,7 @@ const ScammerInfoFields = ({
         )}
       />
       
-      {/* Photo upload section after description */}
+      {/* Photo upload section now directly after scam description */}
       <div className="my-4">
         <FormLabel>Scammer's Photo</FormLabel>
         <ScammerPhotoUpload 
@@ -71,13 +74,13 @@ const ScammerInfoFields = ({
           photoPreview={photoPreview}
           setPhotoPreview={setPhotoPreview}
           setValue={form.setValue}
-          control={control}
+          control={form.control}
         />
       </div>
       
       <Separator className="my-6" />
       
-      {/* Dynamic form arrays */}
+      {/* Dynamic form arrays for wallet addresses, aliases, links, and accomplices */}
       <DynamicFieldArray 
         name="wallet_addresses" 
         label="Wallet Addresses" 
@@ -108,28 +111,6 @@ const ScammerInfoFields = ({
         control={control} 
         errors={errors} 
         setValue={form.setValue} 
-      />
-      
-      {/* Add Official Response field */}
-      <FormField
-        control={control}
-        name="official_response"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Official Response</FormLabel>
-            <FormControl>
-              <Textarea 
-                placeholder="Official response from the accused (if available)..." 
-                className="min-h-[120px]"
-                {...field} 
-              />
-            </FormControl>
-            <FormDescription>
-              Add any official response or statement from the accused party.
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
       />
     </>
   );

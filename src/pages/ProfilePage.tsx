@@ -35,7 +35,7 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [avatarKey, setAvatarKey] = useState(Date.now());
+  const [avatarKey, setAvatarKey] = useState(Date.now()); // Add a key for forcing re-render
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<ProfileFormValues>({
@@ -103,7 +103,7 @@ const ProfilePage = () => {
       const publicUrl = await uploadAvatar(file);
       if (publicUrl) {
         setAvatarUrl(publicUrl);
-        setAvatarKey(Date.now());
+        setAvatarKey(Date.now()); // Update key to force re-render
       }
     } catch (error) {
       console.error('Error uploading avatar:', error);
@@ -219,7 +219,7 @@ const ProfilePage = () => {
                       <Input placeholder="your_username" {...field} />
                     </FormControl>
                     <FormDescription>
-                      Your profile will be accessible at sec.digital/
+                      Your profile will be accessible at bookofscams.lol/
                     </FormDescription>
                   </FormItem>} />
               
