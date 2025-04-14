@@ -1,6 +1,8 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Copy } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import ICCLogo from '../common/ICCLogo';
 import TermsDialog from '../common/TermsDialog';
 import PrivacyDialog from '../common/PrivacyDialog';
@@ -57,6 +59,15 @@ const Footer = () => {
               <a href="https://x.com/sandecommission" target="_blank" rel="noopener noreferrer" className="text-white hover:text-icc-gold dark:text-gray-300 dark:hover:text-icc-gold" aria-label="SEC on X">
                 <img src="/lovable-uploads/91abf77b-554f-410f-85a0-15dfdfcc77e4.png" alt="X (Twitter)" className="h-5 w-5" />
               </a>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="text-white hover:bg-white/10"
+                onClick={copyToClipboard}
+                aria-label="Copy Contract Address"
+              >
+                <Copy className="h-5 w-5" />
+              </Button>
             </div>
           </div>
           
