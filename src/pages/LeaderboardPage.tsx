@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Trophy, Medal, ThumbsUp, Eye, MessageSquare, Clock, Globe, Search } from 'lucide-react';
@@ -117,7 +118,7 @@ const LeaderboardPage = () => {
   
   return (
     <div>
-      <CompactHero title="Leaderboard" subtitle="Top hunters tracking and reporting cryptocurrency scammers." />
+      <CompactHero title="Leaderboard" subtitle="Top hunters tracking and reporting cryptocurrency scammers" />
 
       <section className="py-12 bg-gradient-to-b from-white to-gray-50 dark:from-icc-blue-dark dark:to-icc-blue">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
