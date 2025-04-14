@@ -1,22 +1,23 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { PublicKey, LAMPORTS_PER_SOL, Connection } from '@solana/web3.js';
+import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 import BadgeTier from './BadgeTier';
 import { useBadgeTier } from '@/hooks/useBadgeTier';
+
+// Import from phantomWallet utility
 import { getConnection } from '@/utils/phantomWallet';
 
 // SEC token mint address
 const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump');
-
 interface WalletBalanceProps {
   walletAddress?: string | null;
 }
-
 const WalletBalance: React.FC<WalletBalanceProps> = ({
   walletAddress
 }) => {
@@ -149,5 +150,4 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
       </CardContent>
     </Card>;
 };
-
 export default WalletBalance;
