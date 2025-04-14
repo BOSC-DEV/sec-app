@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -80,7 +81,7 @@ const BadgeTiersPage = () => {
               <TableBody>
                 {tiersWithProgress.map((tierInfo) => {
                   const badgeInfo = {
-                    tier: tierInfo.tier === 'Blue Whale' ? 'Whale' : tierInfo.tier,
+                    tier: tierInfo.tier,
                     color: tierInfo.color,
                     icon: tierInfo.icon,
                     minHolding: tierInfo.minHolding,
