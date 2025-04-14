@@ -15,7 +15,7 @@ const CompactHero: React.FC<CompactHeroProps> = ({
           <h1 className="text-3xl md:text-4xl font-serif font-bold text-white mb-3">
             {title}
           </h1>
-          {subtitle && <p className="text-white opacity-80">{subtitle}.</p>}
+          {subtitle && <p className="text-white opacity-80">{subtitle}</p>}
         </div>
       </div>
       <div className="h-4 bg-gradient-to-r from-icc-gold-dark via-icc-gold to-icc-gold-dark"></div>
