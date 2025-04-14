@@ -21,6 +21,8 @@ import WalletBalance from '@/components/profile/WalletBalance';
 import WalletInfo from '@/components/profile/WalletInfo';
 import { useBadgeTier } from '@/hooks/useBadgeTier';
 import BadgeTier from '@/components/profile/BadgeTier';
+import { FileText, Wallet as WalletIcon, Info, MessageSquare, Trophy } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const PublicProfilePage = () => {
   
@@ -118,6 +120,8 @@ const PublicProfilePage = () => {
     disconnectWallet();
     navigate('/');
   };
+
+  const isMobile = useIsMobile();
 
   if (error) {
     return <div className="container py-10">
@@ -266,22 +270,64 @@ const PublicProfilePage = () => {
             <Tabs defaultValue="reports" className="w-full" value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="w-full justify-start overflow-x-auto bg-background/60 backdrop-blur-sm rounded-lg border p-1 mb-6">
                 <TabsTrigger value="reports" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                  Reports
+                  {isMobile ? (
+                    <FileText className="h-5 w-5" />
+                  ) : (
+                    <>
+                      <FileText className="h-4 w-4 mr-2" />
+                      Reports
+                    </>
+                  )}
                 </TabsTrigger>
                 <TabsTrigger value="bounties" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                  Bounties
+                  {isMobile ? (
+                    <Trophy className="h-5 w-5" />
+                  ) : (
+                    <>
+                      <Trophy className="h-4 w-4 mr-2" />
+                      Bounties
+                    </>
+                  )}
                 </TabsTrigger>
                 <TabsTrigger value="wallet" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                  Wallet
+                  {isMobile ? (
+                    <WalletIcon className="h-5 w-5" />
+                  ) : (
+                    <>
+                      <WalletIcon className="h-4 w-4 mr-2" />
+                      Wallet
+                    </>
+                  )}
                 </TabsTrigger>
                 <TabsTrigger value="info" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                  Info
+                  {isMobile ? (
+                    <Info className="h-5 w-5" />
+                  ) : (
+                    <>
+                      <Info className="h-4 w-4 mr-2" />
+                      Info
+                    </>
+                  )}
                 </TabsTrigger>
                 <TabsTrigger value="activity" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                  Likes
+                  {isMobile ? (
+                    <ThumbsUp className="h-5 w-5" />
+                  ) : (
+                    <>
+                      <ThumbsUp className="h-4 w-4 mr-2" />
+                      Likes
+                    </>
+                  )}
                 </TabsTrigger>
                 <TabsTrigger value="comments" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                  Comments
+                  {isMobile ? (
+                    <MessageSquare className="h-5 w-5" />
+                  ) : (
+                    <>
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Comments
+                    </>
+                  )}
                 </TabsTrigger>
               </TabsList>
                 
