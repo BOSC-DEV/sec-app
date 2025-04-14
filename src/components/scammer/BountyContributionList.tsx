@@ -74,7 +74,7 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
   }
   return <div className="space-y-4">
       {userContributionAmount > 0 && <div className="bg-icc-blue-dark/10 rounded-lg p-4 mb-4">
-          <h4 className="text-sm font-medium text-icc-blue mb-2">My Contributions</h4>
+          <h4 className="text-icc-blue mb-2 font-semibold text-base">My Contributions</h4>
           <div className="text-2xl font-bold text-icc-gold flex items-center gap-1">
             {formatCurrency(userContributionAmount)} <CurrencyIcon />
           </div>
