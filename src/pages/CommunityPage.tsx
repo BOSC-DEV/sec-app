@@ -7,7 +7,7 @@ import LiveChat from '@/components/community/LiveChat';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { LayoutPanelLeft, Rows, Trophy, Megaphone, MessageSquare, Medal } from 'lucide-react';
+import { LayoutPanelLeft, Rows, Medal, Megaphone, MessageSquare } from 'lucide-react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import BadgeTiersPage from '@/components/profile/BadgeTiersPage';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
@@ -55,7 +55,7 @@ const CommunityPage = () => {
               <h2 className="text-2xl font-bold">Community</h2>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={handleBadgeButtonClick} className="flex items-center gap-2">
-                  <Trophy className="h-4 w-4" />
+                  <Medal className="h-4 w-4" />
                   <span>Badge Tiers</span>
                 </Button>
                 <Button variant="outline" size="sm" onClick={toggleSplitScreen} className="flex items-center gap-2">
@@ -64,6 +64,7 @@ const CommunityPage = () => {
                 </Button>
               </div>
             </div>
+            
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="h-[600px] flex flex-col">
@@ -80,6 +81,7 @@ const CommunityPage = () => {
                   </CardContent>
                 </Card>
               </div>
+              
               
               <div className="h-[600px] flex flex-col">
                 <LiveChat />
@@ -102,7 +104,7 @@ const CommunityPage = () => {
                 </TabsTrigger>
                 <TabsTrigger value="badges" className="flex-1">
                   {isMobile ? <Medal className="h-5 w-5" /> : <>
-                      <Trophy className="h-4 w-4 mr-2" />
+                      <Medal className="h-4 w-4 mr-2" />
                       Badge Tiers
                     </>}
                 </TabsTrigger>
@@ -114,15 +116,18 @@ const CommunityPage = () => {
                 </Button>}
             </div>
             
+            
             <TabsContent value="announcements" className="mt-0">
               <AnnouncementFeed useCarousel={false} />
             </TabsContent>
+            
             
             <TabsContent value="chat" className="mt-0">
               <div className="h-[600px]">
                 <LiveChat />
               </div>
             </TabsContent>
+            
             
             <TabsContent value="badges" className="mt-0">
               <BadgeTiersPage />
