@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,6 +25,8 @@ import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 import { getConnection } from '@/utils/phantomWallet';
 import { formatTimeAgo } from '@/utils/formatTime';
+import { useOnlineUsers } from '@/hooks/useOnlineUsers';
+import { CircleDot } from 'lucide-react';
 
 const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump');
 
@@ -42,6 +43,7 @@ const LiveChat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
+  const onlineCount = useOnlineUsers();
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -328,6 +330,10 @@ const LiveChat = () => {
           <div className="flex items-center">
             <MessageSquare className="h-5 w-5 mr-2 text-icc-gold" />
             <h3 className="text-lg font-medium">Chat</h3>
+            <div className="flex items-center ml-2">
+              <CircleDot className="h-3 w-3 text-green-500 mr-1" />
+              <span className="text-xs text-muted-foreground">{onlineCount} online</span>
+            </div>
           </div>
           <div className="bg-muted rounded-full px-3 py-1 text-xs text-muted-foreground flex items-center">
             <Info className="h-3 w-3 mr-1" />
