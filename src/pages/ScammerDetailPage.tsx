@@ -298,6 +298,9 @@ const ScammerDetailPage = () => {
         if (total > 0) {
           setAgreePercentage(Math.round((result.likes || 0) * 100 / total));
         }
+        toast({
+          title: "Agreed",
+        });
         queryClient.setQueryData(['scammer', id], (oldScammer: Scammer | undefined) => {
           if (oldScammer) {
             return {
