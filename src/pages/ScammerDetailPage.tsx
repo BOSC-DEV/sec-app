@@ -41,6 +41,7 @@ import CurrencyIcon from '@/components/common/CurrencyIcon';
 import { Link } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import BountyForm from '@/components/scammer/BountyForm';
+import { ArrowLeftRight } from 'lucide-react';
 
 const ScammerDetailPage = () => {
   const { id } = useParams<{ id: string; }>();
@@ -587,29 +588,38 @@ const ScammerDetailPage = () => {
               </div>
 
               <Tabs defaultValue="comments" className="w-full mb-6">
-                <TabsList className="w-full justify-start overflow-x-auto bg-background/60 backdrop-blur-sm rounded-lg border p-1 mb-4" aria-label="Scammer information tabs">
-                  <TabsTrigger value="comments" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                    Comments
-                  </TabsTrigger>
-                  <TabsTrigger value="links" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                    Links
-                  </TabsTrigger>
-                  <TabsTrigger value="aliases" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                    Aliases
-                  </TabsTrigger>
-                  <TabsTrigger value="accomplices" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                    Accomplices
-                  </TabsTrigger>
-                  <TabsTrigger value="evidence" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                    Evidence
-                  </TabsTrigger>
-                  <TabsTrigger value="wallet-addresses" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                    Wallets
-                  </TabsTrigger>
-                  <TabsTrigger value="official" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                    Official Response
-                  </TabsTrigger>
-                </TabsList>
+                <div className="relative">
+                  <TabsList className="w-full justify-start overflow-x-auto bg-background/60 backdrop-blur-sm rounded-lg border p-1 mb-4" aria-label="Scammer information tabs">
+                    <TabsTrigger value="comments" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                      Comments
+                    </TabsTrigger>
+                    <TabsTrigger value="links" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                      Links
+                    </TabsTrigger>
+                    <TabsTrigger value="aliases" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                      Aliases
+                    </TabsTrigger>
+                    <TabsTrigger value="accomplices" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                      Accomplices
+                    </TabsTrigger>
+                    <TabsTrigger value="evidence" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                      Evidence
+                    </TabsTrigger>
+                    <TabsTrigger value="wallet-addresses" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                      Wallets
+                    </TabsTrigger>
+                    <TabsTrigger value="official" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                      Official Response
+                    </TabsTrigger>
+                  </TabsList>
+                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-icc-gray/50 flex items-center">
+                    <ArrowLeftRight 
+                      size={20} 
+                      className="animate-pulse" 
+                      aria-label="Swipe left to see more tabs" 
+                    />
+                  </div>
+                </div>
                 
                 <TabsContent value="comments" className="mt-2">
                   <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="comments-section">Comments</h2>
