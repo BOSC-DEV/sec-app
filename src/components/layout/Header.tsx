@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, User, Copy, Bell, LogIn, Wallet, MessageCircle } from 'lucide-react';
+import { Menu, X, User, Copy, Bell, LogIn, Wallet } from 'lucide-react';
 import ICCLogo from '../common/ICCLogo';
 import { useProfile } from '@/contexts/ProfileContext';
 import ThemeToggle from '@/components/common/ThemeToggle';
@@ -72,7 +72,7 @@ const Header = () => {
     { label: 'Most Wanted', path: '/most-wanted' },
     { label: 'Report', path: '/report' },
     { label: 'Leaderboard', path: '/leaderboard' },
-    { label: 'Community', path: '/community', icon: <MessageCircle className="h-4 w-4 mr-2" /> },
+    { label: 'Community', path: '/community' },
   ];
 
   return (
