@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -142,25 +141,6 @@ const Header = () => {
                 >
                   <Copy className="h-5 w-5" />
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  className="text-white hover:bg-transparent hover:text-gray-200 border-none"
-                  onClick={handleWalletButtonClick}
-                >
-                  <Wallet className="h-5 w-5" />
-                </Button>
-                {isMobile && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-white hover:bg-icc-blue-light md:hidden"
-                    onClick={toggleMenu}
-                    aria-label="Menu"
-                  >
-                    {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                  </Button>
-                )}
               </div>
             ) : (
               <div className="flex items-center space-x-3">
@@ -186,17 +166,6 @@ const Header = () => {
                     </>
                   )}
                 </Button>
-                {isMobile && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-white hover:bg-icc-blue-light md:hidden"
-                    onClick={toggleMenu}
-                    aria-label="Menu"
-                  >
-                    {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                  </Button>
-                )}
               </div>
             )}
           </div>
