@@ -498,8 +498,9 @@ const ScammerDetailPage = () => {
         </section>
       </div>;
   }
-  return <div>
-      <CompactHero title={scammer.name} />
+  return (
+    <div>
+      <CompactHero title={scammer?.name} />
 
       <section className="icc-section bg-white">
         <div className="icc-container">
@@ -746,6 +747,19 @@ const ScammerDetailPage = () => {
                       scammerName={scammer.name} 
                       developerWalletAddress={developerWalletAddress} 
                     />
+                    
+                    {/* Recent Contributions moved here */}
+                    <div className="mt-6">
+                      <BountyContributionList
+                        contributions={bountyContributions}
+                        isLoading={isLoadingBountyContributions}
+                        totalCount={totalContributions}
+                        onPageChange={handlePageChange}
+                        currentPage={contributionsPage}
+                        itemsPerPage={contributionsPerPage}
+                        userContributionAmount={userContributionAmount}
+                      />
+                    </div>
                   </div>}
               </div>
             </div>
@@ -754,18 +768,27 @@ const ScammerDetailPage = () => {
       </section>
       
       {/* Recent Contributions section */}
-      <div className="mt-8">
-        <BountyContributionList
-          contributions={bountyContributions}
-          isLoading={isLoadingBountyContributions}
-          totalCount={totalContributions}
-          onPageChange={handlePageChange}
-          currentPage={contributionsPage}
-          itemsPerPage={contributionsPerPage}
-          userContributionAmount={userContributionAmount}
-        />
-      </div>
-      
+      {isMobile && (
+        <div className="mt-8">
+          <BountyForm
+            scammerId={scammer.id}
+            scammerName={scammer.name}
+            developerWalletAddress={developerWalletAddress}
+          />
+          <div className="mt-6">
+            <BountyContributionList
+              contributions={bountyContributions}
+              isLoading={isLoadingBountyContributions}
+              totalCount={totalContributions}
+              onPageChange={handlePageChange}
+              currentPage={contributionsPage}
+              itemsPerPage={contributionsPerPage}
+              userContributionAmount={userContributionAmount}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
@@ -783,7 +806,8 @@ const ScammerDetailPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>;
+    </div>
+  );
 };
 
 export default ScammerDetailPage;
