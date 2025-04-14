@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
@@ -23,6 +22,7 @@ import WalletInfo from '@/components/profile/WalletInfo';
 import { useBadgeTier } from '@/hooks/useBadgeTier';
 import BadgeTier from '@/components/profile/BadgeTier';
 import { useIsMobile } from '@/hooks/use-mobile';
+import CurrencyIcon from '@/components/common/CurrencyIcon';
 
 const PublicProfilePage = () => {
   
@@ -346,7 +346,10 @@ const PublicProfilePage = () => {
                                   <h3 className="font-semibold">{scammer.name}</h3>
                                   <p className="text-sm text-muted-foreground line-clamp-1">{scammer.accused_of}</p>
                                 </div>
-                                <Badge variant="secondary">${scammer.bounty_amount}</Badge>
+                                <Badge variant="secondary" className="flex items-center gap-1">
+                                  <CurrencyIcon size="sm" />
+                                  {scammer.bounty_amount}
+                                </Badge>
                               </div>
                             </CardContent>
                           </Link>
