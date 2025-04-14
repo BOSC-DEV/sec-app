@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -10,16 +9,16 @@ import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 import BadgeTier from './BadgeTier';
 import { useBadgeTier } from '@/hooks/useBadgeTier';
 
-// Import from phantomWallet utility
-import { getConnection } from '@/utils/phantomWallet';
-
-// SEC token mint address
 const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump');
+
 interface WalletBalanceProps {
   walletAddress?: string | null;
+  onBalanceUpdate?: (balance: number) => void;
 }
+
 const WalletBalance: React.FC<WalletBalanceProps> = ({
-  walletAddress
+  walletAddress,
+  onBalanceUpdate
 }) => {
   const [solBalance, setSolBalance] = useState<number | null>(null);
   const [secBalance, setSecBalance] = useState<number | null>(null);
@@ -44,22 +43,20 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
       const connection = getConnection();
       const publicKey = new PublicKey(address);
 
-      // Get the associated token account address
       const tokenAccountAddress = await getAssociatedTokenAddress(SEC_TOKEN_MINT, publicKey);
       try {
-        // Get the token account info
         const tokenAccount = await getAccount(connection, tokenAccountAddress);
-
-        // Convert amount (BigInt) to human-readable format with 6 decimals
         const balance = Number(tokenAccount.amount) / Math.pow(10, 6);
+        onBalanceUpdate?.(balance);
         return balance;
       } catch (error) {
-        // Token account might not exist yet
         console.log('Token account not found, likely zero balance');
+        onBalanceUpdate?.(0);
         return 0;
       }
     } catch (error) {
       console.error('Error fetching SEC balance:', error);
+      onBalanceUpdate?.(0);
       return 0;
     }
   };
@@ -121,7 +118,6 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
       <CardContent className="dark:bg-transparent">
         {walletAddress ? <div className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* SOL Balance */}
               <div className="p-4">
                 <div className="text-sm text-gray-500 dark:text-gray-200 mb-1">SOL Balance</div>
                 {isLoading ? <Skeleton className="h-7 w-24 dark:bg-gray-700" /> : <div className="font-mono text-xl font-bold text-primary dark:text-white">
@@ -129,7 +125,6 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
                   </div>}
               </div>
 
-              {/* SEC Balance */}
               <div className="p-4">
                 <div className="text-sm text-gray-500 dark:text-gray-200 mb-1">SEC Balance</div>
                 {isLoading ? <Skeleton className="h-7 w-24 dark:bg-gray-700" /> : <div className="font-mono text-xl font-bold text-primary dark:text-white">
@@ -150,4 +145,5 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
       </CardContent>
     </Card>;
 };
+
 export default WalletBalance;

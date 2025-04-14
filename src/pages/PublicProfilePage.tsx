@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
@@ -39,6 +38,8 @@ const PublicProfilePage = () => {
     disconnectWallet
   } = useProfile();
   
+  const [secBalance, setSecBalance] = useState<number | null>(null);
+  
   const {
     data: profile,
     isLoading,
@@ -65,8 +66,7 @@ const PublicProfilePage = () => {
     enabled: !!profile?.wallet_address
   });
   
-  const badgeInfo = useBadgeTier(profile?.wallet_address ? 
-    (bountyContributions?.totalBountyAmount || 0) : null);
+  const badgeInfo = useBadgeTier(secBalance);
   
   const {
     data: scammerReports,
@@ -427,11 +427,14 @@ const PublicProfilePage = () => {
                   
                   <div className="space-y-8">
                     {profile?.wallet_address ? <>
-                        <WalletBalance walletAddress={profile.wallet_address} />
+                        <WalletBalance 
+                          walletAddress={profile.wallet_address}
+                          onBalanceUpdate={(balance) => setSecBalance(balance)}
+                        />
                         <WalletInfo 
                           walletAddress={profile.wallet_address} 
                           isOwnProfile={isOwnProfile} 
-                          secBalance={profile?.wallet_address ? bountyContributions?.totalBountyAmount || 0 : null}
+                          secBalance={secBalance}
                         />
                       </> : <div className="text-center py-12">
                         <p className="text-muted-foreground text-lg">No wallet information available</p>
