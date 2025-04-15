@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import SEO from '@/components/common/SEO';
 import CompactHero from '@/components/common/CompactHero';
