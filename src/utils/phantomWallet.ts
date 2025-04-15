@@ -1,4 +1,3 @@
-
 import { toast } from '@/hooks/use-toast';
 import { 
   Connection, 
@@ -28,6 +27,7 @@ export interface PhantomProvider {
   connect: ({ onlyIfTrusted }: { onlyIfTrusted: boolean }) => Promise<{ publicKey: { toString: () => string } }>;
   disconnect: () => Promise<void>;
   on: (event: PhantomEvent, callback: () => void) => void;
+  off: (event: PhantomEvent, callback: () => void) => void;
   isPhantom: boolean;
   isConnected: boolean;
   publicKey: { toString: () => string } | null;

@@ -73,7 +73,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     const provider = getPhantomProvider();
     
     if (provider) {
-      provider.on('connect', () => {
+      const handleConnect = () => {
         const publicKey = getWalletPublicKey();
         if (publicKey) {
           setWalletAddress(publicKey);
@@ -81,14 +81,17 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
           localStorage.setItem('walletAddress', publicKey);
           fetchProfile(publicKey);
         }
-      });
+      };
       
-      provider.on('disconnect', () => {
+      const handleDisconnect = () => {
         setWalletAddress(null);
         setIsConnected(false);
         setProfile(null);
         localStorage.removeItem('walletAddress');
-      });
+      };
+      
+      provider.on('connect', handleConnect);
+      provider.on('disconnect', handleDisconnect);
 
       if (provider.isConnected && provider.publicKey) {
         const publicKey = provider.publicKey.toString();
@@ -97,14 +100,14 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem('walletAddress', publicKey);
         fetchProfile(publicKey);
       }
+      
+      return () => {
+        if (provider) {
+          provider.off('connect', handleConnect);
+          provider.off('disconnect', handleDisconnect);
+        }
+      };
     }
-
-    return () => {
-      if (provider) {
-        provider.removeAllListeners('connect');
-        provider.removeAllListeners('disconnect');
-      }
-    };
   }, [isInitialized]);
 
   const fetchProfile = async (address: string) => {
