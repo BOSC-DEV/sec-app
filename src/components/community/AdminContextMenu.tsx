@@ -7,6 +7,8 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { Edit, Trash2, UserX } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { banUser } from '@/utils/adminUtils';
 
 interface AdminContextMenuProps {
   children: React.ReactNode;
@@ -14,6 +16,7 @@ interface AdminContextMenuProps {
   onDelete: () => void;
   onBanUser?: () => void;
   canEdit?: boolean;
+  authorUsername?: string;
 }
 
 const AdminContextMenu: React.FC<AdminContextMenuProps> = ({ 
@@ -21,8 +24,20 @@ const AdminContextMenu: React.FC<AdminContextMenuProps> = ({
   onEdit, 
   onDelete,
   onBanUser,
-  canEdit = true
+  canEdit = true,
+  authorUsername
 }) => {
+  const handleBanUser = () => {
+    if (authorUsername && onBanUser) {
+      banUser(authorUsername);
+      toast({
+        title: "User banned",
+        description: `${authorUsername} has been banned from commenting`,
+      });
+      onBanUser();
+    }
+  };
+
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>
@@ -39,8 +54,8 @@ const AdminContextMenu: React.FC<AdminContextMenuProps> = ({
           <Trash2 className="h-4 w-4 mr-2" />
           Delete
         </ContextMenuItem>
-        {onBanUser && (
-          <ContextMenuItem onClick={onBanUser} className="cursor-pointer text-destructive focus:text-destructive">
+        {authorUsername && onBanUser && (
+          <ContextMenuItem onClick={handleBanUser} className="cursor-pointer text-destructive focus:text-destructive">
             <UserX className="h-4 w-4 mr-2" />
             Ban User
           </ContextMenuItem>

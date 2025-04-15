@@ -20,13 +20,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import ReplyForm from './ReplyForm';
 import RichTextEditor from './RichTextEditor';
 import { formatTimeAgo } from '@/utils/formatTime';
+import { banUser } from '@/utils/adminUtils';
 
 interface AnnouncementRepliesProps {
   announcementId: string;
   isAdmin: boolean;
+  refetch: () => void;
 }
 
-const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementId, isAdmin }) => {
+const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementId, isAdmin, refetch }) => {
   const { profile, isConnected } = useProfile();
   const [replies, setReplies] = useState<AnnouncementReply[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -126,6 +128,11 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
         variant: "destructive",
       });
     }
+  };
+
+  const handleBanUser = async (username: string) => {
+    banUser(username);
+    await refetch(); // Refresh the replies after banning
   };
   
   const openEditDialog = (reply: AnnouncementReply) => {
@@ -275,6 +282,8 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
                         key={reply.id}
                         onEdit={() => openEditDialog(reply)}
                         onDelete={() => handleDeleteReply(reply.id)}
+                        onBanUser={() => handleBanUser(reply.author_username)}
+                        authorUsername={reply.author_username}
                       >
                         {replyContent}
                       </AdminContextMenu>

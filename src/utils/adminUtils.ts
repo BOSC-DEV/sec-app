@@ -1,3 +1,4 @@
+
 export const ADMIN_USERNAMES = ['sec', 'thesec'];
 
 export const BANNED_USERNAMES: string[] = [];
@@ -17,5 +18,11 @@ export const isBanned = (username: string): boolean => {
 export const banUser = (username: string): void => {
   if (!BANNED_USERNAMES.includes(username)) {
     BANNED_USERNAMES.push(username);
+    // Show toast notification to admins
+    toast({
+      title: "User Banned",
+      description: `User ${username} has been banned from commenting`,
+      variant: "default",
+    });
   }
 };
