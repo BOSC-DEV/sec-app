@@ -77,11 +77,13 @@ export default {
         },
         // Add specific dark mode text colors
         "dark-text": {
+          DEFAULT: "#FFFFFF",
           primary: "#F1F1F1",
           secondary: "#C8C8C9",
           muted: "#9F9EA1",
         },
         "dark-bg": {
+          DEFAULT: "#1A1F2C",
           card: "#1A1F2C",
           input: "#2A2F3C",
           hover: "#2C3242",
