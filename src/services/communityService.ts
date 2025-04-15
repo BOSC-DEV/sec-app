@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { 
   Announcement, 
@@ -32,16 +31,13 @@ const convertJsonToSurveyData = (data: Json | null): SurveyData | null => {
       // Validate and ensure proper structure
       return {
         title: String(surveyData.title),
-        poll_number: Number(surveyData.poll_number || 0),
         options: surveyData.options.map((option: any) => ({
           text: String(option.text || ''),
           votes: Number(option.votes || 0),
           voters: Array.isArray(option.voters) 
             ? option.voters.map((voter: any) => ({
                 userId: String(voter.userId || ''),
-                badgeTier: String(voter.badgeTier || ''),
-                username: voter.username ? String(voter.username) : undefined,
-                profilePic: voter.profilePic ? String(voter.profilePic) : undefined
+                badgeTier: String(voter.badgeTier || '')
               }))
             : []
         }))
@@ -132,8 +128,7 @@ export const createSurveyAnnouncement = async (
       .order('created_at', { ascending: false })
       .limit(1);
     
-    const surveyData = latestPoll && latestPoll.length > 0 ? convertJsonToSurveyData(latestPoll[0].survey_data) : null;
-    const lastPollNumber = surveyData?.poll_number || 0;
+    const lastPollNumber = latestPoll?.[0]?.survey_data?.poll_number || 0;
     const newPollNumber = lastPollNumber + 1;
     
     const options: SurveyOption[] = optionTexts.map(text => ({
@@ -142,7 +137,7 @@ export const createSurveyAnnouncement = async (
       voters: []
     }));
     
-    const newSurveyData: SurveyData = {
+    const surveyData: SurveyData = {
       poll_number: newPollNumber,
       title,
       options
@@ -158,7 +153,7 @@ export const createSurveyAnnouncement = async (
         author_profile_pic: announcement.author_profile_pic,
         likes: announcement.likes || 0,
         dislikes: announcement.dislikes || 0,
-        survey_data: convertSurveyDataToJson(newSurveyData)
+        survey_data: convertSurveyDataToJson(surveyData)
       })
       .select()
       .single();
