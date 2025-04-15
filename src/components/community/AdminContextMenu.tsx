@@ -6,12 +6,13 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, UserX } from 'lucide-react';
 
 interface AdminContextMenuProps {
   children: React.ReactNode;
   onEdit?: () => void;
   onDelete: () => void;
+  onBanUser?: () => void;
   canEdit?: boolean;
 }
 
@@ -19,6 +20,7 @@ const AdminContextMenu: React.FC<AdminContextMenuProps> = ({
   children, 
   onEdit, 
   onDelete,
+  onBanUser,
   canEdit = true
 }) => {
   return (
@@ -37,6 +39,12 @@ const AdminContextMenu: React.FC<AdminContextMenuProps> = ({
           <Trash2 className="h-4 w-4 mr-2" />
           Delete
         </ContextMenuItem>
+        {onBanUser && (
+          <ContextMenuItem onClick={onBanUser} className="cursor-pointer text-destructive focus:text-destructive">
+            <UserX className="h-4 w-4 mr-2" />
+            Ban User
+          </ContextMenuItem>
+        )}
       </ContextMenuContent>
     </ContextMenu>
   );

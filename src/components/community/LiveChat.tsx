@@ -27,6 +27,7 @@ import { getConnection } from '@/utils/phantomWallet';
 import { formatTimeAgo } from '@/utils/formatTime';
 import { useOnlineUsers } from '@/hooks/useOnlineUsers';
 import { CircleDot } from 'lucide-react';
+import { isBanned, banUser } from '@/utils/adminUtils';
 
 const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump');
 
@@ -72,6 +73,25 @@ const LiveChat = () => {
     }
   };
 
+  const handleBanUser = (username: string | undefined) => {
+    if (!username) return;
+    try {
+      banUser(username);
+      toast({
+        title: "User banned",
+        description: "The user has been banned from sending messages",
+        variant: "default"
+      });
+    } catch (error) {
+      console.error('Error banning user:', error);
+      toast({
+        title: "Error",
+        description: "Failed to ban user. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isConnected) {
@@ -82,6 +102,16 @@ const LiveChat = () => {
       });
       return;
     }
+    
+    if (profile?.username && isBanned(profile.username)) {
+      toast({
+        title: "Unable to send message",
+        description: "You have been banned from sending messages",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!newMessage.trim() && !imageFile) {
       toast({
         title: "Empty message",
@@ -290,9 +320,16 @@ const LiveChat = () => {
           </div>
         </div>
       </div>;
-    return isAdmin ? <AdminContextMenu key={message.id} onDelete={() => handleDeleteMessage(message.id)} canEdit={false}>
+    return isAdmin ? (
+      <AdminContextMenu 
+        key={message.id} 
+        onDelete={() => handleDeleteMessage(message.id)}
+        onBanUser={() => handleBanUser(message.author_username)}
+        canEdit={false}
+      >
         {messageContent}
-      </AdminContextMenu> : messageContent;
+      </AdminContextMenu>
+    ) : messageContent;
   };
 
   if (isLoading) {
