@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -8,6 +7,7 @@ import { useProfile } from '@/contexts/ProfileContext';
 import { useBadgeTier } from '@/hooks/useBadgeTier';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Gorilla } from 'lucide-react';
 
 interface SurveyVoter {
   userId: string;
@@ -37,7 +37,6 @@ const SurveyDisplay: React.FC<SurveyProps> = ({ survey, onVote }) => {
   const badgeInfo = useBadgeTier(profile?.sec_balance || 0);
   const [showResults, setShowResults] = useState(Boolean(survey.userVote !== undefined));
   
-  // Update state when survey prop changes (e.g., after vote is saved to database)
   useEffect(() => {
     setSelectedOption(survey.userVote);
     setShowResults(survey.userVote !== undefined);
@@ -109,14 +108,12 @@ const SurveyDisplay: React.FC<SurveyProps> = ({ survey, onVote }) => {
   };
   
   const backToVoting = () => {
-    // Only allow going back to voting if the user hasn't cast a vote yet
     if (survey.userVote === undefined) {
       setShowResults(false);
     }
   };
   
   const countVotersByBadge = (option: SurveyOption) => {
-    // Count voters by badge tier
     const badgeCounts: Record<string, number> = {};
     
     option.voters.forEach(voter => {
@@ -140,9 +137,16 @@ const SurveyDisplay: React.FC<SurveyProps> = ({ survey, onVote }) => {
               <TooltipTrigger asChild>
                 <Badge variant="outline" className="text-xs py-0 px-1.5">
                   {badge === "Shrimp" ? "🦐" : 
-                   badge === "Whale" ? "🐳" : 
-                   badge === "Shark" ? "🦈" : 
-                   badge === "Bull" ? "🐂" : "👑"} {count}
+                   badge === "Frog" ? "🐸" :
+                   badge === "Bull" ? "🐂" : 
+                   badge === "Lion" ? "🦁" :
+                   badge === "King Cobra" ? "🐍" :
+                   badge === "Bull Shark" ? "🦈" :
+                   badge === "Bald Eagle" ? "🦅" :
+                   badge === "Great Ape" ? "🦍" : 
+                   badge === "T-Rex" ? "🦖" :
+                   badge === "Goat" ? "🐐" :
+                   badge === "Whale" ? "🐳" : "👑"} {count}
                 </Badge>
               </TooltipTrigger>
               <TooltipContent>
