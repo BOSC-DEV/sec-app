@@ -33,7 +33,8 @@ const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpu
 const LiveChat = () => {
   const {
     profile,
-    isConnected
+    isConnected,
+    connectWallet
   } = useProfile();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
@@ -345,10 +346,11 @@ const LiveChat = () => {
       
       <CardFooter className={`border-t ${isMobile ? 'p-2' : 'p-4'} mt-auto`}>
         {!isConnected ? <div className="w-full flex justify-center">
-            <Button variant="outline" onClick={() => toast({
-          title: "Connect Wallet",
-          description: "Please connect your wallet to participate in the chat"
-        })}>
+            <Button 
+              variant="gold" 
+              className="w-48"
+              onClick={connectWallet}
+            >
               Connect Wallet to Chat
             </Button>
           </div> : <form onSubmit={handleSubmit} className="w-full space-y-2">
