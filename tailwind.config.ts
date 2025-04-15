@@ -10,13 +10,6 @@ export default {
   ],
   prefix: "",
   theme: {
-    container: {
-      center: true,
-      padding: "2rem",
-      screens: {
-        "2xl": "1400px",
-      },
-    },
     extend: {
       colors: {
         border: "hsl(var(--border))",
@@ -74,7 +67,13 @@ export default {
             light: "#F5F5F5",
             dark: "#333333",
           },
-        },
+          dark: {
+            DEFAULT: "#0A1729", // Slightly lighter dark background
+            text: "#C8C8C9",    // Light gray for improved readability
+            accent: "#1EAEDB",  // Bright blue for highlights
+            border: "#2C3E50"   // Slightly lighter border
+          }
+        }
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -112,6 +111,19 @@ export default {
       backgroundImage: {
         "hero-pattern": "url('/hero-background.jpg')",
       },
+      textColor: {
+        dark: {
+          primary: "#C8C8C9",   // Light gray for primary text
+          secondary: "#8E9196", // Neutral gray for secondary text
+          muted: "#666B73"      // Muted gray for less important text
+        }
+      },
+      backgroundColor: {
+        dark: {
+          primary: "#1A1F2C",   // Dark purple background
+          secondary: "#222222"  // Dark charcoal secondary background
+        }
+      }
     },
   },
   plugins: [require("tailwindcss-animate")],
