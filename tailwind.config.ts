@@ -75,6 +75,12 @@ export default {
             dark: "#333333",
           },
         },
+        dark: {
+          background: '#0F1020',
+          text: '#E0E0E0',
+          muted: '#6A6A6A',
+          accent: '#4A4A6A'
+        }
       },
       borderRadius: {
         lg: "var(--radius)",
