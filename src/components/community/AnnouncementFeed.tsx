@@ -60,6 +60,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   const [searchQuery, setSearchQuery] = useState('');
   const [announcementTab, setAnnouncementTab] = useState<'post' | 'survey'>('post');
   const [userSurveyVotes, setUserSurveyVotes] = useState<Record<string, number>>({});
+  const [loadingVotes, setLoadingVotes] = useState(true);
   const badgeInfo = useBadgeTier(profile?.sec_balance || 0);
   
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -86,21 +87,32 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   
   useEffect(() => {
     const loadUserVotes = async () => {
-      if (!profile?.wallet_address) return;
-      
-      const surveyAnnouncements = announcements.filter(a => a.survey_data);
-      const votes: Record<string, number> = {};
-      
-      for (const announcement of surveyAnnouncements) {
-        if (announcement.survey_data) {
-          const userVote = await getUserSurveyVote(announcement.id, profile.wallet_address);
-          if (userVote !== undefined) {
-            votes[announcement.id] = userVote;
-          }
-        }
+      if (!profile?.wallet_address) {
+        setLoadingVotes(false);
+        return;
       }
       
-      setUserSurveyVotes(votes);
+      try {
+        setLoadingVotes(true);
+        const surveyAnnouncements = announcements.filter(a => a.survey_data);
+        const votes: Record<string, number> = {};
+        
+        for (const announcement of surveyAnnouncements) {
+          if (announcement.survey_data) {
+            const userVote = await getUserSurveyVote(announcement.id, profile.wallet_address);
+            if (userVote !== undefined) {
+              votes[announcement.id] = userVote;
+            }
+          }
+        }
+        
+        console.log("User survey votes loaded:", votes);
+        setUserSurveyVotes(votes);
+      } catch (error) {
+        console.error("Error loading user votes:", error);
+      } finally {
+        setLoadingVotes(false);
+      }
     };
     
     loadUserVotes();
@@ -272,6 +284,16 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
           ...prev,
           [announcementId]: optionIndex
         }));
+        
+        try {
+          const storedVotes = JSON.parse(localStorage.getItem('userSurveyVotes') || '{}');
+          localStorage.setItem('userSurveyVotes', JSON.stringify({
+            ...storedVotes,
+            [announcementId]: optionIndex
+          }));
+        } catch (error) {
+          console.error("Error storing vote in localStorage:", error);
+        }
         
         await refetch();
         return true;

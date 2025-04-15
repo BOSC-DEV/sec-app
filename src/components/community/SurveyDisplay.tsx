@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle2 } from 'lucide-react';
@@ -36,6 +36,12 @@ const SurveyDisplay: React.FC<SurveyProps> = ({ survey, onVote }) => {
   const [isVoting, setIsVoting] = useState(false);
   const badgeInfo = useBadgeTier(profile?.sec_balance || 0);
   const [showResults, setShowResults] = useState(survey.userVote !== undefined);
+  
+  // Update state when survey prop changes (e.g., after vote is saved to database)
+  useEffect(() => {
+    setSelectedOption(survey.userVote);
+    setShowResults(survey.userVote !== undefined);
+  }, [survey.userVote]);
   
   const totalVotes = survey.options.reduce((total, option) => total + option.votes, 0);
   

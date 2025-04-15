@@ -164,6 +164,18 @@ export const createSurveyAnnouncement = async (
 
 export const getUserSurveyVote = async (announcementId: string, userId: string): Promise<number | undefined> => {
   try {
+    // First check localStorage for cached vote
+    try {
+      const storedVotes = JSON.parse(localStorage.getItem('userSurveyVotes') || '{}');
+      if (storedVotes[announcementId] !== undefined) {
+        console.log("Found vote in localStorage:", announcementId, storedVotes[announcementId]);
+        return storedVotes[announcementId];
+      }
+    } catch (error) {
+      console.error("Error reading from localStorage:", error);
+    }
+    
+    // If not in localStorage, check the database
     const { data, error } = await supabase
       .from('announcements')
       .select('survey_data')
@@ -182,6 +194,16 @@ export const getUserSurveyVote = async (announcementId: string, userId: string):
         const option = surveyData.options[i];
         const voterIndex = option.voters.findIndex((voter) => voter.userId === userId);
         if (voterIndex !== -1) {
+          // Found the vote in the database, update localStorage
+          try {
+            const storedVotes = JSON.parse(localStorage.getItem('userSurveyVotes') || '{}');
+            localStorage.setItem('userSurveyVotes', JSON.stringify({
+              ...storedVotes,
+              [announcementId]: i
+            }));
+          } catch (error) {
+            console.error("Error updating localStorage:", error);
+          }
           return i;
         }
       }
