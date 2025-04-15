@@ -9,7 +9,7 @@ import CommunityInteractionButtons from '@/components/community/CommunityInterac
 import AdminContextMenu from '@/components/community/AdminContextMenu';
 import { toast } from '@/hooks/use-toast';
 import { deleteComment } from '@/services/commentService';
-import { banUser } from '@/utils/adminUtils';
+import { banUser, isBanned } from '@/utils/adminUtils';
 import { formatTimeAgo } from '@/utils/formatTime';
 
 interface ScammerCardContentProps {
@@ -76,12 +76,16 @@ const ScammerCardContent: React.FC<ScammerCardContentProps> = ({ scammer, commen
       <div key={comment.id} className="border rounded-md p-3 bg-card">
         <div className="flex items-start justify-between">
           <div className="flex items-center">
-            <Avatar className="h-6 w-6 mr-2">
-              <AvatarImage src={comment.author_profile_pic} alt={comment.author_name} />
-              <AvatarFallback>{comment.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
-            </Avatar>
+            <Link to={`/profile/${comment.author_name}`}>
+              <Avatar className="h-6 w-6 mr-2 hover:ring-2 hover:ring-icc-gold transition-all">
+                <AvatarImage src={comment.author_profile_pic} alt={comment.author_name} />
+                <AvatarFallback>{comment.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
+              </Avatar>
+            </Link>
             <div>
-              <span className="text-sm font-medium">{comment.author_name}</span>
+              <Link to={`/profile/${comment.author_name}`} className="hover:text-icc-gold transition-colors">
+                <span className="text-sm font-medium">{comment.author_name}</span>
+              </Link>
             </div>
           </div>
           <div className="text-xs text-muted-foreground flex items-center">
