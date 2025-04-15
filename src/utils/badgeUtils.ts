@@ -30,9 +30,9 @@ export interface BadgeInfo {
   };
 }
 
-// Define badge tiers with their properties - Shrimp now starts at 0.001%
+// Define badge tiers with their properties - Shrimp now starts at 0.0001%
 export const BADGE_TIERS: { [key in BadgeTier]: { minPercent: number, color: string, icon: string } } = {
-  [BadgeTier.Shrimp]: { minPercent: 0.001, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦐' },
+  [BadgeTier.Shrimp]: { minPercent: 0.0001, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦐' },
   [BadgeTier.Frog]: { minPercent: 0.01, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🐸' },
   [BadgeTier.Bull]: { minPercent: 0.03, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🐂' },
   [BadgeTier.Lion]: { minPercent: 0.03, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦁' },
