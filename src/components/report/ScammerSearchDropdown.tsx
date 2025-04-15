@@ -34,7 +34,7 @@ const ScammerSearchDropdown: React.FC<ScammerSearchDropdownProps> = ({
 
   return (
     <Command className="rounded-lg border shadow-md mt-1">
-      <CommandInput placeholder="Searching scammers..." />
+      <CommandInput placeholder="Searching scammers..." value={searchTerm} readOnly />
       {isLoading ? (
         <div className="flex items-center justify-center p-4 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -42,7 +42,7 @@ const ScammerSearchDropdown: React.FC<ScammerSearchDropdownProps> = ({
         </div>
       ) : (
         <CommandGroup>
-          {!scammers?.length ? (
+          {!scammers || scammers.length === 0 ? (
             <CommandEmpty className="py-6 text-sm text-center">
               No similar scammers found
             </CommandEmpty>
@@ -58,7 +58,7 @@ const ScammerSearchDropdown: React.FC<ScammerSearchDropdownProps> = ({
                 <div className="flex flex-col">
                   <div className="font-medium">{scammer.name}</div>
                   <div className="text-xs text-muted-foreground">
-                    {scammer.accused_of?.substring(0, 100)}...
+                    {scammer.accused_of ? `${scammer.accused_of.substring(0, 100)}...` : 'No description available'}
                   </div>
                   {scammer.wallet_addresses?.length > 0 && (
                     <div className="text-xs text-muted-foreground mt-1">
