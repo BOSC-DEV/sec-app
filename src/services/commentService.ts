@@ -2,7 +2,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Comment } from '@/types/dataTypes';
 import { notifyScammerComment } from '@/services/notificationService';
-import { isBanned } from '@/utils/adminUtils';
 
 export const getScammerComments = async (scammerId: string): Promise<Comment[]> => {
   const { data, error } = await supabase
@@ -28,10 +27,6 @@ export const addComment = async (comment: {
   author_username?: string
 }): Promise<Comment> => {
   console.log('Adding comment:', comment);
-  
-  if (comment.author_username && isBanned(comment.author_username)) {
-    throw new Error('User is banned from commenting');
-  }
   
   // Generate a unique ID for the comment
   const id = `cmt-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
@@ -93,23 +88,4 @@ export const addComment = async (comment: {
   }
   
   return data;
-};
-
-export const deleteComment = async (commentId: string): Promise<boolean> => {
-  try {
-    const { error } = await supabase
-      .from('comments')
-      .delete()
-      .eq('id', commentId);
-    
-    if (error) {
-      console.error('Error deleting comment:', error);
-      return false;
-    }
-    
-    return true;
-  } catch (error) {
-    console.error('Error in deleteComment:', error);
-    return false;
-  }
 };

@@ -1,3 +1,4 @@
+
 export interface Scammer {
   id: string;
   name: string;
@@ -141,6 +142,5 @@ export enum EntityType {
   COMMENT = 'comment',
   ANNOUNCEMENT = 'announcement',
   REPLY = 'reply',
-  CHAT_MESSAGE = 'chat_message',
-  SCAMMER_COMMENT = 'scammer-comment'
+  CHAT_MESSAGE = 'chat_message'
 }

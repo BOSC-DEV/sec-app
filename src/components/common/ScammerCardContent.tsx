@@ -1,121 +1,144 @@
-
-import React, { useState } from 'react';
-import { Comment, Scammer } from '@/types/dataTypes';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Link } from 'react-router-dom';
-import { Calendar } from 'lucide-react';
+import React from 'react';
+import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
-import CommunityInteractionButtons from '@/components/community/CommunityInteractionButtons';
-import AdminContextMenu from '@/components/community/AdminContextMenu';
-import { toast } from '@/hooks/use-toast';
-import { deleteComment } from '@/services/commentService';
-import { banUser } from '@/utils/adminUtils';
-import { formatTimeAgo } from '@/utils/formatTime';
+import { Scammer } from '@/types/dataTypes';
+import { LucideIcon, User, AlertTriangle, Calendar, Tag, Plus } from 'lucide-react';
+import CurrencyIcon from '@/components/common/CurrencyIcon';
+import { formatNumber } from '@/lib/utils';
+
+interface ScammerMetadataProps {
+  icon: LucideIcon | typeof CurrencyIcon;
+  label: string;
+  value: string | number | React.ReactNode;
+}
+
+export const ScammerMetadata = ({ icon: Icon, label, value }: ScammerMetadataProps) => (
+  <div className="flex items-center gap-2 text-sm">
+    {Icon === CurrencyIcon ? (
+      <CurrencyIcon className="h-4 w-4 text-muted-foreground" />
+    ) : (
+      <Icon className="h-4 w-4 text-muted-foreground" />
+    )}
+    <span className="text-muted-foreground">{label}:</span>
+    <span className="font-medium">{value}</span>
+  </div>
+);
 
 interface ScammerCardContentProps {
   scammer: Scammer;
-  comments: Comment[];
-  isAdmin: boolean;
+  showBounty?: boolean;
 }
 
-const ScammerCardContent: React.FC<ScammerCardContentProps> = ({ scammer, comments, isAdmin }) => {
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const handleDeleteComment = async (commentId: string) => {
-    if (!isAdmin || isDeleting) return;
-
-    setIsDeleting(true);
-    try {
-      const success = await deleteComment(commentId);
-      if (success) {
-        toast({
-          title: "Comment deleted",
-          description: "The comment has been deleted successfully",
-          variant: "default",
-        });
-        // Refresh comments or update state as needed
-        window.location.reload();
-      } else {
-        throw new Error("Failed to delete comment");
-      }
-    } catch (error) {
-      console.error('Error deleting comment:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete comment. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  const handleBanUser = (authorName: string) => {
-    if (!authorName) return;
-    try {
-      banUser(authorName);
-      toast({
-        title: "User banned",
-        description: "The user has been banned from sending messages",
-        variant: "default"
-      });
-    } catch (error) {
-      console.error('Error banning user:', error);
-      toast({
-        title: "Error",
-        description: "Failed to ban user. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const renderComment = (comment: Comment) => {
-    const time = formatTimeAgo(comment.created_at);
-
-    const commentContent = (
-      <div key={comment.id} className="border rounded-md p-3 bg-card">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center">
-            <Avatar className="h-6 w-6 mr-2">
-              <AvatarImage src={comment.author_profile_pic} alt={comment.author_name} />
-              <AvatarFallback>{comment.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
-            </Avatar>
-            <div>
-              <span className="text-sm font-medium">{comment.author_name}</span>
-            </div>
-          </div>
-          <div className="text-xs text-muted-foreground flex items-center">
-            <Calendar className="h-3 w-3 mr-1" />
-            {time}
-          </div>
-        </div>
-        <div className="text-sm mt-2">{comment.content}</div>
-        <div className="mt-2">
-          <CommunityInteractionButtons
-            itemId={comment.id}
-            itemType="scammer-comment"
-            initialLikes={comment.likes}
-            initialDislikes={comment.dislikes}
-          />
-        </div>
-      </div>
-    );
-    
-    return isAdmin ? (
-      <AdminContextMenu 
-        key={comment.id}
-        onDelete={() => handleDeleteComment(comment.id)}
-        onBanUser={() => handleBanUser(comment.author_name)}
-        canEdit={false}
-      >
-        {commentContent}
-      </AdminContextMenu>
-    ) : commentContent;
-  };
-
+const ScammerCardContent: React.FC<ScammerCardContentProps> = ({
+  scammer,
+  showBounty = true,
+}) => {
   return (
-    <div className="space-y-3">
-      {comments.map(renderComment)}
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-xl font-bold truncate">{scammer.name}</h3>
+        <p className="text-muted-foreground line-clamp-2 h-10 text-sm">
+          {scammer.accused_of}
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <ScammerMetadata
+          icon={User}
+          label="Aliases"
+          value={
+            scammer.aliases && scammer.aliases.length > 0 ? (
+              <div className="flex items-center gap-1">
+                <Badge variant="outline" className="text-xs">
+                  {scammer.aliases[0]}
+                </Badge>
+                {scammer.aliases.length > 1 && (
+                  <Badge variant="outline" className="text-xs flex items-center gap-0.5">
+                    <Plus className="h-3 w-3" />
+                    {scammer.aliases.length - 1}
+                  </Badge>
+                )}
+              </div>
+            ) : (
+              "None"
+            )
+          }
+        />
+
+        {showBounty && (
+          <ScammerMetadata
+            icon={CurrencyIcon}
+            label="Bounty"
+            value={
+              <div className="flex items-center gap-1">
+                <span>{scammer.bounty_amount ? formatNumber(scammer.bounty_amount) : "0"}</span>
+                <CurrencyIcon size="sm" />
+              </div>
+            }
+          />
+        )}
+
+        <ScammerMetadata
+          icon={AlertTriangle}
+          label="Reported"
+          value={
+            <div className="flex items-center">
+              <span className="mr-1">1 time</span>
+            </div>
+          }
+        />
+
+        <ScammerMetadata
+          icon={Calendar}
+          label="Added"
+          value={
+            scammer.date_added
+              ? formatDistanceToNow(new Date(scammer.date_added), { addSuffix: true })
+              : "Recently"
+          }
+        />
+
+        {scammer.wallet_addresses && scammer.wallet_addresses.length > 0 && (
+          <ScammerMetadata
+            icon={Tag}
+            label="Wallets"
+            value={
+              <div className="flex items-center gap-1">
+                <Badge variant="outline" className="text-xs truncate max-w-[120px]">
+                  {scammer.wallet_addresses[0].substring(0, 6)}...
+                  {scammer.wallet_addresses[0].substring(scammer.wallet_addresses[0].length - 4)}
+                </Badge>
+                {scammer.wallet_addresses.length > 1 && (
+                  <Badge variant="outline" className="text-xs flex items-center gap-0.5">
+                    <Plus className="h-3 w-3" />
+                    {scammer.wallet_addresses.length - 1}
+                  </Badge>
+                )}
+              </div>
+            }
+          />
+        )}
+        
+        {scammer.accomplices && scammer.accomplices.length > 0 && (
+          <ScammerMetadata
+            icon={User}
+            label="Accomplices"
+            value={
+              <div className="flex items-center gap-1">
+                <Badge variant="outline" className="text-xs">
+                  {scammer.accomplices[0]}
+                </Badge>
+                {scammer.accomplices.length > 1 && (
+                  <Badge variant="outline" className="text-xs flex items-center gap-0.5">
+                    <Plus className="h-3 w-3" />
+                    {scammer.accomplices.length - 1}
+                  </Badge>
+                )}
+              </div>
+            }
+          />
+        )}
+      </div>
     </div>
   );
 };
