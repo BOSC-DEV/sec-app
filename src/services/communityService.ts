@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { 
   Announcement, 
@@ -28,11 +29,14 @@ const convertJsonToSurveyData = (data: Json | null): SurveyData | null => {
         'options' in surveyData &&
         Array.isArray(surveyData.options)) {
       
+      // Use a type assertion to inform TypeScript that surveyData has a potential poll_number property
+      const typedSurveyData = surveyData as { title: any; poll_number?: any; options: any[] };
+      
       // Validate and ensure proper structure
       return {
-        title: String(surveyData.title),
-        poll_number: surveyData.poll_number ? Number(surveyData.poll_number) : undefined,
-        options: surveyData.options.map((option: any) => ({
+        title: String(typedSurveyData.title),
+        poll_number: typedSurveyData.poll_number ? Number(typedSurveyData.poll_number) : undefined,
+        options: typedSurveyData.options.map((option: any) => ({
           text: String(option.text || ''),
           votes: Number(option.votes || 0),
           voters: Array.isArray(option.voters) 
