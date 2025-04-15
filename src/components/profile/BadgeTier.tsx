@@ -2,9 +2,9 @@
 import React from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
 import { BadgeInfo, BadgeTier as BadgeTierEnum, formatSecAmount } from '@/utils/badgeUtils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Link } from 'react-router-dom';
 
 interface BadgeTierProps {
   badgeInfo: BadgeInfo;
@@ -36,16 +36,17 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
   
   // Create the badge element - showing only the icon
   const badge = (
-    <span 
+    <Link 
+      to="/badges"
       className={`
         ${variant === 'plain' ? '' : color} 
         ${sizeClasses[size]} 
         ${variant === 'default' || variant === 'tier' ? 'rounded-full border px-2.5 py-0.5' : ''}
-        inline-flex items-center shrink-0
+        inline-flex items-center shrink-0 hover:opacity-80 transition-opacity
       `}
     >
       {icon}
-    </span>
+    </Link>
   );
   
   if (!showTooltip) {
