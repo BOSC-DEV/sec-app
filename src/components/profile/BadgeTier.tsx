@@ -40,7 +40,7 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
   const badge = (
     <span 
       className={`
-        ${context === 'chat' ? '' : (variant === 'plain' ? '' : color)} 
+        ${context === 'chat' ? 'relative -top-1 -ml-1' : (variant === 'plain' ? '' : color)} 
         ${sizeClasses[size]} 
         ${context === 'chat' ? '' : (variant === 'default' || variant === 'tier' ? 'rounded-full border px-2.5 py-0.5' : '')}
         inline-flex items-center shrink-0
