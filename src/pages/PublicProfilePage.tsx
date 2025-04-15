@@ -217,7 +217,7 @@ const PublicProfilePage = () => {
                             badgeInfo={badgeInfo} 
                             showTooltip={true} 
                             size="md" 
-                            variant="tier" 
+                            variant="plain" 
                           />
                         )}
                       </div>
