@@ -9,6 +9,7 @@ import { handleError } from '@/utils/errorHandling';
 import { sanitizeHtml } from '@/utils/securityUtils';
 import { notifyReaction } from '@/services/notificationService';
 import { EntityType } from '@/types/dataTypes';
+import { isAdmin } from '@/utils/adminUtils';
 
 // Announcement Services
 export const getAnnouncements = async (): Promise<Announcement[]> => {
@@ -1391,6 +1392,5 @@ export const deleteChatMessage = async (messageId: string): Promise<boolean> => 
 };
 
 export const isUserAdmin = async (username: string): Promise<boolean> => {
-  const ADMIN_USERNAMES = ['sec', 'thesec'];
-  return ADMIN_USERNAMES.includes(username);
+  return isAdmin(username);
 };
