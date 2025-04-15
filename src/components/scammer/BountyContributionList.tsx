@@ -120,7 +120,7 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
                 </div>
               </div>
               
-              {contribution.comment && <p className="text-sm text-icc-gray-dark mb-2 italic">
+              {contribution.comment && <p className="text-sm text-icc-gray-dark dark:text-white mb-2 italic">
                   "{contribution.comment}"
                 </p>}
               
