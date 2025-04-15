@@ -1,4 +1,3 @@
-
 export interface Scammer {
   id: string;
   name: string;
@@ -87,6 +86,7 @@ export interface Announcement {
 
 export interface SurveyData {
   title: string;
+  poll_number?: number;
   options: SurveyOption[];
 }
 
@@ -99,6 +99,8 @@ export interface SurveyOption {
 export interface SurveyVoter {
   userId: string;
   badgeTier: string;
+  username?: string;
+  profilePic?: string;
 }
 
 export interface AnnouncementReply {

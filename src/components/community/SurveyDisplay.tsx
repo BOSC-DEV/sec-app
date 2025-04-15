@@ -13,13 +13,7 @@ import {
 } from "@/components/ui/hover-card";
 import { Link } from 'react-router-dom';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-
-interface SurveyVoter {
-  userId: string;
-  badgeTier: string;
-  username?: string;
-  profilePic?: string;
-}
+import { SurveyVoter } from '@/types/dataTypes';
 
 interface SurveyOption {
   text: string;
@@ -33,15 +27,13 @@ interface SurveyProps {
     title: string;
     options: SurveyOption[];
     userVote?: number;
-    survey_data?: SurveyData;
+    survey_data?: {
+      title: string;
+      poll_number?: number;
+      options: SurveyOption[];
+    };
   };
   onVote: (surveyId: string, optionIndex: number) => Promise<boolean>;
-}
-
-interface SurveyData {
-  title: string;
-  poll_number: number;
-  options: SurveyOption[];
 }
 
 const SurveyDisplay: React.FC<SurveyProps> = ({ survey, onVote }) => {
