@@ -152,14 +152,19 @@ const MostWantedPage = () => {
   };
 
   return (
-    <div>
-      <CompactHero 
-        title="Most Wanted"
-        subtitle="Browse the database of reported crimes."
-      />
+    <div className="min-h-screen bg-white">
+      <div className="bg-[#1A1F2C] text-white py-16">
+        <div className="text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Most Wanted</h1>
+          <p className="text-lg text-gray-300">Browse the database of reported crimes</p>
+        </div>
+      </div>
 
-      <section className="icc-section bg-white">
-        <div className="icc-container">
+      <div className="border-b-4 border-icc-gold" />
+
+      <section className="py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Search and filters section */}
           <div className="mb-8">
             <div className="flex flex-col md:flex-row gap-4 mb-4">
               <div className="relative flex-grow">
@@ -250,8 +255,8 @@ const MostWantedPage = () => {
           </div>
 
           <div className="mb-6">
-            <p className="text-icc-gray">
-              Showing <span className="font-semibold">{filteredScammers.length}</span> results
+            <p className="text-gray-600">
+              Showing <span className="font-semibold text-gray-900">{filteredScammers.length}</span> results
             </p>
           </div>
 
@@ -272,36 +277,32 @@ const MostWantedPage = () => {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-icc-gold/30 border-b border-icc-gold">
-                      <TableHead className="w-12 font-bold text-icc-blue">№</TableHead>
-                      <TableHead className="font-bold text-icc-blue">Outlaw</TableHead>
-                      <TableHead className="font-bold text-icc-blue text-center">
+                      <TableHead className="w-12 font-bold text-gray-900">№</TableHead>
+                      <TableHead className="font-bold text-gray-900">The Accused</TableHead>
+                      <TableHead className="font-bold text-gray-900 text-center">
                         <div className="flex items-center justify-center">
-                          <CurrencyIcon className="h-4 w-4 text-gray-500 dark:text-gray-300" />
+                          <CurrencyIcon className="h-4 w-4 text-gray-600" />
                         </div>
                       </TableHead>
-                      <TableHead className="font-bold text-icc-blue">Accused Of</TableHead>
-                      <TableHead className="font-bold text-icc-blue">Aliases</TableHead>
-                      <TableHead className="font-bold text-icc-blue text-center">
+                      <TableHead className="font-bold text-gray-900">Accusations</TableHead>
+                      <TableHead className="font-bold text-gray-900">Aliases</TableHead>
+                      <TableHead className="font-bold text-gray-900 text-center">
                         <div className="flex items-center justify-center">
-                          <Globe className="h-4 w-4 text-gray-500 dark:text-gray-300" />
+                          <Globe className="h-4 w-4 text-gray-600" />
                         </div>
                       </TableHead>
-                      <TableHead className="font-bold text-icc-blue text-center">
+                      <TableHead className="font-bold text-gray-900 text-center">
                         <div className="flex items-center justify-center">
-                          <ThumbsUp className="h-4 w-4 text-gray-500 dark:text-gray-300" />
+                          <ThumbsUp className="h-4 w-4 text-gray-600" />
                         </div>
                       </TableHead>
-                      <TableHead className="font-bold text-icc-blue text-center">
+                      <TableHead className="font-bold text-gray-900 text-center">
                         <div className="flex items-center justify-center">
-                          <Eye className="h-4 w-4 text-gray-500 dark:text-gray-300" />
+                          <Eye className="h-4 w-4 text-gray-600" />
                         </div>
                       </TableHead>
-                      <TableHead className="font-bold text-icc-blue">Posted</TableHead>
-                      <TableHead className="font-bold text-icc-blue text-center">
-                        <div className="flex items-center justify-center">
-                          By
-                        </div>
-                      </TableHead>
+                      <TableHead className="font-bold text-gray-900">Posted</TableHead>
+                      <TableHead className="font-bold text-gray-900 text-center">By</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
