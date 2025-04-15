@@ -681,7 +681,9 @@ const ScammerDetailPage = () => {
                       <AvatarFallback>{creatorProfile.display_name.substring(0, 2)}</AvatarFallback>
                     </Avatar>
                     <div>
-                      <div className="text-sm font-medium leading-none group-hover:text-icc-gold transition-colors">{creatorProfile.display_name}</div>
+                      <div className="text-sm font-medium font-bold text-icc-blue dark:text-icc-blue leading-none group-hover:text-icc-gold transition-colors">
+                        {creatorProfile.display_name}
+                      </div>
                       <p className="text-sm text-gray-500">@{creatorProfile.username}</p>
                     </div>
                   </Link> : <p className="text-sm text-gray-500">Anonymous</p>}
