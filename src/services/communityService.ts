@@ -1,13 +1,12 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { 
   Announcement, 
-  AnnouncementReply, 
-  Profile, 
+  AnnouncementReply,
   ChatMessage,
   SurveyData,
   SurveyOption,
-  SurveyVoter
+  SurveyVoter,
+  EntityType
 } from '@/types/dataTypes';
 import { toast } from '@/hooks/use-toast';
 import { notifyReaction } from '@/services/notificationService';
@@ -64,10 +63,9 @@ export const createAnnouncement = async (announcement: Omit<Announcement, 'id' |
 export const createSurveyAnnouncement = async (
   title: string,
   optionTexts: string[],
-  announcement: Omit<Announcement, 'id' | 'created_at' | 'views' | 'content'>
+  announcement: Omit<Announcement, 'id' | 'created_at' | 'views' | 'content' | 'survey_data'>
 ): Promise<Announcement | null> => {
   try {
-    // Create survey data structure
     const options: SurveyOption[] = optionTexts.map(text => ({
       text,
       votes: 0,
@@ -79,7 +77,6 @@ export const createSurveyAnnouncement = async (
       options
     };
     
-    // Create announcement with survey data
     const { data, error } = await supabase
       .from('announcements')
       .insert({
@@ -120,7 +117,6 @@ export const getUserSurveyVote = async (announcementId: string, userId: string):
       return undefined;
     }
     
-    // Parse survey_data if it's a string
     let surveyData = data?.survey_data;
     if (!surveyData) return undefined;
     
@@ -133,7 +129,6 @@ export const getUserSurveyVote = async (announcementId: string, userId: string):
       }
     }
     
-    // Find the option index where the user voted
     for (let i = 0; i < surveyData.options.length; i++) {
       const option = surveyData.options[i];
       const voterIndex = option.voters.findIndex((voter: any) => voter.userId === userId);
@@ -165,7 +160,6 @@ export const voteSurvey = async (
       return false;
     }
     
-    // Get the current announcement data
     const { data: announcement, error: fetchError } = await supabase
       .from('announcements')
       .select('survey_data')
@@ -177,7 +171,6 @@ export const voteSurvey = async (
       return false;
     }
     
-    // Parse survey_data if needed
     let surveyData = announcement?.survey_data;
     if (!surveyData) {
       console.error("No survey data found for this announcement");
@@ -193,7 +186,6 @@ export const voteSurvey = async (
       }
     }
     
-    // First, remove user's vote from any option they might have voted for previously
     let userPreviousVote = -1;
     
     surveyData.options.forEach((option: SurveyOption, index: number) => {
@@ -205,7 +197,6 @@ export const voteSurvey = async (
       }
     });
     
-    // Add the user's vote to the selected option
     if (optionIndex >= 0 && optionIndex < surveyData.options.length) {
       const option = surveyData.options[optionIndex];
       option.voters.push({
@@ -218,7 +209,6 @@ export const voteSurvey = async (
       return false;
     }
     
-    // Update the announcement with the new survey data
     const { error: updateError } = await supabase
       .from('announcements')
       .update({
@@ -412,7 +402,6 @@ export const sendChatMessage = async (message: {
   try {
     let imageUrl = undefined;
     
-    // Upload image file if provided
     if (message.image_file) {
       const fileName = `chat-images/${message.author_id}/${Date.now()}-${message.image_file.name}`;
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -479,7 +468,6 @@ export const deleteChatMessage = async (id: string): Promise<boolean> => {
 // Interaction Functions
 export const likeAnnouncement = async (announcementId: string, userId: string): Promise<{ likes: number, dislikes: number } | null> => {
   try {
-    // Check if user already liked or disliked
     const { data: interaction, error: fetchError } = await supabase
       .from('announcement_reactions')
       .select('*')
@@ -488,7 +476,7 @@ export const likeAnnouncement = async (announcementId: string, userId: string): 
       .single();
       
     let action: 'add' | 'remove' | 'update' = 'add';
-    if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "no rows returned" error code
+    if (fetchError && fetchError.code !== 'PGRST116') {
       console.error("Error fetching interaction:", fetchError);
       return null;
     }
@@ -501,7 +489,6 @@ export const likeAnnouncement = async (announcementId: string, userId: string): 
       }
     }
     
-    // Execute the appropriate action
     if (action === 'add') {
       const { error: insertError } = await supabase
         .from('announcement_reactions')
@@ -539,11 +526,9 @@ export const likeAnnouncement = async (announcementId: string, userId: string): 
       }
     }
     
-    // Count likes and dislikes
     const likesCount = await countAnnouncementReactions(announcementId, 'like');
     const dislikesCount = await countAnnouncementReactions(announcementId, 'dislike');
     
-    // Update announcement likes and dislikes
     const { error: updateError } = await supabase
       .from('announcements')
       .update({
@@ -557,7 +542,6 @@ export const likeAnnouncement = async (announcementId: string, userId: string): 
       return null;
     }
     
-    // Get announcement author to notify them
     if (action !== 'remove') {
       const { data: announcement } = await supabase
         .from('announcements')
@@ -566,7 +550,6 @@ export const likeAnnouncement = async (announcementId: string, userId: string): 
         .single();
         
       if (announcement && announcement.author_id !== userId) {
-        // Get user info
         const { data: profile } = await supabase
           .from('profiles')
           .select('display_name, username, profile_pic_url')
@@ -598,7 +581,6 @@ export const likeAnnouncement = async (announcementId: string, userId: string): 
 
 export const dislikeAnnouncement = async (announcementId: string, userId: string): Promise<{ likes: number, dislikes: number } | null> => {
   try {
-    // Check if user already liked or disliked
     const { data: interaction, error: fetchError } = await supabase
       .from('announcement_reactions')
       .select('*')
@@ -607,7 +589,7 @@ export const dislikeAnnouncement = async (announcementId: string, userId: string
       .single();
       
     let action: 'add' | 'remove' | 'update' = 'add';
-    if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "no rows returned" error code
+    if (fetchError && fetchError.code !== 'PGRST116') {
       console.error("Error fetching interaction:", fetchError);
       return null;
     }
@@ -620,7 +602,6 @@ export const dislikeAnnouncement = async (announcementId: string, userId: string
       }
     }
     
-    // Execute the appropriate action
     if (action === 'add') {
       const { error: insertError } = await supabase
         .from('announcement_reactions')
@@ -658,11 +639,9 @@ export const dislikeAnnouncement = async (announcementId: string, userId: string
       }
     }
     
-    // Count likes and dislikes
     const likesCount = await countAnnouncementReactions(announcementId, 'like');
     const dislikesCount = await countAnnouncementReactions(announcementId, 'dislike');
     
-    // Update announcement likes and dislikes
     const { error: updateError } = await supabase
       .from('announcements')
       .update({
@@ -676,7 +655,6 @@ export const dislikeAnnouncement = async (announcementId: string, userId: string
       return null;
     }
     
-    // Get announcement author to notify them
     if (action !== 'remove') {
       const { data: announcement } = await supabase
         .from('announcements')
@@ -685,7 +663,6 @@ export const dislikeAnnouncement = async (announcementId: string, userId: string
         .single();
         
       if (announcement && announcement.author_id !== userId) {
-        // Get user info
         const { data: profile } = await supabase
           .from('profiles')
           .select('display_name, username, profile_pic_url')
@@ -717,7 +694,6 @@ export const dislikeAnnouncement = async (announcementId: string, userId: string
 
 export const likeReply = async (replyId: string, userId: string): Promise<{ likes: number, dislikes: number } | null> => {
   try {
-    // Check if user already liked or disliked
     const { data: interaction, error: fetchError } = await supabase
       .from('reply_reactions')
       .select('*')
@@ -726,7 +702,7 @@ export const likeReply = async (replyId: string, userId: string): Promise<{ like
       .single();
       
     let action: 'add' | 'remove' | 'update' = 'add';
-    if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "no rows returned" error code
+    if (fetchError && fetchError.code !== 'PGRST116') {
       console.error("Error fetching interaction:", fetchError);
       return null;
     }
@@ -739,7 +715,6 @@ export const likeReply = async (replyId: string, userId: string): Promise<{ like
       }
     }
     
-    // Execute the appropriate action
     if (action === 'add') {
       const { error: insertError } = await supabase
         .from('reply_reactions')
@@ -777,11 +752,9 @@ export const likeReply = async (replyId: string, userId: string): Promise<{ like
       }
     }
     
-    // Count likes and dislikes
     const likesCount = await countReplyReactions(replyId, 'like');
     const dislikesCount = await countReplyReactions(replyId, 'dislike');
     
-    // Update reply likes and dislikes
     const { error: updateError } = await supabase
       .from('announcement_replies')
       .update({
@@ -795,7 +768,6 @@ export const likeReply = async (replyId: string, userId: string): Promise<{ like
       return null;
     }
     
-    // Get reply author to notify them
     if (action !== 'remove') {
       const { data: reply } = await supabase
         .from('announcement_replies')
@@ -804,7 +776,6 @@ export const likeReply = async (replyId: string, userId: string): Promise<{ like
         .single();
         
       if (reply && reply.author_id !== userId) {
-        // Get user info
         const { data: profile } = await supabase
           .from('profiles')
           .select('display_name, username, profile_pic_url')
@@ -836,7 +807,6 @@ export const likeReply = async (replyId: string, userId: string): Promise<{ like
 
 export const dislikeReply = async (replyId: string, userId: string): Promise<{ likes: number, dislikes: number } | null> => {
   try {
-    // Check if user already liked or disliked
     const { data: interaction, error: fetchError } = await supabase
       .from('reply_reactions')
       .select('*')
@@ -845,7 +815,7 @@ export const dislikeReply = async (replyId: string, userId: string): Promise<{ l
       .single();
       
     let action: 'add' | 'remove' | 'update' = 'add';
-    if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "no rows returned" error code
+    if (fetchError && fetchError.code !== 'PGRST116') {
       console.error("Error fetching interaction:", fetchError);
       return null;
     }
@@ -858,7 +828,6 @@ export const dislikeReply = async (replyId: string, userId: string): Promise<{ l
       }
     }
     
-    // Execute the appropriate action
     if (action === 'add') {
       const { error: insertError } = await supabase
         .from('reply_reactions')
@@ -896,11 +865,9 @@ export const dislikeReply = async (replyId: string, userId: string): Promise<{ l
       }
     }
     
-    // Count likes and dislikes
     const likesCount = await countReplyReactions(replyId, 'like');
     const dislikesCount = await countReplyReactions(replyId, 'dislike');
     
-    // Update reply likes and dislikes
     const { error: updateError } = await supabase
       .from('announcement_replies')
       .update({
@@ -914,7 +881,6 @@ export const dislikeReply = async (replyId: string, userId: string): Promise<{ l
       return null;
     }
     
-    // Get reply author to notify them
     if (action !== 'remove') {
       const { data: reply } = await supabase
         .from('announcement_replies')
@@ -923,7 +889,6 @@ export const dislikeReply = async (replyId: string, userId: string): Promise<{ l
         .single();
         
       if (reply && reply.author_id !== userId) {
-        // Get user info
         const { data: profile } = await supabase
           .from('profiles')
           .select('display_name, username, profile_pic_url')
@@ -955,7 +920,6 @@ export const dislikeReply = async (replyId: string, userId: string): Promise<{ l
 
 export const likeChatMessage = async (messageId: string, userId: string): Promise<{ likes: number, dislikes: number } | null> => {
   try {
-    // Check if user already liked or disliked
     const { data: interaction, error: fetchError } = await supabase
       .from('chat_message_reactions')
       .select('*')
@@ -964,7 +928,7 @@ export const likeChatMessage = async (messageId: string, userId: string): Promis
       .single();
       
     let action: 'add' | 'remove' | 'update' = 'add';
-    if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "no rows returned" error code
+    if (fetchError && fetchError.code !== 'PGRST116') {
       console.error("Error fetching interaction:", fetchError);
       return null;
     }
@@ -977,7 +941,6 @@ export const likeChatMessage = async (messageId: string, userId: string): Promis
       }
     }
     
-    // Execute the appropriate action
     if (action === 'add') {
       const { error: insertError } = await supabase
         .from('chat_message_reactions')
@@ -1015,11 +978,9 @@ export const likeChatMessage = async (messageId: string, userId: string): Promis
       }
     }
     
-    // Count likes and dislikes
     const likesCount = await countChatMessageReactions(messageId, 'like');
     const dislikesCount = await countChatMessageReactions(messageId, 'dislike');
     
-    // Update message likes and dislikes
     const { error: updateError } = await supabase
       .from('chat_messages')
       .update({
@@ -1033,7 +994,6 @@ export const likeChatMessage = async (messageId: string, userId: string): Promis
       return null;
     }
     
-    // Get message author to notify them
     if (action !== 'remove') {
       const { data: message } = await supabase
         .from('chat_messages')
@@ -1042,7 +1002,6 @@ export const likeChatMessage = async (messageId: string, userId: string): Promis
         .single();
         
       if (message && message.author_id !== userId) {
-        // Get user info
         const { data: profile } = await supabase
           .from('profiles')
           .select('display_name, username, profile_pic_url')
@@ -1074,7 +1033,6 @@ export const likeChatMessage = async (messageId: string, userId: string): Promis
 
 export const dislikeChatMessage = async (messageId: string, userId: string): Promise<{ likes: number, dislikes: number } | null> => {
   try {
-    // Check if user already liked or disliked
     const { data: interaction, error: fetchError } = await supabase
       .from('chat_message_reactions')
       .select('*')
@@ -1083,7 +1041,7 @@ export const dislikeChatMessage = async (messageId: string, userId: string): Pro
       .single();
       
     let action: 'add' | 'remove' | 'update' = 'add';
-    if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "no rows returned" error code
+    if (fetchError && fetchError.code !== 'PGRST116') {
       console.error("Error fetching interaction:", fetchError);
       return null;
     }
@@ -1096,7 +1054,6 @@ export const dislikeChatMessage = async (messageId: string, userId: string): Pro
       }
     }
     
-    // Execute the appropriate action
     if (action === 'add') {
       const { error: insertError } = await supabase
         .from('chat_message_reactions')
@@ -1134,11 +1091,9 @@ export const dislikeChatMessage = async (messageId: string, userId: string): Pro
       }
     }
     
-    // Count likes and dislikes
     const likesCount = await countChatMessageReactions(messageId, 'like');
     const dislikesCount = await countChatMessageReactions(messageId, 'dislike');
     
-    // Update message likes and dislikes
     const { error: updateError } = await supabase
       .from('chat_messages')
       .update({
@@ -1152,7 +1107,6 @@ export const dislikeChatMessage = async (messageId: string, userId: string): Pro
       return null;
     }
     
-    // Get message author to notify them
     if (action !== 'remove') {
       const { data: message } = await supabase
         .from('chat_messages')
@@ -1161,7 +1115,6 @@ export const dislikeChatMessage = async (messageId: string, userId: string): Pro
         .single();
         
       if (message && message.author_id !== userId) {
-        // Get user info
         const { data: profile } = await supabase
           .from('profiles')
           .select('display_name, username, profile_pic_url')
@@ -1327,7 +1280,6 @@ export const getUserChatMessageInteraction = async (messageId: string, userId: s
 
 // Admin functions
 export const isUserAdmin = async (username: string): Promise<boolean> => {
-  // Check if username is in the admin list in adminUtils.ts
   const { ADMIN_USERNAMES } = await import('@/utils/adminUtils');
   return ADMIN_USERNAMES.includes(username);
 };

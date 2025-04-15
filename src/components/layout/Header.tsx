@@ -12,6 +12,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const { isConnected, connectWallet, profile, isPhantomAvailable, isLoading } = useProfile();
   const navigate = useNavigate();
   const location = useLocation();
@@ -117,7 +118,10 @@ const Header = () => {
                   </Button>
                   {showNotifications && (
                     <div className="fixed left-1/2 transform -translate-x-1/2 mt-2 z-50">
-                      <NotificationDropdown onClose={() => setShowNotifications(false)} />
+                      <NotificationDropdown 
+                        open={notificationsOpen}
+                        onOpenChange={setNotificationsOpen}
+                      />
                     </div>
                   )}
                 </div>

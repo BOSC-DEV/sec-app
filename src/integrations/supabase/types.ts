@@ -99,6 +99,7 @@ export type Database = {
           dislikes: number
           id: string
           likes: number
+          survey_data: Json | null
           views: number
         }
         Insert: {
@@ -111,6 +112,7 @@ export type Database = {
           dislikes?: number
           id?: string
           likes?: number
+          survey_data?: Json | null
           views?: number
         }
         Update: {
@@ -123,6 +125,7 @@ export type Database = {
           dislikes?: number
           id?: string
           likes?: number
+          survey_data?: Json | null
           views?: number
         }
         Relationships: []
