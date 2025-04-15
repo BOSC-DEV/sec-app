@@ -17,16 +17,13 @@ const NotificationIndicator: React.FC<NotificationIndicatorProps> = ({
   size = 'icon',
   variant = 'ghost'
 }) => {
-  const { profile, isConnected } = useProfile();
+  const { profile } = useProfile();
   
-  const { data: unreadCount = 0, refetch } = useQuery({
+  const { data: unreadCount = 0 } = useQuery({
     queryKey: ['notifications-unread-count', profile?.wallet_address],
     queryFn: () => getUnreadNotificationsCount(profile?.wallet_address || ''),
-    enabled: !!profile?.wallet_address && isConnected,
-    refetchInterval: 30000, // Refetch more frequently (every 30 seconds)
-    refetchOnWindowFocus: true, // Refetch when window regains focus
-    refetchOnMount: true, // Refetch when component mounts
-    staleTime: 10000, // Consider data stale after 10 seconds
+    enabled: !!profile?.wallet_address,
+    refetchInterval: 60000, // Refetch every minute
   });
   
   return (
@@ -34,10 +31,7 @@ const NotificationIndicator: React.FC<NotificationIndicatorProps> = ({
       variant={variant} 
       size={size} 
       className="text-white hover:bg-icc-blue-light relative"
-      onClick={() => {
-        onClick();
-        refetch(); // Refetch when clicked
-      }}
+      onClick={onClick}
       aria-label="Notifications"
     >
       <Bell className="h-5 w-5" />

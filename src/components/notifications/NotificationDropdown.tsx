@@ -1,5 +1,4 @@
-
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useProfile } from '@/contexts/ProfileContext';
 import { getUserNotifications, markNotificationAsRead, markAllNotificationsAsRead } from '@/services/notificationService';
@@ -12,7 +11,6 @@ import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Bell, Check, CheckCheck, Sparkles, MessageSquare, ThumbsUp, CircleDollarSign, Info } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
 
 interface NotificationDropdownProps {
   open: boolean;
@@ -23,42 +21,25 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   open,
   onOpenChange
 }) => {
-  const { profile, isConnected } = useProfile();
+  const { profile } = useProfile();
   const navigate = useNavigate();
   
-  const { data: notifications = [], refetch, isLoading, isError } = useQuery({
+  const { data: notifications = [], refetch } = useQuery({
     queryKey: ['notifications', profile?.wallet_address],
     queryFn: () => getUserNotifications(profile?.wallet_address || ''),
-    enabled: !!profile?.wallet_address && isConnected && open,
-    refetchOnWindowFocus: true,
-    staleTime: 10000, // Consider data stale after 10 seconds
+    enabled: !!profile?.wallet_address && open,
   });
   
-  // Refetch when component mounts or when dropdown opens
-  useEffect(() => {
-    if (open && profile?.wallet_address) {
-      refetch();
-    }
-  }, [open, profile?.wallet_address, refetch]);
+  const refetchUnreadCount = () => {
+    refetch();
+  };
   
   const markAllAsRead = async () => {
     if (!profile?.wallet_address) return;
     
-    try {
-      await markAllNotificationsAsRead(profile.wallet_address);
-      toast({
-        title: "Notifications cleared",
-        description: "All notifications have been marked as read"
-      });
-      refetch();
-    } catch (error) {
-      console.error("Error marking all as read:", error);
-      toast({
-        title: "Error",
-        description: "Failed to mark notifications as read",
-        variant: "destructive"
-      });
-    }
+    await markAllNotificationsAsRead(profile.wallet_address);
+    refetch();
+    refetchUnreadCount();
   };
   
   const handleClose = () => {
@@ -66,34 +47,31 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   };
   
   const handleNotificationClick = async (notification: Notification) => {
-    try {
-      await markNotificationAsRead(notification.id);
-      
-      switch (notification.entity_type) {
-        case EntityType.scammer:
-          navigate(`/scammer/${notification.entity_id}`);
-          break;
-        case EntityType.comment:
-          navigate(`/scammer/${notification.entity_id.split('-')[1]}`);
-          break;
-        case EntityType.announcement:
-          navigate('/community');
-          break;
-        case EntityType.reply:
-          navigate('/community');
-          break;
-        case EntityType.chat_message:
-          navigate('/community');
-          break;
-        default:
-          navigate('/community');
-      }
-      
-      refetch();
-      handleClose();
-    } catch (error) {
-      console.error("Error handling notification click:", error);
+    await markNotificationAsRead(notification.id);
+    
+    switch (notification.entity_type) {
+      case EntityType.scammer:
+        navigate(`/scammer/${notification.entity_id}`);
+        break;
+      case EntityType.comment:
+        navigate(`/scammer/${notification.entity_id.split('-')[1]}`);
+        break;
+      case EntityType.announcement:
+        navigate('/community');
+        break;
+      case EntityType.reply:
+        navigate('/community');
+        break;
+      case EntityType.chat_message:
+        navigate('/community');
+        break;
+      default:
+        navigate('/community');
     }
+    
+    refetch();
+    refetchUnreadCount();
+    handleClose();
   };
   
   const getNotificationIcon = (notification: Notification) => {
@@ -113,10 +91,6 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     }
   };
   
-  if (!isConnected) {
-    return null;
-  }
-  
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="sm:max-w-md w-[90vw]">
@@ -133,20 +107,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
         </SheetHeader>
         
         <ScrollArea className="h-[calc(100vh-8rem)]">
-          {isLoading ? (
-            <div className="flex items-center justify-center p-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-          ) : isError ? (
-            <div className="flex flex-col items-center justify-center p-8">
-              <p className="text-center text-muted-foreground">
-                Failed to load notifications. Please try again.
-              </p>
-              <Button variant="outline" className="mt-4" onClick={() => refetch()}>
-                Retry
-              </Button>
-            </div>
-          ) : notifications.length === 0 ? (
+          {notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center pt-12 pb-4 px-4">
               <Bell className="h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="text-xl font-medium">No Notifications</h3>

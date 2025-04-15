@@ -1,4 +1,3 @@
-
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { Profile } from '@/types/dataTypes';
 import { getProfileByWallet, uploadProfilePicture, saveProfile } from '@/services/profileService';
@@ -189,32 +188,35 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     try {
       setIsLoading(true);
       
-      if (!isPhantomAvailable) {
-        toast({
-          title: 'Phantom Wallet Required',
-          description: 'Please install Phantom wallet extension to connect',
-          variant: 'destructive',
-        });
+      if (isPhantomAvailable) {
+        const publicKey = await connectPhantomWallet();
         
-        // Open Phantom wallet website
-        window.open("https://phantom.app/", "_blank");
-        return;
-      }
-      
-      const publicKey = await connectPhantomWallet();
-      
-      if (publicKey) {
-        setWalletAddress(publicKey);
-        setIsConnected(true);
-        localStorage.setItem('walletAddress', publicKey);
-        
-        const existingProfile = await getProfileByWallet(publicKey);
-        
-        if (existingProfile) {
-          setProfile(existingProfile);
-        } else {
-          await createDefaultProfile(publicKey);
+        if (publicKey) {
+          setWalletAddress(publicKey);
+          setIsConnected(true);
+          localStorage.setItem('walletAddress', publicKey);
+          
+          const existingProfile = await getProfileByWallet(publicKey);
+          
+          if (existingProfile) {
+            setProfile(existingProfile);
+          } else {
+            await createDefaultProfile(publicKey);
+          }
         }
+      } else {
+        const mockWalletAddress = `wallet_${Date.now().toString(36)}`;
+        
+        localStorage.setItem('walletAddress', mockWalletAddress);
+        setWalletAddress(mockWalletAddress);
+        setIsConnected(true);
+        
+        await createDefaultProfile(mockWalletAddress);
+        
+        toast({
+          title: 'Mock Wallet Connected',
+          description: 'Phantom wallet not detected. Using a mock wallet for testing.',
+        });
       }
     } catch (error) {
       console.error('Error connecting wallet:', error);
@@ -237,6 +239,13 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     setWalletAddress(null);
     setIsConnected(false);
     setProfile(null);
+    
+    if (!isPhantomAvailable) {
+      toast({
+        title: 'Wallet Disconnected',
+        description: 'Your mock wallet has been disconnected',
+      });
+    }
   };
 
   const refreshProfile = async () => {
