@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
-import { Comment, Scammer } from '@/types/dataTypes';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Comment, Scammer, ItemType } from '@/types/dataTypes';
 import { Link } from 'react-router-dom';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Calendar } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import CommunityInteractionButtons from '@/components/community/CommunityInteractionButtons';
@@ -98,8 +97,8 @@ const ScammerCardContent: React.FC<ScammerCardContentProps> = ({ scammer, commen
           <CommunityInteractionButtons
             itemId={comment.id}
             itemType="scammer-comment"
-            initialLikes={comment.likes}
-            initialDislikes={comment.dislikes}
+            initialLikes={comment.likes || 0}
+            initialDislikes={comment.dislikes || 0}
           />
         </div>
       </div>
