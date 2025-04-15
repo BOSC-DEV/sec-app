@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Loader2, Circle } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { searchScammers } from '@/services/scammerSearchService';
 import type { Scammer } from '@/types/dataTypes';
 import { toast } from '@/hooks/use-toast';
@@ -75,7 +76,7 @@ const ScammerSearchDropdown: React.FC<ScammerSearchDropdownProps> = ({
                     </div>
                     <div className="text-xs text-muted-foreground mt-1 flex items-center">
                       <CurrencyIcon size="sm" className="mr-1" />
-                      Bounty: {formatNumber(scammer.bounty_amount || 0)}
+                      {formatNumber(scammer.bounty_amount || 0)}
                     </div>
                   </div>
                 </div>
@@ -89,3 +90,4 @@ const ScammerSearchDropdown: React.FC<ScammerSearchDropdownProps> = ({
 };
 
 export default ScammerSearchDropdown;
+
