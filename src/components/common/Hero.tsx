@@ -1,12 +1,15 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, Search } from 'lucide-react';
+
 interface HeroProps {
   title?: string;
   subtitle?: string;
   showCta?: boolean;
 }
+
 const Hero: React.FC<HeroProps> = ({
   title,
   subtitle,
@@ -27,13 +30,13 @@ const Hero: React.FC<HeroProps> = ({
           </p>
           
           {showCta && <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
-              <Button asChild className="bg-icc-gold hover:bg-icc-gold-light text-icc-blue-dark dark:text-white text-lg py-6 px-8 min-w-[200px] sm:min-w-[240px] font-medium" aria-label="View reports list">
+              <Button asChild variant="gold" className="text-lg py-6 px-8 min-w-[200px] sm:min-w-[240px] font-medium" aria-label="View reports list">
                 <Link to="/most-wanted">
                   <Search className="mr-2 h-5 w-5" />
                   View Reports
                 </Link>
               </Button>
-              <Button asChild className="bg-icc-blue-dark hover:bg-icc-blue-light text-white dark:text-white text-lg py-6 px-8 min-w-[200px] sm:min-w-[240px] font-medium" aria-label="File a report">
+              <Button asChild variant="gold" className="text-lg py-6 px-8 min-w-[200px] sm:min-w-[240px] font-medium" aria-label="File a report">
                 <Link to="/report">
                   <AlertCircle className="mr-2 h-5 w-5" />
                   File a Report
@@ -46,4 +49,5 @@ const Hero: React.FC<HeroProps> = ({
       <div className="h-4 bg-gradient-to-r from-icc-gold-dark via-icc-gold to-icc-gold-dark" aria-hidden="true"></div>
     </div>;
 };
+
 export default Hero;
