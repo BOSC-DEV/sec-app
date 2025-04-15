@@ -29,6 +29,7 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
     color,
     nextTier
   } = badgeInfo;
+  
   const sizeClasses = {
     sm: 'text-xs',
     md: 'text-sm',
@@ -48,6 +49,21 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
     </span>
   );
   
+  const progressBar = nextTier && (
+    <div className="space-y-2">
+      <div className="flex justify-between text-xs">
+        <span>{tier}</span>
+        <span>{nextTier.name}</span>
+      </div>
+      
+      <Progress value={100 - nextTier.remaining / (nextTier.minHolding - badgeInfo.minHolding) * 100} className="h-2" />
+      
+      <div className="text-xs text-right text-muted-foreground">
+        Need {formatSecAmount(nextTier.remaining)} more SEC
+      </div>
+    </div>
+  );
+
   if (!showTooltip) {
     return badge;
   }
@@ -71,22 +87,12 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
                 {badgeInfo.percentOfSupply > 0 && <span> ({badgeInfo.percentOfSupply}% of total supply)</span>}
               </div>
               
-              {showProgress && nextTier && <div className="space-y-2">
-                  <div className="flex justify-between text-xs">
-                    <span>{tier}</span>
-                    <span>{nextTier.name}</span>
-                  </div>
-                  
-                  <Progress value={100 - nextTier.remaining / (nextTier.minHolding - badgeInfo.minHolding) * 100} className="h-2" />
-                  
-                  <div className="text-xs text-right text-muted-foreground">
-                    Need {formatSecAmount(nextTier.remaining)} more SEC
-                  </div>
-                </div>}
+              {showProgress && !isMobile && progressBar}
             </div>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
+      {showProgress && isMobile && <div className="mt-2">{progressBar}</div>}
     </div>
   );
 };
