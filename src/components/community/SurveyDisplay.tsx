@@ -157,7 +157,6 @@ const SurveyDisplay: React.FC<SurveyProps> = ({ survey, onVote }) => {
             <div className="text-sm font-medium">
               {badge === "Shrimp" ? "🦐" : 
                badge === "Frog" ? "🐸" :
-               badge === "Bull" ? "🐂" : 
                badge === "Lion" ? "🦁" :
                badge === "King Cobra" ? "🐍" :
                badge === "Bull Shark" ? "🦈" :
@@ -177,11 +176,11 @@ const SurveyDisplay: React.FC<SurveyProps> = ({ survey, onVote }) => {
                   <Avatar className="h-6 w-6">
                     <AvatarImage src={voter.profilePic} alt={voter.username || 'User'} />
                     <AvatarFallback>
-                      {(voter.username?.[0] || 'U').toUpperCase()}
+                      {(voter.username?.[0] || voter.userId[0]).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <span className="text-sm text-muted-foreground hover:text-primary">
-                    {voter.username || 'Anonymous'}
+                    {voter.username || voter.userId}
                   </span>
                 </Link>
               ))}
@@ -203,7 +202,6 @@ const SurveyDisplay: React.FC<SurveyProps> = ({ survey, onVote }) => {
               <Badge variant="outline" className="text-xs py-0 px-1.5 cursor-pointer">
                 {badge === "Shrimp" ? "🦐" : 
                  badge === "Frog" ? "🐸" :
-                 badge === "Bull" ? "🐂" : 
                  badge === "Lion" ? "🦁" :
                  badge === "King Cobra" ? "🐍" :
                  badge === "Bull Shark" ? "🦈" :
