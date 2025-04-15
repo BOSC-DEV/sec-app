@@ -1,4 +1,3 @@
-
 import { toast } from '@/hooks/use-toast';
 import { 
   Connection, 
@@ -367,35 +366,51 @@ export const sendTransactionToDevWallet = async (
     const activeConnection = getConnection();
     
     try {
-      const senderTokenAccount = await getOrCreateAssociatedTokenAccount(
-        activeConnection,
-        fromPubkey,
-        fromPubkey,
-        SEC_TOKEN_MINT
-      );
+      // Add a safety timeout to prevent UI freezes for long-running operations
+      const timeoutPromise = new Promise<null>((_, reject) => {
+        setTimeout(() => reject(new Error("Transaction preparation timed out")), 15000);
+      });
       
-      const recipientTokenAccount = await getOrCreateAssociatedTokenAccount(
-        activeConnection,
-        fromPubkey,
-        toPubkey,
-        SEC_TOKEN_MINT
-      );
-      
-      const tokenDecimals = 6;
-      const tokenAmount = BigInt(Math.round(amount * 10 ** tokenDecimals));
-      
-      console.log(`Converting ${amount} SEC tokens to ${tokenAmount} base units (with ${tokenDecimals} decimals)`);
-      
-      transaction.add(
-        createTransferInstruction(
-          senderTokenAccount,
-          recipientTokenAccount,
+      // Create a safe promise that won't freeze the UI
+      const setupPromise = (async () => {
+        const senderTokenAccount = await getOrCreateAssociatedTokenAccount(
+          activeConnection,
           fromPubkey,
-          tokenAmount,
-          [],
-          TOKEN_PROGRAM_ID
-        )
-      );
+          fromPubkey,
+          SEC_TOKEN_MINT
+        );
+        
+        const recipientTokenAccount = await getOrCreateAssociatedTokenAccount(
+          activeConnection,
+          fromPubkey,
+          toPubkey,
+          SEC_TOKEN_MINT
+        );
+        
+        const tokenDecimals = 6;
+        const tokenAmount = BigInt(Math.round(amount * 10 ** tokenDecimals));
+        
+        console.log(`Converting ${amount} SEC tokens to ${tokenAmount} base units (with ${tokenDecimals} decimals)`);
+        
+        transaction.add(
+          createTransferInstruction(
+            senderTokenAccount,
+            recipientTokenAccount,
+            fromPubkey,
+            tokenAmount,
+            [],
+            TOKEN_PROGRAM_ID
+          )
+        );
+        
+        return { transaction, fromPubkey };
+      })();
+      
+      // Use Promise.race to avoid UI freezes
+      const result = await Promise.race([setupPromise, timeoutPromise]);
+      if (!result) return null;
+      
+      const { transaction, fromPubkey } = result;
       
       try {
         const { blockhash, lastValidBlockHeight } = await activeConnection.getLatestBlockhash();
@@ -403,19 +418,35 @@ export const sendTransactionToDevWallet = async (
         transaction.feePayer = fromPubkey;
         
         console.log("Sending SEC token transaction via QuickNode RPC...");
-        const { signature } = await provider.signAndSendTransaction(transaction);
+        const signResponse = await provider.signAndSendTransaction(transaction);
+        const signature = signResponse.signature;
         console.log("SEC token transaction sent, signature:", signature);
         
-        await confirmTransactionWithRetry(
+        // Don't wait for confirmation in the UI thread - this prevents freezing
+        // Instead, we'll show a success message and handle confirmation in the background
+        toast({
+          title: "Transaction submitted",
+          description: `Transaction for ${amount} $SEC tokens has been submitted`,
+        });
+        
+        // Handle confirmation in the background
+        confirmTransactionWithRetry(
           activeConnection,
           signature,
           blockhash,
           lastValidBlockHeight
-        );
-        
-        toast({
-          title: "Transaction successful",
-          description: `Successfully sent ${amount} $SEC tokens to the wallet`,
+        ).then(() => {
+          toast({
+            title: "Transaction successful",
+            description: `Successfully sent ${amount} $SEC tokens to the wallet`,
+          });
+        }).catch(error => {
+          console.error('Transaction confirmation failed:', error);
+          toast({
+            title: "Transaction may have failed",
+            description: "Please check your wallet for confirmation",
+            variant: "destructive"
+          });
         });
         
         return signature;
@@ -433,16 +464,30 @@ export const sendTransactionToDevWallet = async (
           
           console.log("Fallback SEC token transaction sent, signature:", signature);
           
-          await confirmTransactionWithRetry(
+          // Don't wait for confirmation in the UI thread
+          toast({
+            title: "Transaction submitted (fallback)",
+            description: `Transaction for ${amount} $SEC tokens has been submitted`,
+          });
+          
+          // Handle confirmation in the background
+          confirmTransactionWithRetry(
             fallbackConn,
             signature,
             blockhash,
             lastValidBlockHeight
-          );
-          
-          toast({
-            title: "Transaction successful (fallback)",
-            description: `Successfully sent ${amount} $SEC tokens to the wallet`,
+          ).then(() => {
+            toast({
+              title: "Transaction successful (fallback)",
+              description: `Successfully sent ${amount} $SEC tokens to the wallet`,
+            });
+          }).catch(error => {
+            console.error('Fallback transaction confirmation failed:', error);
+            toast({
+              title: "Transaction may have failed",
+              description: "Please check your wallet for confirmation",
+              variant: "destructive"
+            });
           });
           
           return signature;
