@@ -510,7 +510,7 @@ const ScammerDetailPage = () => {
               <ArrowLeft className="h-4 w-4 mr-2" aria-hidden="true" />
               {isMobile ? 'Back' : 'Back to Most Wanted'}
             </Button>
-            <div className="flex items-center space-x-2 md:space-x-3">
+            <div className="flex items-center space-x-2 md:space-x-3 text-zinc-50">
               {isCreator && <>
                   <Button variant="outline" size="sm" onClick={handleEditScammer} aria-label="Edit this report">
                     <Edit className="h-3.5 w-3.5" aria-hidden="true" />
@@ -660,9 +660,6 @@ const ScammerDetailPage = () => {
                     </div> : <p className="text-icc-gray">No official response yet.</p>}
                 </TabsContent>
               </Tabs>
-              
-              {/* Display the BountyForm only on mobile */}
-              {isMobile && <BountyForm scammerId={scammer.id} scammerName={scammer.name} developerWalletAddress={developerWalletAddress} />}
             </div>
 
             <div>
@@ -737,23 +734,12 @@ const ScammerDetailPage = () => {
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-                
-                {/* Display the BountyForm on desktop under the likes bar */}
-                {!isMobile && <div className="mt-6">
-                    <BountyForm scammerId={scammer.id} scammerName={scammer.name} developerWalletAddress={developerWalletAddress} />
-                    
-                    {/* Recent Contributions moved here */}
-                    <div className="mt-6">
-                      <BountyContributionList contributions={bountyContributions} isLoading={isLoadingBountyContributions} totalCount={totalContributions} onPageChange={handlePageChange} currentPage={contributionsPage} itemsPerPage={contributionsPerPage} userContributionAmount={userContributionAmount} />
-                    </div>
-                  </div>}
               </div>
             </div>
           </div>
         </div>
       </section>
       
-      {/* Recent Contributions section */}
       {isMobile && <div className="mt-8">
           <BountyForm scammerId={scammer.id} scammerName={scammer.name} developerWalletAddress={developerWalletAddress} />
           <div className="mt-6">
@@ -761,7 +747,6 @@ const ScammerDetailPage = () => {
           </div>
         </div>}
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
