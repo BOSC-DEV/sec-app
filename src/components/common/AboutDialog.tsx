@@ -14,7 +14,8 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
   open,
   onOpenChange
 }) => {
-  return <Dialog open={open} onOpenChange={onOpenChange}>
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[800px] max-h-[80vh]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-serif text-icc-blue flex items-center gap-2">
@@ -56,9 +57,9 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
                       <ul className="list-disc pl-5 mt-1">
                         <li>Real-time wallet address validation using blockchain-specific regex patterns:
                           <ul className="list-[circle] pl-5 mt-1">
-                            <li>Ethereum: ^0x[a-fA-F0-9]{40}$</li>
-                            <li>Bitcoin: ^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$</li>
-                            <li>Solana: [1-9A-HJ-NP-Za-km-z]{32,44}</li>
+                            <li>Ethereum: ^0x[a-fA-F0-9]{'{'}{40}{'}'}$</li>
+                            <li>Bitcoin: ^[13][a-km-zA-HJ-NP-Z1-9]{'{'}{25,34}{'}'}$</li>
+                            <li>Solana: [1-9A-HJ-NP-Za-km-z]{'{'}{32,44}{'}'}</li>
                           </ul>
                         </li>
                         <li>Dynamic field validation with configurable rules:
@@ -419,10 +420,10 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
                           <ul className="list-[circle] pl-5 mt-1">
                             <li>Amount classification:
                               <ul className="list-[square] pl-5 mt-1">
-                                <li>Tier 1 (1-10 points): < $10,000</li>
+                                <li>Tier 1 (1-10 points): &lt; $10,000</li>
                                 <li>Tier 2 (11-30 points): $10,000-$100,000</li>
                                 <li>Tier 3 (31-60 points): $100,000-$1M</li>
-                                <li>Tier 4 (61-100 points): > $1M</li>
+                                <li>Tier 4 (61-100 points): &gt; $1M</li>
                               </ul>
                             </li>
                             <li>Victim multiplier:
@@ -430,7 +431,7 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
                                 <li>1-5 victims: 1.0x</li>
                                 <li>6-20 victims: 1.3x</li>
                                 <li>21-100 victims: 1.6x</li>
-                                <li>>100 victims: 2.0x</li>
+                                <li>&gt;100 victims: 2.0x</li>
                               </ul>
                             </li>
                           </ul>
@@ -516,8 +517,8 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
           </DialogClose>
         </DialogFooter>
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+  );
 };
 
 export default AboutDialog;
-
