@@ -122,6 +122,11 @@ export const connectPhantomWallet = async (): Promise<string | null> => {
     
     console.log("Phantom wallet connected successfully:", publicKey);
     
+    // Verify the connection is active
+    if (!provider.isConnected || !provider.publicKey) {
+      throw new Error("Wallet connection verification failed");
+    }
+    
     toast({
       title: "Wallet connected",
       description: "Phantom wallet connected successfully",

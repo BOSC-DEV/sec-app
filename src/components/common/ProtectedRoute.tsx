@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -21,22 +20,34 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   } = useProfile();
   const location = useLocation();
   const [showDialog, setShowDialog] = useState(false);
-  
-  // Only show dialog when we're sure user is not connected AND not still loading
+
   useEffect(() => {
-    if (!isConnected && !isLoading) {
-      setShowDialog(true);
+    let timeoutId: NodeJS.Timeout;
+    
+    if (!isLoading && !isConnected) {
+      // Add a small delay to prevent flickering during quick state changes
+      timeoutId = setTimeout(() => {
+        setShowDialog(true);
+      }, 100);
     } else {
       setShowDialog(false);
     }
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, [isConnected, isLoading]);
 
   // Show loading state while checking authentication
   if (isLoading) {
-    return <div className="p-8 space-y-4">
+    return (
+      <div className="p-8 space-y-4">
         <Skeleton className="h-12 w-full max-w-xl" />
         <Skeleton className="h-64 w-full" />
-      </div>;
+      </div>
+    );
   }
 
   // Instead of redirecting, show a dialog
