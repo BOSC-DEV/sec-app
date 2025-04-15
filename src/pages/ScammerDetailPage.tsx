@@ -35,7 +35,6 @@ import { Link } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import BountyForm from '@/components/scammer/BountyForm';
 import { ArrowLeftRight } from 'lucide-react';
-
 const ScammerDetailPage = () => {
   const {
     id
@@ -299,7 +298,7 @@ const ScammerDetailPage = () => {
           setAgreePercentage(Math.round((result.likes || 0) * 100 / total));
         }
         toast({
-          title: "Agreed",
+          title: "Agreed"
         });
         queryClient.setQueryData(['scammer', id], (oldScammer: Scammer | undefined) => {
           if (oldScammer) {
@@ -501,8 +500,7 @@ const ScammerDetailPage = () => {
         </section>
       </div>;
   }
-  return (
-    <div>
+  return <div>
       <CompactHero title={scammer?.name} />
 
       <section className="icc-section bg-white">
@@ -523,12 +521,7 @@ const ScammerDetailPage = () => {
                     {!isMobile && <span className="ml-1">Delete Report</span>}
                   </Button>
                 </>}
-              <Button variant="outline" size="sm" onClick={() => document.getElementById('bounty-section')?.scrollIntoView({
-              behavior: 'smooth'
-            })}>
-                <DollarSign className="h-3.5 w-3.5" aria-hidden="true" />
-                {!isMobile && <span className="ml-1">Add Bounty</span>}
-              </Button>
+              
               <Button variant="outline" size="sm" onClick={handleShare} aria-label="Share this scammer report">
                 <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
                 {!isMobile && <span className="ml-1">Share</span>}
@@ -747,23 +740,11 @@ const ScammerDetailPage = () => {
                 
                 {/* Display the BountyForm on desktop under the likes bar */}
                 {!isMobile && <div className="mt-6">
-                    <BountyForm 
-                      scammerId={scammer.id} 
-                      scammerName={scammer.name} 
-                      developerWalletAddress={developerWalletAddress} 
-                    />
+                    <BountyForm scammerId={scammer.id} scammerName={scammer.name} developerWalletAddress={developerWalletAddress} />
                     
                     {/* Recent Contributions moved here */}
                     <div className="mt-6">
-                      <BountyContributionList
-                        contributions={bountyContributions}
-                        isLoading={isLoadingBountyContributions}
-                        totalCount={totalContributions}
-                        onPageChange={handlePageChange}
-                        currentPage={contributionsPage}
-                        itemsPerPage={contributionsPerPage}
-                        userContributionAmount={userContributionAmount}
-                      />
+                      <BountyContributionList contributions={bountyContributions} isLoading={isLoadingBountyContributions} totalCount={totalContributions} onPageChange={handlePageChange} currentPage={contributionsPage} itemsPerPage={contributionsPerPage} userContributionAmount={userContributionAmount} />
                     </div>
                   </div>}
               </div>
@@ -773,26 +754,12 @@ const ScammerDetailPage = () => {
       </section>
       
       {/* Recent Contributions section */}
-      {isMobile && (
-        <div className="mt-8">
-          <BountyForm
-            scammerId={scammer.id}
-            scammerName={scammer.name}
-            developerWalletAddress={developerWalletAddress}
-          />
+      {isMobile && <div className="mt-8">
+          <BountyForm scammerId={scammer.id} scammerName={scammer.name} developerWalletAddress={developerWalletAddress} />
           <div className="mt-6">
-            <BountyContributionList
-              contributions={bountyContributions}
-              isLoading={isLoadingBountyContributions}
-              totalCount={totalContributions}
-              onPageChange={handlePageChange}
-              currentPage={contributionsPage}
-              itemsPerPage={contributionsPerPage}
-              userContributionAmount={userContributionAmount}
-            />
+            <BountyContributionList contributions={bountyContributions} isLoading={isLoadingBountyContributions} totalCount={totalContributions} onPageChange={handlePageChange} currentPage={contributionsPage} itemsPerPage={contributionsPerPage} userContributionAmount={userContributionAmount} />
           </div>
-        </div>
-      )}
+        </div>}
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
@@ -811,8 +778,6 @@ const ScammerDetailPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
-  );
+    </div>;
 };
-
 export default ScammerDetailPage;
