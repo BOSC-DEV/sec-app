@@ -244,7 +244,7 @@ const LiveChat = () => {
         const data = await getChatMessages();
         setMessages(data);
         setIsLoading(false);
-        const uniqueAuthors = new Set(data.map(message => message.author_id));
+        const uniqueAuthors = new Set(data.map(message => message.author_id as string));
         uniqueAuthors.forEach(authorId => {
           if (authorId) fetchUserSecBalance(authorId);
         });
