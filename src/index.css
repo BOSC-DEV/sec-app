@@ -1,43 +1,130 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 215 76% 19%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 43 44% 60%;
+    --secondary-foreground: 215 76% 19%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 43 44% 60%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 215 76% 19%;
+
+    --radius: 0.5rem;
+  }
+
   .dark {
-    /* Improved dark mode color palette */
-    --background: 240 10% 7.9%;
-    --foreground: 0 0% 80%;
-    --card: 240 10% 7.9%;
-    --card-foreground: 0 0% 80%;
-    --popover: 240 10% 7.9%;
-    --popover-foreground: 0 0% 80%;
-    --primary: 0 0% 80%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 80%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 80%;
+    --background: 215 76% 10%;
+    --foreground: 210 40% 98%;
+
+    --card: 215 76% 12%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 215 76% 12%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 215 76% 19%;
+
+    --secondary: 43 44% 40%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 43 44% 50%;
+    --accent-foreground: 210 40% 98%;
+
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 80%;
-    --border: 240 3.7% 20.9%;
-    --input: 240 3.7% 20.9%;
-    --ring: 240 4.9% 83.9%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
   }
 }
 
 @layer base {
-  body.dark {
-    @apply bg-[#1A1F2C] text-[#C8C8C9];
+  * {
+    @apply border-border;
   }
 
-  .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
-    @apply text-[#FFFFFF];
+  body {
+    @apply bg-background text-foreground font-sans;
   }
 
-  .dark .bg-card {
-    @apply bg-[#222222] text-[#C8C8C9];
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif text-icc-blue dark:text-white;
+  }
+}
+
+@layer components {
+  .icc-container {
+    @apply container max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 
-  .dark .text-muted-foreground {
-    @apply text-[#8E9196];
+  .icc-header {
+    @apply bg-icc-blue text-white shadow-md dark:bg-icc-blue-dark;
+  }
+
+  .icc-footer {
+    @apply bg-icc-blue text-white py-8 dark:bg-icc-blue-dark;
+  }
+
+  .icc-card {
+    @apply bg-white border border-gray-200 rounded-md shadow-sm hover:shadow-md transition-shadow duration-200 dark:bg-gray-800 dark:border-gray-700;
+  }
+
+  .icc-btn-primary {
+    @apply bg-icc-blue hover:bg-icc-blue-light text-white transition-colors duration-200 dark:bg-icc-blue-dark dark:hover:bg-icc-blue;
+  }
+
+  .icc-btn-secondary {
+    @apply bg-icc-gold hover:bg-icc-gold-light text-icc-blue-dark transition-colors duration-200 dark:bg-icc-gold-dark dark:hover:bg-icc-gold;
+  }
+
+  .icc-btn-danger {
+    @apply bg-icc-red hover:bg-icc-red-light text-white transition-colors duration-200 dark:bg-icc-red-dark dark:hover:bg-icc-red;
+  }
+
+  .icc-section {
+    @apply py-12 md:py-16 dark:bg-icc-blue-dark;
+  }
+
+  .icc-title {
+    @apply text-3xl md:text-4xl font-serif font-bold text-icc-blue dark:text-white mb-6;
+  }
+
+  .icc-subtitle {
+    @apply text-xl font-serif text-icc-blue-light dark:text-gray-200 mb-4;
+  }
+
+  .icc-link {
+    @apply text-icc-blue-light hover:text-icc-blue dark:text-icc-gold dark:hover:text-icc-gold-light underline;
   }
 }
