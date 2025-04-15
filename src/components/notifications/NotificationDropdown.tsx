@@ -95,16 +95,20 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="sm:max-w-md w-[90vw]">
         <SheetHeader className="pb-4">
-          <SheetTitle className="flex justify-between items-center space-x-4">
+          <SheetTitle className="flex justify-between items-center">
             <div>Notifications</div>
-            {notifications.some(n => !n.is_read) && (
-              <Button variant="ghost" size="sm" onClick={markAllAsRead} className="flex items-center gap-2">
-                <CheckCheck className="h-4 w-4" />
-                <span>Mark all as read</span>
-              </Button>
-            )}
           </SheetTitle>
         </SheetHeader>
+        
+        {notifications.some(n => !n.is_read) && (
+          <button
+            onClick={markAllAsRead}
+            className="absolute right-12 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-neutral-200 data-[state=open]:text-neutral-800 p-1"
+            aria-label="Mark all as read"
+          >
+            <CheckCheck className="h-4 w-4" />
+          </button>
+        )}
         
         <ScrollArea className="h-[calc(100vh-8rem)]">
           {notifications.length === 0 ? (
