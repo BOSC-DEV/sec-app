@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { toast } from '@/hooks/use-toast';
@@ -5,7 +6,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { addBountyContribution } from '@/services/bountyService';
 import { sendTransactionToDevWallet } from '@/utils/phantomWallet';
 import { handleError, ErrorSeverity } from '@/utils/errorHandling';
-import { Separator } from '@/components/ui/separator';
 import DeveloperWalletDisplay from './DeveloperWalletDisplay';
 import ContributionForm from './ContributionForm';
 import BountyTransferDialog from './BountyTransferDialog';
@@ -142,7 +142,7 @@ const BountyForm: React.FC<BountyFormProps> = ({
 
   return (
     <div id="bounty-section" className="bg-icc-gold-light/20 border border-icc-gold rounded-lg p-5 mt-4">
-      <h4 className="font-bold text-xl text-icc-blue mb-2">Contribute to Bounty</h4>
+      <h4 className="font-bold text-xl text-icc-blue dark:text-white mb-2">Contribute to Bounty</h4>
       
       <DeveloperWalletDisplay developerWalletAddress={developerWalletAddress} />
       
