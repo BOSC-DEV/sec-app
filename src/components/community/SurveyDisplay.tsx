@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, Gorilla } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useProfile } from '@/contexts/ProfileContext';
 import { useBadgeTier } from '@/hooks/useBadgeTier';
@@ -142,7 +142,7 @@ const SurveyDisplay: React.FC<SurveyProps> = ({ survey, onVote }) => {
                    badge === "King Cobra" ? "🐍" :
                    badge === "Bull Shark" ? "🦈" :
                    badge === "Bald Eagle" ? "🦅" :
-                   badge === "Great Ape" ? <Gorilla className="h-3 w-3" /> : 
+                   badge === "Great Ape" ? "🦍" : 
                    badge === "T-Rex" ? "🦖" :
                    badge === "Goat" ? "🐐" :
                    badge === "Whale" ? "🐳" : "👑"} {count}
