@@ -65,8 +65,7 @@ const PublicProfilePage = () => {
     enabled: !!profile?.wallet_address
   });
   
-  const badgeInfo = useBadgeTier(profile?.wallet_address ? 
-    (bountyContributions?.totalBountyAmount || 0) : null);
+  const badgeInfo = useBadgeTier(profile?.sec_balance || null);
   
   const {
     data: scammerReports,
@@ -441,7 +440,7 @@ const PublicProfilePage = () => {
                         <WalletInfo 
                           walletAddress={profile.wallet_address} 
                           isOwnProfile={isOwnProfile} 
-                          secBalance={profile?.wallet_address ? bountyContributions?.totalBountyAmount || 0 : null}
+                          secBalance={profile?.sec_balance}
                         />
                       </> : <div className="text-center py-12">
                         <p className="text-muted-foreground text-lg">No wallet information available</p>
