@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Menu, X, User, Copy, Bell, LogIn, Wallet } from 'lucide-react';
 import ICCLogo from '../common/ICCLogo';
 import { useProfile } from '@/contexts/ProfileContext';
-import ThemeToggle from '@/components/common/ThemeToggle';
 import { toast } from '@/hooks/use-toast';
 import NotificationDropdown from '../notifications/NotificationDropdown';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -99,7 +98,6 @@ const Header = () => {
           </div>
 
           <div className="flex items-center space-x-2">
-            <ThemeToggle variant="outline" size="sm" className="mr-2" />
             {isLoading ? (
               <Button variant="outline" size="sm" disabled className="opacity-75">
                 Loading...
