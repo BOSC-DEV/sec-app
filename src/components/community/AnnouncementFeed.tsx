@@ -88,40 +88,50 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   useEffect(() => {
     const loadUserVotes = async () => {
       try {
-        const storedVotes = JSON.parse(localStorage.getItem('userSurveyVotes') || '{}');
-        setUserSurveyVotes(storedVotes);
-      } catch (error) {
-        console.error("Error reading from localStorage:", error);
-      }
-      
-      if (!profile?.wallet_address) {
-        setLoadingVotes(false);
-        return;
-      }
-      
-      try {
-        setLoadingVotes(true);
-        const surveyAnnouncements = announcements.filter(a => a.survey_data);
-        const votes: Record<string, number> = {};
-        
-        for (const announcement of surveyAnnouncements) {
-          if (announcement.survey_data) {
-            const userVote = await getUserSurveyVote(announcement.id, profile.wallet_address);
-            if (userVote !== undefined) {
-              votes[announcement.id] = userVote;
-            }
-          }
+        let storedVotes = {};
+        try {
+          storedVotes = JSON.parse(localStorage.getItem('userSurveyVotes') || '{}');
+        } catch (error) {
+          console.error("Error reading from localStorage:", error);
         }
         
-        console.log("User survey votes loaded:", votes);
+        const tempVotes = { ...storedVotes };
         
-        setUserSurveyVotes(prev => ({
-          ...prev,
-          ...votes
-        }));
+        if (!profile?.wallet_address) {
+          setUserSurveyVotes(tempVotes);
+          setLoadingVotes(false);
+          return;
+        }
+        
+        try {
+          setLoadingVotes(true);
+          const surveyAnnouncements = announcements.filter(a => a.survey_data);
+          let serverVotesFound = false;
+          
+          for (const announcement of surveyAnnouncements) {
+            if (announcement.survey_data) {
+              const userVote = await getUserSurveyVote(announcement.id, profile.wallet_address);
+              if (userVote !== undefined) {
+                tempVotes[announcement.id] = userVote;
+                serverVotesFound = true;
+              }
+            }
+          }
+          
+          console.log("User survey votes loaded:", tempVotes);
+          
+          setUserSurveyVotes(tempVotes);
+          
+          if (serverVotesFound) {
+            localStorage.setItem('userSurveyVotes', JSON.stringify(tempVotes));
+          }
+        } catch (error) {
+          console.error("Error loading user votes:", error);
+        } finally {
+          setLoadingVotes(false);
+        }
       } catch (error) {
-        console.error("Error loading user votes:", error);
-      } finally {
+        console.error("Error in vote loading process:", error);
         setLoadingVotes(false);
       }
     };
@@ -291,17 +301,15 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
       );
       
       if (success) {
-        setUserSurveyVotes(prev => ({
-          ...prev,
+        const updatedVotes = {
+          ...userSurveyVotes,
           [announcementId]: optionIndex
-        }));
+        };
+        
+        setUserSurveyVotes(updatedVotes);
         
         try {
-          const storedVotes = JSON.parse(localStorage.getItem('userSurveyVotes') || '{}');
-          localStorage.setItem('userSurveyVotes', JSON.stringify({
-            ...storedVotes,
-            [announcementId]: optionIndex
-          }));
+          localStorage.setItem('userSurveyVotes', JSON.stringify(updatedVotes));
         } catch (error) {
           console.error("Error storing vote in localStorage:", error);
         }
@@ -442,7 +450,6 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   const renderAnnouncementCard = (announcement: Announcement) => {
     const time = formatTimeAgo(announcement.created_at);
     
-    // Prepare survey data if this announcement contains a survey
     const surveyData = announcement.survey_data ? {
       id: announcement.id,
       title: announcement.survey_data.title,
