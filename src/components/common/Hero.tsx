@@ -44,11 +44,11 @@ const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
               <Button 
                 asChild 
                 className="bg-icc-blue-dark hover:bg-icc-blue-light text-white dark:text-white text-lg py-6 px-8 min-w-[200px] sm:min-w-[240px] font-medium"
-                aria-label="Report a scammer"
+                aria-label="File a report"
               >
                 <Link to="/report">
                   <AlertCircle className="mr-2 h-5 w-5" />
-                  Report a Scammer
+                  File a Report
                 </Link>
               </Button>
             </div>
