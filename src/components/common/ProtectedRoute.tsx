@@ -1,13 +1,16 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Wallet, LogIn } from 'lucide-react';
+
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
+
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children
 }) => {
@@ -17,7 +20,16 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     connectWallet
   } = useProfile();
   const location = useLocation();
-  const [showDialog, setShowDialog] = React.useState(!isConnected && !isLoading);
+  const [showDialog, setShowDialog] = useState(false);
+  
+  // Only show dialog when we're sure user is not connected AND not still loading
+  useEffect(() => {
+    if (!isConnected && !isLoading) {
+      setShowDialog(true);
+    } else {
+      setShowDialog(false);
+    }
+  }, [isConnected, isLoading]);
 
   // Show loading state while checking authentication
   if (isLoading) {
@@ -54,4 +66,5 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // If authenticated, render the children
   return <>{children}</>;
 };
+
 export default ProtectedRoute;
