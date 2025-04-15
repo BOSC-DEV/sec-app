@@ -674,7 +674,7 @@ const ScammerDetailPage = () => {
 
             <div>
               <div className="bg-gray-50 rounded-lg shadow-md p-4">
-                <h3 className="text-lg font-semibold text-icc-blue mb-3">Reported By</h3>
+                <h3 className="text-lg font-semibold text-icc-blue dark:text-icc-blue mb-3">Reported By</h3>
                 {creatorProfile ? <Link to={`/profile/${creatorProfile.username || creatorProfile.wallet_address}`} className="flex items-center space-x-3 group hover:bg-gray-100 p-2 rounded-md transition-colors">
                     <Avatar className="group-hover:ring-2 group-hover:ring-icc-gold transition-all">
                       <AvatarImage src={creatorProfile.profile_pic_url} alt={`${creatorProfile.display_name}'s profile`} />
