@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/hover-card";
 import { Link } from 'react-router-dom';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { SurveyData } from '@/types/dataTypes';
 
 interface SurveyVoter {
   userId: string;
@@ -36,12 +37,6 @@ interface SurveyProps {
     survey_data?: SurveyData;
   };
   onVote: (surveyId: string, optionIndex: number) => Promise<boolean>;
-}
-
-interface SurveyData {
-  title: string;
-  poll_number: number;
-  options: SurveyOption[];
 }
 
 const SurveyDisplay: React.FC<SurveyProps> = ({ survey, onVote }) => {
