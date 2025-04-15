@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -43,41 +42,96 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
             <section>
               <h4 className="font-bold flex items-center gap-2 text-base mb-3">
                 <Shield className="h-4 w-4 text-icc-gold" />
-                1. Mission & Vision
+                1. Core Reporting System
               </h4>
               <div className="pl-4 space-y-3">
                 <p>
-                  <span className="font-semibold">Mission:</span> To create a safer digital asset ecosystem by empowering communities to 
-                  collectively identify, verify, and deter cryptocurrency scams through decentralized coordination and economic incentives.
+                  The reporting system is built on a structured validation framework that ensures accuracy and reliability:
                 </p>
-                <p>
-                  <span className="font-semibold">Vision:</span> A cryptocurrency landscape where fraudulent actors find it increasingly 
-                  difficult to operate due to rapid identification, comprehensive documentation, and community-driven deterrence mechanisms.
-                </p>
+                <ul className="list-disc pl-5 space-y-2">
+                  <li><span className="font-medium">Report Creation:</span> Reports are submitted with mandatory fields including scammer name, wallet addresses, and fraud methodology. The system validates:
+                    <ul className="list-disc pl-5 mt-1">
+                      <li>Wallet address format validation using regex patterns for multiple blockchain formats</li>
+                      <li>Duplicate detection across existing scammer records</li>
+                      <li>Evidence requirements including transaction proofs and communication records</li>
+                    </ul>
+                  </li>
+                  <li><span className="font-medium">Validation Process:</span> Reports undergo multi-stage verification:
+                    <ul className="list-disc pl-5 mt-1">
+                      <li>Initial automated checks for completeness and format validity</li>
+                      <li>Cross-referencing against known scam patterns</li>
+                      <li>Community validation through the reputation system</li>
+                      <li>Final verification by high-reputation members</li>
+                    </ul>
+                  </li>
+                  <li><span className="font-medium">Evidence Storage:</span> The system employs secure storage for:
+                    <ul className="list-disc pl-5 mt-1">
+                      <li>Transaction screenshots with metadata extraction</li>
+                      <li>Communication logs with timestamp verification</li>
+                      <li>Wallet activity tracking across multiple chains</li>
+                    </ul>
+                  </li>
+                </ul>
               </div>
             </section>
 
             <section>
               <h4 className="font-bold flex items-center gap-2 text-base mb-3">
                 <ChartBar className="h-4 w-4 text-icc-gold" />
-                2. Core System Components
+                2. Bounty System Architecture
               </h4>
-              <div className="pl-4 space-y-3">
-                <div className="bg-muted/50 p-4 rounded-lg">
-                  <h5 className="font-semibold mb-2">2.1 Reporting Infrastructure</h5>
+              <div className="pl-4 space-y-4">
+                <h5 className="font-semibold mb-1">2.1 Core Bounty Mechanics</h5>
+                <div className="pl-4 space-y-2">
+                  <p>
+                    The bounty system operates on a sophisticated transfer and tracking mechanism:
+                  </p>
                   <ul className="list-disc pl-5 space-y-2">
-                    <li><span className="font-medium">Structured Documentation:</span> Standardized forms for detailed scam reports including wallet addresses, transaction evidence, and communication records</li>
-                    <li><span className="font-medium">Evidence Validation:</span> Multi-stage verification process ensuring report accuracy and credibility</li>
-                    <li><span className="font-medium">Cross-Reference System:</span> Interconnected database linking related scam patterns and actors</li>
+                    <li><span className="font-medium">Contribution Logic:</span>
+                      <ul className="list-disc pl-5 mt-1">
+                        <li>Direct contributions in $SEC tokens</li>
+                        <li>Automatic verification of transaction signatures</li>
+                        <li>Real-time bounty amount updates with atomic database operations</li>
+                        <li>Contribution tracking per user with full history</li>
+                      </ul>
+                    </li>
+                    <li><span className="font-medium">Transfer Mechanism:</span>
+                      <ul className="list-disc pl-5 mt-1">
+                        <li>Partial bounty transfers between scammer reports</li>
+                        <li>Mandatory 10% retention on original scammer report</li>
+                        <li>Multi-step validation process for transfers</li>
+                        <li>Atomic database updates to prevent inconsistencies</li>
+                      </ul>
+                    </li>
+                    <li><span className="font-medium">Transaction Validation:</span>
+                      <ul className="list-disc pl-5 mt-1">
+                        <li>On-chain verification of $SEC token transfers</li>
+                        <li>Double-entry accounting system for bounty tracking</li>
+                        <li>Automatic reconciliation of bounty amounts</li>
+                      </ul>
+                    </li>
                   </ul>
                 </div>
-                
-                <div className="bg-muted/50 p-4 rounded-lg">
-                  <h5 className="font-semibold mb-2">2.2 Economic Incentives</h5>
+
+                <h5 className="font-semibold mb-1">2.2 Contribution Management</h5>
+                <div className="pl-4 space-y-2">
                   <ul className="list-disc pl-5 space-y-2">
-                    <li><span className="font-medium">Bounty System:</span> Community-funded rewards for identifying and verifying scammer information</li>
-                    <li><span className="font-medium">Reputation Mechanism:</span> Tiered badge system based on SEC token holdings and contribution quality</li>
-                    <li><span className="font-medium">Value Distribution:</span> Fair allocation of rewards to incentivize sustained community participation</li>
+                    <li><span className="font-medium">Transfer Rules:</span>
+                      <ul className="list-disc pl-5 mt-1">
+                        <li>Maximum transfer amount = 90% of original contribution</li>
+                        <li>Minimum retention amount = 10% of original contribution</li>
+                        <li>Transfer window = unlimited time period</li>
+                        <li>Multiple transfers allowed from single contribution</li>
+                      </ul>
+                    </li>
+                    <li><span className="font-medium">State Management:</span>
+                      <ul className="list-disc pl-5 mt-1">
+                        <li>Active/inactive contribution tracking</li>
+                        <li>Transfer history with full audit trail</li>
+                        <li>Contribution source tracking</li>
+                        <li>Real-time balance updates</li>
+                      </ul>
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -86,283 +140,66 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
             <section>
               <h4 className="font-bold flex items-center gap-2 text-base mb-3">
                 <Users className="h-4 w-4 text-icc-gold" />
-                3. Community Governance
-              </h4>
-              <div className="pl-4 space-y-3">
-                <p>
-                  SEC operates through a tiered participation structure:
-                </p>
-                <ul className="list-disc pl-5 space-y-2">
-                  <li><span className="font-medium">Badge Tiers:</span> From Shrimp (entry-level) to Whale (highest-tier), reflecting community contribution and token holdings</li>
-                  <li><span className="font-medium">Verification Rights:</span> Earned privileges for report validation based on reputation</li>
-                  <li><span className="font-medium">Collaborative Decision Making:</span> Community input on platform development and policy updates</li>
-                </ul>
-              </div>
-            </section>
-
-            <section>
-              <h4 className="font-bold flex items-center gap-2 text-base mb-3">
-                <Code className="h-4 w-4 text-icc-gold" />
-                4. Technical Architecture
+                3. Leaderboard & Ranking System
               </h4>
               <div className="pl-4 space-y-4">
-                <h5 className="font-semibold mb-1">4.1 Front-End Framework</h5>
+                <h5 className="font-semibold mb-1">3.1 Scoring Algorithm</h5>
                 <div className="pl-4 space-y-2">
                   <p>
-                    The SEC platform utilizes a React.js front-end with TypeScript for enhanced type safety and developer ergonomics.
-                    Components are organized using a feature-based architecture to ensure maintainable code:
+                    The leaderboard system utilizes a comprehensive scoring algorithm that considers multiple factors:
                   </p>
-                  <ul className="list-disc pl-5 space-y-1">
-                    <li><span className="font-medium">UI Components:</span> Built on Shadcn/UI with Tailwind CSS for responsive design</li>
-                    <li><span className="font-medium">State Management:</span> Tanstack React Query for server state management, with contextual hooks for UI state</li>
-                    <li><span className="font-medium">Routing:</span> React Router v6 with protected routes enforcing wallet authentication</li>
-                    <li><span className="font-medium">Authentication Flow:</span> Secure wallet-based authentication with transaction signing verification</li>
-                  </ul>
-                </div>
-
-                <h5 className="font-semibold mb-1">4.2 Database Schema</h5>
-                <div className="pl-4 space-y-2">
-                  <p>
-                    The platform is built on a PostgreSQL database with the following core entities:
-                  </p>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="bg-muted/30 p-3 rounded-lg">
-                      <h6 className="font-semibold mb-1">scammers</h6>
-                      <ul className="list-none pl-2 space-y-1">
-                        <li>id: text (PK)</li>
-                        <li>name: text</li>
-                        <li>photo_url: text</li>
-                        <li>accused_of: text</li>
-                        <li>wallet_addresses: text[]</li>
-                        <li>links: text[]</li>
-                        <li>aliases: text[]</li>
-                        <li>accomplices: text[]</li>
-                        <li>bounty_amount: numeric</li>
-                        <li>date_added: timestamp</li>
-                        <li>added_by: text (FK)</li>
-                        <li>views/likes/dislikes: integer</li>
-                      </ul>
-                    </div>
-                    <div className="bg-muted/30 p-3 rounded-lg">
-                      <h6 className="font-semibold mb-1">profiles</h6>
-                      <ul className="list-none pl-2 space-y-1">
-                        <li>id: uuid (PK)</li>
-                        <li>wallet_address: text (unique)</li>
-                        <li>display_name: text</li>
-                        <li>username: text</li>
-                        <li>profile_pic_url: text</li>
-                        <li>sec_balance: numeric</li>
-                        <li>points: integer</li>
-                        <li>bio: text</li>
-                        <li>x_link/website_link: text</li>
-                        <li>created_at: timestamp</li>
-                      </ul>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-xs mt-2">
-                    <div className="bg-muted/30 p-3 rounded-lg">
-                      <h6 className="font-semibold mb-1">bounty_contributions</h6>
-                      <ul className="list-none pl-2 space-y-1">
-                        <li>id: uuid (PK)</li>
-                        <li>scammer_id: text (FK)</li>
-                        <li>contributor_id: text (FK)</li>
-                        <li>contributor_name: text</li>
-                        <li>amount: numeric</li>
-                        <li>transaction_signature: text</li>
-                        <li>comment: text</li>
-                        <li>created_at: timestamp</li>
-                        <li>transferred_from/to_id: uuid</li>
-                      </ul>
-                    </div>
-                    <div className="bg-muted/30 p-3 rounded-lg">
-                      <h6 className="font-semibold mb-1">user_scammer_interactions</h6>
-                      <ul className="list-none pl-2 space-y-1">
-                        <li>id: uuid (PK)</li>
-                        <li>user_id: text (FK)</li>
-                        <li>scammer_id: text (FK)</li>
-                        <li>liked: boolean</li>
-                        <li>disliked: boolean</li>
-                        <li>last_updated: timestamp</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-
-                <h5 className="font-semibold mb-1">4.3 Blockchain Integration</h5>
-                <div className="pl-4 space-y-2">
-                  <p>
-                    The SEC platform integrates with the Solana blockchain through:
-                  </p>
-                  <ul className="list-disc pl-5 space-y-1">
-                    <li><span className="font-medium">Wallet Adapter:</span> Integration with Phantom wallet through <code>@solana/web3.js</code> library</li>
-                    <li><span className="font-medium">Token Operations:</span> SEC token tracking using <code>@solana/spl-token</code> for badge tier verification</li>
-                    <li><span className="font-medium">Transaction Processing:</span> Validation of bounty contributions on-chain with secure signature verification</li>
-                    <li><span className="font-medium">Error Handling:</span> Robust error management for blockchain operations with retry mechanisms</li>
-                  </ul>
-                </div>
-              </div>
-            </section>
-
-            <section>
-              <h4 className="font-bold flex items-center gap-2 text-base mb-3">
-                <Database className="h-4 w-4 text-icc-gold" />
-                5. Data Management & Services
-              </h4>
-              <div className="pl-4 space-y-4">
-                <h5 className="font-semibold mb-1">5.1 Service Architecture</h5>
-                <div className="pl-4 space-y-2">
-                  <p>
-                    The SEC application employs a service-based architecture to separate concerns:
-                  </p>
-                  <div className="bg-muted/30 p-3 rounded-lg text-xs">
-                    <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-                      <div>
-                        <h6 className="font-semibold">Core Services</h6>
-                        <ul className="list-disc pl-5 space-y-1">
-                          <li>profileService.ts</li>
-                          <li>scammerService.ts</li>
-                          <li>reportService.ts</li>
-                          <li>commentService.ts</li>
-                          <li>bountyService.ts</li>
-                        </ul>
-                      </div>
-                      <div>
-                        <h6 className="font-semibold">Supporting Services</h6>
-                        <ul className="list-disc pl-5 space-y-1">
-                          <li>interactionService.ts</li>
-                          <li>notificationService.ts</li>
-                          <li>analyticsService.ts</li>
-                          <li>loggingService.ts</li>
-                          <li>statisticsService.ts</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-xs">
-                    Each service implements specific functionality with database operations, error handling, and business logic isolation. 
-                    Services communicate with the UI layer through React Query hooks, providing optimistic updates and cache invalidation.
-                  </p>
-                </div>
-
-                <h5 className="font-semibold mb-1">5.2 Database Access Layer</h5>
-                <div className="pl-4 space-y-2">
-                  <p>
-                    The platform uses Supabase for database access, with the following implementation specifics:
-                  </p>
-                  <ul className="list-disc pl-5 space-y-1">
-                    <li><span className="font-medium">Client Configuration:</span> Singleton Supabase client with connection pooling and retry logic</li>
-                    <li><span className="font-medium">Row Level Security:</span> Granular RLS policies enforcing data access controls</li>
-                    <li><span className="font-medium">Database Functions:</span> PostgreSQL functions for complex operations including:
-                      <ul className="list-disc pl-5 pt-1">
-                        <li>increment_scammer_views(scammer_id)</li>
-                        <li>is_duplicate_view(p_scammer_id, p_ip_hash)</li>
-                        <li>update_leaderboard_stats(wallet_address)</li>
+                  <ul className="list-disc pl-5 space-y-2">
+                    <li><span className="font-medium">Point Calculation:</span>
+                      <ul className="list-disc pl-5 mt-1">
+                        <li>Report Creation: Base 100 points per verified report</li>
+                        <li>Report Quality Multiplier: 1.0-2.0x based on detail level</li>
+                        <li>Evidence Bonus: +50 points per verified evidence piece</li>
+                        <li>Community Validation: +10 points per validation</li>
                       </ul>
                     </li>
-                    <li><span className="font-medium">Storage Integration:</span> Secure file storage for profile pictures and evidence uploads</li>
-                  </ul>
-                </div>
-              </div>
-            </section>
-
-            <section>
-              <h4 className="font-bold flex items-center gap-2 text-base mb-3">
-                <Lock className="h-4 w-4 text-icc-gold" />
-                6. Security Implementation
-              </h4>
-              <div className="pl-4 space-y-4">
-                <h5 className="font-semibold mb-1">6.1 Authentication & Authorization</h5>
-                <div className="pl-4 space-y-2">
-                  <p>
-                    The SEC platform implements a wallet-based authentication system with the following components:
-                  </p>
-                  <ul className="list-disc pl-5 space-y-1">
-                    <li><span className="font-medium">Challenge-Response:</span> Secure challenge-response mechanism for wallet verification</li>
-                    <li><span className="font-medium">Message Signing:</span> Cryptographic signing of messages to prove wallet ownership</li>
-                    <li><span className="font-medium">Session Management:</span> Secure session handling with automatic refresh mechanisms</li>
-                    <li><span className="font-medium">Permission Controls:</span> Role-based access control tied to badge tiers</li>
+                    <li><span className="font-medium">Engagement Metrics:</span>
+                      <ul className="list-disc pl-5 mt-1">
+                        <li>Comment quality score: 1-5 points per substantive comment</li>
+                        <li>Like/dislike ratio impact: ±2 points per interaction</li>
+                        <li>Report view count: 0.1 points per unique view</li>
+                        <li>Cross-references: 5 points per valid connection</li>
+                      </ul>
+                    </li>
+                    <li><span className="font-medium">Bounty Impact:</span>
+                      <ul className="list-disc pl-5 mt-1">
+                        <li>Contribution points: 1 point per $SEC contributed</li>
+                        <li>Transfer bonus: 0.5 points per successful transfer</li>
+                        <li>Total bounty raised: 2 points per $SEC on reports</li>
+                      </ul>
+                    </li>
                   </ul>
                 </div>
 
-                <h5 className="font-semibold mb-1">6.2 Data Protection</h5>
+                <h5 className="font-semibold mb-1">3.2 Ranking Categories</h5>
                 <div className="pl-4 space-y-2">
-                  <ul className="list-disc pl-5 space-y-1">
-                    <li><span className="font-medium">Input Validation:</span> Comprehensive validation using Zod schema validation</li>
-                    <li><span className="font-medium">XSS Prevention:</span> Content sanitization for user-generated content</li>
-                    <li><span className="font-medium">Rate Limiting:</span> IP-based rate limiting for sensitive operations</li>
-                    <li><span className="font-medium">Audit Logging:</span> Comprehensive activity tracking for security monitoring</li>
-                  </ul>
-                </div>
-              </div>
-            </section>
-
-            <section>
-              <h4 className="font-bold flex items-center gap-2 text-base mb-3">
-                <Cpu className="h-4 w-4 text-icc-gold" />
-                7. UI Component Architecture
-              </h4>
-              <div className="pl-4 space-y-4">
-                <div className="pl-4 space-y-2">
-                  <p>
-                    The UI is built on a modular component architecture with the following structure:
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs mt-2">
-                    <div className="bg-muted/30 p-3 rounded-lg">
-                      <h6 className="font-semibold mb-1">Core Components</h6>
-                      <ul className="list-disc pl-4 space-y-1">
-                        <li>ScammerCard</li>
-                        <li>ScammerDetail</li>
-                        <li>ProfileView</li>
-                        <li>ReportForm</li>
-                        <li>BountyForm</li>
+                  <ul className="list-disc pl-5 space-y-2">
+                    <li><span className="font-medium">Overall Ranking:</span> Combines all metrics with weighted importance:
+                      <ul className="list-disc pl-5 mt-1">
+                        <li>Report Quality: 40% weight</li>
+                        <li>Community Engagement: 30% weight</li>
+                        <li>Bounty Activity: 30% weight</li>
                       </ul>
-                    </div>
-                    <div className="bg-muted/30 p-3 rounded-lg">
-                      <h6 className="font-semibold mb-1">Layout Components</h6>
-                      <ul className="list-disc pl-4 space-y-1">
-                        <li>Layout</li>
-                        <li>Header</li>
-                        <li>Footer</li>
-                        <li>Hero/CompactHero</li>
-                        <li>Sidebar</li>
+                    </li>
+                    <li><span className="font-medium">Category Rankings:</span>
+                      <ul className="list-disc pl-5 mt-1">
+                        <li>Top Reporters: Based on report count and quality</li>
+                        <li>Top Contributors: Based on bounty amounts</li>
+                        <li>Community Leaders: Based on engagement metrics</li>
                       </ul>
-                    </div>
-                    <div className="bg-muted/30 p-3 rounded-lg">
-                      <h6 className="font-semibold mb-1">Common Components</h6>
-                      <ul className="list-disc pl-4 space-y-1">
-                        <li>Dialog components</li>
-                        <li>Form elements</li>
-                        <li>LoadingSpinner</li>
-                        <li>ErrorBoundary</li>
-                        <li>Notifications</li>
+                    </li>
+                    <li><span className="font-medium">Temporal Rankings:</span>
+                      <ul className="list-disc pl-5 mt-1">
+                        <li>Daily: Reset every 24 hours</li>
+                        <li>Weekly: Rolling 7-day window</li>
+                        <li>Monthly: Calendar month basis</li>
+                        <li>All-time: Cumulative stats</li>
                       </ul>
-                    </div>
-                  </div>
-                  <p className="text-xs mt-2">
-                    Component composition follows atomic design principles, with base UI components from Shadcn/UI extended with application-specific logic.
-                    State is managed through React's Context API for global state and local state hooks for component-specific state.
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            <section>
-              <h4 className="font-bold flex items-center gap-2 text-base mb-3">
-                <GitMerge className="h-4 w-4 text-icc-gold" />
-                8. Performance Optimizations
-              </h4>
-              <div className="pl-4 space-y-4">
-                <div className="pl-4 space-y-2">
-                  <p>
-                    The SEC platform implements the following performance optimization strategies:
-                  </p>
-                  <ul className="list-disc pl-5 space-y-1">
-                    <li><span className="font-medium">Code Splitting:</span> Dynamic imports for route-based code splitting</li>
-                    <li><span className="font-medium">Virtualized Lists:</span> Efficient rendering of large data sets through virtualization</li>
-                    <li><span className="font-medium">Memoization:</span> Strategic use of React.memo and useMemo to prevent unnecessary renders</li>
-                    <li><span className="font-medium">Image Optimization:</span> Responsive images with lazy loading and WebP format</li>
-                    <li><span className="font-medium">Query Caching:</span> Tanstack Query's caching and stale-while-revalidate strategy</li>
-                    <li><span className="font-medium">Database Indexing:</span> Strategic indexes on frequently queried columns</li>
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -371,65 +208,63 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
             <section>
               <h4 className="font-bold flex items-center gap-2 text-base mb-3">
                 <Network className="h-4 w-4 text-icc-gold" />
-                9. API & Integration Specifications
+                4. Most Wanted System
               </h4>
               <div className="pl-4 space-y-4">
-                <h5 className="font-semibold mb-1">9.1 Internal API Design</h5>
+                <h5 className="font-semibold mb-1">4.1 Ranking Algorithm</h5>
                 <div className="pl-4 space-y-2">
                   <p>
-                    The SEC platform uses a RESTful API design with the following endpoints structure:
+                    The Most Wanted list is determined by a complex algorithm that weighs multiple factors:
                   </p>
-                  <div className="bg-muted/30 p-3 rounded-lg text-xs">
-                    <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-                      <div>
-                        <h6 className="font-semibold">/scammers</h6>
-                        <ul className="list-none pl-3 space-y-1">
-                          <li><span className="font-mono text-green-600">GET</span> /scammers</li>
-                          <li><span className="font-mono text-green-600">GET</span> /scammers/{'{id}'}</li>
-                          <li><span className="font-mono text-blue-600">POST</span> /scammers</li>
-                          <li><span className="font-mono text-orange-600">PATCH</span> /scammers/{'{id}'}</li>
-                          <li><span className="font-mono text-red-600">DELETE</span> /scammers/{'{id}'}</li>
-                        </ul>
-                      </div>
-                      <div>
-                        <h6 className="font-semibold">/profiles</h6>
-                        <ul className="list-none pl-3 space-y-1">
-                          <li><span className="font-mono text-green-600">GET</span> /profiles/{'{wallet}'}</li>
-                          <li><span className="font-mono text-blue-600">POST</span> /profiles</li>
-                          <li><span className="font-mono text-orange-600">PATCH</span> /profiles/{'{id}'}</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <h5 className="font-semibold mb-1">9.2 External Integrations</h5>
-                <div className="pl-4 space-y-2">
-                  <p>
-                    The platform interfaces with the following external systems:
-                  </p>
-                  <ul className="list-disc pl-5 space-y-1">
-                    <li><span className="font-medium">Solana RPC:</span> High-availability Solana node for blockchain interactions</li>
-                    <li><span className="font-medium">Webhook System:</span> Extensible webhook architecture for notifications and integrations</li>
-                    <li><span className="font-medium">Data Export API:</span> Structured data export for research and analysis</li>
+                  <ul className="list-disc pl-5 space-y-2">
+                    <li><span className="font-medium">Primary Metrics:</span>
+                      <ul className="list-disc pl-5 mt-1">
+                        <li>Total bounty amount (40% weight)</li>
+                        <li>Number of verified victims (25% weight)</li>
+                        <li>Scam severity score (20% weight)</li>
+                        <li>Activity recency (15% weight)</li>
+                      </ul>
+                    </li>
+                    <li><span className="font-medium">Severity Scoring:</span>
+                      <ul className="list-disc pl-5 mt-1">
+                        <li>Financial impact: 1-100 based on total amount</li>
+                        <li>Victim count multiplier: 1.0-2.0x</li>
+                        <li>Sophistication level: 1-50 points</li>
+                        <li>Cross-border factor: 1.5x multiplier</li>
+                      </ul>
+                    </li>
+                    <li><span className="font-medium">Time Decay:</span>
+                      <ul className="list-disc pl-5 mt-1">
+                        <li>Last activity within 7 days: 1.0x</li>
+                        <li>8-30 days: 0.8x</li>
+                        <li>31-90 days: 0.6x</li>
+                        <li>90+ days: 0.4x</li>
+                      </ul>
+                    </li>
                   </ul>
                 </div>
-              </div>
-            </section>
 
-            <section>
-              <h4 className="font-bold flex items-center gap-2 text-base mb-3">
-                <Globe className="h-4 w-4 text-icc-gold" />
-                10. Future Technical Roadmap
-              </h4>
-              <div className="pl-4 space-y-3">
-                <ul className="list-disc pl-5 space-y-2">
-                  <li><span className="font-medium">Decentralized Governance:</span> Implementation of on-chain DAO voting mechanisms</li>
-                  <li><span className="font-medium">AI-Enhanced Detection:</span> Machine learning models for pattern recognition in scam reports</li>
-                  <li><span className="font-medium">Cross-Chain Monitoring:</span> Expansion to additional blockchain networks beyond Solana</li>
-                  <li><span className="font-medium">Real-Time Alerting:</span> WebSocket-based notification system for immediate threat detection</li>
-                  <li><span className="font-medium">Developer API:</span> Public API for third-party integrations and ecosystem expansion</li>
-                </ul>
+                <h5 className="font-semibold mb-1">4.2 Update Mechanism</h5>
+                <div className="pl-4 space-y-2">
+                  <ul className="list-disc pl-5 space-y-2">
+                    <li><span className="font-medium">Ranking Updates:</span>
+                      <ul className="list-disc pl-5 mt-1">
+                        <li>Real-time bounty amount updates</li>
+                        <li>Hourly recalculation of ranking positions</li>
+                        <li>Daily severity score updates</li>
+                        <li>Weekly comprehensive review</li>
+                      </ul>
+                    </li>
+                    <li><span className="font-medium">Trigger Events:</span>
+                      <ul className="list-disc pl-5 mt-1">
+                        <li>New bounty contributions</li>
+                        <li>Additional victim reports</li>
+                        <li>New evidence submissions</li>
+                        <li>Cross-reference connections</li>
+                      </ul>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </section>
             
