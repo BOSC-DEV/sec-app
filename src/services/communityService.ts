@@ -33,7 +33,7 @@ const convertJsonToSurveyData = (data: Json | null): SurveyData | null => {
       // Validate and ensure proper structure
       return {
         title: String(surveyData.title),
-        poll_number: 'poll_number' in surveyData ? Number(surveyData.poll_number) : undefined,
+        poll_number: typeof surveyData.poll_number !== 'undefined' ? Number(surveyData.poll_number) : undefined,
         options: surveyData.options.map((option: any) => ({
           text: String(option.text || ''),
           votes: Number(option.votes || 0),
