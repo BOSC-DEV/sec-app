@@ -67,7 +67,10 @@ const Index = () => {
             </div>}
 
           <div className="text-center mt-10">
-            <Button asChild className="icc-btn-primary py-6 px-8 dark:text-white dark:hover:text-gray-200">
+            <Button 
+              asChild 
+              className="bg-icc-blue/10 text-icc-blue hover:bg-icc-blue/20 dark:bg-icc-blue-light/20 dark:text-white dark:hover:bg-icc-blue-light/30 py-6 px-8"
+            >
               <Link to="/most-wanted">View All Reports</Link>
             </Button>
           </div>
