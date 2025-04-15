@@ -12,10 +12,13 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { Link } from 'react-router-dom';
+import { Avatar, AvatarImage, AvatarFallback } from 'nextui-org/react';
 
 interface SurveyVoter {
   userId: string;
   badgeTier: string;
+  username?: string;
+  profilePic?: string;
 }
 
 interface SurveyOption {
@@ -157,15 +160,22 @@ const SurveyDisplay: React.FC<SurveyProps> = ({ survey, onVote }) => {
                badge === "Goat" ? "🐐" :
                badge === "Whale" ? "🐳" : "👑"} {badge}
             </div>
-            <div className="pl-2 space-y-1">
+            <div className="pl-2 flex flex-col gap-2">
               {badgeVoters.map(voter => (
                 <Link 
                   key={voter.userId}
-                  to={`/profile/${voter.userId}`}
-                  className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary hover:underline"
+                  to={`/profile/${voter.username || voter.userId}`}
+                  className="flex items-center gap-2 hover:bg-accent/50 rounded-md p-1 transition-colors"
                 >
-                  <UserRound className="h-3 w-3" />
-                  <span>{voter.userId}</span>
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage src={voter.profilePic} alt={voter.username || 'User'} />
+                    <AvatarFallback>
+                      {(voter.username?.[0] || 'U').toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm text-muted-foreground hover:text-primary">
+                    {voter.username || 'Anonymous'}
+                  </span>
                 </Link>
               ))}
             </div>
