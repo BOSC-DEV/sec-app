@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, UserRound } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useProfile } from '@/contexts/ProfileContext';
 import { useBadgeTier } from '@/hooks/useBadgeTier';
 import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { 
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import { Link } from 'react-router-dom';
 
 interface SurveyVoter {
   userId: string;
@@ -125,34 +130,78 @@ const SurveyDisplay: React.FC<SurveyProps> = ({ survey, onVote }) => {
     return badgeCounts;
   };
   
+  const renderVotersList = (voters: SurveyVoter[]) => {
+    const votersByBadge: Record<string, SurveyVoter[]> = {};
+    
+    voters.forEach(voter => {
+      if (!votersByBadge[voter.badgeTier]) {
+        votersByBadge[voter.badgeTier] = [];
+      }
+      votersByBadge[voter.badgeTier].push(voter);
+    });
+    
+    return (
+      <div className="space-y-2">
+        {Object.entries(votersByBadge).map(([badge, badgeVoters]) => (
+          <div key={badge} className="space-y-1">
+            <div className="text-sm font-medium">
+              {badge === "Shrimp" ? "🦐" : 
+               badge === "Frog" ? "🐸" :
+               badge === "Bull" ? "🐂" : 
+               badge === "Lion" ? "🦁" :
+               badge === "King Cobra" ? "🐍" :
+               badge === "Bull Shark" ? "🦈" :
+               badge === "Bald Eagle" ? "🦅" :
+               badge === "Great Ape" ? "🦍" : 
+               badge === "T-Rex" ? "🦖" :
+               badge === "Goat" ? "🐐" :
+               badge === "Whale" ? "🐳" : "👑"} {badge}
+            </div>
+            <div className="pl-2 space-y-1">
+              {badgeVoters.map(voter => (
+                <Link 
+                  key={voter.userId}
+                  to={`/profile/${voter.userId}`}
+                  className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary hover:underline"
+                >
+                  <UserRound className="h-3 w-3" />
+                  <span>{voter.userId}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+  
   const renderBadgeBreakdown = (option: SurveyOption) => {
     const badgeCounts = countVotersByBadge(option);
     
     return (
       <div className="flex flex-wrap gap-1 mt-1">
         {Object.entries(badgeCounts).map(([badge, count]) => (
-          <TooltipProvider key={badge}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge variant="outline" className="text-xs py-0 px-1.5">
-                  {badge === "Shrimp" ? "🦐" : 
-                   badge === "Frog" ? "🐸" :
-                   badge === "Bull" ? "🐂" : 
-                   badge === "Lion" ? "🦁" :
-                   badge === "King Cobra" ? "🐍" :
-                   badge === "Bull Shark" ? "🦈" :
-                   badge === "Bald Eagle" ? "🦅" :
-                   badge === "Great Ape" ? "🦍" : 
-                   badge === "T-Rex" ? "🦖" :
-                   badge === "Goat" ? "🐐" :
-                   badge === "Whale" ? "🐳" : "👑"} {count}
-                </Badge>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{count} {badge}{count !== 1 ? 's' : ''}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <HoverCard key={badge}>
+            <HoverCardTrigger asChild>
+              <Badge variant="outline" className="text-xs py-0 px-1.5 cursor-pointer">
+                {badge === "Shrimp" ? "🦐" : 
+                 badge === "Frog" ? "🐸" :
+                 badge === "Bull" ? "🐂" : 
+                 badge === "Lion" ? "🦁" :
+                 badge === "King Cobra" ? "🐍" :
+                 badge === "Bull Shark" ? "🦈" :
+                 badge === "Bald Eagle" ? "🦅" :
+                 badge === "Great Ape" ? "🦍" : 
+                 badge === "T-Rex" ? "🦖" :
+                 badge === "Goat" ? "🐐" :
+                 badge === "Whale" ? "🐳" : "👑"} {count}
+              </Badge>
+            </HoverCardTrigger>
+            <HoverCardContent className="w-64" align="start">
+              <div className="font-medium mb-2">{badge} Voters</div>
+              {renderVotersList(option.voters.filter(v => v.badgeTier === badge))}
+            </HoverCardContent>
+          </HoverCard>
         ))}
       </div>
     );
