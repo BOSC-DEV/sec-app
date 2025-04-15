@@ -30,13 +30,13 @@ const Hero: React.FC<HeroProps> = ({
           </p>
           
           {showCta && <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
-              <Button asChild variant="gold" className="text-lg py-6 px-8 min-w-[200px] sm:min-w-[240px] font-medium" aria-label="View reports list">
+              <Button asChild variant="gold" className="text-lg py-6 px-8 min-w-[200px] sm:min-w-[240px] font-medium dark:text-black" aria-label="View reports list">
                 <Link to="/most-wanted">
                   <Search className="mr-2 h-5 w-5" />
                   View Reports
                 </Link>
               </Button>
-              <Button asChild variant="gold" className="text-lg py-6 px-8 min-w-[200px] sm:min-w-[240px] font-medium" aria-label="File a report">
+              <Button asChild variant="gold" className="text-lg py-6 px-8 min-w-[200px] sm:min-w-[240px] font-medium dark:text-black" aria-label="File a report">
                 <Link to="/report">
                   <AlertCircle className="mr-2 h-5 w-5" />
                   File a Report
