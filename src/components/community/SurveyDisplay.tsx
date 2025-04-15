@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -34,8 +33,15 @@ interface SurveyProps {
     title: string;
     options: SurveyOption[];
     userVote?: number;
+    survey_data?: SurveyData;
   };
   onVote: (surveyId: string, optionIndex: number) => Promise<boolean>;
+}
+
+interface SurveyData {
+  title: string;
+  poll_number: number;
+  options: SurveyOption[];
 }
 
 const SurveyDisplay: React.FC<SurveyProps> = ({ survey, onVote }) => {
@@ -220,7 +226,7 @@ const SurveyDisplay: React.FC<SurveyProps> = ({ survey, onVote }) => {
   
   return (
     <div className="bg-card border rounded-lg p-4 mt-4">
-      <h3 className="text-lg font-medium mb-4">{survey.title}</h3>
+      <h3 className="text-lg font-medium mb-4">Poll {survey.survey_data?.poll_number || 1}</h3>
       
       <div className="space-y-4">
         {showResults ? (
