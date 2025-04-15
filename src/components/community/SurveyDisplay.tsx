@@ -35,11 +35,12 @@ const SurveyDisplay: React.FC<SurveyProps> = ({ survey, onVote }) => {
   const [selectedOption, setSelectedOption] = useState<number | undefined>(survey.userVote);
   const [isVoting, setIsVoting] = useState(false);
   const badgeInfo = useBadgeTier(profile?.sec_balance || 0);
-  const [showResults, setShowResults] = useState(survey.userVote !== undefined);
+  const [showResults, setShowResults] = useState(Boolean(survey.userVote !== undefined));
   
   // Update state when survey prop changes (e.g., after vote is saved to database)
   useEffect(() => {
     setSelectedOption(survey.userVote);
+    // Only auto-show results if the user has voted
     setShowResults(survey.userVote !== undefined);
   }, [survey.userVote]);
   
@@ -104,6 +105,17 @@ const SurveyDisplay: React.FC<SurveyProps> = ({ survey, onVote }) => {
     }
   };
   
+  const viewResults = () => {
+    setShowResults(true);
+  };
+  
+  const backToVoting = () => {
+    // Only allow going back to voting if the user hasn't cast a vote yet
+    if (survey.userVote === undefined) {
+      setShowResults(false);
+    }
+  };
+  
   const countVotersByBadge = (option: SurveyOption) => {
     // Count voters by badge tier
     const badgeCounts: Record<string, number> = {};
@@ -149,12 +161,11 @@ const SurveyDisplay: React.FC<SurveyProps> = ({ survey, onVote }) => {
       <h3 className="text-lg font-medium mb-4">{survey.title}</h3>
       
       <div className="space-y-4">
-        {survey.options.map((option, index) => {
-          const percentage = totalVotes ? Math.round((option.votes / totalVotes) * 100) : 0;
-          const isSelected = selectedOption === index;
-          const isUserVote = survey.userVote === index;
-          
-          if (showResults) {
+        {showResults ? (
+          survey.options.map((option, index) => {
+            const percentage = totalVotes ? Math.round((option.votes / totalVotes) * 100) : 0;
+            const isUserVote = survey.userVote === index;
+            
             return (
               <div key={index} className={`border rounded-md p-3 ${isUserVote ? 'border-blue-400 bg-blue-50 dark:bg-blue-950/30' : ''}`}>
                 <div className="flex justify-between items-center mb-1">
@@ -173,40 +184,60 @@ const SurveyDisplay: React.FC<SurveyProps> = ({ survey, onVote }) => {
                 </div>
               </div>
             );
-          }
-          
-          return (
-            <Button
-              key={index}
-              variant={isSelected ? "default" : "outline"}
-              className="w-full justify-start h-auto py-3 text-left"
-              onClick={() => handleOptionSelect(index)}
-            >
-              {option.text}
-            </Button>
-          );
-        })}
+          })
+        ) : (
+          survey.options.map((option, index) => {
+            const isSelected = selectedOption === index;
+            
+            return (
+              <Button
+                key={index}
+                variant={isSelected ? "default" : "outline"}
+                className="w-full justify-start h-auto py-3 text-left"
+                onClick={() => handleOptionSelect(index)}
+              >
+                {option.text}
+              </Button>
+            );
+          })
+        )}
       </div>
       
-      {!showResults && (
-        <Button
-          className="w-full mt-4"
-          disabled={selectedOption === undefined || isVoting}
-          onClick={handleSubmitVote}
-        >
-          {isVoting ? "Voting..." : "Submit Vote"}
-        </Button>
-      )}
-      
-      {showResults && survey.userVote === undefined && (
-        <div className="text-center text-muted-foreground text-sm mt-4">
-          You can see the results without voting
+      {!showResults ? (
+        <div className="mt-4 space-y-2">
+          <Button
+            className="w-full"
+            disabled={selectedOption === undefined || isVoting}
+            onClick={handleSubmitVote}
+          >
+            {isVoting ? "Voting..." : "Submit Vote"}
+          </Button>
+          
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={viewResults}
+          >
+            View Results
+          </Button>
+        </div>
+      ) : (
+        <div className="mt-4 space-y-2">
+          {survey.userVote === undefined && (
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={backToVoting}
+            >
+              Back to Voting
+            </Button>
+          )}
+          
+          <div className="text-center text-muted-foreground text-xs">
+            Total: {totalVotes} vote{totalVotes !== 1 ? 's' : ''}
+          </div>
         </div>
       )}
-      
-      <div className="mt-4 text-center text-xs text-muted-foreground">
-        Total: {totalVotes} vote{totalVotes !== 1 ? 's' : ''}
-      </div>
     </div>
   );
 };

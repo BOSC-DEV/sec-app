@@ -87,6 +87,13 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   
   useEffect(() => {
     const loadUserVotes = async () => {
+      try {
+        const storedVotes = JSON.parse(localStorage.getItem('userSurveyVotes') || '{}');
+        setUserSurveyVotes(storedVotes);
+      } catch (error) {
+        console.error("Error reading from localStorage:", error);
+      }
+      
       if (!profile?.wallet_address) {
         setLoadingVotes(false);
         return;
@@ -107,7 +114,11 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         }
         
         console.log("User survey votes loaded:", votes);
-        setUserSurveyVotes(votes);
+        
+        setUserSurveyVotes(prev => ({
+          ...prev,
+          ...votes
+        }));
       } catch (error) {
         console.error("Error loading user votes:", error);
       } finally {
