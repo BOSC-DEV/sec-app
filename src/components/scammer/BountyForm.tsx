@@ -1,5 +1,4 @@
-
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { toast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -11,13 +10,11 @@ import DeveloperWalletDisplay from './DeveloperWalletDisplay';
 import ContributionForm from './ContributionForm';
 import BountyTransferDialog from './BountyTransferDialog';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
-
 interface BountyFormProps {
   scammerId: string;
   scammerName: string;
   developerWalletAddress: string;
 }
-
 const BountyForm: React.FC<BountyFormProps> = ({
   scammerId,
   scammerName,
@@ -31,7 +28,6 @@ const BountyForm: React.FC<BountyFormProps> = ({
   const [contributionAmount, setContributionAmount] = useState('0.00');
   const [bountyComment, setBountyComment] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  
   const addBountyContributionMutation = useMutation({
     mutationFn: (contribution: {
       scammer_id: string;
@@ -43,17 +39,12 @@ const BountyForm: React.FC<BountyFormProps> = ({
       transaction_signature?: string;
     }) => addBountyContribution(contribution),
     onSuccess: () => {
-      // Trigger refetch after a small delay to prevent UI freeze
-      setTimeout(() => {
-        queryClient.invalidateQueries({
-          queryKey: ['bountyContributions', scammerId]
-        });
-        
-        queryClient.invalidateQueries({
-          queryKey: ['scammer', scammerId]
-        });
-      }, 300);
-      
+      queryClient.invalidateQueries({
+        queryKey: ['bountyContributions', scammerId]
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['scammer', scammerId]
+      });
       setContributionAmount('0.00');
       setBountyComment('');
       toast({
@@ -72,8 +63,7 @@ const BountyForm: React.FC<BountyFormProps> = ({
       setIsProcessing(false);
     }
   });
-  
-  const handleAddBounty = useCallback(async () => {
+  const handleAddBounty = async () => {
     // Check if user is logged in
     if (!profile) {
       // Try to connect wallet first
@@ -87,7 +77,6 @@ const BountyForm: React.FC<BountyFormProps> = ({
         return;
       }
     }
-    
     const amount = parseFloat(contributionAmount);
     if (!amount || amount <= 0) {
       toast({
@@ -97,9 +86,7 @@ const BountyForm: React.FC<BountyFormProps> = ({
       });
       return;
     }
-    
     setIsProcessing(true);
-    
     try {
       // Ensure the wallet address is valid
       if (!developerWalletAddress || developerWalletAddress.trim() === '') {
@@ -119,28 +106,23 @@ const BountyForm: React.FC<BountyFormProps> = ({
         type: typeof developerWalletAddress,
         length: developerWalletAddress.length
       });
-      
       const transactionSignature = await sendTransactionToDevWallet(developerWalletAddress, amount);
       if (!transactionSignature) {
         setIsProcessing(false);
         return;
       }
 
-      // Add a small delay before database operation to avoid UI freeze
-      setTimeout(() => {
-        // Only proceed with database operation if transaction was successful
-        console.log("Recording bounty contribution in database");
-        addBountyContributionMutation.mutate({
-          scammer_id: scammerId,
-          amount: amount,
-          comment: bountyComment || undefined,
-          contributor_id: profile.wallet_address,
-          contributor_name: profile.display_name,
-          contributor_profile_pic: profile.profile_pic_url,
-          transaction_signature: transactionSignature
-        });
-      }, 300);
-      
+      // Only proceed with database operation if transaction was successful
+      console.log("Recording bounty contribution in database");
+      addBountyContributionMutation.mutate({
+        scammer_id: scammerId,
+        amount: amount,
+        comment: bountyComment || undefined,
+        contributor_id: profile.wallet_address,
+        contributor_name: profile.display_name,
+        contributor_profile_pic: profile.profile_pic_url,
+        transaction_signature: transactionSignature
+      });
     } catch (error) {
       console.error("Bounty contribution error:", error);
       handleError(error, {
@@ -150,53 +132,32 @@ const BountyForm: React.FC<BountyFormProps> = ({
       });
       setIsProcessing(false);
     }
-  }, [profile, contributionAmount, bountyComment, developerWalletAddress, scammerId, addBountyContributionMutation, connectWallet]);
-  
-  const handleTransferComplete = useCallback(() => {
-    // Refresh both queries with a delay to prevent UI freeze
-    setTimeout(() => {
-      queryClient.invalidateQueries({
-        queryKey: ['bountyContributions', scammerId]
-      });
-      queryClient.invalidateQueries({
-        queryKey: ['scammer', scammerId]
-      });
-    }, 300);
-  }, [queryClient, scammerId]);
-  
-  return (
-    <div id="bounty-section" className="bg-icc-gold-light/20 border border-icc-gold rounded-lg p-5 mt-4">
+  };
+  const handleTransferComplete = () => {
+    // Refresh both queries to show updated data
+    queryClient.invalidateQueries({
+      queryKey: ['bountyContributions', scammerId]
+    });
+    queryClient.invalidateQueries({
+      queryKey: ['scammer', scammerId]
+    });
+  };
+  return <div id="bounty-section" className="bg-icc-gold-light/20 border border-icc-gold rounded-lg p-5 mt-4">
       <h4 className="font-bold text-xl text-icc-blue mb-2">Contribute to Bounty</h4>
+      
       
       <DeveloperWalletDisplay developerWalletAddress={developerWalletAddress} />
       
-      <ContributionForm 
-        contributionAmount={contributionAmount} 
-        setContributionAmount={setContributionAmount} 
-        bountyComment={bountyComment} 
-        setBountyComment={setBountyComment} 
-        isProcessing={isProcessing} 
-        addBountyContributionMutation={addBountyContributionMutation} 
-        handleAddBounty={handleAddBounty} 
-        profile={profile} 
-      />
+      <ContributionForm contributionAmount={contributionAmount} setContributionAmount={setContributionAmount} bountyComment={bountyComment} setBountyComment={setBountyComment} isProcessing={isProcessing} addBountyContributionMutation={addBountyContributionMutation} handleAddBounty={handleAddBounty} profile={profile} />
       
-      {profile && (
-        <>
+      {profile && <>
           <Separator className="my-4" />
           <div className="text-center text-sm text-icc-gray mb-3">
             Or transfer from an existing contribution
           </div>
           
-          <BountyTransferDialog 
-            scammerId={scammerId} 
-            scammerName={scammerName} 
-            onTransferComplete={handleTransferComplete} 
-          />
-        </>
-      )}
-    </div>
-  );
+          <BountyTransferDialog scammerId={scammerId} scammerName={scammerName} onTransferComplete={handleTransferComplete} />
+        </>}
+    </div>;
 };
-
 export default BountyForm;

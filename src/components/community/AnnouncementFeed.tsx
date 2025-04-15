@@ -50,7 +50,6 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
   
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editContent, setEditContent] = useState('');
@@ -191,7 +190,6 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
     if (!editingAnnouncementId || !isAdmin) return;
     
     try {
-      setIsSubmittingEdit(true);
       const updated = await editAnnouncement(editingAnnouncementId, editContent);
       if (updated) {
         toast({
@@ -199,12 +197,8 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
           description: "The announcement has been updated successfully",
           variant: "default",
         });
-        
         setEditDialogOpen(false);
-        setTimeout(() => {
-          refetch();
-          setIsSubmittingEdit(false);
-        }, 300);
+        refetch();
       } else {
         throw new Error("Failed to update announcement");
       }
@@ -215,7 +209,6 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         description: "Failed to update announcement. Please try again.",
         variant: "destructive",
       });
-      setIsSubmittingEdit(false);
     }
   };
   
@@ -440,11 +433,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         </div>
       )}
       
-      <Dialog open={editDialogOpen} onOpenChange={(open) => {
-        if (!isSubmittingEdit || !open) {
-          setEditDialogOpen(open);
-        }
-      }}>
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="sm:max-w-[700px]">
           <DialogHeader>
             <DialogTitle>Edit Announcement</DialogTitle>
@@ -459,16 +448,10 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
             <Button 
               variant="outline" 
               onClick={() => setEditDialogOpen(false)}
-              disabled={isSubmittingEdit}
             >
               Cancel
             </Button>
-            <Button 
-              onClick={handleEditAnnouncement}
-              disabled={isSubmittingEdit}
-            >
-              {isSubmittingEdit ? "Saving..." : "Save Changes"}
-            </Button>
+            <Button onClick={handleEditAnnouncement}>Save Changes</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
