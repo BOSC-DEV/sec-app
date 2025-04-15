@@ -1,11 +1,12 @@
 
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, Circle } from 'lucide-react';
 import { searchScammers } from '@/services/scammerSearchService';
 import type { Scammer } from '@/types/dataTypes';
 import { toast } from '@/hooks/use-toast';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { CircleIcon } from 'lucide-react';
 
 interface ScammerSearchDropdownProps {
   searchTerm: string;
@@ -32,7 +33,6 @@ const ScammerSearchDropdown: React.FC<ScammerSearchDropdownProps> = ({
 
   if (searchTerm.length < 2) return null;
 
-  // A simpler rendering approach to avoid any potential issues with the Command component
   return (
     <div className="rounded-lg border shadow-md mt-1 bg-background">
       <div className="flex items-center border-b px-3 py-2">
@@ -58,7 +58,15 @@ const ScammerSearchDropdown: React.FC<ScammerSearchDropdownProps> = ({
                   className="flex items-start gap-2 p-3 hover:bg-accent rounded-sm cursor-pointer"
                   onClick={() => handleSelect(scammer)}
                 >
-                  <AlertCircle className="h-4 w-4 mt-1 flex-shrink-0 text-yellow-500" />
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage 
+                      src={scammer.photo_url || '/placeholder.svg'} 
+                      alt={`${scammer.name}'s profile`} 
+                    />
+                    <AvatarFallback>
+                      <CircleIcon className="h-6 w-6 text-muted-foreground" />
+                    </AvatarFallback>
+                  </Avatar>
                   <div className="flex flex-col">
                     <div className="font-medium">{scammer.name}</div>
                     <div className="text-xs text-muted-foreground">
