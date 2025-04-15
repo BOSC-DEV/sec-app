@@ -13,13 +13,15 @@ const CompactHero: React.FC<CompactHeroProps> = ({
   return (
     <div className="relative bg-[#1A1F2C] text-white">
       <div className="absolute inset-0 bg-[url('/images/cyber-pattern.png')] opacity-10"></div>
-      <div className="icc-container py-8 relative z-10">
+      <div className="icc-container py-16 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-3xl md:text-4xl font-serif font-bold text-white mb-3">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white mb-6">
             {title}
           </h1>
           {subtitle && (
-            <p className="text-white/80">{subtitle.replace(/\.$/, '')}</p>
+            <p className="text-xl md:text-2xl text-gray-100 mb-8 max-w-2xl mx-auto">
+              {subtitle.replace(/\.$/, '')}
+            </p>
           )}
         </div>
       </div>

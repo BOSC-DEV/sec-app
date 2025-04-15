@@ -119,7 +119,7 @@ const LeaderboardPage = () => {
     <div className="min-h-screen bg-white">
       <div className="bg-[#1A1F2C] text-white py-16">
         <div className="text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Leaderboard</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">Leaderboard</h1>
           <p className="text-lg text-gray-300">Top hunters tracking and reporting cryptocurrency scammers</p>
         </div>
       </div>
