@@ -143,12 +143,17 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
     if (!searchQuery.trim()) return announcements;
     
     const query = searchQuery.toLowerCase();
-    return announcements.filter(announcement => 
-      announcement.content.toLowerCase().includes(query) || 
-      announcement.author_name.toLowerCase().includes(query) ||
-      (announcement.author_username && announcement.author_username.toLowerCase().includes(query)) ||
-      (announcement.survey_data?.title.toLowerCase().includes(query))
-    );
+    return announcements.filter(announcement => {
+      const pollText = announcement.survey_data 
+        ? `poll ${announcement.survey_data.poll_number}`
+        : '';
+        
+      return announcement.content.toLowerCase().includes(query) || 
+        announcement.author_name.toLowerCase().includes(query) ||
+        (announcement.author_username && announcement.author_username.toLowerCase().includes(query)) ||
+        (announcement.survey_data?.title.toLowerCase().includes(query)) ||
+        pollText.toLowerCase().includes(query);
+    });
   }, [searchQuery, announcements]);
   
   useEffect(() => {
