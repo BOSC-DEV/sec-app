@@ -7,6 +7,7 @@ import { useProfile } from '@/contexts/ProfileContext';
 import { useBadgeTier } from '@/hooks/useBadgeTier';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Gorilla } from 'lucide-react';
 
 interface SurveyVoter {
   userId: string;
