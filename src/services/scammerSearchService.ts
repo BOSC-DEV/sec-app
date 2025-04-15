@@ -19,6 +19,7 @@ export const searchScammers = async (searchTerm: string): Promise<Scammer[]> => 
       return [];
     }
 
+    // Ensure we always return an array, even if data is null or undefined
     return data || [];
   } catch (error) {
     console.error('Exception searching scammers:', error);
