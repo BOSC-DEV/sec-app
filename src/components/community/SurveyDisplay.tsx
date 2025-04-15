@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -12,7 +13,7 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { Link } from 'react-router-dom';
-import { Avatar, AvatarImage, AvatarFallback } from 'nextui-org/react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 interface SurveyVoter {
   userId: string;
