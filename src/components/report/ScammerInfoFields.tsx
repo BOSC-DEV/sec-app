@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -6,6 +5,10 @@ import { Textarea } from '@/components/ui/textarea';
 import DynamicFieldArray from './DynamicFieldArray';
 import ScammerPhotoUpload from './ScammerPhotoUpload';
 import { Separator } from '@/components/ui/separator';
+import ScammerSearchDropdown from './ScammerSearchDropdown';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { useNavigate } from 'react-router-dom';
+import { Scammer } from '@/types/dataTypes';
 
 interface ScammerInfoFieldsProps {
   form: any;
@@ -22,20 +25,32 @@ const ScammerInfoFields = ({
   photoPreview,
   setPhotoPreview
 }: ScammerInfoFieldsProps) => {
-  const { control } = form;
-  const { errors } = form.formState;
+  const { control, watch } = form;
+  const navigate = useNavigate();
+  const scammerName = watch('name');
+  const debouncedName = useDebouncedValue(scammerName, 300);
   
+  const handleScammerSelect = (scammer: Scammer) => {
+    navigate(`/scammer/${scammer.id}`);
+  };
+
   return (
     <>
       <FormField
         control={control}
         name="name"
         render={({ field }) => (
-          <FormItem>
+          <FormItem className="relative">
             <FormLabel>Scammer's Name*</FormLabel>
             <FormControl>
               <Input placeholder="Enter the scammer's name" {...field} />
             </FormControl>
+            {scammerName && (
+              <ScammerSearchDropdown
+                searchTerm={debouncedName}
+                onScammerSelect={handleScammerSelect}
+              />
+            )}
             <FormMessage />
           </FormItem>
         )}
@@ -62,7 +77,6 @@ const ScammerInfoFields = ({
         )}
       />
       
-      {/* Photo upload section after description */}
       <div className="my-4">
         <FormLabel>Scammer's Photo</FormLabel>
         <ScammerPhotoUpload 
@@ -77,12 +91,11 @@ const ScammerInfoFields = ({
       
       <Separator className="my-6" />
       
-      {/* Dynamic form arrays */}
       <DynamicFieldArray 
         name="wallet_addresses" 
         label="Wallet Addresses" 
         control={control} 
-        errors={errors} 
+        errors={form.formState.errors} 
         setValue={form.setValue} 
       />
       
@@ -90,7 +103,7 @@ const ScammerInfoFields = ({
         name="aliases" 
         label="Known Aliases" 
         control={control} 
-        errors={errors} 
+        errors={form.formState.errors} 
         setValue={form.setValue} 
       />
       
@@ -98,7 +111,7 @@ const ScammerInfoFields = ({
         name="links" 
         label="Related Links" 
         control={control} 
-        errors={errors} 
+        errors={form.formState.errors} 
         setValue={form.setValue} 
       />
       
@@ -106,11 +119,10 @@ const ScammerInfoFields = ({
         name="accomplices" 
         label="Known Accomplices" 
         control={control} 
-        errors={errors} 
+        errors={form.formState.errors} 
         setValue={form.setValue} 
       />
       
-      {/* Official Response field */}
       <FormField
         control={control}
         name="official_response"
