@@ -150,10 +150,18 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
     return announcements.filter(announcement => {
       if (announcement.survey_data) {
         if (pollNumberMatch && pollNumberMatch[1]) {
-          return announcement.survey_data.poll_number === parseInt(pollNumberMatch[1]);
+          const searchedPollNumber = parseInt(pollNumberMatch[1], 10);
+          return announcement.survey_data.poll_number === searchedPollNumber;
         }
+        
         if (justNumberMatch) {
-          return announcement.survey_data.poll_number === parseInt(query);
+          const searchedPollNumber = parseInt(query, 10);
+          return announcement.survey_data.poll_number === searchedPollNumber;
+        }
+        
+        const pollNumberString = `poll ${announcement.survey_data.poll_number}`;
+        if (query === pollNumberString) {
+          return true;
         }
       }
       
