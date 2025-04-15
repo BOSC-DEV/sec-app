@@ -13,6 +13,7 @@ import BadgeTiersPage from '@/components/profile/BadgeTiersPage';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
+
 const CommunityPage = () => {
   const {
     profile,
@@ -21,6 +22,7 @@ const CommunityPage = () => {
   const [activeTab, setActiveTab] = useState("announcements");
   const [splitScreen, setSplitScreen] = useState(true);
   const isMobile = useIsMobile();
+
   useEffect(() => {
     if (!isConnected) {
       toast({
@@ -30,20 +32,24 @@ const CommunityPage = () => {
       });
     }
   }, [isConnected]);
+
   useEffect(() => {
     if (isMobile) {
       setSplitScreen(false);
     }
   }, [isMobile]);
+
   const toggleSplitScreen = () => {
     setSplitScreen(!splitScreen);
   };
+
   const handleBadgeButtonClick = () => {
     setActiveTab("badges");
     if (splitScreen) {
       setSplitScreen(false);
     }
   };
+
   return <>
       <SEO title="Community | Scams & E-crimes Commission" description="Join the community to discuss and stay updated on the latest scams and fraud prevention." />
       
@@ -136,4 +142,5 @@ const CommunityPage = () => {
       </div>
     </>;
 };
+
 export default CommunityPage;
