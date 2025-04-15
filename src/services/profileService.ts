@@ -1,195 +1,84 @@
-import { supabase } from '@/integrations/supabase/client';
-import { Profile } from '@/types/dataTypes';
-import { handleError, ErrorSeverity } from "@/utils/errorHandling";
-import { fileUpload } from "@/utils/fileUpload";
 
-// Generate a sequential ID for a new scammer
-export const generateScammerId = async (): Promise<string> => {
+import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
+import { getConnection } from '@/utils/phantomWallet';
+
+// SEC token mint address
+const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump');
+
+// Extend existing saveProfile function to fetch and update SEC balance
+export const saveProfile = async (profile: Profile): Promise<Profile | null> => {
   try {
-    // Generate a unique ID based on timestamp to avoid collisions
-    const timestamp = Date.now();
-    const randomSuffix = Math.floor(Math.random() * 1000);
-    return `scammer-${timestamp}-${randomSuffix}`;
-  } catch (e) {
-    console.error('Error generating scammer ID:', e);
-    // Fallback to a timestamp-based ID if any error occurs
-    const timestamp = Date.now();
-    const randomSuffix = Math.floor(Math.random() * 1000);
-    return `scammer-${timestamp}-${randomSuffix}`;
-  }
-};
+    let updatedProfile = { ...profile };
 
-// Profile Service
-export const getProfiles = async (): Promise<Profile[]> => {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*');
-  
-  if (error) {
-    console.error('Error fetching profiles:', error);
-    throw error;
-  }
-  
-  return data || [];
-};
+    // If wallet address is present, fetch SEC balance
+    if (profile.wallet_address) {
+      try {
+        const connection = getConnection();
+        const publicKey = new PublicKey(profile.wallet_address);
 
-export const getProfileByWallet = async (walletAddress: string): Promise<Profile | null> => {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('wallet_address', walletAddress)
-    .maybeSingle();
-  
-  if (error) {
-    console.error('Error fetching profile by wallet:', error);
-    throw error;
-  }
-  
-  return data;
-};
+        // Get the associated token account address
+        const tokenAccountAddress = await getAssociatedTokenAddress(SEC_TOKEN_MINT, publicKey);
+        
+        try {
+          // Get the token account info
+          const tokenAccount = await getAccount(connection, tokenAccountAddress);
 
-/**
- * Get profile by username
- */
-export const getProfileByUsername = async (username: string): Promise<Profile | null> => {
-  try {
-    console.log(`Fetching profile with username: ${username}`);
-    
+          // Convert amount (BigInt) to human-readable format with 6 decimals
+          const secBalance = Number(tokenAccount.amount) / Math.pow(10, 6);
+          
+          // Update the profile with SEC balance
+          updatedProfile.sec_balance = secBalance;
+        } catch (error) {
+          // Token account might not exist yet or zero balance
+          console.log('Token account not found, setting balance to 0');
+          updatedProfile.sec_balance = 0;
+        }
+      } catch (walletError) {
+        console.error('Error fetching SEC balance:', walletError);
+        updatedProfile.sec_balance = 0;
+      }
+    }
+
+    // Call the existing upsert function in Supabase
     const { data, error } = await supabase
       .from('profiles')
-      .select('*')
-      .eq('username', username)
-      .maybeSingle();
-      
-    if (error) {
-      console.error('Error fetching profile by username:', error);
-      throw error;
-    }
+      .upsert({
+        ...updatedProfile,
+        id: profile.id,
+        wallet_address: profile.wallet_address
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
     
     return data;
   } catch (error) {
-    handleError(error, {
-      fallbackMessage: `Failed to fetch profile with username: ${username}`,
-      severity: ErrorSeverity.LOW,
-      context: "GET_PROFILE_BY_USERNAME"
-    });
+    console.error('Error saving profile with SEC balance:', error);
     return null;
   }
 };
 
-/**
- * Get profiles by display name
- * This handles the case where multiple profiles might have the same display name
- */
-export const getProfilesByDisplayName = async (displayName: string) => {
+// Modify getProfileByWallet to use the same balance fetching logic
+export const getProfileByWallet = async (walletAddress: string): Promise<Profile | null> => {
   try {
-    console.log(`Fetching profiles with display name: ${displayName}`);
-    
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('display_name', displayName);
-      
-    if (error) {
-      console.error('Error fetching profiles by display name:', error);
-      throw error;
-    }
-    
-    return data || [];
-  } catch (error) {
-    handleError(error, {
-      fallbackMessage: `Failed to fetch profiles with display name: ${displayName}`,
-      severity: ErrorSeverity.LOW,
-      context: "GET_PROFILES_BY_DISPLAY_NAME"
-    });
-    return [];
-  }
-};
+      .eq('wallet_address', walletAddress)
+      .single();
 
-/**
- * Save a profile to the database
- */
-export const saveProfile = async (profile: Profile): Promise<Profile | null> => {
-  try {
-    // Check if profile exists first
-    const { data: existingProfile, error: fetchError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('wallet_address', profile.wallet_address)
-      .maybeSingle();
-    
-    if (fetchError) {
-      console.error('Error checking for existing profile:', fetchError);
-      throw fetchError;
-    }
-    
-    let result;
-    
-    if (existingProfile) {
-      // Update existing profile
-      const { data, error } = await supabase
-        .from('profiles')
-        .update(profile)
-        .eq('wallet_address', profile.wallet_address)
-        .select()
-        .maybeSingle();
-      
-      if (error) {
-        console.error('Error updating profile:', error);
-        throw error;
-      }
-      
-      result = data;
-    } else {
-      // Insert new profile
-      const { data, error } = await supabase
-        .from('profiles')
-        .insert(profile)
-        .select()
-        .maybeSingle();
-      
-      if (error) {
-        console.error('Error creating new profile:', error);
-        throw error;
-      }
-      
-      result = data;
-    }
-    
-    return result;
-  } catch (error) {
-    handleError(error, {
-      fallbackMessage: 'Failed to save profile',
-      severity: ErrorSeverity.MEDIUM,
-      context: "SAVE_PROFILE"
-    });
-    return null;
-  }
-};
+    if (error) throw error;
 
-/**
- * Upload a profile picture and return the public URL
- */
-export const uploadProfilePicture = async (walletAddress: string, file: File): Promise<string | null> => {
-  try {
-    const folderPath = `profile-pics/${walletAddress}`;
-    const fileName = `profile-${Date.now()}.${file.name.split('.').pop()}`;
-    
-    // Use the fileUpload utility which now uses the correct 'uploads' bucket
-    const publicUrl = await fileUpload.uploadFile(file, folderPath, fileName);
-    
-    if (!publicUrl) {
-      throw new Error('Failed to get public URL for uploaded file');
+    // If profile exists, ensure SEC balance is up to date
+    if (data) {
+      return await saveProfile(data);
     }
-    
-    console.log('Profile picture uploaded successfully:', publicUrl);
-    return publicUrl;
+
+    return data;
   } catch (error) {
-    handleError(error, {
-      fallbackMessage: 'Failed to upload profile picture',
-      severity: ErrorSeverity.MEDIUM,
-      context: "UPLOAD_PROFILE_PICTURE"
-    });
+    console.error('Error fetching profile by wallet:', error);
     return null;
   }
 };

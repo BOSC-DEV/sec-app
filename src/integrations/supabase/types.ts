@@ -417,6 +417,7 @@ export type Database = {
           id: string
           points: number | null
           profile_pic_url: string | null
+          sec_balance: number | null
           username: string | null
           wallet_address: string
           website_link: string | null
@@ -429,6 +430,7 @@ export type Database = {
           id: string
           points?: number | null
           profile_pic_url?: string | null
+          sec_balance?: number | null
           username?: string | null
           wallet_address: string
           website_link?: string | null
@@ -441,6 +443,7 @@ export type Database = {
           id?: string
           points?: number | null
           profile_pic_url?: string | null
+          sec_balance?: number | null
           username?: string | null
           wallet_address?: string
           website_link?: string | null
