@@ -2,6 +2,7 @@
 export enum BadgeTier {
   'Shrimp' = 'Shrimp',
   'Frog' = 'Frog',
+  'Bull' = 'Bull',
   'Lion' = 'Lion',
   'King Cobra' = 'King Cobra',
   'Bull Shark' = 'Bull Shark',
@@ -33,6 +34,7 @@ export interface BadgeInfo {
 export const BADGE_TIERS: { [key in BadgeTier]: { minPercent: number, color: string, icon: string } } = {
   [BadgeTier.Shrimp]: { minPercent: 0.0001, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦐' },
   [BadgeTier.Frog]: { minPercent: 0.01, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🐸' },
+  [BadgeTier.Bull]: { minPercent: 0.02, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🐂' },
   [BadgeTier.Lion]: { minPercent: 0.04, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦁' },
   [BadgeTier["King Cobra"]]: { minPercent: 0.06, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🐍' },
   [BadgeTier["Bull Shark"]]: { minPercent: 0.1, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦈' },
