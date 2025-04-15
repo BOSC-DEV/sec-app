@@ -10,8 +10,10 @@ import { useQuery } from '@tanstack/react-query';
 import { formatNumber } from '@/lib/utils';
 import DisclaimerDialog from '@/components/common/DisclaimerDialog';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
+
 const Index = () => {
   const [disclaimerOpen, setDisclaimerOpen] = useState(false);
+
   const {
     data: topScammers = [],
     isLoading: isLoadingScammers,
@@ -20,6 +22,7 @@ const Index = () => {
     queryKey: ['topScammers'],
     queryFn: () => getTopScammers(3)
   });
+
   const {
     data: statistics = {
       totalBounty: 0,
@@ -33,12 +36,15 @@ const Index = () => {
     queryKey: ['statistics'],
     queryFn: getStatistics
   });
+
   if (scammersError) {
     console.error('Failed to load top scammers', scammersError);
   }
+
   if (statsError) {
     console.error('Failed to load statistics', statsError);
   }
+
   return <div>
       <Hero />
 
@@ -125,7 +131,7 @@ const Index = () => {
         </div>
       </section>
 
-      <section className="icc-section bg-slate-800">
+      <section className="icc-section bg-white dark:bg-gray-900">
         <div className="icc-container">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {isLoadingStats ? <>
@@ -160,4 +166,5 @@ const Index = () => {
       <DisclaimerDialog open={disclaimerOpen} onOpenChange={setDisclaimerOpen} />
     </div>;
 };
+
 export default Index;

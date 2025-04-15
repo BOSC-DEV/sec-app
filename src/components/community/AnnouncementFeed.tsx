@@ -505,10 +505,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         <Separator />
         
         <CardContent className="py-4">
-          <div 
-            className="prose prose-sm max-w-none dark:prose-invert dark:text-white text-black" 
-            dangerouslySetInnerHTML={{ __html: announcement.content }} 
-          />
+          <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: announcement.content }} />
           
           {surveyData && (
             <SurveyDisplay 
