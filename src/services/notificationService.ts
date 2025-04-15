@@ -2,7 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Notification, NotificationType, EntityType } from '@/types/dataTypes';
 import { handleError } from '@/utils/errorHandling';
 
-// Get notifications for the current user
+// Get notifications for the current user with limit
 export const getUserNotifications = async (userId: string): Promise<Notification[]> => {
   try {
     console.log("Fetching notifications for user:", userId);
@@ -12,7 +12,7 @@ export const getUserNotifications = async (userId: string): Promise<Notification
       .select('*')
       .eq('recipient_id', userId)
       .order('created_at', { ascending: false })
-      .limit(50);
+      .limit(100);
       
     if (error) {
       console.error("Error fetching notifications:", error);
@@ -93,7 +93,7 @@ export const markAllNotificationsAsRead = async (userId: string): Promise<boolea
   }
 };
 
-// Create notification
+// Create notification with cleanup
 export const createNotification = async (notification: Omit<Notification, 'id' | 'created_at'>): Promise<Notification | null> => {
   try {
     // Don't notify if the actor is the same as the recipient
@@ -103,7 +103,31 @@ export const createNotification = async (notification: Omit<Notification, 'id' |
     }
     
     console.log("Creating notification:", notification);
+
+    // First, count existing notifications
+    const { count } = await supabase
+      .from('notifications')
+      .select('*', { count: 'exact', head: true })
+      .eq('recipient_id', notification.recipient_id);
+
+    // If we already have 100 notifications, delete the oldest one
+    if (count && count >= 100) {
+      const { data: oldestNotifications } = await supabase
+        .from('notifications')
+        .select('id')
+        .eq('recipient_id', notification.recipient_id)
+        .order('created_at', { ascending: true })
+        .limit(1);
+
+      if (oldestNotifications && oldestNotifications.length > 0) {
+        await supabase
+          .from('notifications')
+          .delete()
+          .eq('id', oldestNotifications[0].id);
+      }
+    }
     
+    // Create the new notification
     const { data, error } = await supabase
       .from('notifications')
       .insert({

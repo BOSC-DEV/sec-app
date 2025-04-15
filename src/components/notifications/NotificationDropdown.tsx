@@ -95,10 +95,10 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="sm:max-w-md w-[90vw]">
         <SheetHeader className="pb-4">
-          <SheetTitle className="flex justify-between items-center">
+          <SheetTitle className="flex justify-between items-center space-x-4">
             <div>Notifications</div>
             {notifications.some(n => !n.is_read) && (
-              <Button variant="ghost" size="sm" onClick={markAllAsRead} className="flex items-center gap-1">
+              <Button variant="ghost" size="sm" onClick={markAllAsRead} className="flex items-center gap-2">
                 <CheckCheck className="h-4 w-4" />
                 <span>Mark all as read</span>
               </Button>
