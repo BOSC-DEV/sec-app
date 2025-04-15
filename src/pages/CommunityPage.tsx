@@ -7,17 +7,14 @@ import AnnouncementFeed from '@/components/community/AnnouncementFeed';
 import LiveChat from '@/components/community/LiveChat';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { LayoutPanelLeft, Rows, Medal, Megaphone, MessageSquare } from 'lucide-react';
+import { LayoutPanelLeft, Rows, Medal, Megaphone, MessageSquare, LandmarkIcon } from 'lucide-react';
 import BadgeTiersPage from '@/components/profile/BadgeTiersPage';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const CommunityPage = () => {
-  const {
-    profile,
-    isConnected
-  } = useProfile();
+  const { profile, isConnected } = useProfile();
   const [activeTab, setActiveTab] = useState("announcements");
   const [splitScreen, setSplitScreen] = useState(true);
   const isMobile = useIsMobile();
@@ -60,7 +57,6 @@ const CommunityPage = () => {
               </div>
             </div>
             
-            
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="h-[600px] flex flex-col">
                 <Card className="flex-1 overflow-hidden">
@@ -70,13 +66,12 @@ const CommunityPage = () => {
                   <CardContent className="p-0 h-full">
                     <ScrollArea className="h-[520px]">
                       <div className="p-4">
-                        <AnnouncementFeed useCarousel={false} />
+                        <AnnouncementFeed useCarousel={false} showSurveysOnly={false} />
                       </div>
                     </ScrollArea>
                   </CardContent>
                 </Card>
               </div>
-              
               
               <div className="h-[600px] flex flex-col">
                 <LiveChat />
@@ -89,6 +84,12 @@ const CommunityPage = () => {
                   {isMobile ? <Megaphone className="h-5 w-5" /> : <>
                       <Megaphone className="h-4 w-4 mr-2" />
                       Announcements
+                    </>}
+                </TabsTrigger>
+                <TabsTrigger value="governance" className="flex-1">
+                  {isMobile ? <LandmarkIcon className="h-5 w-5" /> : <>
+                      <LandmarkIcon className="h-4 w-4 mr-2" />
+                      Governance
                     </>}
                 </TabsTrigger>
                 <TabsTrigger value="chat" className="flex-1">
@@ -111,18 +112,19 @@ const CommunityPage = () => {
                 </Button>}
             </div>
             
-            
             <TabsContent value="announcements" className="mt-0">
-              <AnnouncementFeed useCarousel={false} />
+              <AnnouncementFeed useCarousel={false} showSurveysOnly={false} />
             </TabsContent>
-            
+
+            <TabsContent value="governance" className="mt-0">
+              <AnnouncementFeed useCarousel={false} showSurveysOnly={true} />
+            </TabsContent>
             
             <TabsContent value="chat" className="mt-0">
               <div className="h-[600px]">
                 <LiveChat />
               </div>
             </TabsContent>
-            
             
             <TabsContent value="badges" className="mt-0">
               <BadgeTiersPage />

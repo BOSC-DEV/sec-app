@@ -47,9 +47,10 @@ const ADMIN_USERNAMES = ['sec', 'thesec'];
 
 interface AnnouncementFeedProps {
   useCarousel?: boolean;
+  showSurveysOnly?: boolean;
 }
 
-const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false }) => {
+const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false, showSurveysOnly = false }) => {
   const { profile, isConnected } = useProfile();
   const [newAnnouncement, setNewAnnouncement] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -140,14 +141,20 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   }, [announcements, profile?.wallet_address]);
   
   const filteredAnnouncements = React.useMemo(() => {
-    if (!searchQuery.trim()) return announcements;
+    let filtered = announcements;
+    
+    if (showSurveysOnly) {
+      filtered = filtered.filter(announcement => announcement.survey_data);
+    }
+    
+    if (!searchQuery.trim()) return filtered;
     
     const query = searchQuery.toLowerCase().trim();
     
     const pollPattern = /^(?:poll\s*)?(\d+)$/i;
     const match = query.match(pollPattern);
     
-    return announcements.filter(announcement => {
+    return filtered.filter(announcement => {
       if (announcement.survey_data && match) {
         const searchedPollNumber = parseInt(match[1], 10);
         return announcement.survey_data.poll_number === searchedPollNumber;
@@ -160,7 +167,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         (announcement.survey_data?.title.toLowerCase().includes(query))
       );
     });
-  }, [searchQuery, announcements]);
+  }, [searchQuery, announcements, showSurveysOnly]);
   
   useEffect(() => {
     if (currentIndex >= filteredAnnouncements.length && filteredAnnouncements.length > 0) {
