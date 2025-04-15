@@ -1,4 +1,3 @@
-
 // Environment detection and utilities
 
 /**
@@ -57,7 +56,8 @@ export const featureFlags = {
   enableChatArchiving: true,
   enableBountySystem: true,
   enableNotifications: true, // Explicitly enable notifications
-  enableDarkMode: false // Explicitly disable dark mode in all environments
+  enableDarkMode: false,
+  darkModeEnabled: false
 };
 
 /**
@@ -76,7 +76,8 @@ export const getConfig = () => {
     analyticsEnabled: true,
     environment: Environment.PRODUCTION,
     notificationsEnabled: true, // Explicitly enable notifications in config
-    darkModeEnabled: false // Explicitly disable dark mode in config
+    darkModeEnabled: false,
+    theme: 'light' as const
   };
 
   return commonConfig;
