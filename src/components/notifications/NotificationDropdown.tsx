@@ -1,5 +1,5 @@
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useProfile } from '@/contexts/ProfileContext';
 import { getUserNotifications, markNotificationAsRead, markAllNotificationsAsRead } from '@/services/notificationService';
 import { Notification, EntityType } from '@/types/dataTypes';
@@ -23,6 +23,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
 }) => {
   const { profile } = useProfile();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   
   const { data: notifications = [], refetch } = useQuery({
     queryKey: ['notifications', profile?.wallet_address],
@@ -31,14 +32,14 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   });
   
   const refetchUnreadCount = () => {
-    refetch();
+    queryClient.invalidateQueries({ queryKey: ['notifications-unread-count', profile?.wallet_address] });
   };
   
   const markAllAsRead = async () => {
     if (!profile?.wallet_address) return;
     
     await markAllNotificationsAsRead(profile.wallet_address);
-    refetch();
+    await refetch();
     refetchUnreadCount();
   };
   
