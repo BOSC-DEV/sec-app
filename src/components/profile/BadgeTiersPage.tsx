@@ -39,6 +39,7 @@ const BadgeTiersPage = () => {
         const range = nextTier.minHolding - tierInfo.minHolding;
         const progress = secBalance - tierInfo.minHolding;
         progressPercentage = Math.min(100, (progress / range) * 100);
+        // Update the progress text to show the correct next tier threshold
         progressText = `${formatSecAmount(secBalance)} / ${formatSecAmount(nextTier.minHolding)} SEC`;
       } else {
         progressPercentage = 100;
