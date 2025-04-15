@@ -1,14 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import SEO from '@/components/common/SEO';
 import CompactHero from '@/components/common/CompactHero';
 import AnnouncementFeed from '@/components/community/AnnouncementFeed';
 import LiveChat from '@/components/community/LiveChat';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { LayoutPanelLeft, Rows, Medal, Megaphone, MessageSquare } from 'lucide-react';
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import BadgeTiersPage from '@/components/profile/BadgeTiersPage';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -22,16 +20,6 @@ const CommunityPage = () => {
   const [activeTab, setActiveTab] = useState("announcements");
   const [splitScreen, setSplitScreen] = useState(true);
   const isMobile = useIsMobile();
-
-  useEffect(() => {
-    if (!isConnected) {
-      toast({
-        title: "Connect your wallet",
-        description: "Connect your wallet to interact with the community features",
-        variant: "default"
-      });
-    }
-  }, [isConnected]);
 
   useEffect(() => {
     if (isMobile) {
