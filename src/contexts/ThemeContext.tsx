@@ -17,8 +17,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // Check if the user has a system preference
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     
-    // Return saved theme, or system preference, or default to light
-    return savedTheme || (prefersDark ? 'dark' : 'light');
+    // Return saved theme, or dark by default (changed from light to dark)
+    return savedTheme || 'dark';
   });
 
   useEffect(() => {
