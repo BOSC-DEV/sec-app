@@ -1,11 +1,12 @@
 
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Wallet, LogIn, Download } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -53,7 +54,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
               <Button 
                 variant="default" 
                 className="bg-icc-gold text-icc-blue hover:bg-icc-gold-light flex items-center gap-2" 
-                onClick={connectWallet}
+                onClick={() => {
+                  connectWallet();
+                  // Show toast message when connecting
+                  toast({
+                    title: "Connecting Wallet",
+                    description: "Please approve the connection request in Phantom"
+                  });
+                }}
               >
                 <LogIn className="h-4 w-4" />
                 Connect Wallet
@@ -62,7 +70,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
               <Button 
                 variant="default" 
                 className="bg-icc-gold text-icc-blue hover:bg-icc-gold-light flex items-center gap-2" 
-                onClick={() => window.open("https://phantom.app/", "_blank")}
+                onClick={() => {
+                  window.open("https://phantom.app/", "_blank");
+                  toast({
+                    title: "Installing Phantom",
+                    description: "Please install Phantom wallet and refresh the page"
+                  });
+                }}
               >
                 <Download className="h-4 w-4" />
                 Get Phantom Wallet

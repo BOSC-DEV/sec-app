@@ -55,7 +55,8 @@ export const featureFlags = {
   enableDetailedErrorLogging: false,
   enablePerformanceMonitoring: true,
   enableChatArchiving: true,
-  enableBountySystem: true
+  enableBountySystem: true,
+  enableNotifications: true // Explicitly enable notifications
 };
 
 /**
@@ -72,7 +73,8 @@ export const getConfig = () => {
     apiTimeoutMs: 20000,
     logLevel: 'warn',
     analyticsEnabled: true,
-    environment: Environment.PRODUCTION
+    environment: Environment.PRODUCTION,
+    notificationsEnabled: true // Explicitly enable notifications in config
   };
 
   return commonConfig;

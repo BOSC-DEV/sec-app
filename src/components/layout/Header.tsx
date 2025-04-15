@@ -2,16 +2,16 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, User, Copy, Bell, LogIn, Wallet, Download } from 'lucide-react';
+import { Menu, X, User, Copy, LogIn, Wallet, Download } from 'lucide-react';
 import ICCLogo from '../common/ICCLogo';
 import { useProfile } from '@/contexts/ProfileContext';
 import { toast } from '@/hooks/use-toast';
 import NotificationDropdown from '../notifications/NotificationDropdown';
+import NotificationIndicator from '../notifications/NotificationIndicator';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const { isConnected, connectWallet, profile, isPhantomAvailable, isLoading } = useProfile();
   const navigate = useNavigate();
@@ -71,7 +71,7 @@ const Header = () => {
   };
 
   const toggleNotifications = () => {
-    setShowNotifications(!showNotifications);
+    setNotificationsOpen(!notificationsOpen);
   };
 
   const navigationItems = [
@@ -113,25 +113,9 @@ const Header = () => {
               </Button>
             ) : isConnected ? (
               <div className="flex items-center space-x-3">
-                <div className="relative">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="text-white hover:bg-icc-blue-light relative"
-                    onClick={toggleNotifications}
-                    aria-label="Notifications"
-                  >
-                    <Bell className="h-5 w-5" />
-                  </Button>
-                  {showNotifications && (
-                    <div className="fixed left-1/2 transform -translate-x-1/2 mt-2 z-50">
-                      <NotificationDropdown 
-                        open={notificationsOpen}
-                        onOpenChange={setNotificationsOpen}
-                      />
-                    </div>
-                  )}
-                </div>
+                <NotificationIndicator 
+                  onClick={toggleNotifications}
+                />
                 <Button 
                   variant="ghost" 
                   size="icon"
@@ -208,6 +192,7 @@ const Header = () => {
         </div>
       </div>
 
+      {/* Mobile menu */}
       {isMenuOpen && (
         <div className="md:hidden bg-icc-blue-light">
           <div className="icc-container py-4">
@@ -228,6 +213,12 @@ const Header = () => {
           </div>
         </div>
       )}
+      
+      {/* Notification Dropdown */}
+      <NotificationDropdown 
+        open={notificationsOpen}
+        onOpenChange={setNotificationsOpen}
+      />
     </header>
   );
 };
