@@ -1,12 +1,13 @@
-
 import React from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+
 interface CookieDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
 const CookieDialog: React.FC<CookieDialogProps> = ({
   open,
   onOpenChange
@@ -84,12 +85,13 @@ const CookieDialog: React.FC<CookieDialogProps> = ({
             </p>
           </div>
         </ScrollArea>
-        <DialogFooter className="mt-4">
+        <div className="flex justify-end mt-4 pr-4">
           <DialogClose asChild>
-            <Button variant="neutral">I Understand</Button>
+            <Button variant="neutral" className="text-icc-blue hover:bg-gray-100">I Understand</Button>
           </DialogClose>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>;
 };
+
 export default CookieDialog;
