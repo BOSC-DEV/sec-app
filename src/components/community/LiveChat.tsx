@@ -27,11 +27,12 @@ import { getConnection } from '@/utils/phantomWallet';
 import { formatTimeAgo } from '@/utils/formatTime';
 import { useOnlineUsers } from '@/hooks/useOnlineUsers';
 import { CircleDot } from 'lucide-react';
-
 const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump');
-
 const LiveChat = () => {
-  const { profile, isConnected } = useProfile();
+  const {
+    profile,
+    isConnected
+  } = useProfile();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,7 +45,6 @@ const LiveChat = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
   const onlineCount = useOnlineUsers();
-
   useEffect(() => {
     const checkAdmin = async () => {
       if (profile?.username) {
@@ -56,13 +56,11 @@ const LiveChat = () => {
     };
     checkAdmin();
   }, [profile?.username]);
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({
       behavior: 'smooth'
     });
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isConnected) {
@@ -105,7 +103,6 @@ const LiveChat = () => {
       setIsSubmitting(false);
     }
   };
-
   const handleDeleteMessage = async (messageId: string) => {
     if (!isAdmin) return;
     try {
@@ -130,7 +127,6 @@ const LiveChat = () => {
       });
     }
   };
-
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -157,7 +153,6 @@ const LiveChat = () => {
     reader.readAsDataURL(file);
     setImageFile(file);
   };
-
   const removeImage = () => {
     setImageFile(null);
     setImagePreview(null);
@@ -165,20 +160,15 @@ const LiveChat = () => {
       fileInputRef.current.value = '';
     }
   };
-
   const handleEmojiSelect = (emoji: string) => {
     setNewMessage(prev => prev + emoji);
   };
-
   const fetchUserSecBalance = async (walletAddress: string) => {
     try {
       if (userSecBalances[walletAddress] !== undefined) return;
-      
       const connection = getConnection();
       const publicKey = new PublicKey(walletAddress);
-
       const tokenAccountAddress = await getAssociatedTokenAddress(SEC_TOKEN_MINT, publicKey);
-      
       try {
         const tokenAccount = await getAccount(connection, tokenAccountAddress);
         const balance = Number(tokenAccount.amount) / Math.pow(10, 6);
@@ -201,19 +191,16 @@ const LiveChat = () => {
       }));
     }
   };
-
   useEffect(() => {
     const fetchMessages = async () => {
       try {
         const data = await getChatMessages();
         setMessages(data);
         setIsLoading(false);
-        
         const uniqueAuthors = new Set(data.map(message => message.author_id));
         uniqueAuthors.forEach(authorId => {
           if (authorId) fetchUserSecBalance(authorId);
         });
-        
         setTimeout(() => {
           scrollToBottom();
         }, 100);
@@ -223,7 +210,6 @@ const LiveChat = () => {
       }
     };
     fetchMessages();
-    
     const channel = supabase.channel('public:chat_messages').on('postgres_changes', {
       event: 'INSERT',
       schema: 'public',
@@ -241,14 +227,11 @@ const LiveChat = () => {
       supabase.removeChannel(channel);
     };
   }, []);
-
   const renderMessage = (message: ChatMessage, index: number) => {
     const userBadge = message.author_id ? userSecBalances[message.author_id] !== undefined ? calculateBadgeTier(userSecBalances[message.author_id]) : null : null;
     const isCurrentUser = message.author_id === profile?.wallet_address;
     const time = formatTimeAgo(message.created_at);
-
-    const messageContent = (
-      <div key={message.id} className="flex my-6">
+    const messageContent = <div key={message.id} className="flex my-6">
         <div className={`flex ${isCurrentUser ? 'flex-row-reverse self-end ml-auto' : 'flex-row'} space-x-2 ${isCurrentUser ? 'space-x-reverse' : ''}`}>
           <div className="flex-shrink-0">
             <Link to={message.author_username ? `/profile/${message.author_username}` : '#'}>
@@ -265,50 +248,34 @@ const LiveChat = () => {
                 {message.author_name}
               </span>
               {userBadge && <BadgeTier badgeInfo={userBadge} size="sm" showTooltip={true} />}
-              {isAdmin && message.author_username === 'sec' && 
-                <span className="text-xs bg-icc-gold/20 text-icc-gold px-1 rounded ml-1">admin</span>
-              }
+              {isAdmin && message.author_username === 'sec' && <span className="text-xs bg-icc-gold/20 text-icc-gold px-1 rounded ml-1">admin</span>}
             </div>
             
             <div className="text-sm break-words">
               {message.content}
             </div>
             
-            {message.image_url && (
-              <div className="mt-2 relative group">
-                <img src={message.image_url} alt="Chat attachment" 
-                  className="max-h-40 rounded-md object-contain bg-muted/20" />
-                <a href={message.image_url} target="_blank" rel="noopener noreferrer" 
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity 
+            {message.image_url && <div className="mt-2 relative group">
+                <img src={message.image_url} alt="Chat attachment" className="max-h-40 rounded-md object-contain bg-muted/20" />
+                <a href={message.image_url} target="_blank" rel="noopener noreferrer" className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity 
                   bg-background/80 rounded-full p-1" title="View full image">
                   <Download className="h-4 w-4" />
                 </a>
-              </div>
-            )}
+              </div>}
             
             <div className="flex justify-between items-center mt-1">
-              <CommunityInteractionButtons 
-                itemId={message.id} 
-                itemType="message"
-                initialLikes={message.likes}
-                initialDislikes={message.dislikes}
-              />
+              <CommunityInteractionButtons itemId={message.id} itemType="message" initialLikes={message.likes} initialDislikes={message.dislikes} />
               <span className="text-xs text-muted-foreground">
                 {time}
               </span>
             </div>
           </div>
         </div>
-      </div>
-    );
-    
-    return isAdmin ? (
-      <AdminContextMenu key={message.id} onDelete={() => handleDeleteMessage(message.id)} canEdit={false}>
+      </div>;
+    return isAdmin ? <AdminContextMenu key={message.id} onDelete={() => handleDeleteMessage(message.id)} canEdit={false}>
         {messageContent}
-      </AdminContextMenu>
-    ) : messageContent;
+      </AdminContextMenu> : messageContent;
   };
-
   if (isLoading) {
     return <div className="flex justify-center py-12">
         <div className="animate-pulse flex flex-col space-y-4 w-full">
@@ -322,9 +289,7 @@ const LiveChat = () => {
         </div>
       </div>;
   }
-
-  return (
-    <Card className="h-full flex flex-col">
+  return <Card className="h-full flex flex-col">
       <CardHeader className={`pb-2 ${isMobile ? 'px-3 py-2' : 'px-4 py-3'}`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center">
@@ -332,7 +297,7 @@ const LiveChat = () => {
             <h3 className="text-lg font-medium">Chat</h3>
             <div className="flex items-center ml-4">
               <CircleDot className="h-5 w-5 text-green-500 mr-2 animate-pulse" />
-              <span className="text-lg text-muted-foreground">{onlineCount}</span>
+              <span className="text-lg font-medium text-gray-900">{onlineCount}</span>
             </div>
           </div>
           <div className="bg-muted rounded-full px-3 py-1 text-xs text-muted-foreground flex items-center">
@@ -347,42 +312,33 @@ const LiveChat = () => {
       <CardContent className="p-0 flex-grow overflow-hidden">
         <ScrollArea className="h-[calc(100%-1rem)]">
           <div className={`space-y-0 p-${isMobile ? '2' : '4'}`}>
-            {messages.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full py-10">
+            {messages.length === 0 ? <div className="flex flex-col items-center justify-center h-full py-10">
                 <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
                 <h3 className="text-xl font-medium text-center">No Messages Yet</h3>
                 <p className="text-muted-foreground text-center mt-1">
                   Be the first to start the conversation!
                 </p>
-              </div>
-            ) : (
-              messages.map((message, index) => renderMessage(message, index))
-            )}
+              </div> : messages.map((message, index) => renderMessage(message, index))}
             <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
       </CardContent>
       
       <CardFooter className={`border-t ${isMobile ? 'p-2' : 'p-4'} mt-auto`}>
-        {!isConnected ? (
-          <div className="w-full flex justify-center">
+        {!isConnected ? <div className="w-full flex justify-center">
             <Button variant="outline" onClick={() => toast({
-              title: "Connect Wallet",
-              description: "Please connect your wallet to participate in the chat"
-            })}>
+          title: "Connect Wallet",
+          description: "Please connect your wallet to participate in the chat"
+        })}>
               Connect Wallet to Chat
             </Button>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="w-full space-y-2">
-            {imagePreview && (
-              <div className="relative inline-block">
+          </div> : <form onSubmit={handleSubmit} className="w-full space-y-2">
+            {imagePreview && <div className="relative inline-block">
                 <img src={imagePreview} alt="Upload preview" className="max-h-32 rounded-md object-contain bg-muted/50" />
                 <Button type="button" variant="ghost" size="icon" className="absolute top-1 right-1 h-6 w-6 rounded-full bg-background/80" onClick={removeImage}>
                   <X className="h-4 w-4" />
                 </Button>
-              </div>
-            )}
+              </div>}
             
             <div className="flex space-x-2">
               <div className="flex items-center space-x-1">
@@ -403,29 +359,16 @@ const LiveChat = () => {
                 </Popover>
               </div>
               
-              <Textarea 
-                placeholder="Type your message..." 
-                value={newMessage} 
-                onChange={e => setNewMessage(e.target.value)} 
-                disabled={isSubmitting} 
-                className="flex-1 min-h-[38px] max-h-[80px] py-2 text-sm resize-none"
-                rows={1}
-                style={{lineHeight: '1.2'}}
-              />
+              <Textarea placeholder="Type your message..." value={newMessage} onChange={e => setNewMessage(e.target.value)} disabled={isSubmitting} className="flex-1 min-h-[38px] max-h-[80px] py-2 text-sm resize-none" rows={1} style={{
+            lineHeight: '1.2'
+          }} />
               
-              <Button type="submit" size="icon" className="h-9 w-9" disabled={isSubmitting || (!newMessage.trim() && !imageFile)}>
-                {isSubmitting ? (
-                  <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
-                ) : (
-                  <Send className="h-4 w-4" />
-                )}
+              <Button type="submit" size="icon" className="h-9 w-9" disabled={isSubmitting || !newMessage.trim() && !imageFile}>
+                {isSubmitting ? <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" /> : <Send className="h-4 w-4" />}
               </Button>
             </div>
-          </form>
-        )}
+          </form>}
       </CardFooter>
-    </Card>
-  );
+    </Card>;
 };
-
 export default LiveChat;
