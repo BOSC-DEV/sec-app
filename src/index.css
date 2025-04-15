@@ -79,7 +79,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif text-icc-blue dark:text-white;
+    @apply font-serif text-foreground;
   }
 }
 
@@ -97,7 +97,7 @@
   }
 
   .icc-card {
-    @apply bg-white border border-gray-200 rounded-md shadow-sm hover:shadow-md transition-shadow duration-200 dark:bg-gray-800 dark:border-gray-700;
+    @apply bg-card text-card-foreground border border-border rounded-md shadow-sm hover:shadow-md transition-shadow duration-200;
   }
 
   .icc-btn-primary {
@@ -113,18 +113,18 @@
   }
 
   .icc-section {
-    @apply py-12 md:py-16 dark:bg-icc-blue-dark;
+    @apply py-12 md:py-16 bg-background;
   }
 
   .icc-title {
-    @apply text-3xl md:text-4xl font-serif font-bold text-icc-blue dark:text-white mb-6;
+    @apply text-3xl md:text-4xl font-serif font-bold text-foreground mb-6;
   }
 
   .icc-subtitle {
-    @apply text-xl font-serif text-icc-blue-light dark:text-gray-200 mb-4;
+    @apply text-xl font-serif text-muted-foreground mb-4;
   }
 
   .icc-link {
-    @apply text-icc-blue-light hover:text-icc-blue dark:text-icc-gold dark:hover:text-icc-gold-light underline;
+    @apply text-primary hover:text-primary/90 dark:text-primary-foreground dark:hover:text-primary-foreground/90 underline;
   }
 }

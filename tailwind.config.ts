@@ -81,10 +81,6 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
-      fontFamily: {
-        serif: ["Cambria", "Georgia", "serif"],
-        sans: ["Open Sans", "Arial", "sans-serif"],
-      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
