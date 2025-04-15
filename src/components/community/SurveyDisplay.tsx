@@ -40,7 +40,6 @@ const SurveyDisplay: React.FC<SurveyProps> = ({ survey, onVote }) => {
   // Update state when survey prop changes (e.g., after vote is saved to database)
   useEffect(() => {
     setSelectedOption(survey.userVote);
-    // Only auto-show results if the user has voted
     setShowResults(survey.userVote !== undefined);
   }, [survey.userVote]);
   
