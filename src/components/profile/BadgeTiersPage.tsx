@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -34,16 +35,13 @@ const BadgeTiersPage = () => {
     let progressText = '';
     
     if (secBalance < tierInfo.minHolding) {
+      // User hasn't reached this tier yet
       progressPercentage = Math.min(100, (secBalance / tierInfo.minHolding) * 100);
       progressText = `${formatSecAmount(secBalance)} / ${formatSecAmount(tierInfo.minHolding)} SEC`;
-    } else if (nextTier) {
-      const range = nextTier.minHolding - tierInfo.minHolding;
-      const progress = secBalance - tierInfo.minHolding;
-      progressPercentage = Math.min(100, (progress / range) * 100);
-      progressText = `${formatSecAmount(secBalance)} / ${formatSecAmount(nextTier.minHolding)} SEC`;
     } else {
+      // User has reached or exceeded this tier
       progressPercentage = 100;
-      progressText = `${formatSecAmount(secBalance)} SEC (Max Tier)`;
+      progressText = `${formatSecAmount(secBalance)} / ${formatSecAmount(tierInfo.minHolding)} SEC`;
     }
     
     return {
