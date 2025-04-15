@@ -14,7 +14,8 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
   open,
   onOpenChange
 }) => {
-  return <Dialog open={open} onOpenChange={onOpenChange}>
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-serif text-icc-blue flex items-center gap-2">
@@ -146,7 +147,8 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
           </DialogClose>
         </DialogFooter>
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+  );
 };
 
 export default AboutDialog;
