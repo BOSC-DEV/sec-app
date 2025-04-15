@@ -63,7 +63,7 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
             <div className="space-y-3">
               <div className="font-semibold text-center flex items-center justify-center gap-2">
                 <span className="text-lg">{icon}</span>
-                <span className="truncate">{tier} Badge</span>
+                <span className="truncate">{tier}</span>
               </div>
               
               <div className="text-sm text-muted-foreground">
