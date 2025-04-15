@@ -61,9 +61,14 @@ const LiveChat = () => {
   }, [profile?.username]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: 'smooth'
-    });
+    if (messagesEndRef.current) {
+      const scrollContainer = messagesEndRef.current.closest('.scroll-area-viewport');
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      } else {
+        messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
