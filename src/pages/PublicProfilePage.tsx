@@ -213,6 +213,14 @@ const PublicProfilePage = () => {
                     <div className="flex flex-wrap items-center justify-center md:justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <h1 className="text-3xl font-bold text-icc-gold">{profile?.display_name}</h1>
+                        {badgeInfo && (
+                          <BadgeTier 
+                            badgeInfo={badgeInfo} 
+                            showTooltip={true} 
+                            size="md" 
+                            variant="tier" 
+                          />
+                        )}
                       </div>
                       <div className="flex items-center space-x-3 mt-3 md:mt-0 p-0">
                         {isOwnProfile && <>
