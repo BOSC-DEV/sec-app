@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Loader2, Circle } from 'lucide-react';
@@ -6,8 +5,9 @@ import { searchScammers } from '@/services/scammerSearchService';
 import type { Scammer } from '@/types/dataTypes';
 import { toast } from '@/hooks/use-toast';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { CircleIcon, DollarSignIcon } from 'lucide-react';
-import { formatCurrency } from '@/utils/formatCurrency'; // We'll create this utility function
+import { CircleIcon } from 'lucide-react';
+import CurrencyIcon from '@/components/common/CurrencyIcon';
+import { formatNumber } from '@/lib/utils';
 
 interface ScammerSearchDropdownProps {
   searchTerm: string;
@@ -74,8 +74,8 @@ const ScammerSearchDropdown: React.FC<ScammerSearchDropdownProps> = ({
                       {scammer.accused_of ? `${scammer.accused_of.substring(0, 100)}...` : 'No description available'}
                     </div>
                     <div className="text-xs text-muted-foreground mt-1 flex items-center">
-                      <DollarSignIcon className="h-3 w-3 mr-1 text-green-600" />
-                      Bounty: {formatCurrency(scammer.bounty_amount || 0)}
+                      <CurrencyIcon size="sm" className="mr-1" />
+                      Bounty: {formatNumber(scammer.bounty_amount || 0)}
                     </div>
                   </div>
                 </div>
