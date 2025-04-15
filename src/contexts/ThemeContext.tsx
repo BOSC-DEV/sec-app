@@ -14,11 +14,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [theme, setTheme] = useState<Theme>(() => {
     // Try to get the theme from localStorage
     const savedTheme = localStorage.getItem('theme') as Theme;
-    // Check if the user has a system preference
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     
-    // Return saved theme, or system preference, or default to light
-    return savedTheme || (prefersDark ? 'dark' : 'light');
+    // If no saved theme, default to light mode
+    return savedTheme || 'light';
   });
 
   useEffect(() => {
@@ -49,3 +47,4 @@ export const useTheme = (): ThemeContextType => {
   }
   return context;
 };
+
