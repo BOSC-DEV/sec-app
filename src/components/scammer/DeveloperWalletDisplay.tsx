@@ -27,13 +27,13 @@ const DeveloperWalletDisplay: React.FC<DeveloperWalletDisplayProps> = ({ develop
   return (
     <div className="mb-4">
       <div className="flex justify-between items-center mb-1">
-        <div className="text-sm font-medium text-icc-blue">Developer Wallet</div>
+        <div className="text-sm font-medium text-icc-blue dark:text-white">Multi-Sig Treasury</div>
         <div className="text-xs text-icc-gray-dark flex items-center">
           All <CurrencyIcon size="sm" className="mx-0.5" /> tokens go here
         </div>
       </div>
       <div className="bg-icc-gold-light/30 border border-icc-gold/30 rounded p-3 flex items-center justify-between">
-        <span className="font-mono text-sm text-icc-blue-dark">{shortAddress}</span>
+        <span className="font-mono text-sm text-icc-blue-dark dark:text-white">{shortAddress}</span>
         <Button 
           variant="ghost" 
           size="sm" 
