@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Progress } from '@/components/ui/progress';
@@ -12,7 +11,7 @@ interface BadgeTierProps {
   size?: 'sm' | 'md' | 'lg';
   showTooltip?: boolean;
   variant?: 'default' | 'tier' | 'plain';
-  context?: 'chat' | 'profile'; // New prop to determine styling
+  context?: 'chat' | 'profile';
 }
 
 const BadgeTier: React.FC<BadgeTierProps> = ({
@@ -21,7 +20,7 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
   size = 'md',
   showTooltip = true,
   variant = 'default',
-  context = 'profile' // Default to profile styling
+  context = 'profile'
 }) => {
   const isMobile = useIsMobile();
   const {
@@ -36,11 +35,10 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
     lg: 'text-base'
   };
   
-  // Create the badge element - showing only the icon
   const badge = (
     <span 
       className={`
-        ${context === 'chat' ? 'relative -top-2 -ml-0.5' : (variant === 'plain' ? '' : color)} 
+        ${context === 'chat' ? 'relative -top-2 -ml-0' : (variant === 'plain' ? '' : color)} 
         ${sizeClasses[size]} 
         ${context === 'chat' ? '' : (variant === 'default' || variant === 'tier' ? 'rounded-full border px-2.5 py-0.5' : '')}
         inline-flex items-center shrink-0
