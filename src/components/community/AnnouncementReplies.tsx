@@ -4,7 +4,8 @@ import {
   getAnnouncementReplies, 
   addAnnouncementReply,
   deleteAnnouncementReply,
-  editAnnouncementReply
+  editAnnouncementReply,
+  banUser
 } from '@/services/communityService';
 import { AnnouncementReply } from '@/types/dataTypes';
 import { Button } from '@/components/ui/button';
@@ -53,12 +54,40 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
     }
   }, [announcementId, showReplies]);
   
+  const handleBanUser = async (username: string | undefined) => {
+    if (!username) return;
+    try {
+      banUser(username);
+      toast({
+        title: "User banned",
+        description: "The user has been banned from sending messages",
+        variant: "default"
+      });
+    } catch (error) {
+      console.error('Error banning user:', error);
+      toast({
+        title: "Error",
+        description: "Failed to ban user. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleAddReply = async (content: string) => {
     if (!isConnected) {
       toast({
         title: "Not connected",
         description: "Please connect your wallet to reply",
         variant: "destructive",
+      });
+      return;
+    }
+    
+    if (profile?.username && isBanned(profile.username)) {
+      toast({
+        title: "Unable to reply",
+        description: "You have been banned from sending messages",
+        variant: "destructive"
       });
       return;
     }
@@ -275,6 +304,7 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
                         key={reply.id}
                         onEdit={() => openEditDialog(reply)}
                         onDelete={() => handleDeleteReply(reply.id)}
+                        onBanUser={() => handleBanUser(reply.author_username)}
                       >
                         {replyContent}
                       </AdminContextMenu>
