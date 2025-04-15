@@ -144,25 +144,13 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
     
     const query = searchQuery.toLowerCase().trim();
     
-    const pollNumberMatch = query.match(/poll\s*(\d+)/i);
-    const justNumberMatch = /^\d+$/.test(query);
+    const pollPattern = /^(?:poll\s*)?(\d+)$/i;
+    const match = query.match(pollPattern);
     
     return announcements.filter(announcement => {
-      if (announcement.survey_data) {
-        if (pollNumberMatch && pollNumberMatch[1]) {
-          const searchedPollNumber = parseInt(pollNumberMatch[1], 10);
-          return announcement.survey_data.poll_number === searchedPollNumber;
-        }
-        
-        if (justNumberMatch) {
-          const searchedPollNumber = parseInt(query, 10);
-          return announcement.survey_data.poll_number === searchedPollNumber;
-        }
-        
-        const pollNumberString = `poll ${announcement.survey_data.poll_number}`;
-        if (query === pollNumberString) {
-          return true;
-        }
+      if (announcement.survey_data && match) {
+        const searchedPollNumber = parseInt(match[1], 10);
+        return announcement.survey_data.poll_number === searchedPollNumber;
       }
       
       return (
