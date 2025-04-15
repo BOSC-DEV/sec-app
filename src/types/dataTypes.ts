@@ -29,8 +29,7 @@ export interface Profile {
   website_link: string;
   bio: string;
   points: number;
-  sec_balance?: number; // Added this property
-  // Additional fields for leaderboard
+  sec_balance?: number;
   reports_count?: number;
   likes_count?: number;
   views_count?: number;
@@ -38,7 +37,7 @@ export interface Profile {
   bounty_amount?: number;
   bounties_raised?: number;
   last_activity?: string;
-  total_bounty?: number; // Added field: sum of bounty_amount and bounties_raised
+  total_bounty?: number;
 }
 
 export interface Comment {

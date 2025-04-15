@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { 
   Announcement, 
@@ -25,7 +26,20 @@ export const getAnnouncements = async (): Promise<Announcement[]> => {
       return [];
     }
     
-    return data as Announcement[];
+    // Parse the survey_data if it exists and convert to proper SurveyData type
+    const announcementsWithParsedData = data.map(item => {
+      if (item.survey_data) {
+        return {
+          ...item,
+          survey_data: typeof item.survey_data === 'string' 
+            ? JSON.parse(item.survey_data) as SurveyData 
+            : item.survey_data as SurveyData
+        };
+      }
+      return item;
+    }) as Announcement[];
+    
+    return announcementsWithParsedData;
   } catch (error) {
     console.error('Error in getAnnouncements:', error);
     return [];
@@ -97,6 +111,18 @@ export const createSurveyAnnouncement = async (
       return null;
     }
     
+    // Parse the survey_data if needed
+    if (data.survey_data) {
+      const parsedAnnouncement = {
+        ...data,
+        survey_data: typeof data.survey_data === 'string' 
+          ? JSON.parse(data.survey_data) as SurveyData 
+          : data.survey_data as SurveyData
+      } as Announcement;
+      
+      return parsedAnnouncement;
+    }
+    
     return data as Announcement;
   } catch (error) {
     console.error('Error in createSurveyAnnouncement:', error);
@@ -117,23 +143,19 @@ export const getUserSurveyVote = async (announcementId: string, userId: string):
       return undefined;
     }
     
-    let surveyData = data?.survey_data;
-    if (!surveyData) return undefined;
+    let surveyData: SurveyData | null = null;
     
-    if (typeof surveyData === 'string') {
-      try {
-        surveyData = JSON.parse(surveyData);
-      } catch (e) {
-        console.error("Error parsing survey data:", e);
-        return undefined;
-      }
-    }
-    
-    for (let i = 0; i < surveyData.options.length; i++) {
-      const option = surveyData.options[i];
-      const voterIndex = option.voters.findIndex((voter: any) => voter.userId === userId);
-      if (voterIndex !== -1) {
-        return i;
+    if (data?.survey_data) {
+      surveyData = typeof data.survey_data === 'string'
+        ? JSON.parse(data.survey_data) as SurveyData
+        : data.survey_data as SurveyData;
+      
+      for (let i = 0; i < surveyData.options.length; i++) {
+        const option = surveyData.options[i];
+        const voterIndex = option.voters.findIndex((voter) => voter.userId === userId);
+        if (voterIndex !== -1) {
+          return i;
+        }
       }
     }
     
@@ -171,57 +193,53 @@ export const voteSurvey = async (
       return false;
     }
     
-    let surveyData = announcement?.survey_data;
-    if (!surveyData) {
-      console.error("No survey data found for this announcement");
-      return false;
-    }
+    let surveyData: SurveyData | null = null;
     
-    if (typeof surveyData === 'string') {
-      try {
-        surveyData = JSON.parse(surveyData);
-      } catch (e) {
-        console.error("Error parsing survey data:", e);
+    if (announcement?.survey_data) {
+      surveyData = typeof announcement.survey_data === 'string'
+        ? JSON.parse(announcement.survey_data) as SurveyData
+        : announcement.survey_data as SurveyData;
+      
+      let userPreviousVote = -1;
+      
+      surveyData.options.forEach((option, index) => {
+        const voterIndex = option.voters.findIndex((voter) => voter.userId === userId);
+        if (voterIndex !== -1) {
+          userPreviousVote = index;
+          option.voters.splice(voterIndex, 1);
+          option.votes = Math.max(0, option.votes - 1);
+        }
+      });
+      
+      if (optionIndex >= 0 && optionIndex < surveyData.options.length) {
+        const option = surveyData.options[optionIndex];
+        option.voters.push({
+          userId,
+          badgeTier
+        });
+        option.votes += 1;
+      } else {
+        console.error("Invalid option index:", optionIndex);
         return false;
       }
-    }
-    
-    let userPreviousVote = -1;
-    
-    surveyData.options.forEach((option: SurveyOption, index: number) => {
-      const voterIndex = option.voters.findIndex((voter: SurveyVoter) => voter.userId === userId);
-      if (voterIndex !== -1) {
-        userPreviousVote = index;
-        option.voters.splice(voterIndex, 1);
-        option.votes = Math.max(0, option.votes - 1);
-      }
-    });
-    
-    if (optionIndex >= 0 && optionIndex < surveyData.options.length) {
-      const option = surveyData.options[optionIndex];
-      option.voters.push({
-        userId,
-        badgeTier
-      });
-      option.votes += 1;
-    } else {
-      console.error("Invalid option index:", optionIndex);
-      return false;
-    }
-    
-    const { error: updateError } = await supabase
-      .from('announcements')
-      .update({
-        survey_data: surveyData
-      })
-      .eq('id', announcementId);
       
-    if (updateError) {
-      console.error("Error updating survey votes:", updateError);
-      return false;
+      const { error: updateError } = await supabase
+        .from('announcements')
+        .update({
+          survey_data: surveyData
+        })
+        .eq('id', announcementId);
+        
+      if (updateError) {
+        console.error("Error updating survey votes:", updateError);
+        return false;
+      }
+      
+      return true;
     }
     
-    return true;
+    console.error("No survey data found for this announcement");
+    return false;
   } catch (error) {
     console.error('Error in voteSurvey:', error);
     return false;
@@ -269,7 +287,7 @@ export const deleteAnnouncement = async (id: string): Promise<boolean> => {
 export const incrementAnnouncementViews = async (id: string): Promise<boolean> => {
   try {
     const { error } = await supabase
-      .rpc('increment_announcement_views', { announcement_id: id });
+      .rpc('increment_announcement_views', { p_announcement_id: id });
       
     if (error) {
       console.error("Error incrementing announcement views:", error);
@@ -559,7 +577,7 @@ export const likeAnnouncement = async (announcementId: string, userId: string): 
         if (profile) {
           notifyReaction(
             announcementId,
-            'announcement',
+            EntityType.announcement,
             '',
             'like',
             announcement.author_id,
@@ -672,7 +690,7 @@ export const dislikeAnnouncement = async (announcementId: string, userId: string
         if (profile) {
           notifyReaction(
             announcementId,
-            'announcement',
+            EntityType.announcement,
             '',
             'dislike',
             announcement.author_id,
@@ -785,7 +803,7 @@ export const likeReply = async (replyId: string, userId: string): Promise<{ like
         if (profile) {
           notifyReaction(
             replyId,
-            'reply',
+            EntityType.reply,
             '',
             'like',
             reply.author_id,
@@ -898,7 +916,7 @@ export const dislikeReply = async (replyId: string, userId: string): Promise<{ l
         if (profile) {
           notifyReaction(
             replyId,
-            'reply',
+            EntityType.reply,
             '',
             'dislike',
             reply.author_id,
@@ -1011,7 +1029,7 @@ export const likeChatMessage = async (messageId: string, userId: string): Promis
         if (profile) {
           notifyReaction(
             messageId,
-            'chat_message',
+            EntityType.chat_message,
             '',
             'like',
             message.author_id,
@@ -1124,7 +1142,7 @@ export const dislikeChatMessage = async (messageId: string, userId: string): Pro
         if (profile) {
           notifyReaction(
             messageId,
-            'chat_message',
+            EntityType.chat_message,
             '',
             'dislike',
             message.author_id,
