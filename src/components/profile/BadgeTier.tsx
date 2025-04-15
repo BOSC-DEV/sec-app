@@ -37,7 +37,7 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
   // Create the badge element - showing only the icon
   const badge = (
     <Link 
-      to="/badges"
+      to="/community?tab=badges"
       className={`
         ${variant === 'plain' ? '' : color} 
         ${sizeClasses[size]} 
