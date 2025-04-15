@@ -67,7 +67,7 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
               </div>
               
               <div className="text-sm text-muted-foreground">
-                Requires minimum {formatSecAmount(badgeInfo.minHolding)} SEC tokens
+                Requires {formatSecAmount(badgeInfo.minHolding)} SEC tokens
                 {badgeInfo.percentOfSupply > 0 && <span> ({badgeInfo.percentOfSupply}% of total supply)</span>}
               </div>
               
