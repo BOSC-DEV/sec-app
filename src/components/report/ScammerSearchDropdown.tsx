@@ -6,7 +6,8 @@ import { searchScammers } from '@/services/scammerSearchService';
 import type { Scammer } from '@/types/dataTypes';
 import { toast } from '@/hooks/use-toast';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { CircleIcon } from 'lucide-react';
+import { CircleIcon, DollarSignIcon } from 'lucide-react';
+import { formatCurrency } from '@/utils/formatCurrency'; // We'll create this utility function
 
 interface ScammerSearchDropdownProps {
   searchTerm: string;
@@ -72,11 +73,10 @@ const ScammerSearchDropdown: React.FC<ScammerSearchDropdownProps> = ({
                     <div className="text-xs text-muted-foreground">
                       {scammer.accused_of ? `${scammer.accused_of.substring(0, 100)}...` : 'No description available'}
                     </div>
-                    {scammer.wallet_addresses?.length > 0 && (
-                      <div className="text-xs text-muted-foreground mt-1">
-                        Wallet: {scammer.wallet_addresses[0]}
-                      </div>
-                    )}
+                    <div className="text-xs text-muted-foreground mt-1 flex items-center">
+                      <DollarSignIcon className="h-3 w-3 mr-1 text-green-600" />
+                      Bounty: {formatCurrency(scammer.bounty_amount || 0)}
+                    </div>
                   </div>
                 </div>
               ))}
