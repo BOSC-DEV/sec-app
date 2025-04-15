@@ -65,7 +65,7 @@ const CommunityPage = () => {
               <div className="h-[600px] flex flex-col">
                 <Card className="flex-1 overflow-hidden">
                   <CardHeader className="pb-3">
-                    <h3 className="text-lg font-semibold">Announcements</h3>
+                    <h3 className="text-lg font-semibold">News</h3>
                   </CardHeader>
                   <CardContent className="p-0 h-full">
                     <ScrollArea className="h-[520px]">
@@ -88,7 +88,7 @@ const CommunityPage = () => {
                 <TabsTrigger value="announcements" className="flex-1">
                   {isMobile ? <Megaphone className="h-5 w-5" /> : <>
                       <Megaphone className="h-4 w-4 mr-2" />
-                      Announcements
+                      News
                     </>}
                 </TabsTrigger>
                 <TabsTrigger value="chat" className="flex-1">
@@ -133,3 +133,4 @@ const CommunityPage = () => {
 };
 
 export default CommunityPage;
+
