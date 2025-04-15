@@ -4,8 +4,7 @@ import {
   getAnnouncementReplies, 
   addAnnouncementReply,
   deleteAnnouncementReply,
-  editAnnouncementReply,
-  banUser
+  editAnnouncementReply
 } from '@/services/communityService';
 import { AnnouncementReply } from '@/types/dataTypes';
 import { Button } from '@/components/ui/button';
@@ -21,6 +20,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import ReplyForm from './ReplyForm';
 import RichTextEditor from './RichTextEditor';
 import { formatTimeAgo } from '@/utils/formatTime';
+import { banUser, isBanned } from '@/utils/adminUtils';
 
 interface AnnouncementRepliesProps {
   announcementId: string;

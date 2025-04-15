@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Comment } from '@/types/dataTypes';
 import { notifyScammerComment } from '@/services/notificationService';
@@ -92,4 +93,23 @@ export const addComment = async (comment: {
   }
   
   return data;
+};
+
+export const deleteComment = async (commentId: string): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('comments')
+      .delete()
+      .eq('id', commentId);
+    
+    if (error) {
+      console.error('Error deleting comment:', error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error in deleteComment:', error);
+    return false;
+  }
 };

@@ -1,4 +1,6 @@
 
+import { supabase } from '@/integrations/supabase/client';
+
 export const ADMIN_USERNAMES = ['sec', 'thesec'];
 
 export const BANNED_USERNAMES: string[] = [];
@@ -41,10 +43,9 @@ const deleteUserMessages = async (username: string): Promise<void> => {
     await supabase
       .from('comments')
       .delete()
-      .eq('author_username', username);
+      .eq('author_name', username);
   } catch (error) {
     console.error('Error deleting user messages:', error);
     throw error;
   }
 };
-

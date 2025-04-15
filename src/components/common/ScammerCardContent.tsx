@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Comment, Scammer } from '@/types/dataTypes';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -49,10 +50,10 @@ const ScammerCardContent: React.FC<ScammerCardContentProps> = ({ scammer, commen
     }
   };
 
-  const handleBanUser = (username: string | undefined) => {
-    if (!username) return;
+  const handleBanUser = (authorName: string) => {
+    if (!authorName) return;
     try {
-      banUser(username);
+      banUser(authorName);
       toast({
         title: "User banned",
         description: "The user has been banned from sending messages",
@@ -75,27 +76,12 @@ const ScammerCardContent: React.FC<ScammerCardContentProps> = ({ scammer, commen
       <div key={comment.id} className="border rounded-md p-3 bg-card">
         <div className="flex items-start justify-between">
           <div className="flex items-center">
-            {comment.author_username ? (
-              <Link to={`/profile/${comment.author_username}`}>
-                <Avatar className="h-6 w-6 mr-2">
-                  <AvatarImage src={comment.author_profile_pic} alt={comment.author_name} />
-                  <AvatarFallback>{comment.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                </Avatar>
-              </Link>
-            ) : (
-              <Avatar className="h-6 w-6 mr-2">
-                <AvatarImage src={comment.author_profile_pic} alt={comment.author_name} />
-                <AvatarFallback>{comment.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
-              </Avatar>
-            )}
+            <Avatar className="h-6 w-6 mr-2">
+              <AvatarImage src={comment.author_profile_pic} alt={comment.author_name} />
+              <AvatarFallback>{comment.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
+            </Avatar>
             <div>
-              {comment.author_username ? (
-                <Link to={`/profile/${comment.author_username}`} className="hover:underline">
-                  <span className="text-sm font-medium">{comment.author_name}</span>
-                </Link>
-              ) : (
-                <span className="text-sm font-medium">{comment.author_name}</span>
-              )}
+              <span className="text-sm font-medium">{comment.author_name}</span>
             </div>
           </div>
           <div className="text-xs text-muted-foreground flex items-center">
@@ -107,7 +93,7 @@ const ScammerCardContent: React.FC<ScammerCardContentProps> = ({ scammer, commen
         <div className="mt-2">
           <CommunityInteractionButtons
             itemId={comment.id}
-            itemType="comment"
+            itemType="scammer-comment"
             initialLikes={comment.likes}
             initialDislikes={comment.dislikes}
           />
@@ -119,7 +105,7 @@ const ScammerCardContent: React.FC<ScammerCardContentProps> = ({ scammer, commen
       <AdminContextMenu 
         key={comment.id}
         onDelete={() => handleDeleteComment(comment.id)}
-        onBanUser={() => handleBanUser(comment.author_username)}
+        onBanUser={() => handleBanUser(comment.author_name)}
         canEdit={false}
       >
         {commentContent}
