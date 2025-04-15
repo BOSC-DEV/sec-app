@@ -1,4 +1,6 @@
 
+import { toast } from "@/hooks/use-toast";
+
 export const ADMIN_USERNAMES = ['sec', 'thesec'];
 
 export const BANNED_USERNAMES: string[] = [];

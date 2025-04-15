@@ -342,7 +342,11 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
             </div>
           </div>
           
-          <AnnouncementReplies announcementId={announcement.id} isAdmin={isAdmin} />
+          <AnnouncementReplies 
+            announcementId={announcement.id} 
+            isAdmin={isAdmin} 
+            refetch={refetch}
+          />
         </CardFooter>
       </Card>
     );
