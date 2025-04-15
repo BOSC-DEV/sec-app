@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -44,34 +45,85 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
                 <Shield className="h-4 w-4 text-icc-gold" />
                 1. Core Reporting System
               </h4>
-              <div className="pl-4 space-y-3">
+              <div className="pl-4 space-y-4">
                 <p>
-                  The reporting system is built on a structured validation framework that ensures accuracy and reliability:
+                  The reporting system implements a sophisticated multi-layered architecture designed for accuracy, reliability, and scalability:
                 </p>
-                <ul className="list-disc pl-5 space-y-2">
-                  <li><span className="font-medium">Report Creation:</span> Reports are submitted with mandatory fields including scammer name, wallet addresses, and fraud methodology. The system validates:
-                    <ul className="list-disc pl-5 mt-1">
-                      <li>Wallet address format validation using regex patterns for multiple blockchain formats</li>
-                      <li>Duplicate detection across existing scammer records</li>
-                      <li>Evidence requirements including transaction proofs and communication records</li>
-                    </ul>
-                  </li>
-                  <li><span className="font-medium">Validation Process:</span> Reports undergo multi-stage verification:
-                    <ul className="list-disc pl-5 mt-1">
-                      <li>Initial automated checks for completeness and format validity</li>
-                      <li>Cross-referencing against known scam patterns</li>
-                      <li>Community validation through the reputation system</li>
-                      <li>Final verification by high-reputation members</li>
-                    </ul>
-                  </li>
-                  <li><span className="font-medium">Evidence Storage:</span> The system employs secure storage for:
-                    <ul className="list-disc pl-5 mt-1">
-                      <li>Transaction screenshots with metadata extraction</li>
-                      <li>Communication logs with timestamp verification</li>
-                      <li>Wallet activity tracking across multiple chains</li>
-                    </ul>
-                  </li>
-                </ul>
+                <div className="space-y-4">
+                  <h5 className="font-semibold">1.1 Data Validation Framework</h5>
+                  <ul className="list-disc pl-5 space-y-2">
+                    <li><span className="font-medium">Input Validation Layer:</span>
+                      <ul className="list-disc pl-5 mt-1">
+                        <li>Real-time wallet address validation using blockchain-specific regex patterns:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Ethereum: ^0x[a-fA-F0-9]{40}$</li>
+                            <li>Bitcoin: ^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$</li>
+                            <li>Solana: [1-9A-HJ-NP-Za-km-z]{32,44}</li>
+                          </ul>
+                        </li>
+                        <li>Dynamic field validation with configurable rules:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Required fields: name, accused_of, wallet_addresses</li>
+                            <li>Optional fields: photo_url, aliases, links, accomplices</li>
+                            <li>Array field validation: minimum 1 wallet address</li>
+                          </ul>
+                        </li>
+                        <li>Duplicate detection system:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Fuzzy matching on scammer names (Levenshtein distance ≤ 2)</li>
+                            <li>Exact matching on wallet addresses</li>
+                            <li>Cross-reference against existing aliases</li>
+                          </ul>
+                        </li>
+                      </ul>
+                    </li>
+                    <li><span className="font-medium">Evidence Processing Pipeline:</span>
+                      <ul className="list-disc pl-5 mt-1">
+                        <li>File validation and processing:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Maximum file size: 10MB per image</li>
+                            <li>Supported formats: PNG, JPG, JPEG, WEBP</li>
+                            <li>Automatic image optimization and compression</li>
+                            <li>EXIF data stripping for privacy</li>
+                          </ul>
+                        </li>
+                        <li>Metadata extraction and verification:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Transaction hash verification</li>
+                            <li>Timestamp validation</li>
+                            <li>Blockchain explorer integration</li>
+                          </ul>
+                        </li>
+                        <li>Storage and retrieval system:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Content-addressable storage with SHA-256 hashing</li>
+                            <li>Redundant storage across multiple availability zones</li>
+                            <li>Automatic file type detection and validation</li>
+                          </ul>
+                        </li>
+                      </ul>
+                    </li>
+                    <li><span className="font-medium">Report Verification Process:</span>
+                      <ul className="list-disc pl-5 mt-1">
+                        <li>Multi-stage verification workflow:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Stage 1: Automated checks (syntax, completeness)</li>
+                            <li>Stage 2: Duplicate detection and cross-referencing</li>
+                            <li>Stage 3: Community validation period (72 hours)</li>
+                            <li>Stage 4: High-reputation member review</li>
+                          </ul>
+                        </li>
+                        <li>Verification scoring algorithm:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Base score: 0-100 based on completeness</li>
+                            <li>Evidence multiplier: 1.0-2.0x based on quality</li>
+                            <li>Community trust factor: 0.5-1.5x based on validation</li>
+                          </ul>
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </section>
 
@@ -81,55 +133,100 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
                 2. Bounty System Architecture
               </h4>
               <div className="pl-4 space-y-4">
-                <h5 className="font-semibold mb-1">2.1 Core Bounty Mechanics</h5>
-                <div className="pl-4 space-y-2">
+                <h5 className="font-semibold">2.1 Core Transaction Engine</h5>
+                <div className="space-y-2">
                   <p>
-                    The bounty system operates on a sophisticated transfer and tracking mechanism:
+                    The bounty system operates on a sophisticated blockchain-integrated architecture:
                   </p>
                   <ul className="list-disc pl-5 space-y-2">
-                    <li><span className="font-medium">Contribution Logic:</span>
+                    <li><span className="font-medium">Transaction Processing Pipeline:</span>
                       <ul className="list-disc pl-5 mt-1">
-                        <li>Direct contributions in $SEC tokens</li>
-                        <li>Automatic verification of transaction signatures</li>
-                        <li>Real-time bounty amount updates with atomic database operations</li>
-                        <li>Contribution tracking per user with full history</li>
+                        <li>Input validation:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Amount validation (minimum 0.01 $SEC)</li>
+                            <li>Signature verification using ed25519</li>
+                            <li>Balance checks against user wallet</li>
+                          </ul>
+                        </li>
+                        <li>Transaction execution:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Atomic operations with rollback capability</li>
+                            <li>Double-entry accounting system</li>
+                            <li>Real-time balance updates</li>
+                          </ul>
+                        </li>
+                        <li>State management:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>ACID compliance for all operations</li>
+                            <li>Optimistic locking for concurrent updates</li>
+                            <li>Event-driven architecture for notifications</li>
+                          </ul>
+                        </li>
                       </ul>
                     </li>
                     <li><span className="font-medium">Transfer Mechanism:</span>
                       <ul className="list-disc pl-5 mt-1">
-                        <li>Partial bounty transfers between scammer reports</li>
-                        <li>Mandatory 10% retention on original scammer report</li>
-                        <li>Multi-step validation process for transfers</li>
-                        <li>Atomic database updates to prevent inconsistencies</li>
-                      </ul>
-                    </li>
-                    <li><span className="font-medium">Transaction Validation:</span>
-                      <ul className="list-disc pl-5 mt-1">
-                        <li>On-chain verification of $SEC token transfers</li>
-                        <li>Double-entry accounting system for bounty tracking</li>
-                        <li>Automatic reconciliation of bounty amounts</li>
+                        <li>Business rules enforcement:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>90% maximum transfer amount</li>
+                            <li>10% minimum retention requirement</li>
+                            <li>Multiple transfer support</li>
+                          </ul>
+                        </li>
+                        <li>Transfer validation:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Source contribution verification</li>
+                            <li>Destination scammer validation</li>
+                            <li>Transfer amount constraints</li>
+                          </ul>
+                        </li>
+                        <li>Transfer execution:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Two-phase commit protocol</li>
+                            <li>Automatic balance reconciliation</li>
+                            <li>Transfer history tracking</li>
+                          </ul>
+                        </li>
                       </ul>
                     </li>
                   </ul>
-                </div>
 
-                <h5 className="font-semibold mb-1">2.2 Contribution Management</h5>
-                <div className="pl-4 space-y-2">
+                  <h5 className="font-semibold mt-4">2.2 State Management System</h5>
                   <ul className="list-disc pl-5 space-y-2">
-                    <li><span className="font-medium">Transfer Rules:</span>
+                    <li><span className="font-medium">Contribution State Machine:</span>
                       <ul className="list-disc pl-5 mt-1">
-                        <li>Maximum transfer amount = 90% of original contribution</li>
-                        <li>Minimum retention amount = 10% of original contribution</li>
-                        <li>Transfer window = unlimited time period</li>
-                        <li>Multiple transfers allowed from single contribution</li>
+                        <li>State transitions:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>PENDING → CONFIRMED → ACTIVE</li>
+                            <li>ACTIVE → TRANSFERRED (partial/full)</li>
+                            <li>ACTIVE → REFUNDED (exceptional cases)</li>
+                          </ul>
+                        </li>
+                        <li>State constraints:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Minimum balance requirements</li>
+                            <li>Transfer cooldown periods</li>
+                            <li>Maximum transfer attempts</li>
+                          </ul>
+                        </li>
                       </ul>
                     </li>
-                    <li><span className="font-medium">State Management:</span>
+                    <li><span className="font-medium">Balance Management:</span>
                       <ul className="list-disc pl-5 mt-1">
-                        <li>Active/inactive contribution tracking</li>
-                        <li>Transfer history with full audit trail</li>
-                        <li>Contribution source tracking</li>
-                        <li>Real-time balance updates</li>
+                        <li>Balance tracking:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Real-time balance calculations</li>
+                            <li>Historical balance tracking</li>
+                            <li>Balance reconciliation system</li>
+                          </ul>
+                        </li>
+                        <li>Transfer restrictions:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Minimum balance enforcement</li>
+                            <li>Maximum transfer limits</li>
+                            <li>Daily transfer quotas</li>
+                          </ul>
+                        </li>
                       </ul>
                     </li>
                   </ul>
@@ -143,61 +240,124 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
                 3. Leaderboard & Ranking System
               </h4>
               <div className="pl-4 space-y-4">
-                <h5 className="font-semibold mb-1">3.1 Scoring Algorithm</h5>
-                <div className="pl-4 space-y-2">
+                <h5 className="font-semibold">3.1 Scoring Algorithm</h5>
+                <div className="space-y-2">
                   <p>
-                    The leaderboard system utilizes a comprehensive scoring algorithm that considers multiple factors:
+                    The leaderboard implements a comprehensive scoring system with multiple weighted factors:
                   </p>
                   <ul className="list-disc pl-5 space-y-2">
-                    <li><span className="font-medium">Point Calculation:</span>
+                    <li><span className="font-medium">Core Metrics:</span>
                       <ul className="list-disc pl-5 mt-1">
-                        <li>Report Creation: Base 100 points per verified report</li>
-                        <li>Report Quality Multiplier: 1.0-2.0x based on detail level</li>
-                        <li>Evidence Bonus: +50 points per verified evidence piece</li>
-                        <li>Community Validation: +10 points per validation</li>
-                      </ul>
-                    </li>
-                    <li><span className="font-medium">Engagement Metrics:</span>
-                      <ul className="list-disc pl-5 mt-1">
-                        <li>Comment quality score: 1-5 points per substantive comment</li>
-                        <li>Like/dislike ratio impact: ±2 points per interaction</li>
-                        <li>Report view count: 0.1 points per unique view</li>
-                        <li>Cross-references: 5 points per valid connection</li>
-                      </ul>
-                    </li>
-                    <li><span className="font-medium">Bounty Impact:</span>
-                      <ul className="list-disc pl-5 mt-1">
-                        <li>Contribution points: 1 point per $SEC contributed</li>
-                        <li>Transfer bonus: 0.5 points per successful transfer</li>
-                        <li>Total bounty raised: 2 points per $SEC on reports</li>
+                        <li>Report Quality Score (max 100 points per report):
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Completeness: 0-40 points
+                              <ul className="list-[square] pl-5 mt-1">
+                                <li>Required fields: 20 points</li>
+                                <li>Optional fields: 10 points</li>
+                                <li>Evidence quality: 10 points</li>
+                              </ul>
+                            </li>
+                            <li>Verification success: 0-30 points
+                              <ul className="list-[square] pl-5 mt-1">
+                                <li>Community validation: 15 points</li>
+                                <li>Evidence verification: 15 points</li>
+                              </ul>
+                            </li>
+                            <li>Community engagement: 0-30 points
+                              <ul className="list-[square] pl-5 mt-1">
+                                <li>Comments quality: 10 points</li>
+                                <li>Helpful votes: 10 points</li>
+                                <li>Report shares: 10 points</li>
+                              </ul>
+                            </li>
+                          </ul>
+                        </li>
+                        <li>Engagement Metrics:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Comment scoring:
+                              <ul className="list-[square] pl-5 mt-1">
+                                <li>Base points: 1-5 per comment</li>
+                                <li>Length multiplier: 1.0-1.5x</li>
+                                <li>Quality bonus: 0-3 points</li>
+                              </ul>
+                            </li>
+                            <li>Interaction scoring:
+                              <ul className="list-[square] pl-5 mt-1">
+                                <li>Likes received: 2 points each</li>
+                                <li>Shares generated: 5 points each</li>
+                                <li>Report views: 0.1 points each</li>
+                              </ul>
+                            </li>
+                          </ul>
+                        </li>
+                        <li>Bounty Impact:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Contribution scoring:
+                              <ul className="list-[square] pl-5 mt-1">
+                                <li>Base: 1 point per $SEC</li>
+                                <li>Early contributor bonus: 1.5x</li>
+                                <li>Large contribution bonus: 2x</li>
+                              </ul>
+                            </li>
+                            <li>Transfer efficiency:
+                              <ul className="list-[square] pl-5 mt-1">
+                                <li>Successful transfers: 5 points</li>
+                                <li>Strategic placement: 10 points</li>
+                                <li>Network effect: 2x multiplier</li>
+                              </ul>
+                            </li>
+                          </ul>
+                        </li>
                       </ul>
                     </li>
                   </ul>
                 </div>
 
-                <h5 className="font-semibold mb-1">3.2 Ranking Categories</h5>
-                <div className="pl-4 space-y-2">
+                <h5 className="font-semibold mt-4">3.2 Ranking Categories</h5>
+                <div className="space-y-2">
                   <ul className="list-disc pl-5 space-y-2">
-                    <li><span className="font-medium">Overall Ranking:</span> Combines all metrics with weighted importance:
+                    <li><span className="font-medium">Overall Ranking Algorithm:</span>
                       <ul className="list-disc pl-5 mt-1">
-                        <li>Report Quality: 40% weight</li>
-                        <li>Community Engagement: 30% weight</li>
-                        <li>Bounty Activity: 30% weight</li>
+                        <li>Base Formula:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Total Score = (QS × 0.4) + (ES × 0.3) + (BS × 0.3)</li>
+                            <li>QS = Quality Score (normalized 0-100)</li>
+                            <li>ES = Engagement Score (normalized 0-100)</li>
+                            <li>BS = Bounty Score (normalized 0-100)</li>
+                          </ul>
+                        </li>
+                        <li>Time decay factors:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Recent activity bonus: 1.0-1.5x</li>
+                            <li>Historical contribution weight: 0.7-1.0x</li>
+                            <li>Seasonal adjustments: ±0.2x</li>
+                          </ul>
+                        </li>
                       </ul>
                     </li>
-                    <li><span className="font-medium">Category Rankings:</span>
+                    <li><span className="font-medium">Specialized Rankings:</span>
                       <ul className="list-disc pl-5 mt-1">
-                        <li>Top Reporters: Based on report count and quality</li>
-                        <li>Top Contributors: Based on bounty amounts</li>
-                        <li>Community Leaders: Based on engagement metrics</li>
-                      </ul>
-                    </li>
-                    <li><span className="font-medium">Temporal Rankings:</span>
-                      <ul className="list-disc pl-5 mt-1">
-                        <li>Daily: Reset every 24 hours</li>
-                        <li>Weekly: Rolling 7-day window</li>
-                        <li>Monthly: Calendar month basis</li>
-                        <li>All-time: Cumulative stats</li>
+                        <li>Reporter Rankings:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Report accuracy weight: 40%</li>
+                            <li>Community validation: 30%</li>
+                            <li>Impact measurement: 30%</li>
+                          </ul>
+                        </li>
+                        <li>Contributor Rankings:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Total bounty amount: 50%</li>
+                            <li>Transfer efficiency: 25%</li>
+                            <li>Strategic impact: 25%</li>
+                          </ul>
+                        </li>
+                        <li>Community Leadership:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Engagement quality: 40%</li>
+                            <li>Network influence: 30%</li>
+                            <li>Contribution impact: 30%</li>
+                          </ul>
+                        </li>
                       </ul>
                     </li>
                   </ul>
@@ -211,56 +371,133 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
                 4. Most Wanted System
               </h4>
               <div className="pl-4 space-y-4">
-                <h5 className="font-semibold mb-1">4.1 Ranking Algorithm</h5>
-                <div className="pl-4 space-y-2">
+                <h5 className="font-semibold">4.1 Ranking Algorithm</h5>
+                <div className="space-y-2">
                   <p>
-                    The Most Wanted list is determined by a complex algorithm that weighs multiple factors:
+                    The Most Wanted list utilizes a sophisticated ranking algorithm that considers multiple weighted factors:
                   </p>
                   <ul className="list-disc pl-5 space-y-2">
-                    <li><span className="font-medium">Primary Metrics:</span>
+                    <li><span className="font-medium">Core Metrics Implementation:</span>
                       <ul className="list-disc pl-5 mt-1">
-                        <li>Total bounty amount (40% weight)</li>
-                        <li>Number of verified victims (25% weight)</li>
-                        <li>Scam severity score (20% weight)</li>
-                        <li>Activity recency (15% weight)</li>
+                        <li>Primary metrics calculation:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Bounty weight (40%):
+                              <ul className="list-[square] pl-5 mt-1">
+                                <li>Total amount normalization</li>
+                                <li>Growth rate factor</li>
+                                <li>Contribution diversity</li>
+                              </ul>
+                            </li>
+                            <li>Victim impact (25%):
+                              <ul className="list-[square] pl-5 mt-1">
+                                <li>Verified victim count</li>
+                                <li>Financial impact scale</li>
+                                <li>Geographic distribution</li>
+                              </ul>
+                            </li>
+                            <li>Severity score (20%):
+                              <ul className="list-[square] pl-5 mt-1">
+                                <li>Scam sophistication level</li>
+                                <li>Network complexity</li>
+                                <li>Recovery difficulty</li>
+                              </ul>
+                            </li>
+                            <li>Activity recency (15%):
+                              <ul className="list-[square] pl-5 mt-1">
+                                <li>Last reported activity</li>
+                                <li>Pattern frequency</li>
+                                <li>Temporal clustering</li>
+                              </ul>
+                            </li>
+                          </ul>
+                        </li>
                       </ul>
                     </li>
-                    <li><span className="font-medium">Severity Scoring:</span>
+                    <li><span className="font-medium">Severity Scoring Implementation:</span>
                       <ul className="list-disc pl-5 mt-1">
-                        <li>Financial impact: 1-100 based on total amount</li>
-                        <li>Victim count multiplier: 1.0-2.0x</li>
-                        <li>Sophistication level: 1-50 points</li>
-                        <li>Cross-border factor: 1.5x multiplier</li>
-                      </ul>
-                    </li>
-                    <li><span className="font-medium">Time Decay:</span>
-                      <ul className="list-disc pl-5 mt-1">
-                        <li>Last activity within 7 days: 1.0x</li>
-                        <li>8-30 days: 0.8x</li>
-                        <li>31-90 days: 0.6x</li>
-                        <li>90+ days: 0.4x</li>
+                        <li>Financial impact assessment:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Amount classification:
+                              <ul className="list-[square] pl-5 mt-1">
+                                <li>Tier 1 (1-10 points): < $10,000</li>
+                                <li>Tier 2 (11-30 points): $10,000-$100,000</li>
+                                <li>Tier 3 (31-60 points): $100,000-$1M</li>
+                                <li>Tier 4 (61-100 points): > $1M</li>
+                              </ul>
+                            </li>
+                            <li>Victim multiplier:
+                              <ul className="list-[square] pl-5 mt-1">
+                                <li>1-5 victims: 1.0x</li>
+                                <li>6-20 victims: 1.3x</li>
+                                <li>21-100 victims: 1.6x</li>
+                                <li>>100 victims: 2.0x</li>
+                              </ul>
+                            </li>
+                          </ul>
+                        </li>
+                        <li>Sophistication assessment:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Technical complexity:
+                              <ul className="list-[square] pl-5 mt-1">
+                                <li>Basic (1-10 points)</li>
+                                <li>Intermediate (11-25 points)</li>
+                                <li>Advanced (26-40 points)</li>
+                                <li>Sophisticated (41-50 points)</li>
+                              </ul>
+                            </li>
+                            <li>Network analysis:
+                              <ul className="list-[square] pl-5 mt-1">
+                                <li>Wallet clustering</li>
+                                <li>Transaction patterns</li>
+                                <li>Cross-chain activity</li>
+                              </ul>
+                            </li>
+                          </ul>
+                        </li>
                       </ul>
                     </li>
                   </ul>
                 </div>
 
-                <h5 className="font-semibold mb-1">4.2 Update Mechanism</h5>
-                <div className="pl-4 space-y-2">
+                <h5 className="font-semibold mt-4">4.2 Dynamic Ranking System</h5>
+                <div className="space-y-2">
                   <ul className="list-disc pl-5 space-y-2">
-                    <li><span className="font-medium">Ranking Updates:</span>
+                    <li><span className="font-medium">Real-time Updates:</span>
                       <ul className="list-disc pl-5 mt-1">
-                        <li>Real-time bounty amount updates</li>
-                        <li>Hourly recalculation of ranking positions</li>
-                        <li>Daily severity score updates</li>
-                        <li>Weekly comprehensive review</li>
+                        <li>Trigger events:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>New bounty contributions</li>
+                            <li>Additional victim reports</li>
+                            <li>Evidence submissions</li>
+                            <li>Cross-reference connections</li>
+                          </ul>
+                        </li>
+                        <li>Update schedule:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Real-time: Bounty amounts</li>
+                            <li>Hourly: Position recalculation</li>
+                            <li>Daily: Severity assessment</li>
+                            <li>Weekly: Comprehensive review</li>
+                          </ul>
+                        </li>
                       </ul>
                     </li>
-                    <li><span className="font-medium">Trigger Events:</span>
+                    <li><span className="font-medium">Position Calculation:</span>
                       <ul className="list-disc pl-5 mt-1">
-                        <li>New bounty contributions</li>
-                        <li>Additional victim reports</li>
-                        <li>New evidence submissions</li>
-                        <li>Cross-reference connections</li>
+                        <li>Ranking formula:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Base score calculation</li>
+                            <li>Time decay application</li>
+                            <li>Activity boost factors</li>
+                          </ul>
+                        </li>
+                        <li>Update triggers:
+                          <ul className="list-[circle] pl-5 mt-1">
+                            <li>Score threshold changes</li>
+                            <li>New evidence impact</li>
+                            <li>Community validation</li>
+                          </ul>
+                        </li>
                       </ul>
                     </li>
                   </ul>
@@ -283,3 +520,4 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
 };
 
 export default AboutDialog;
+
