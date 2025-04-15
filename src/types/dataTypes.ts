@@ -1,3 +1,4 @@
+
 export interface Scammer {
   id: string;
   name: string;
@@ -81,7 +82,7 @@ export interface Announcement {
   likes: number;
   dislikes: number;
   views: number;
-  survey_data?: SurveyData;
+  survey_data?: SurveyData | null;
 }
 
 export interface SurveyData {

@@ -9,9 +9,52 @@ import {
   SurveyVoter,
   EntityType
 } from '@/types/dataTypes';
+import { Json } from '@/integrations/supabase/types';
 import { toast } from '@/hooks/use-toast';
 import { notifyReaction } from '@/services/notificationService';
 import { MAX_SURVEY_OPTIONS, canVoteInSurvey } from '@/utils/adminUtils';
+
+// Helper function to safely convert Json to SurveyData
+const convertJsonToSurveyData = (data: Json | null): SurveyData | null => {
+  if (!data) return null;
+  
+  try {
+    // If it's a string, parse it
+    const surveyData = typeof data === 'string' ? JSON.parse(data) : data;
+    
+    // Check if it has the required structure
+    if (typeof surveyData === 'object' && 
+        surveyData !== null && 
+        'title' in surveyData && 
+        'options' in surveyData &&
+        Array.isArray(surveyData.options)) {
+      
+      // Validate and ensure proper structure
+      return {
+        title: String(surveyData.title),
+        options: surveyData.options.map((option: any) => ({
+          text: String(option.text || ''),
+          votes: Number(option.votes || 0),
+          voters: Array.isArray(option.voters) 
+            ? option.voters.map((voter: any) => ({
+                userId: String(voter.userId || ''),
+                badgeTier: String(voter.badgeTier || '')
+              }))
+            : []
+        }))
+      };
+    }
+  } catch (error) {
+    console.error('Error parsing survey data:', error);
+  }
+  
+  return null;
+};
+
+// Helper function to convert SurveyData to Json for Supabase
+const convertSurveyDataToJson = (surveyData: SurveyData): Json => {
+  return surveyData as unknown as Json;
+};
 
 // Announcements Functions
 export const getAnnouncements = async (): Promise<Announcement[]> => {
@@ -28,16 +71,11 @@ export const getAnnouncements = async (): Promise<Announcement[]> => {
     
     // Parse the survey_data if it exists and convert to proper SurveyData type
     const announcementsWithParsedData = data.map(item => {
-      if (item.survey_data) {
-        return {
-          ...item,
-          survey_data: typeof item.survey_data === 'string' 
-            ? JSON.parse(item.survey_data) as SurveyData 
-            : item.survey_data as SurveyData
-        };
-      }
-      return item;
-    }) as Announcement[];
+      return {
+        ...item,
+        survey_data: convertJsonToSurveyData(item.survey_data)
+      } as Announcement;
+    });
     
     return announcementsWithParsedData;
   } catch (error) {
@@ -67,7 +105,10 @@ export const createAnnouncement = async (announcement: Omit<Announcement, 'id' |
       return null;
     }
     
-    return data as Announcement;
+    return {
+      ...data,
+      survey_data: convertJsonToSurveyData(data.survey_data)
+    } as Announcement;
   } catch (error) {
     console.error('Error in createAnnouncement:', error);
     return null;
@@ -101,7 +142,7 @@ export const createSurveyAnnouncement = async (
         author_profile_pic: announcement.author_profile_pic,
         likes: announcement.likes || 0,
         dislikes: announcement.dislikes || 0,
-        survey_data: surveyData
+        survey_data: convertSurveyDataToJson(surveyData)
       })
       .select()
       .single();
@@ -111,19 +152,10 @@ export const createSurveyAnnouncement = async (
       return null;
     }
     
-    // Parse the survey_data if needed
-    if (data.survey_data) {
-      const parsedAnnouncement = {
-        ...data,
-        survey_data: typeof data.survey_data === 'string' 
-          ? JSON.parse(data.survey_data) as SurveyData 
-          : data.survey_data as SurveyData
-      } as Announcement;
-      
-      return parsedAnnouncement;
-    }
-    
-    return data as Announcement;
+    return {
+      ...data,
+      survey_data: convertJsonToSurveyData(data.survey_data)
+    } as Announcement;
   } catch (error) {
     console.error('Error in createSurveyAnnouncement:', error);
     return null;
@@ -143,13 +175,9 @@ export const getUserSurveyVote = async (announcementId: string, userId: string):
       return undefined;
     }
     
-    let surveyData: SurveyData | null = null;
+    const surveyData = convertJsonToSurveyData(data?.survey_data);
     
-    if (data?.survey_data) {
-      surveyData = typeof data.survey_data === 'string'
-        ? JSON.parse(data.survey_data) as SurveyData
-        : data.survey_data as SurveyData;
-      
+    if (surveyData) {
       for (let i = 0; i < surveyData.options.length; i++) {
         const option = surveyData.options[i];
         const voterIndex = option.voters.findIndex((voter) => voter.userId === userId);
@@ -193,13 +221,9 @@ export const voteSurvey = async (
       return false;
     }
     
-    let surveyData: SurveyData | null = null;
+    const surveyData = convertJsonToSurveyData(announcement?.survey_data);
     
-    if (announcement?.survey_data) {
-      surveyData = typeof announcement.survey_data === 'string'
-        ? JSON.parse(announcement.survey_data) as SurveyData
-        : announcement.survey_data as SurveyData;
-      
+    if (surveyData) {
       let userPreviousVote = -1;
       
       surveyData.options.forEach((option, index) => {
@@ -226,7 +250,7 @@ export const voteSurvey = async (
       const { error: updateError } = await supabase
         .from('announcements')
         .update({
-          survey_data: surveyData
+          survey_data: convertSurveyDataToJson(surveyData)
         })
         .eq('id', announcementId);
         
