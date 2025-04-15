@@ -28,21 +28,20 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
     color,
     nextTier
   } = badgeInfo;
-  
   const sizeClasses = {
     sm: 'text-xs',
     md: 'text-sm',
     lg: 'text-base'
   };
   
-  // Create the badge element - showing only the icon, removing the border and background
+  // Create the badge element - showing only the icon
   const badge = (
     <span 
       className={`
         ${variant === 'plain' ? '' : color} 
         ${sizeClasses[size]} 
+        ${variant === 'default' || variant === 'tier' ? 'rounded-full border px-2.5 py-0.5' : ''}
         inline-flex items-center shrink-0
-        -mt-1
       `}
     >
       {icon}
