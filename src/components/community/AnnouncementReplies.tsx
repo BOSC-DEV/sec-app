@@ -82,6 +82,8 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
         author_name: profile?.display_name || '',
         author_username: profile?.username || '',
         author_profile_pic: profile?.profile_pic_url || '',
+        likes: 0,
+        dislikes: 0
       });
       
       if (newReply) {

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -155,6 +154,8 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         author_name: profile?.display_name || '',
         author_username: profile?.username || '',
         author_profile_pic: profile?.profile_pic_url || '',
+        likes: 0,
+        dislikes: 0
       });
       
       if (createdAnnouncement) {
@@ -211,6 +212,8 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
           author_name: profile?.display_name || '',
           author_username: profile?.username || '',
           author_profile_pic: profile?.profile_pic_url || '',
+          likes: 0,
+          dislikes: 0
         }
       );
       

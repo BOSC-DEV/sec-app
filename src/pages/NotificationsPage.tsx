@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -51,28 +50,28 @@ const NotificationsPage: React.FC = () => {
     : notifications;
   
   // Handle clicking a notification
-  const handleNotificationClick = async (notification: Notification) => {
-    // Mark as read
-    await markNotificationAsRead(notification.id);
+  const handleNotificationClick = (notification: Notification) => {
+    // Mark as read first if not already read
+    if (!notification.is_read) {
+      markNotificationAsRead(notification.id);
+    }
     
     // Navigate based on entity type
     switch (notification.entity_type) {
-      case EntityType.SCAMMER:
+      case EntityType.scammer:
         navigate(`/scammer/${notification.entity_id}`);
         break;
-      case EntityType.COMMENT:
-        // For comments, navigate to the scammer page
-        // Comment IDs are in format "cmt-timestamp-randomstring"
-        const scammerId = notification.entity_id.split('-')[1];
-        navigate(`/scammer/${scammerId}`);
+      case EntityType.comment:
+        // For comments, we need to navigate to the scammer page
+        navigate(`/scammer/${notification.entity_id.split('-')[1]}`);
         break;
-      case EntityType.ANNOUNCEMENT:
+      case EntityType.announcement:
         navigate('/community');
         break;
-      case EntityType.REPLY:
+      case EntityType.reply:
         navigate('/community');
         break;
-      case EntityType.CHAT_MESSAGE:
+      case EntityType.chat_message:
         navigate('/community');
         break;
       default:

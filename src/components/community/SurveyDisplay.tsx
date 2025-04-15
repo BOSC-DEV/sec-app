@@ -106,7 +106,7 @@ const SurveyDisplay: React.FC<SurveyDisplayProps> = ({ survey, onVote }) => {
     
     return (
       <div key={tier} className="flex items-center text-xs bg-muted/50 rounded-full px-2 py-1">
-        <span className="mr-1">{MINIMUM_VOTING_BADGE !== 'Whale' ? tier : ''}</span>
+        <span className="mr-1">{tier}</span>
         <span>{count}</span>
       </div>
     );

@@ -1,3 +1,4 @@
+
 export interface Scammer {
   id: string;
   name: string;
@@ -138,12 +139,12 @@ export enum NotificationType {
 }
 
 export enum EntityType {
-  'scammer' = 'scammer',
-  'announcement' = 'announcement',
-  'reply' = 'reply',
-  'comment' = 'comment',
-  'chat_message' = 'chat_message',
-  'survey' = 'survey'
+  scammer = 'scammer',
+  announcement = 'announcement',
+  reply = 'reply',
+  comment = 'comment',
+  chat_message = 'chat_message',
+  survey = 'survey'
 }
 
 export interface Notification {

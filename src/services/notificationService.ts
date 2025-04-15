@@ -178,7 +178,7 @@ export const notifyAllUsersAboutAnnouncement = async (
         type: NotificationType.SYSTEM,
         content: `New announcement from ${actorName}: ${truncatedContent}`,
         entity_id: announcementId,
-        entity_type: EntityType.ANNOUNCEMENT,
+        entity_type: EntityType.announcement,
         actor_id: actorId,
         actor_name: actorName,
         actor_username: actorUsername,
@@ -222,7 +222,7 @@ export const notifyScammerLike = async (
       type: NotificationType.LIKE,
       content: `${actorName} liked your post about ${scammerName}`,
       entity_id: scammerId,
-      entity_type: EntityType.SCAMMER,
+      entity_type: EntityType.scammer,
       actor_id: actorId,
       actor_name: actorName,
       actor_username: actorUsername,
@@ -252,7 +252,7 @@ export const notifyScammerComment = async (
       type: NotificationType.COMMENT,
       content: `${actorName} commented on your post about ${scammerName}`,
       entity_id: commentId,
-      entity_type: EntityType.COMMENT,
+      entity_type: EntityType.comment,
       actor_id: actorId,
       actor_name: actorName,
       actor_username: actorUsername,
@@ -282,7 +282,7 @@ export const notifyScammerBounty = async (
       type: NotificationType.BOUNTY,
       content: `${actorName} added a bounty of ${amount} SOL on your post about ${scammerName}`,
       entity_id: scammerId,
-      entity_type: EntityType.SCAMMER,
+      entity_type: EntityType.scammer,
       actor_id: actorId,
       actor_name: actorName,
       actor_username: actorUsername,
@@ -309,16 +309,16 @@ export const notifyReaction = async (
   try {
     let content = '';
     switch (entityType) {
-      case EntityType.COMMENT:
+      case EntityType.comment:
         content = `${actorName} reacted with ${reactionType} to your comment`;
         break;
-      case EntityType.ANNOUNCEMENT:
+      case EntityType.announcement:
         content = `${actorName} reacted with ${reactionType} to your announcement`;
         break;
-      case EntityType.REPLY:
+      case EntityType.reply:
         content = `${actorName} reacted with ${reactionType} to your reply`;
         break;
-      case EntityType.CHAT_MESSAGE:
+      case EntityType.chat_message:
         content = `${actorName} reacted with ${reactionType} to your message`;
         break;
       default:
