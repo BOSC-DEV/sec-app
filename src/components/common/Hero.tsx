@@ -34,11 +34,11 @@ const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
               <Button 
                 asChild 
                 className="bg-icc-gold hover:bg-icc-gold-light text-icc-blue-dark dark:text-white text-lg py-6 px-8 min-w-[200px] sm:min-w-[240px] font-medium"
-                aria-label="View scammers list"
+                aria-label="View reports list"
               >
                 <Link to="/most-wanted">
                   <Search className="mr-2 h-5 w-5" />
-                  View Scammers
+                  View Reports
                 </Link>
               </Button>
               <Button 
