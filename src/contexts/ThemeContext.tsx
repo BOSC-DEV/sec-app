@@ -8,6 +8,7 @@ type ThemeContextType = {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Always use light theme, no toggle or dark mode functionality
   const theme = 'light';
 
   return (

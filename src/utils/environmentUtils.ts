@@ -56,7 +56,8 @@ export const featureFlags = {
   enablePerformanceMonitoring: true,
   enableChatArchiving: true,
   enableBountySystem: true,
-  enableNotifications: true // Explicitly enable notifications
+  enableNotifications: true, // Explicitly enable notifications
+  enableDarkMode: false // Explicitly disable dark mode in all environments
 };
 
 /**
@@ -74,7 +75,8 @@ export const getConfig = () => {
     logLevel: 'warn',
     analyticsEnabled: true,
     environment: Environment.PRODUCTION,
-    notificationsEnabled: true // Explicitly enable notifications in config
+    notificationsEnabled: true, // Explicitly enable notifications in config
+    darkModeEnabled: false // Explicitly disable dark mode in config
   };
 
   return commonConfig;
