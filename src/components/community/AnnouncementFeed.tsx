@@ -506,7 +506,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         
         <CardContent className="py-4">
           <div 
-            className="prose prose-sm max-w-none dark:text-white text-black dark:prose-invert" 
+            className="prose prose-sm max-w-none dark:prose-invert dark:text-white text-black" 
             dangerouslySetInnerHTML={{ __html: announcement.content }} 
           />
           

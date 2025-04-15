@@ -264,7 +264,7 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
                         </div>
                         
                         <div 
-                          className="text-sm mt-2 prose prose-sm max-w-none" 
+                          className="text-sm mt-2 prose prose-sm max-w-none dark:text-white dark:prose-invert" 
                           dangerouslySetInnerHTML={{ __html: reply.content }}
                         />
                         

@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -78,6 +79,26 @@
 
     .text-muted {
       @apply text-dark-text-muted;
+    }
+    
+    /* Fix for prose content in dark mode */
+    .prose {
+      @apply text-dark-text-primary;
+    }
+    
+    .prose p, 
+    .prose li, 
+    .prose h1, 
+    .prose h2, 
+    .prose h3, 
+    .prose h4, 
+    .prose h5, 
+    .prose h6,
+    .prose strong,
+    .prose em,
+    .prose blockquote,
+    .prose code {
+      @apply text-white;
     }
   }
 }
