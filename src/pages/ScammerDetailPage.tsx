@@ -35,6 +35,7 @@ import { Link } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import BountyForm from '@/components/scammer/BountyForm';
 import { ArrowLeftRight } from 'lucide-react';
+
 const ScammerDetailPage = () => {
   const {
     id
@@ -63,6 +64,7 @@ const ScammerDetailPage = () => {
   const contributionsPerPage = 5;
   const [profileChangeCounter, setProfileChangeCounter] = useState(0);
   const isMobile = useIsMobile();
+
   useEffect(() => {
     const handleProfileUpdated = () => {
       console.log("Profile updated event received, refreshing contributions");
@@ -76,6 +78,7 @@ const ScammerDetailPage = () => {
       window.removeEventListener(PROFILE_UPDATED_EVENT, handleProfileUpdated);
     };
   }, [id, queryClient]);
+
   const deleteScammerMutation = useMutation({
     mutationFn: () => {
       if (!id) throw new Error("Scammer ID is required");
@@ -96,6 +99,7 @@ const ScammerDetailPage = () => {
       });
     }
   });
+
   const {
     data: scammer,
     isLoading: isLoadingScammer,
@@ -105,6 +109,7 @@ const ScammerDetailPage = () => {
     queryFn: () => getScammerById(id || ''),
     enabled: !!id
   });
+
   const {
     data: comments,
     isLoading: isLoadingComments,
@@ -114,6 +119,7 @@ const ScammerDetailPage = () => {
     queryFn: () => getScammerComments(id || ''),
     enabled: !!id
   });
+
   const {
     data: bountyContributionsData,
     isLoading: isLoadingBountyContributions
@@ -123,6 +129,7 @@ const ScammerDetailPage = () => {
     enabled: !!id,
     placeholderData: previousData => previousData
   });
+
   const {
     data: userContributionAmount = 0,
     isLoading: isLoadingUserContribution
@@ -131,8 +138,10 @@ const ScammerDetailPage = () => {
     queryFn: () => getUserContributionAmountForScammer(id || '', profile?.wallet_address || ''),
     enabled: !!id && !!profile?.wallet_address
   });
+
   const bountyContributions = bountyContributionsData?.contributions || [];
   const totalContributions = bountyContributionsData?.totalCount || 0;
+
   useEffect(() => {
     const checkIsCreator = async () => {
       if (!profile?.wallet_address || !id) return;
@@ -149,6 +158,7 @@ const ScammerDetailPage = () => {
     };
     checkIsCreator();
   }, [id, profile?.wallet_address]);
+
   useEffect(() => {
     const fetchUserInteraction = async () => {
       if (!profile?.wallet_address || !scammer?.id) return;
@@ -171,6 +181,7 @@ const ScammerDetailPage = () => {
     };
     fetchUserInteraction();
   }, [scammer?.id, profile?.wallet_address]);
+
   useEffect(() => {
     if (scammer) {
       setLikes(scammer.likes || 0);
@@ -183,6 +194,7 @@ const ScammerDetailPage = () => {
       }
     }
   }, [scammer]);
+
   useEffect(() => {
     const fetchCreatorProfile = async () => {
       if (scammer?.added_by) {
@@ -200,15 +212,18 @@ const ScammerDetailPage = () => {
     };
     fetchCreatorProfile();
   }, [scammer?.added_by]);
+
   useEffect(() => {
     if (profile) {
       setProfileChangeCounter(prev => prev + 1);
     }
   }, [profile?.display_name, profile?.profile_pic_url]);
+
   const handleEditScammer = () => {
     if (!id) return;
     navigate(`/report/${id}`);
   };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
       toast({
@@ -217,6 +232,7 @@ const ScammerDetailPage = () => {
       });
     });
   };
+
   const addCommentMutation = useMutation({
     mutationFn: (newComment: {
       scammer_id: string;
@@ -243,6 +259,7 @@ const ScammerDetailPage = () => {
       });
     }
   });
+
   const addBountyContributionMutation = useMutation({
     mutationFn: (contribution: {
       scammer_id: string;
@@ -275,6 +292,7 @@ const ScammerDetailPage = () => {
       });
     }
   });
+
   const handleLike = async () => {
     if (!profile?.wallet_address) {
       toast({
@@ -321,6 +339,7 @@ const ScammerDetailPage = () => {
       setIsLoading(false);
     }
   };
+
   const handleDislike = async () => {
     if (!profile?.wallet_address) {
       toast({
@@ -364,6 +383,7 @@ const ScammerDetailPage = () => {
       setIsLoading(false);
     }
   };
+
   const handleAddComment = () => {
     if (!profile) {
       toast({
@@ -389,6 +409,7 @@ const ScammerDetailPage = () => {
       author_profile_pic: profile.profile_pic_url
     });
   };
+
   const handleAddBounty = async () => {
     if (!profile) {
       await connectPhantomWallet();
@@ -437,15 +458,19 @@ const ScammerDetailPage = () => {
       setIsLoading(false);
     }
   };
+
   const handlePageChange = (page: number) => {
     setContributionsPage(page);
   };
+
   const handleDeleteScammer = () => {
     setShowDeleteDialog(true);
   };
+
   const confirmDelete = () => {
     deleteScammerMutation.mutate();
   };
+
   const handleShare = async () => {
     try {
       const url = `${window.location.origin}/scammer/${scammer?.id || id}`;
@@ -462,6 +487,7 @@ const ScammerDetailPage = () => {
       });
     }
   };
+
   const handleTransferComplete = () => {
     queryClient.invalidateQueries({
       queryKey: ['bountyContributions', id]
@@ -470,7 +496,9 @@ const ScammerDetailPage = () => {
       queryKey: ['scammer', id]
     });
   };
+
   const developerWallet = `${developerWalletAddress.substring(0, 4)}...${developerWalletAddress.substring(developerWalletAddress.length - 4)}`;
+
   if (isLoadingScammer) {
     return <div>
         <CompactHero title="Loading..." />
@@ -484,6 +512,7 @@ const ScammerDetailPage = () => {
         </section>
       </div>;
   }
+
   if (errorScammer || !scammer) {
     return <div>
         <CompactHero title="Error" />
@@ -500,6 +529,7 @@ const ScammerDetailPage = () => {
         </section>
       </div>;
   }
+
   return <div>
       <CompactHero title={scammer?.name} />
 
@@ -660,9 +690,6 @@ const ScammerDetailPage = () => {
                     </div> : <p className="text-icc-gray">No official response yet.</p>}
                 </TabsContent>
               </Tabs>
-              
-              {/* Display the BountyForm only on mobile */}
-              {isMobile && <BountyForm scammerId={scammer.id} scammerName={scammer.name} developerWalletAddress={developerWalletAddress} />}
             </div>
 
             <div>
@@ -737,31 +764,33 @@ const ScammerDetailPage = () => {
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-                
-                {/* Display the BountyForm on desktop under the likes bar */}
-                {!isMobile && <div className="mt-6">
-                    <BountyForm scammerId={scammer.id} scammerName={scammer.name} developerWalletAddress={developerWalletAddress} />
-                    
-                    {/* Recent Contributions moved here */}
-                    <div className="mt-6">
-                      <BountyContributionList contributions={bountyContributions} isLoading={isLoadingBountyContributions} totalCount={totalContributions} onPageChange={handlePageChange} currentPage={contributionsPage} itemsPerPage={contributionsPerPage} userContributionAmount={userContributionAmount} />
-                    </div>
-                  </div>}
               </div>
             </div>
           </div>
         </div>
       </section>
       
-      {/* Recent Contributions section */}
-      {isMobile && <div className="mt-8">
-          <BountyForm scammerId={scammer.id} scammerName={scammer.name} developerWalletAddress={developerWalletAddress} />
+      {isMobile && (
+        <div className="mt-8">
+          <BountyForm 
+            scammerId={scammer.id} 
+            scammerName={scammer.name} 
+            developerWalletAddress={developerWalletAddress} 
+          />
           <div className="mt-6">
-            <BountyContributionList contributions={bountyContributions} isLoading={isLoadingBountyContributions} totalCount={totalContributions} onPageChange={handlePageChange} currentPage={contributionsPage} itemsPerPage={contributionsPerPage} userContributionAmount={userContributionAmount} />
+            <BountyContributionList 
+              contributions={bountyContributions} 
+              isLoading={isLoadingBountyContributions} 
+              totalCount={totalContributions} 
+              onPageChange={handlePageChange} 
+              currentPage={contributionsPage} 
+              itemsPerPage={contributionsPerPage} 
+              userContributionAmount={userContributionAmount} 
+            />
           </div>
-        </div>}
+        </div>
+      )}
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -780,4 +809,5 @@ const ScammerDetailPage = () => {
       </AlertDialog>
     </div>;
 };
+
 export default ScammerDetailPage;
