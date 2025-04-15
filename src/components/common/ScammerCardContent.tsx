@@ -1,14 +1,15 @@
+
 import React, { useState } from 'react';
-import { Comment, Scammer, ItemType } from '@/types/dataTypes';
-import { Link } from 'react-router-dom';
+import { Comment, Scammer } from '@/types/dataTypes';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Link } from 'react-router-dom';
 import { Calendar } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import CommunityInteractionButtons from '@/components/community/CommunityInteractionButtons';
 import AdminContextMenu from '@/components/community/AdminContextMenu';
 import { toast } from '@/hooks/use-toast';
 import { deleteComment } from '@/services/commentService';
-import { banUser, isBanned } from '@/utils/adminUtils';
+import { banUser } from '@/utils/adminUtils';
 import { formatTimeAgo } from '@/utils/formatTime';
 
 interface ScammerCardContentProps {
@@ -75,16 +76,12 @@ const ScammerCardContent: React.FC<ScammerCardContentProps> = ({ scammer, commen
       <div key={comment.id} className="border rounded-md p-3 bg-card">
         <div className="flex items-start justify-between">
           <div className="flex items-center">
-            <Link to={`/profile/${comment.author_name}`}>
-              <Avatar className="h-6 w-6 mr-2 hover:ring-2 hover:ring-icc-gold transition-all">
-                <AvatarImage src={comment.author_profile_pic} alt={comment.author_name} />
-                <AvatarFallback>{comment.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
-              </Avatar>
-            </Link>
+            <Avatar className="h-6 w-6 mr-2">
+              <AvatarImage src={comment.author_profile_pic} alt={comment.author_name} />
+              <AvatarFallback>{comment.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
+            </Avatar>
             <div>
-              <Link to={`/profile/${comment.author_name}`} className="hover:text-icc-gold transition-colors">
-                <span className="text-sm font-medium">{comment.author_name}</span>
-              </Link>
+              <span className="text-sm font-medium">{comment.author_name}</span>
             </div>
           </div>
           <div className="text-xs text-muted-foreground flex items-center">
@@ -97,8 +94,8 @@ const ScammerCardContent: React.FC<ScammerCardContentProps> = ({ scammer, commen
           <CommunityInteractionButtons
             itemId={comment.id}
             itemType="scammer-comment"
-            initialLikes={comment.likes || 0}
-            initialDislikes={comment.dislikes || 0}
+            initialLikes={comment.likes}
+            initialDislikes={comment.dislikes}
           />
         </div>
       </div>

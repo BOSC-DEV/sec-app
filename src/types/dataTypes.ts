@@ -1,4 +1,3 @@
-import React from 'react';
 
 export interface Scammer {
   id: string;
@@ -31,7 +30,8 @@ export interface Profile {
   website_link: string;
   bio: string;
   points: number;
-  sec_balance?: number;
+  sec_balance?: number; // Added this property
+  // Additional fields for leaderboard
   reports_count?: number;
   likes_count?: number;
   views_count?: number;
@@ -39,7 +39,7 @@ export interface Profile {
   bounty_amount?: number;
   bounties_raised?: number;
   last_activity?: string;
-  total_bounty?: number;
+  total_bounty?: number; // Added field: sum of bounty_amount and bounties_raised
 }
 
 export interface Comment {
@@ -71,6 +71,7 @@ export interface BountyContribution {
   transferred_to_id?: string;
 }
 
+// Community feature types
 export interface Announcement {
   id: string;
   content: string;
@@ -110,6 +111,7 @@ export interface ChatMessage {
   dislikes?: number;
 }
 
+// Notification system types
 export interface Notification {
   id: string;
   recipient_id: string;
@@ -142,5 +144,3 @@ export enum EntityType {
   REPLY = 'reply',
   CHAT_MESSAGE = 'chat_message'
 }
-
-export type ItemType = 'announcement' | 'reply' | 'scammer' | 'scammer-comment' | 'chat_message';
