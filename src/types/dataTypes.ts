@@ -88,7 +88,6 @@ export interface Announcement {
 export interface SurveyData {
   title: string;
   options: SurveyOption[];
-  poll_number?: number;
 }
 
 export interface SurveyOption {
@@ -100,8 +99,6 @@ export interface SurveyOption {
 export interface SurveyVoter {
   userId: string;
   badgeTier: string;
-  username?: string;
-  profilePic?: string;
 }
 
 export interface AnnouncementReply {

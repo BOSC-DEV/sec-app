@@ -1,5 +1,4 @@
 
-// First part of the file with the helper function for JSON conversion
 import { supabase } from '@/integrations/supabase/client';
 import { 
   Announcement, 
@@ -33,16 +32,13 @@ const convertJsonToSurveyData = (data: Json | null): SurveyData | null => {
       // Validate and ensure proper structure
       return {
         title: String(surveyData.title),
-        poll_number: typeof surveyData.poll_number !== 'undefined' ? Number(surveyData.poll_number) : undefined,
         options: surveyData.options.map((option: any) => ({
           text: String(option.text || ''),
           votes: Number(option.votes || 0),
           voters: Array.isArray(option.voters) 
             ? option.voters.map((voter: any) => ({
                 userId: String(voter.userId || ''),
-                badgeTier: String(voter.badgeTier || ''),
-                username: voter.username ? String(voter.username) : undefined,
-                profilePic: voter.profilePic ? String(voter.profilePic) : undefined
+                badgeTier: String(voter.badgeTier || '')
               }))
             : []
         }))
@@ -120,22 +116,11 @@ export const createAnnouncement = async (announcement: Omit<Announcement, 'id' |
 };
 
 export const createSurveyAnnouncement = async (
-  title: string, 
+  title: string,
   optionTexts: string[],
   announcement: Omit<Announcement, 'id' | 'created_at' | 'views' | 'content' | 'survey_data'>
 ): Promise<Announcement | null> => {
   try {
-    // Get the latest poll number
-    const { data: latestPoll } = await supabase
-      .from('announcements')
-      .select('survey_data')
-      .not('survey_data', 'is', null)
-      .order('created_at', { ascending: false })
-      .limit(1);
-    
-    const lastPollNumber = latestPoll?.[0]?.survey_data?.poll_number || 0;
-    const newPollNumber = lastPollNumber + 1;
-    
     const options: SurveyOption[] = optionTexts.map(text => ({
       text,
       votes: 0,
@@ -143,7 +128,6 @@ export const createSurveyAnnouncement = async (
     }));
     
     const surveyData: SurveyData = {
-      poll_number: newPollNumber,
       title,
       options
     };
