@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -7,7 +8,10 @@ import {
   incrementAnnouncementViews,
   deleteAnnouncement,
   editAnnouncement,
-  isUserAdmin
+  isUserAdmin,
+  createSurveyAnnouncement,
+  voteSurvey,
+  getUserSurveyVote
 } from '@/services/communityService';
 import { notifyAllUsersAboutAnnouncement } from '@/services/notificationService';
 import { Announcement } from '@/types/dataTypes';
@@ -16,6 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Megaphone, 
   Calendar, 
@@ -23,18 +28,21 @@ import {
   Eye, 
   ChevronLeft, 
   ChevronRight,
-  Search
+  Search,
+  BarChart3
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { formatDistanceToNow } from 'date-fns';
 import { Link } from 'react-router-dom';
 import AnnouncementReplies from './AnnouncementReplies';
 import CommunityInteractionButtons from './CommunityInteractionButtons';
 import AdminContextMenu from './AdminContextMenu';
 import RichTextEditor from './RichTextEditor';
+import SurveyCreator from './SurveyCreator';
+import SurveyDisplay from './SurveyDisplay';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { formatTimeAgo } from '@/utils/formatTime';
+import { useBadgeTier } from '@/hooks/useBadgeTier';
 
 const ADMIN_USERNAMES = ['sec', 'thesec'];
 
@@ -46,10 +54,14 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   const { profile, isConnected } = useProfile();
   const [newAnnouncement, setNewAnnouncement] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSurveySubmitting, setIsSurveySubmitting] = useState(false);
   const [viewedAnnouncements, setViewedAnnouncements] = useState<Set<string>>(new Set());
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [announcementTab, setAnnouncementTab] = useState<'post' | 'survey'>('post');
+  const [userSurveyVotes, setUserSurveyVotes] = useState<Record<string, number>>({});
+  const badgeInfo = useBadgeTier(profile?.sec_balance || 0);
   
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editContent, setEditContent] = useState('');
@@ -73,6 +85,28 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
     queryFn: getAnnouncements,
   });
   
+  useEffect(() => {
+    const loadUserVotes = async () => {
+      if (!profile?.wallet_address) return;
+      
+      const surveyAnnouncements = announcements.filter(a => a.survey_data);
+      const votes: Record<string, number> = {};
+      
+      for (const announcement of surveyAnnouncements) {
+        if (announcement.survey_data) {
+          const userVote = await getUserSurveyVote(announcement.id, profile.wallet_address);
+          if (userVote !== undefined) {
+            votes[announcement.id] = userVote;
+          }
+        }
+      }
+      
+      setUserSurveyVotes(votes);
+    };
+    
+    loadUserVotes();
+  }, [announcements, profile?.wallet_address]);
+  
   const filteredAnnouncements = React.useMemo(() => {
     if (!searchQuery.trim()) return announcements;
     
@@ -80,7 +114,8 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
     return announcements.filter(announcement => 
       announcement.content.toLowerCase().includes(query) || 
       announcement.author_name.toLowerCase().includes(query) ||
-      (announcement.author_username && announcement.author_username.toLowerCase().includes(query))
+      (announcement.author_username && announcement.author_username.toLowerCase().includes(query)) ||
+      (announcement.survey_data?.title.toLowerCase().includes(query))
     );
   }, [searchQuery, announcements]);
   
@@ -152,6 +187,102 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+  
+  const handleCreateSurvey = async (title: string, options: string[]) => {
+    if (!isAdmin) {
+      toast({
+        title: "Unauthorized",
+        description: "Only admins can create surveys",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsSurveySubmitting(true);
+    
+    try {
+      const createdSurvey = await createSurveyAnnouncement(
+        title,
+        options,
+        {
+          author_id: profile?.wallet_address || '',
+          author_name: profile?.display_name || '',
+          author_username: profile?.username || '',
+          author_profile_pic: profile?.profile_pic_url || '',
+        }
+      );
+      
+      if (createdSurvey) {
+        await notifyAllUsersAboutAnnouncement(
+          createdSurvey.id,
+          `New survey: ${title}`,
+          profile?.wallet_address || '',
+          profile?.display_name || '',
+          profile?.username,
+          profile?.profile_pic_url
+        );
+        
+        toast({
+          title: "Survey created",
+          description: "Your survey has been created and all users have been notified",
+          variant: "default",
+        });
+        
+        refetch();
+      } else {
+        throw new Error("Failed to create survey");
+      }
+    } catch (error) {
+      console.error('Error creating survey:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create survey. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSurveySubmitting(false);
+    }
+  };
+  
+  const handleSurveyVote = async (announcementId: string, optionIndex: number) => {
+    if (!profile?.wallet_address || !badgeInfo?.tier) {
+      toast({
+        title: "Can't vote",
+        description: "You need to be connected and have a badge to vote",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    try {
+      const success = await voteSurvey(
+        announcementId, 
+        optionIndex, 
+        profile.wallet_address,
+        badgeInfo.tier
+      );
+      
+      if (success) {
+        setUserSurveyVotes(prev => ({
+          ...prev,
+          [announcementId]: optionIndex
+        }));
+        
+        await refetch();
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error voting in survey:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit your vote. Please try again.",
+        variant: "destructive",
+      });
+      return false;
     }
   };
   
@@ -274,6 +405,14 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   
   const renderAnnouncementCard = (announcement: Announcement) => {
     const time = formatTimeAgo(announcement.created_at);
+    
+    // Prepare survey data if this announcement contains a survey
+    const surveyData = announcement.survey_data ? {
+      id: announcement.id,
+      title: announcement.survey_data.title,
+      options: announcement.survey_data.options,
+      userVote: userSurveyVotes[announcement.id]
+    } : undefined;
 
     const cardContent = (
       <Card 
@@ -308,7 +447,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
                   )}
                 </div>
                 <div className="text-xs text-icc-gold font-medium mt-0.5">
-                  Official SEC Announcement
+                  {announcement.survey_data ? "SEC Community Survey" : "Official SEC Announcement"}
                 </div>
               </div>
             </div>
@@ -324,6 +463,13 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         
         <CardContent className="py-4">
           <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: announcement.content }} />
+          
+          {surveyData && (
+            <SurveyDisplay 
+              survey={surveyData}
+              onVote={handleSurveyVote}
+            />
+          )}
         </CardContent>
         
         <CardFooter className="pt-0 px-6 pb-3 flex flex-col items-start">
@@ -391,26 +537,45 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
           <CardHeader className="pb-3">
             <div className="flex items-center">
               <Megaphone className="h-5 w-5 mr-2 text-icc-gold" />
-              <h3 className="text-lg font-medium">Post New Announcement</h3>
+              <h3 className="text-lg font-medium">Admin Tools</h3>
             </div>
+            <Tabs value={announcementTab} onValueChange={(value) => setAnnouncementTab(value as 'post' | 'survey')}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="post">
+                  <Megaphone className="h-4 w-4 mr-2" />
+                  Post Announcement
+                </TabsTrigger>
+                <TabsTrigger value="survey">
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  Create Survey
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="post" className="mt-4">
+                <form onSubmit={handleSubmit}>
+                  <RichTextEditor 
+                    value={newAnnouncement}
+                    onChange={setNewAnnouncement}
+                  />
+                  <div className="mt-3 flex justify-end">
+                    <Button 
+                      type="submit" 
+                      disabled={isSubmitting || !newAnnouncement.trim()}
+                    >
+                      {isSubmitting ? "Posting..." : "Post Announcement"}
+                    </Button>
+                  </div>
+                </form>
+              </TabsContent>
+              
+              <TabsContent value="survey" className="mt-4">
+                <SurveyCreator 
+                  onCreateSurvey={handleCreateSurvey}
+                  isSubmitting={isSurveySubmitting}
+                />
+              </TabsContent>
+            </Tabs>
           </CardHeader>
-          
-          <CardContent>
-            <form onSubmit={handleSubmit}>
-              <RichTextEditor 
-                value={newAnnouncement}
-                onChange={setNewAnnouncement}
-              />
-              <div className="mt-3 flex justify-end">
-                <Button 
-                  type="submit" 
-                  disabled={isSubmitting || !newAnnouncement.trim()}
-                >
-                  {isSubmitting ? "Posting..." : "Post Announcement"}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
         </Card>
       )}
       

@@ -1394,3 +1394,153 @@ export const deleteChatMessage = async (messageId: string): Promise<boolean> => 
 export const isUserAdmin = async (username: string): Promise<boolean> => {
   return isAdmin(username);
 };
+
+// Survey Functions
+export const createSurveyAnnouncement = async (
+  title: string,
+  options: string[],
+  authorInfo: {
+    author_id: string;
+    author_name: string;
+    author_username?: string;
+    author_profile_pic?: string;
+  }
+): Promise<Announcement | null> => {
+  try {
+    // Create survey data structure
+    const surveyData = {
+      title: title,
+      options: options.map(opt => ({
+        text: opt,
+        votes: 0,
+        voters: []
+      }))
+    };
+
+    // Create announcement with survey_data
+    const { data, error } = await supabase
+      .from('announcements')
+      .insert({
+        content: `<div class="text-center"><strong>SURVEY:</strong> ${title}</div>`,
+        author_id: authorInfo.author_id,
+        author_name: authorInfo.author_name,
+        author_username: authorInfo.author_username,
+        author_profile_pic: authorInfo.author_profile_pic,
+        survey_data: surveyData
+      })
+      .select()
+      .single();
+      
+    if (error) {
+      throw error;
+    }
+    
+    return data;
+  } catch (error) {
+    handleError(error, 'Error creating survey announcement');
+    return null;
+  }
+};
+
+export const voteSurvey = async (
+  announcementId: string,
+  optionIndex: number,
+  userId: string,
+  badgeTier: string
+): Promise<boolean> => {
+  try {
+    // First get the current announcement with survey data
+    const { data: announcement, error: fetchError } = await supabase
+      .from('announcements')
+      .select('survey_data')
+      .eq('id', announcementId)
+      .single();
+      
+    if (fetchError) {
+      throw fetchError;
+    }
+    
+    if (!announcement?.survey_data) {
+      throw new Error('No survey data found in announcement');
+    }
+    
+    const surveyData = announcement.survey_data;
+    
+    // Check if user has already voted
+    const hasVoted = surveyData.options.some(option => 
+      option.voters.some(voter => voter.userId === userId)
+    );
+    
+    if (hasVoted) {
+      // Remove the previous vote if exists
+      for (const option of surveyData.options) {
+        option.votes = option.voters.filter(voter => voter.userId === userId).length > 0 
+          ? option.votes - 1 
+          : option.votes;
+        option.voters = option.voters.filter(voter => voter.userId !== userId);
+      }
+    }
+    
+    // Add the new vote
+    if (optionIndex >= 0 && optionIndex < surveyData.options.length) {
+      surveyData.options[optionIndex].votes += 1;
+      surveyData.options[optionIndex].voters.push({
+        userId,
+        badgeTier
+      });
+    } else {
+      throw new Error('Invalid option index');
+    }
+    
+    // Update the survey data in the database
+    const { error: updateError } = await supabase
+      .from('announcements')
+      .update({
+        survey_data: surveyData
+      })
+      .eq('id', announcementId);
+      
+    if (updateError) {
+      throw updateError;
+    }
+    
+    return true;
+  } catch (error) {
+    handleError(error, 'Error voting in survey');
+    return false;
+  }
+};
+
+export const getUserSurveyVote = async (
+  announcementId: string,
+  userId: string
+): Promise<number | undefined> => {
+  try {
+    const { data: announcement, error } = await supabase
+      .from('announcements')
+      .select('survey_data')
+      .eq('id', announcementId)
+      .single();
+      
+    if (error) {
+      throw error;
+    }
+    
+    if (!announcement?.survey_data) {
+      return undefined;
+    }
+    
+    // Find which option the user voted for
+    for (let i = 0; i < announcement.survey_data.options.length; i++) {
+      const option = announcement.survey_data.options[i];
+      if (option.voters.some(voter => voter.userId === userId)) {
+        return i;
+      }
+    }
+    
+    return undefined;
+  } catch (error) {
+    console.error('Error getting user survey vote:', error);
+    return undefined;
+  }
+};

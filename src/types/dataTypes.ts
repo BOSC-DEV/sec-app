@@ -76,12 +76,29 @@ export interface Announcement {
   content: string;
   author_id: string;
   author_name: string;
-  author_username: string;
+  author_username?: string;
   author_profile_pic?: string;
   created_at: string;
+  likes: number;
+  dislikes: number;
   views: number;
-  likes?: number;
-  dislikes?: number;
+  survey_data?: SurveyData;
+}
+
+export interface SurveyData {
+  title: string;
+  options: SurveyOption[];
+}
+
+export interface SurveyOption {
+  text: string;
+  votes: number;
+  voters: SurveyVoter[];
+}
+
+export interface SurveyVoter {
+  userId: string;
+  badgeTier: string;
 }
 
 export interface AnnouncementReply {
@@ -93,8 +110,8 @@ export interface AnnouncementReply {
   author_username?: string;
   author_profile_pic?: string;
   created_at: string;
-  likes?: number;
-  dislikes?: number;
+  likes: number;
+  dislikes: number;
 }
 
 export interface ChatMessage {
@@ -106,24 +123,8 @@ export interface ChatMessage {
   author_profile_pic?: string;
   image_url?: string;
   created_at: string;
-  likes?: number;
-  dislikes?: number;
-}
-
-// Notification system types
-export interface Notification {
-  id: string;
-  recipient_id: string;
-  type: NotificationType;
-  content: string;
-  entity_id: string;
-  entity_type: EntityType;
-  actor_id?: string;
-  actor_name?: string;
-  actor_username?: string;
-  actor_profile_pic?: string;
-  created_at: string;
-  is_read: boolean;
+  likes: number;
+  dislikes: number;
 }
 
 export enum NotificationType {
@@ -137,10 +138,25 @@ export enum NotificationType {
 }
 
 export enum EntityType {
-  SCAMMER = 'scammer',
-  COMMENT = 'comment',
-  ANNOUNCEMENT = 'announcement',
-  REPLY = 'reply',
-  CHAT_MESSAGE = 'chat_message',
-  SCAMMER_COMMENT = 'scammer-comment'
+  'scammer' = 'scammer',
+  'announcement' = 'announcement',
+  'reply' = 'reply',
+  'comment' = 'comment',
+  'chat_message' = 'chat_message',
+  'survey' = 'survey'
+}
+
+export interface Notification {
+  id: string;
+  recipient_id: string;
+  type: NotificationType;
+  content: string;
+  entity_id: string;
+  entity_type: EntityType;
+  actor_id?: string;
+  actor_name?: string;
+  actor_username?: string;
+  actor_profile_pic?: string;
+  created_at: string;
+  is_read: boolean;
 }
