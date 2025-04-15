@@ -27,9 +27,7 @@ import { getConnection } from '@/utils/phantomWallet';
 import { formatTimeAgo } from '@/utils/formatTime';
 import { useOnlineUsers } from '@/hooks/useOnlineUsers';
 import { CircleDot } from 'lucide-react';
-
 const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump');
-
 const LiveChat = () => {
   const {
     profile,
@@ -47,7 +45,6 @@ const LiveChat = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
   const onlineCount = useOnlineUsers();
-
   useEffect(() => {
     const checkAdmin = async () => {
       if (profile?.username) {
@@ -59,13 +56,11 @@ const LiveChat = () => {
     };
     checkAdmin();
   }, [profile?.username]);
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({
       behavior: 'smooth'
     });
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isConnected) {
@@ -108,7 +103,6 @@ const LiveChat = () => {
       setIsSubmitting(false);
     }
   };
-
   const handleDeleteMessage = async (messageId: string) => {
     if (!isAdmin) return;
     try {
@@ -133,7 +127,6 @@ const LiveChat = () => {
       });
     }
   };
-
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -160,7 +153,6 @@ const LiveChat = () => {
     reader.readAsDataURL(file);
     setImageFile(file);
   };
-
   const removeImage = () => {
     setImageFile(null);
     setImagePreview(null);
@@ -168,11 +160,9 @@ const LiveChat = () => {
       fileInputRef.current.value = '';
     }
   };
-
   const handleEmojiSelect = (emoji: string) => {
     setNewMessage(prev => prev + emoji);
   };
-
   const fetchUserSecBalance = async (walletAddress: string) => {
     try {
       if (userSecBalances[walletAddress] !== undefined) return;
@@ -201,7 +191,6 @@ const LiveChat = () => {
       }));
     }
   };
-
   useEffect(() => {
     const fetchMessages = async () => {
       try {
@@ -238,7 +227,6 @@ const LiveChat = () => {
       supabase.removeChannel(channel);
     };
   }, []);
-
   const renderMessage = (message: ChatMessage, index: number) => {
     const userBadge = message.author_id ? userSecBalances[message.author_id] !== undefined ? calculateBadgeTier(userSecBalances[message.author_id]) : null : null;
     const isCurrentUser = message.author_id === profile?.wallet_address;
@@ -259,7 +247,7 @@ const LiveChat = () => {
               <span className={`font-semibold text-sm ${isCurrentUser ? 'text-icc-gold' : 'text-icc-gold'}`}>
                 {message.author_name}
               </span>
-              {userBadge && <BadgeTier badgeInfo={userBadge} size="sm" showTooltip={true} context="chat" />}
+              {userBadge && <BadgeTier badgeInfo={userBadge} size="sm" showTooltip={true} />}
               {isAdmin && message.author_username === 'sec' && <span className="text-xs bg-icc-gold/20 text-icc-gold px-1 rounded ml-1">admin</span>}
             </div>
             
@@ -288,7 +276,6 @@ const LiveChat = () => {
         {messageContent}
       </AdminContextMenu> : messageContent;
   };
-
   if (isLoading) {
     return <div className="flex justify-center py-12">
         <div className="animate-pulse flex flex-col space-y-4 w-full">
@@ -302,7 +289,6 @@ const LiveChat = () => {
         </div>
       </div>;
   }
-
   return <Card className="h-full flex flex-col">
       <CardHeader className={`pb-2 ${isMobile ? 'px-3 py-2' : 'px-4 py-3'}`}>
         <div className="flex items-center justify-between">
@@ -385,5 +371,4 @@ const LiveChat = () => {
       </CardFooter>
     </Card>;
 };
-
 export default LiveChat;
