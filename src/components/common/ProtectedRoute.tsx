@@ -1,16 +1,13 @@
-
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Wallet, LogIn } from 'lucide-react';
-
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
-
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children
 }) => {
@@ -20,35 +17,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     connectWallet
   } = useProfile();
   const location = useLocation();
-  const [showDialog, setShowDialog] = useState(false);
-
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    
-    if (!isLoading && !isConnected) {
-      // Add a small delay to prevent flickering during quick state changes
-      timeoutId = setTimeout(() => {
-        setShowDialog(true);
-      }, 100);
-    } else {
-      setShowDialog(false);
-    }
-
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, [isConnected, isLoading]);
+  const [showDialog, setShowDialog] = React.useState(!isConnected && !isLoading);
 
   // Show loading state while checking authentication
   if (isLoading) {
-    return (
-      <div className="p-8 space-y-4">
+    return <div className="p-8 space-y-4">
         <Skeleton className="h-12 w-full max-w-xl" />
         <Skeleton className="h-64 w-full" />
-      </div>
-    );
+      </div>;
   }
 
   // Instead of redirecting, show a dialog
@@ -78,5 +54,4 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // If authenticated, render the children
   return <>{children}</>;
 };
-
 export default ProtectedRoute;

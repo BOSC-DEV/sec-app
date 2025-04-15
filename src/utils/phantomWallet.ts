@@ -1,3 +1,4 @@
+
 import { toast } from '@/hooks/use-toast';
 import { 
   Connection, 
@@ -27,7 +28,6 @@ export interface PhantomProvider {
   connect: ({ onlyIfTrusted }: { onlyIfTrusted: boolean }) => Promise<{ publicKey: { toString: () => string } }>;
   disconnect: () => Promise<void>;
   on: (event: PhantomEvent, callback: () => void) => void;
-  off: (event: PhantomEvent, callback: () => void) => void;
   isPhantom: boolean;
   isConnected: boolean;
   publicKey: { toString: () => string } | null;
@@ -121,11 +121,6 @@ export const connectPhantomWallet = async (): Promise<string | null> => {
     const publicKey = response.publicKey.toString();
     
     console.log("Phantom wallet connected successfully:", publicKey);
-    
-    // Verify the connection is active
-    if (!provider.isConnected || !provider.publicKey) {
-      throw new Error("Wallet connection verification failed");
-    }
     
     toast({
       title: "Wallet connected",

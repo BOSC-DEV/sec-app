@@ -36,44 +36,35 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isPhantomAvailable, setIsPhantomAvailable] = useState<boolean>(false);
-  const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
   useEffect(() => {
-    const initializeWallet = async () => {
-      try {
-        setIsPhantomAvailable(isPhantomInstalled());
-        const savedWallet = localStorage.getItem('walletAddress');
-        
-        if (savedWallet) {
-          const provider = getPhantomProvider();
-          if (provider && provider.isConnected) {
-            setWalletAddress(savedWallet);
-            setIsConnected(true);
-            await fetchProfile(savedWallet);
-          } else {
-            localStorage.removeItem('walletAddress');
-          }
-        }
-      } catch (error) {
-        console.error('Error initializing wallet:', error);
-      } finally {
-        setIsLoading(false);
-        setIsInitialized(true);
-      }
+    const checkPhantomAvailability = () => {
+      setIsPhantomAvailable(isPhantomInstalled());
     };
 
-    initializeWallet();
+    checkPhantomAvailability();
+
+    const savedWallet = localStorage.getItem('walletAddress');
+    if (savedWallet) {
+      setWalletAddress(savedWallet);
+      setIsConnected(true);
+      fetchProfile(savedWallet);
+    }
+
+    window.addEventListener('DOMContentLoaded', checkPhantomAvailability);
+    
+    return () => {
+      window.removeEventListener('DOMContentLoaded', checkPhantomAvailability);
+    };
   }, []);
 
   useEffect(() => {
-    if (!isInitialized) return;
-
     const provider = getPhantomProvider();
     
     if (provider) {
-      const handleConnect = () => {
+      provider.on('connect', () => {
         const publicKey = getWalletPublicKey();
         if (publicKey) {
           setWalletAddress(publicKey);
@@ -81,34 +72,16 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
           localStorage.setItem('walletAddress', publicKey);
           fetchProfile(publicKey);
         }
-      };
+      });
       
-      const handleDisconnect = () => {
+      provider.on('disconnect', () => {
         setWalletAddress(null);
         setIsConnected(false);
         setProfile(null);
         localStorage.removeItem('walletAddress');
-      };
-      
-      provider.on('connect', handleConnect);
-      provider.on('disconnect', handleDisconnect);
-
-      if (provider.isConnected && provider.publicKey) {
-        const publicKey = provider.publicKey.toString();
-        setWalletAddress(publicKey);
-        setIsConnected(true);
-        localStorage.setItem('walletAddress', publicKey);
-        fetchProfile(publicKey);
-      }
-      
-      return () => {
-        if (provider) {
-          provider.off('connect', handleConnect);
-          provider.off('disconnect', handleDisconnect);
-        }
-      };
+      });
     }
-  }, [isInitialized]);
+  }, [isPhantomAvailable]);
 
   const fetchProfile = async (address: string) => {
     try {
