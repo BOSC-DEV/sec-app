@@ -1,3 +1,5 @@
+import React from 'react';
+
 export interface Scammer {
   id: string;
   name: string;
@@ -141,4 +143,4 @@ export enum EntityType {
   CHAT_MESSAGE = 'chat_message'
 }
 
-export type ItemType = 'announcement' | 'reply' | 'scammer' | 'scammer-comment';
+export type ItemType = 'announcement' | 'reply' | 'scammer' | 'scammer-comment' | 'chat_message';
