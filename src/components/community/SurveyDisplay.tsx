@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -139,72 +138,39 @@ const SurveyDisplay: React.FC<SurveyProps> = ({
     }
   };
 
-  const renderVoterTooltip = (voter: SurveyVoter) => {
+  const renderVoterTooltip = (option: SurveyOption) => {
     return (
-      <div className="flex items-center space-x-2">
-        <Avatar className="h-6 w-6">
-          <AvatarImage src={voter.profilePic} />
-          <AvatarFallback>{getBadgeEmoji(voter.badgeTier)}</AvatarFallback>
-        </Avatar>
-        <span>{voter.username || 'Anonymous'}</span>
-        <span className="text-xs text-muted-foreground">({voter.badgeTier})</span>
-      </div>
-    );
-  };
-
-  const countVotersByBadge = (option: SurveyOption) => {
-    const badgeCounts: Record<string, { count: number, voters: SurveyVoter[] }> = {};
-    
-    option.voters.forEach(voter => {
-      if (!badgeCounts[voter.badgeTier]) {
-        badgeCounts[voter.badgeTier] = { count: 0, voters: [] };
-      }
-      badgeCounts[voter.badgeTier].count++;
-      badgeCounts[voter.badgeTier].voters.push(voter);
-    });
-    
-    return badgeCounts;
-  };
-
-  const renderBadgeBreakdown = (option: SurveyOption) => {
-    const badgeCounts = countVotersByBadge(option);
-    
-    return (
-      <div className="flex flex-wrap gap-1 mt-1">
-        {Object.entries(badgeCounts).map(([badge, data]) => (
-          <TooltipProvider key={badge}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="cursor-pointer">
-                  <Badge variant="outline" className="text-xs py-0 px-1.5">
-                    {getBadgeEmoji(badge)} {data.count}
-                  </Badge>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent className="p-0">
-                <div className="p-2 max-h-48 overflow-y-auto space-y-2">
-                  <div className="font-medium text-sm">{badge} Voters ({data.count})</div>
-                  <div className="space-y-1">
-                    {data.voters.map((voter, idx) => (
-                      <Link 
-                        key={idx} 
-                        to={voter.username ? `/profile/${voter.username}` : '#'} 
-                        className="flex items-center p-1 hover:bg-muted rounded gap-2"
-                      >
-                        <Avatar className="h-6 w-6">
-                          <AvatarImage src={voter.profilePic} />
-                          <AvatarFallback>{getBadgeEmoji(voter.badgeTier)}</AvatarFallback>
-                        </Avatar>
-                        <span className="text-sm">{voter.username || 'Anonymous'}</span>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        ))}
-      </div>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="cursor-pointer flex items-center gap-1">
+              <Badge variant="outline" className="text-xs py-0 px-1.5">
+                {getBadgeEmoji(option.voters[0]?.badgeTier || '')} {option.votes}
+              </Badge>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent className="p-0">
+            <div className="p-2 max-h-48 overflow-y-auto space-y-2">
+              <div className="font-medium text-sm">Voters ({option.votes})</div>
+              <div className="space-y-1">
+                {option.voters.map((voter, idx) => (
+                  <Link 
+                    key={idx} 
+                    to={voter.username ? `/profile/${voter.username}` : '#'} 
+                    className="flex items-center p-1 hover:bg-muted rounded gap-2"
+                  >
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={voter.profilePic} />
+                      <AvatarFallback>{getBadgeEmoji(voter.badgeTier)}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm">{voter.username || 'Anonymous'}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     );
   };
 
@@ -226,7 +192,7 @@ const SurveyDisplay: React.FC<SurveyProps> = ({
               <Progress value={percentage} className="h-2" />
               <div className="flex justify-between items-center mt-2">
                 <span className="text-xs text-muted-foreground">{option.votes} vote{option.votes !== 1 ? 's' : ''}</span>
-                {renderBadgeBreakdown(option)}
+                {option.votes > 0 && renderVoterTooltip(option)}
               </div>
             </div>
           );
