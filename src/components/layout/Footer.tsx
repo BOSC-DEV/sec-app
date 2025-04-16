@@ -55,11 +55,11 @@ const Footer = () => {
               A decentralized crime registry bringing accountability and self governance to the new digital world.
             </p>
             <div className="flex justify-center md:justify-start items-center space-x-4 mt-6">
-              <a 
-                href="https://x.com/sandecommission" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="flex items-center text-white hover:text-icc-gold dark:text-gray-300 dark:hover:text-icc-gold" 
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="text-white hover:bg-white/10 p-1"
+                onClick={() => window.open("https://x.com/sandecommission", "_blank")}
                 aria-label="SEC on X"
               >
                 <img 
@@ -67,7 +67,7 @@ const Footer = () => {
                   alt="X (Twitter)" 
                   className="h-5 w-5" 
                 />
-              </a>
+              </Button>
               <Button 
                 variant="ghost" 
                 size="icon"
