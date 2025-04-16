@@ -23,7 +23,6 @@ import { useBadgeTier } from '@/hooks/useBadgeTier';
 import BadgeTier from '@/components/profile/BadgeTier';
 import { useIsMobile } from '@/hooks/use-mobile';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
-
 const PublicProfilePage = () => {
   const {
     username,
@@ -356,7 +355,7 @@ const PublicProfilePage = () => {
                                     <span className="font-medium">{contribution.scammers.name}</span>
                                   </Link> : <span>Unknown Scammer</span>}
                               </TableCell>
-                              <TableCell className="font-mono font-medium text-icc-blue dark:text-white">
+                              <TableCell className="font-mono font-medium text-icc-blue">
                                 {formatCurrency(contribution.amount)} $SEC
                               </TableCell>
                               <TableCell className="max-w-[200px] truncate">
