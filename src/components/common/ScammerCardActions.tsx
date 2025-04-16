@@ -22,6 +22,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import ConsensusUsers from '@/components/scammer/ConsensusUsers';
 import BountyForm from '@/components/scammer/BountyForm';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
 import { formatNumber } from '@/lib/utils';
@@ -234,68 +235,76 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
   };
 
   return (
-    <div className="flex justify-between items-center pt-2 border-t mt-auto">
-      <div className="flex space-x-1">
-        <ScammerActionButton
-          icon={<ThumbsUp size={16} />}
-          count={localLikes}
-          onClick={handleLike}
-          isActive={isLiked}
-          label="Like"
-        />
-        <ScammerActionButton
-          icon={<ThumbsDown size={16} />}
-          count={localDislikes}
-          onClick={handleDislike}
-          isActive={isDisliked}
-          label="Dislike"
-        />
+    <div className="flex flex-col pt-2 border-t mt-auto">
+      <div className="flex justify-between items-center">
+        <div className="flex space-x-1">
+          <ScammerActionButton
+            icon={<ThumbsUp size={16} />}
+            count={localLikes}
+            onClick={handleLike}
+            isActive={isLiked}
+            label="Like"
+          />
+          <ScammerActionButton
+            icon={<ThumbsDown size={16} />}
+            count={localDislikes}
+            onClick={handleDislike}
+            isActive={isDisliked}
+            label="Dislike"
+          />
+        </div>
+        <div className="flex space-x-1">
+          <Dialog open={bountyDialogOpen} onOpenChange={setBountyDialogOpen}>
+            <DialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-1 text-muted-foreground"
+                onClick={handleBountyClick}
+                title="Add Bounty"
+              >
+                <CurrencyIcon size="sm" />
+                <span>{scammer.bounty_amount || 0}</span>
+              </Button>
+            </DialogTrigger>
+            {showBountyDialog && (
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Add Bounty for {scammer.name}</DialogTitle>
+                  <DialogDescription>
+                    Contribute to the bounty for this scammer. All funds go to the developer wallet.
+                  </DialogDescription>
+                </DialogHeader>
+                <BountyForm 
+                  scammerId={scammer.id} 
+                  scammerName={scammer.name}
+                  developerWalletAddress={developerWalletAddress}
+                />
+              </DialogContent>
+            )}
+          </Dialog>
+          <ScammerActionButton
+            icon={<Eye size={16} />}
+            count={scammer.views || 0}
+            label="Views"
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground"
+            onClick={handleShare}
+            title="Share"
+          >
+            <Share2 size={16} />
+          </Button>
+        </div>
       </div>
-      <div className="flex space-x-1">
-        <Dialog open={bountyDialogOpen} onOpenChange={setBountyDialogOpen}>
-          <DialogTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="flex items-center gap-1 text-muted-foreground"
-              onClick={handleBountyClick}
-              title="Add Bounty"
-            >
-              <CurrencyIcon size="sm" />
-              <span>{scammer.bounty_amount || 0}</span>
-            </Button>
-          </DialogTrigger>
-          {showBountyDialog && (
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Add Bounty for {scammer.name}</DialogTitle>
-                <DialogDescription>
-                  Contribute to the bounty for this scammer. All funds go to the developer wallet.
-                </DialogDescription>
-              </DialogHeader>
-              <BountyForm 
-                scammerId={scammer.id} 
-                scammerName={scammer.name}
-                developerWalletAddress={developerWalletAddress}
-              />
-            </DialogContent>
-          )}
-        </Dialog>
-        <ScammerActionButton
-          icon={<Eye size={16} />}
-          count={scammer.views || 0}
-          label="Views"
-        />
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-muted-foreground"
-          onClick={handleShare}
-          title="Share"
-        >
-          <Share2 size={16} />
-        </Button>
-      </div>
+      
+      {(localLikes > 0 || localDislikes > 0) && (
+        <div className="mt-1">
+          <ConsensusUsers scammerId={scammer.id} maxDisplayed={3} />
+        </div>
+      )}
     </div>
   );
 };
