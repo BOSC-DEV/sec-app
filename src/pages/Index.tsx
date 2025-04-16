@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Hero from '@/components/common/Hero';
 import ScammerCard from '@/components/common/ScammerCard';
@@ -10,6 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { formatNumber } from '@/lib/utils';
 import DisclaimerDialog from '@/components/common/DisclaimerDialog';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
+import AnimatedCounter from '@/components/common/AnimatedCounter';
 
 const Index = () => {
   const [disclaimerOpen, setDisclaimerOpen] = useState(false);
@@ -141,21 +143,37 @@ const Index = () => {
                   </div>)}
               </> : <>
                 <div className="text-center p-6">
-                  <div className="text-4xl font-bold text-icc-blue dark:text-white mb-2 flex items-center justify-center">
-                    <CurrencyIcon size="lg" className="mr-1" />{formatNumber(statistics.totalBounty)}
-                  </div>
+                  <AnimatedCounter 
+                    endValue={statistics.totalBounty}
+                    className="text-4xl font-bold text-icc-blue dark:text-white mb-2 flex items-center justify-center"
+                    formatter={(value) => formatNumber(value)}
+                  >
+                    <CurrencyIcon size="lg" className="ml-1" />
+                  </AnimatedCounter>
                   <div className="text-sm text-icc-gray dark:text-gray-400">Total Bounties</div>
                 </div>
                 <div className="text-center p-6">
-                  <div className="text-4xl font-bold text-icc-blue dark:text-white mb-2">{formatNumber(statistics.scammersCount)}</div>
+                  <AnimatedCounter 
+                    endValue={statistics.scammersCount}
+                    className="text-4xl font-bold text-icc-blue dark:text-white mb-2"
+                    formatter={(value) => formatNumber(value)}
+                  />
                   <div className="text-sm text-icc-gray dark:text-gray-400">Total Reports</div>
                 </div>
                 <div className="text-center p-6">
-                  <div className="text-4xl font-bold text-icc-blue dark:text-white mb-2">{formatNumber(statistics.reportersCount)}</div>
+                  <AnimatedCounter 
+                    endValue={statistics.reportersCount}
+                    className="text-4xl font-bold text-icc-blue dark:text-white mb-2"
+                    formatter={(value) => formatNumber(value)}
+                  />
                   <div className="text-sm text-icc-gray dark:text-gray-400">Active Hunters</div>
                 </div>
                 <div className="text-center p-6">
-                  <div className="text-4xl font-bold text-icc-blue dark:text-white mb-2">{formatNumber(statistics.usersCount)}</div>
+                  <AnimatedCounter 
+                    endValue={statistics.usersCount}
+                    className="text-4xl font-bold text-icc-blue dark:text-white mb-2"
+                    formatter={(value) => formatNumber(value)}
+                  />
                   <div className="text-sm text-icc-gray dark:text-gray-400">Total Users</div>
                 </div>
               </>}
