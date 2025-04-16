@@ -16,7 +16,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import EmojiPicker from '@/components/community/EmojiPicker';
 import CommunityInteractionButtons from './CommunityInteractionButtons';
 import AdminContextMenu from './AdminContextMenu';
-import { BadgeTier } from '@/components/profile/BadgeTier';
+import BadgeTier from '@/components/profile/BadgeTier'; // Update this import
 import { calculateBadgeTier } from '@/utils/badgeUtils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useChatMessages } from '@/hooks/useChatMessages';
