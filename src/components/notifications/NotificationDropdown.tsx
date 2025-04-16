@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -11,7 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Bell, X, CheckCheck, Sparkles, MessageSquare, ThumbsUp, CircleDollarSign, Info } from 'lucide-react';
+import { Bell, CheckCheck, Sparkles, MessageSquare, ThumbsUp, CircleDollarSign, Info } from 'lucide-react';
 
 interface NotificationDropdownProps {
   open: boolean;
@@ -40,6 +39,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
       window.setUnreadCount();
     }
     refetch();
+    onOpenChange(false);
   };
   
   const handleClose = () => {
@@ -134,14 +134,6 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                 <CheckCheck className="h-4 w-4" />
               </Button>
             )}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleClose}
-              className="h-8 w-8 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         </SheetHeader>
         
