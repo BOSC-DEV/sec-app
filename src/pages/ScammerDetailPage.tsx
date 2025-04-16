@@ -5,7 +5,7 @@ import { getScammerById, deleteScammer } from '@/services/scammerService';
 import { getScammerComments, addComment } from '@/services/commentService';
 import { likeScammer, dislikeScammer, getUserScammerInteraction } from '@/services/interactionService';
 import { isScammerCreator } from '@/services/reportService';
-import { addBountyContribution, getScammerBountyContributions, getUserContributionAmountForScammer } from '@/services/bountyService';
+import { addBountyContribution, getScammerBountyContributions, getUserContributionAmountForScammer } from '@/services/bounty';
 import CompactHero from '@/components/common/CompactHero';
 import BountyContributionList from '@/components/scammer/BountyContributionList';
 import BountyTransferDialog from '@/components/scammer/BountyTransferDialog';
@@ -501,7 +501,8 @@ const ScammerDetailPage = () => {
   const developerWallet = `${developerWalletAddress.substring(0, 4)}...${developerWalletAddress.substring(developerWalletAddress.length - 4)}`;
 
   if (isLoadingScammer) {
-    return <div>
+    return (
+      <div>
         <CompactHero title="Loading..." />
         <section className="icc-section bg-white">
           <div className="icc-container">
@@ -511,11 +512,13 @@ const ScammerDetailPage = () => {
             <Skeleton className="h-6 w-1/2 mt-2" />
           </div>
         </section>
-      </div>;
+      </div>
+    );
   }
 
   if (errorScammer || !scammer) {
-    return <div>
+    return (
+      <div>
         <CompactHero title="Error" />
         <section className="icc-section bg-white">
           <div className="icc-container">
@@ -528,7 +531,8 @@ const ScammerDetailPage = () => {
             </p>
           </div>
         </section>
-      </div>;
+      </div>
+    );
   }
 
   return (
@@ -547,7 +551,8 @@ const ScammerDetailPage = () => {
               {isMobile ? 'Back' : 'Back to Most Wanted'}
             </Button>
             <div className="flex items-center space-x-2 md:space-x-3">
-              {isCreator && <>
+              {isCreator && (
+                <>
                   <Button variant="outline" size="sm" onClick={handleEditScammer} aria-label="Edit this report">
                     <Edit className="h-3.5 w-3.5" aria-hidden="true" />
                     {!isMobile && <span className="ml-1">Edit Report</span>}
@@ -556,7 +561,8 @@ const ScammerDetailPage = () => {
                     <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                     {!isMobile && <span className="ml-1">Archive Report</span>}
                   </Button>
-                </>}
+                </>
+              )}
               
               <Button variant="outline" size="sm" onClick={handleShare} aria-label="Share this scammer report">
                 <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
@@ -707,7 +713,8 @@ const ScammerDetailPage = () => {
                   <h3 className="text-lg font-semibold text-icc-blue dark:text-white mb-3">Reported By</h3>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  {creatorProfile ? <Link to={`/profile/${creatorProfile.username || creatorProfile.wallet_address}`} className="flex items-center space-x-3 group hover:bg-gray-100 dark:hover:bg-icc-blue p-2 rounded-md transition-colors py-0 px-0 -mt-2">
+                  {creatorProfile ? (
+                    <Link to={`/profile/${creatorProfile.username || creatorProfile.wallet_address}`} className="flex items-center space-x-3 group hover:bg-gray-100 dark:hover:bg-icc-blue p-2 rounded-md transition-colors py-0 px-0 -mt-2">
                       <Avatar className="group-hover:ring-2 group-hover:ring-icc-gold transition-all">
                         <AvatarImage src={creatorProfile.profile_pic_url} alt={`${creatorProfile.display_name}'s profile`} />
                         <AvatarFallback>{creatorProfile.display_name.substring(0, 2)}</AvatarFallback>
@@ -718,7 +725,10 @@ const ScammerDetailPage = () => {
                         </div>
                         <p className="text-sm text-gray-500 dark:text-gray-300">@{creatorProfile.username}</p>
                       </div>
-                    </Link> : <p className="text-sm text-gray-500 dark:text-gray-300">Anonymous</p>}
+                    </Link>
+                  ) : (
+                    <p className="text-sm text-gray-500 dark:text-gray-300">Anonymous</p>
+                  )}
                   <Separator className="my-4 dark:bg-gray-700" />
                   <div className="flex justify-between items-center mb-3">
                     <div className="text-sm text-gray-500 dark:text-gray-300 flex items-center">
@@ -728,3 +738,32 @@ const ScammerDetailPage = () => {
                   </div>
                   <div className="flex justify-between items-center mb-3">
                     <div className="text-sm text-gray-500 dark:text-gray-300 flex items-center">
+                      {/* Additional content can be added here */}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Archive Report</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to archive this report? This will remove it from public view, but associated bounty information will remain active.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={confirmDelete}>Archive</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default ScammerDetailPage;
