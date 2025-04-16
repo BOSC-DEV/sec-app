@@ -1,13 +1,6 @@
-
 import React from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { UseMutationResult } from '@tanstack/react-query';
-import { Profile } from '@/types/dataTypes';
-import CurrencyIcon from '@/components/common/CurrencyIcon';
 
-interface ContributionFormProps {
+const ContributionForm: React.FC<{
   contributionAmount: string;
   setContributionAmount: (value: string) => void;
   bountyComment: string;
@@ -16,9 +9,7 @@ interface ContributionFormProps {
   addBountyContributionMutation: UseMutationResult<any, unknown, any, unknown>;
   handleAddBounty: () => void;
   profile: Profile | null;
-}
-
-const ContributionForm = ({ 
+}> = ({ 
   contributionAmount, 
   setContributionAmount, 
   bountyComment, 
@@ -27,9 +18,9 @@ const ContributionForm = ({
   addBountyContributionMutation,
   handleAddBounty,
   profile
-}: ContributionFormProps) => {
+}) => {
   return (
-    <>
+    <div className="dark:text-white text-table">
       <div className="mb-4">
         <div className="text-sm font-medium text-icc-blue dark:text-white" id="contribution-amount-label">Contribution Amount</div>
         <div className="flex items-center space-x-2">
@@ -79,7 +70,7 @@ const ContributionForm = ({
           "Connect your wallet to contribute"
         )}
       </Button>
-    </>
+    </div>
   );
 };
 

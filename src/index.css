@@ -79,6 +79,10 @@
     .text-muted {
       @apply text-dark-text-muted;
     }
+
+    .text-table {
+      @apply text-white;
+    }
   }
 }
 
