@@ -89,7 +89,7 @@ const ConsensusUsers: React.FC<ConsensusUsersProps> = ({
               liked: interaction.liked
             };
           })
-          // Fix: Make sure the type predicate properly matches the ConsensusUser interface
+          // Fix: Update the type predicate to correctly match the ConsensusUser interface
           .filter((user): user is ConsensusUser => user !== null);
           
         setUsers(usersWithData);
