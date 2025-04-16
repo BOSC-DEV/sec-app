@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -153,7 +154,7 @@ const Header = () => {
                 </Link>)}
               
               <button 
-                className="text-white hover:text-icc-gold transition-colors px-2 py-1" 
+                className="text-white hover:text-icc-gold transition-colors px-2 py-1 text-left" 
                 onClick={() => {
                   copyToClipboard();
                   setIsMenuOpen(false);
