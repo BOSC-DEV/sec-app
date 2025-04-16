@@ -547,7 +547,7 @@ const ScammerDetailPage = () => {
                     <Edit className="h-3.5 w-3.5" aria-hidden="true" />
                     {!isMobile && <span className="ml-1">Edit Report</span>}
                   </Button>
-                  <Button variant="danger" size="sm" onClick={handleDeleteScammer} aria-label="Delete this report">
+                  <Button variant="gold" size="sm" onClick={handleDeleteScammer} aria-label="Delete this report">
                     <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                     {!isMobile && <span className="ml-1">Delete Report</span>}
                   </Button>
@@ -570,7 +570,7 @@ const ScammerDetailPage = () => {
               </div>
 
               <div className="mt-4 mb-6">
-                <h2 className="icc-title">{scammer.name}'s Accusations</h2>
+                <h2 className="icc-title">{scammer?.name}'s Accusations</h2>
                 <p className="text-lg text-icc-gray-dark dark:text-white mt-2">{scammer.accused_of}</p>
               </div>
 
