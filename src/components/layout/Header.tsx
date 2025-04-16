@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, User, Copy, Bell, LogIn, Wallet, ExternalLink } from 'lucide-react';
+import { Menu, X, User, Copy, Bell, LogIn, Wallet, ExternalLink, Clipboard } from 'lucide-react';
 import ICCLogo from '../common/ICCLogo';
 import { useProfile } from '@/contexts/ProfileContext';
 import ThemeToggle from '@/components/common/ThemeToggle';
@@ -9,6 +10,7 @@ import { toast } from '@/hooks/use-toast';
 import NotificationDropdown from '../notifications/NotificationDropdown';
 import NotificationIndicator from '../notifications/NotificationIndicator';
 import { useIsMobile } from '@/hooks/use-mobile';
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -22,12 +24,15 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
+
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location.pathname]);
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+
   const handleProfileClick = () => {
     if (profile?.username) {
       navigate(`/${profile.username}`);
@@ -36,6 +41,7 @@ const Header = () => {
     }
     setIsMenuOpen(false);
   };
+
   const handleWalletButtonClick = () => {
     if (isConnected) {
       navigate('/profile');
@@ -52,6 +58,7 @@ const Header = () => {
     }
     setIsMenuOpen(false);
   };
+
   const copyToClipboard = async () => {
     const contractAddress = "HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump";
     try {
@@ -68,9 +75,11 @@ const Header = () => {
       console.error("Failed to copy: ", err);
     }
   };
+
   const toggleNotifications = () => {
     setNotificationsOpen(!notificationsOpen);
   };
+
   const navigationItems = [{
     label: 'Home',
     path: '/'
@@ -87,6 +96,7 @@ const Header = () => {
     label: 'Community',
     path: '/community'
   }];
+
   return <header className="icc-header sticky top-0 z-50">
       <div className="icc-container py-3">
         <div className="flex justify-between items-center">
@@ -142,6 +152,17 @@ const Header = () => {
               {navigationItems.map(item => <Link key={item.path} to={item.path} className={`text-white hover:text-icc-gold transition-colors px-2 py-1 flex items-center ${location.pathname === item.path ? 'text-icc-gold font-medium' : ''}`} onClick={() => setIsMenuOpen(false)}>
                   {item.label}
                 </Link>)}
+              
+              <button 
+                className="text-white hover:text-icc-gold transition-colors px-2 py-1 flex items-center space-x-2" 
+                onClick={() => {
+                  copyToClipboard();
+                  setIsMenuOpen(false);
+                }}
+              >
+                <Clipboard className="h-4 w-4 mr-2" />
+                <span>Contract Address</span>
+              </button>
             </nav>
           </div>
         </div>}
@@ -149,4 +170,5 @@ const Header = () => {
       <NotificationDropdown open={notificationsOpen} onOpenChange={setNotificationsOpen} />
     </header>;
 };
+
 export default Header;
