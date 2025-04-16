@@ -1,9 +1,9 @@
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Scammer } from '@/types/dataTypes';
-import scammerService from '@/services/scammerService';
+import * as scammerService from '@/services/scammerService';
 
 const ScammerDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
