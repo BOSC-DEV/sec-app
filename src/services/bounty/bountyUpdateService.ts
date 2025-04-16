@@ -116,14 +116,13 @@ export const deleteBountyContribution = async (
 };
 
 // Helper function to update scammer bounty amount
-// This function works for both active and archived scammers
 export const updateScammerBounty = async (
   scammerId: string,
   amount: number,
   isAddition: boolean
 ): Promise<boolean> => {
   try {
-    // Get current bounty amount regardless of deleted_at status
+    // Instead of using RPC functions that don't exist, use direct update
     const { data: scammer } = await supabase
       .from('scammers')
       .select('bounty_amount')
@@ -153,11 +152,9 @@ export const updateScammerBounty = async (
 };
 
 // Adding a function with the alternative name to fix the import errors
-// This also works with archived scammers
 export const updateScammerBountyAmount = async (scammerId: string): Promise<boolean> => {
   try {
     // Calculate the total bounty amount from all active contributions
-    // regardless of whether the scammer is archived or not
     const { data, error } = await supabase
       .from('bounty_contributions')
       .select('amount')
