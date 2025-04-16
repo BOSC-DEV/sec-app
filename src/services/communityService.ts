@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { 
   Announcement, 
@@ -33,7 +34,9 @@ const convertJsonToSurveyData = (data: Json | null): SurveyData | null => {
           voters: Array.isArray(option.voters) 
             ? option.voters.map((voter: any) => ({
                 userId: String(voter.userId || ''),
-                badgeTier: String(voter.badgeTier || '')
+                badgeTier: String(voter.badgeTier || ''),
+                username: voter.username ? String(voter.username) : undefined,
+                displayName: voter.displayName ? String(voter.displayName) : undefined
               }))
             : []
         }))
@@ -215,15 +218,24 @@ export const voteSurvey = async (
   username?: string
 ): Promise<boolean> => {
   try {
-    const { data: announcement } = await supabase
+    const { data: announcementData, error: fetchError } = await supabase
       .from('announcements')
       .select('survey_data')
       .eq('id', announcementId)
       .single();
     
-    if (!announcement?.survey_data) return false;
+    if (fetchError || !announcementData?.survey_data) {
+      console.error("Error fetching announcement data:", fetchError);
+      return false;
+    }
     
-    const surveyData = announcement.survey_data;
+    // Safely convert the JSON data to our SurveyData format
+    const surveyData = convertJsonToSurveyData(announcementData.survey_data);
+    if (!surveyData) {
+      console.error("Could not parse survey data");
+      return false;
+    }
+    
     const options = [...surveyData.options];
     
     const alreadyVotedOptionIndex = options.findIndex(option => 
@@ -239,24 +251,31 @@ export const voteSurvey = async (
       options[optionIndex].voters.push({
         userId,
         badgeTier,
-        username
+        username,
+        displayName
       });
       options[optionIndex].votes += 1;
     } else {
       return true;
     }
     
-    const { error } = await supabase
+    // Create updated survey data
+    const updatedSurveyData: SurveyData = {
+      title: surveyData.title,
+      options: options
+    };
+    
+    const { error: updateError } = await supabase
       .from('announcements')
       .update({
-        survey_data: {
-          ...surveyData,
-          options
-        }
+        survey_data: convertSurveyDataToJson(updatedSurveyData)
       })
       .eq('id', announcementId);
     
-    if (error) throw error;
+    if (updateError) {
+      console.error("Error updating survey data:", updateError);
+      throw updateError;
+    }
     
     return true;
   } catch (error) {
