@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/hover-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link } from 'react-router-dom';
+import { useProfile } from '@/contexts/ProfileContext';
+import useBadgeTier from '@/hooks/useBadgeTier';
 
 interface SurveyVoter {
   userId: string;
