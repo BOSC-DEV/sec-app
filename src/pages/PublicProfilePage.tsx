@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
-import { getProfileByUsername } from '@/services/profileService';
+import { getProfileByUsername, getProfileByWallet } from '@/services/profileService';
 import { Twitter, Globe, Copy, ExternalLink, Share2, Edit, LogOut, ExternalLinkIcon, ThumbsUp, MessageSquare, FileText, Trophy, Wallet as WalletIcon, Info, Package } from 'lucide-react';
 import { getScammersByReporter, getLikedScammersByUser } from '@/services/scammerService';
 import { getUserBountyContributions } from '@/services/bountyService';
@@ -25,12 +25,14 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
 
 const PublicProfilePage = () => {
-  
   const {
-    username
+    username,
+    address
   } = useParams<{
-    username: string;
+    username?: string;
+    address?: string;
   }>();
+  
   const [activeTab, setActiveTab] = useState("reports");
   const navigate = useNavigate();
   const location = useLocation();
@@ -39,15 +41,26 @@ const PublicProfilePage = () => {
     disconnectWallet
   } = useProfile();
   
+  const userIdentifier = address || username;
+  const isWalletAddress = address || (username && username.length > 30);
+  
   const {
     data: profile,
     isLoading,
     error,
     refetch
   } = useQuery({
-    queryKey: ['profile', username],
-    queryFn: () => getProfileByUsername(username || ''),
-    enabled: !!username
+    queryKey: ['profile', userIdentifier, isWalletAddress],
+    queryFn: async () => {
+      if (!userIdentifier) return null;
+      
+      if (isWalletAddress) {
+        return getProfileByWallet(userIdentifier);
+      }
+      
+      return getProfileByUsername(userIdentifier);
+    },
+    enabled: !!userIdentifier
   });
   
   useEffect(() => {

@@ -165,6 +165,7 @@ const App = () => (
                       </ProtectedRoute>
                     } />
                     <Route path="/profile/:username" element={<PublicProfilePage />} />
+                    <Route path="/wallet/:address" element={<PublicProfilePage />} />
                     <Route path="/:username" element={<PublicProfilePage />} />
                     
                     {/* Legal and Information Pages */}

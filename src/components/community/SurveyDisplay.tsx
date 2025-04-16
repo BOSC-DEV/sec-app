@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -165,7 +164,7 @@ const SurveyDisplay: React.FC<SurveyProps> = ({
                       ) : voter.userId.includes('@') ? (
                         <span className="text-muted-foreground">{voter.userId}</span>
                       ) : (
-                        <Link to={`/profile/${voter.userId}`} className="hover:underline text-blue-500">
+                        <Link to={`/wallet/${voter.userId}`} className="hover:underline text-blue-500">
                           {voter.userId.substring(0, 6)}...{voter.userId.substring(voter.userId.length - 4)}
                         </Link>
                       )}
@@ -181,34 +180,31 @@ const SurveyDisplay: React.FC<SurveyProps> = ({
   };
 
   return <div className="bg-card border rounded-lg p-4 mt-4">
-      
-      
       <div className="space-y-4">
         {showResults ? survey.options.map((option, index) => {
-        const percentage = totalVotes ? Math.round(option.votes / totalVotes * 100) : 0;
-        const isUserVote = survey.userVote === index;
-        return <div key={index} className={`border rounded-md p-3 ${isUserVote ? 'border-blue-400 bg-blue-50 dark:bg-blue-950/30' : ''}`}>
-                <div className="flex justify-between items-center mb-1">
-                  <div className="flex items-center">
-                    <span className="text-sm font-medium">{option.text}</span>
-                    {isUserVote && <CheckCircle2 className="h-4 w-4 ml-2 text-blue-500" />}
+          const percentage = totalVotes ? Math.round(option.votes / totalVotes * 100) : 0;
+          const isUserVote = survey.userVote === index;
+          return <div key={index} className={`border rounded-md p-3 ${isUserVote ? 'border-blue-400 bg-blue-50 dark:bg-blue-950/30' : ''}`}>
+                  <div className="flex justify-between items-center mb-1">
+                    <div className="flex items-center">
+                      <span className="text-sm font-medium">{option.text}</span>
+                      {isUserVote && <CheckCircle2 className="h-4 w-4 ml-2 text-blue-500" />}
+                    </div>
+                    <span className="text-sm font-medium">{percentage}%</span>
                   </div>
-                  <span className="text-sm font-medium">{percentage}%</span>
-                </div>
-                <Progress value={percentage} className="h-2" />
-                <div className="flex justify-between items-center mt-1">
-                  <span className="text-xs text-muted-foreground">{option.votes} vote{option.votes !== 1 ? 's' : ''}</span>
-                  {renderBadgeBreakdown(option)}
-                </div>
-              </div>;
-      }) : survey.options.map((option, index) => {
-        const isSelected = selectedOption === index;
-        return <Button key={index} className={`w-full justify-start h-auto py-3 ${isSelected ? '' : 'variant-outline'}`} variant={isSelected ? "default" : "outline"} onClick={() => handleOptionSelect(index)}>
-                {option.text}
-              </Button>;
-      })}
+                  <Progress value={percentage} className="h-2" />
+                  <div className="flex justify-between items-center mt-1">
+                    <span className="text-xs text-muted-foreground">{option.votes} vote{option.votes !== 1 ? 's' : ''}</span>
+                    {renderBadgeBreakdown(option)}
+                  </div>
+                </div>;
+        }) : survey.options.map((option, index) => {
+          const isSelected = selectedOption === index;
+          return <Button key={index} className={`w-full justify-start h-auto py-3 ${isSelected ? '' : 'variant-outline'}`} variant={isSelected ? "default" : "outline"} onClick={() => handleOptionSelect(index)}>
+                  {option.text}
+                </Button>;
+        })}
       </div>
-      
       {!showResults ? <div className="mt-4 flex justify-end gap-2">
           <Button
             variant="outline"
