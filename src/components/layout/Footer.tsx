@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Copy } from 'lucide-react';
 import ICCLogo from '../common/ICCLogo';
 import TermsDialog from '../common/TermsDialog';
 import PrivacyDialog from '../common/PrivacyDialog';
