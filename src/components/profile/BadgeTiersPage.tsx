@@ -136,7 +136,7 @@ const BadgeTiersPage: React.FC = () => {
                           <Progress 
                             value={animate ? tierInfo.progress : 0} 
                             animated={animate} 
-                            delay={index * 300} 
+                            delay={index * 150} // Reduced delay to make animations more consistent
                             color={tierInfo.isUnlocked ? "bg-primary" : "bg-muted"} 
                             className={`h-2 ${tierInfo.isUnlocked ? "bg-primary/20" : "bg-muted"}`} 
                           />

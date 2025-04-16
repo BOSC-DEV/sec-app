@@ -39,8 +39,8 @@ const Progress = React.forwardRef<
         if (!startTime) startTime = timestamp;
         const elapsed = timestamp - startTime;
         
-        // Duration of 1 second (adjust as needed)
-        const duration = 1200;
+        // Duration of animation (adjust as needed - increased for smoother animation)
+        const duration = 1500;
         const progress = Math.min(elapsed / duration, 1);
         
         // Ease-out cubic function for smoother animation
