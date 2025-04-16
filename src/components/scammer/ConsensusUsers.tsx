@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -84,8 +83,8 @@ const ConsensusUsers: React.FC<ConsensusUsersProps> = ({
             return {
               wallet_address: profile.wallet_address,
               display_name: profile.display_name,
-              username: profile.username,
-              profile_pic_url: profile.profile_pic_url,
+              username: profile.username || undefined,
+              profile_pic_url: profile.profile_pic_url || undefined,
               liked: interaction.liked
             };
           })
