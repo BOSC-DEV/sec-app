@@ -16,7 +16,7 @@ import CurrencyIcon from '@/components/common/CurrencyIcon';
 import BadgeTier from '@/components/profile/BadgeTier';
 import { calculateBadgeTier } from '@/utils/badgeUtils';
 
-type SortField = 'total_bounty' | 'rank' | 'name' | 'reports' | 'likes' | 'views' | 'comments' | 'bounty' | 'bounties_raised' | 'activity';
+type SortField = 'total_bounty' | 'rank' | 'name' | 'reports' | 'likes' | 'views' | 'comments' | 'bounty' | 'bounties_raised' | 'activity' | 'sec_balance';
 type SortOrder = 'asc' | 'desc';
 
 const LeaderboardPage = () => {
@@ -105,6 +105,9 @@ const LeaderboardPage = () => {
           if (a.created_at && b.created_at) {
             comparison = new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
           }
+          break;
+        case 'sec_balance':
+          comparison = (b.sec_balance || 0) - (a.sec_balance || 0);
           break;
         default:
           comparison = 0;
@@ -281,6 +284,20 @@ const LeaderboardPage = () => {
                           </TooltipContent>
                         </Tooltip>
                       </TableHead>
+
+                      <TableHead className="text-center cursor-pointer font-bold text-icc-blue dark:text-white" onClick={() => handleSort('sec_balance')}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="flex items-center justify-center">
+                              <span>SEC Balance</span>
+                              {getSortIcon('sec_balance')}
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>SEC token balance</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TableHead>
                       
                       <TableHead className="w-20 text-center cursor-pointer font-bold text-icc-blue dark:text-white" onClick={() => handleSort('activity')}>
                         <Tooltip>
@@ -419,6 +436,18 @@ const LeaderboardPage = () => {
                                 <span className="flex items-center justify-center">
                                   0 <CurrencyIcon size="sm" className="ml-1" />
                                 </span>
+                              )}
+                            </Link>
+                          </TableCell>
+
+                          <TableCell className="text-center font-semibold text-icc-primary dark:text-white">
+                            <Link to={`/profile/${profile.username || profile.wallet_address}`} className="hover:underline">
+                              {profile.sec_balance !== undefined ? (
+                                <span className="flex items-center justify-center">
+                                  {formatNumber(profile.sec_balance)} <CurrencyIcon size="sm" className="ml-1" />
+                                </span>
+                              ) : (
+                                <span className="text-gray-400 dark:text-gray-500">-</span>
                               )}
                             </Link>
                           </TableCell>
