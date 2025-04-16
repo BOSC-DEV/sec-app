@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Scammer } from '@/types/dataTypes';
 import { handleError } from '@/utils/errorHandling';
@@ -56,7 +57,6 @@ export const getScammerById = async (id: string): Promise<Scammer | null> => {
     .from('scammers')
     .select('*')
     .eq('id', id)
-    .is('deleted_at', null)
     .single();
   
   if (error) {
@@ -164,12 +164,11 @@ export const getLikedScammersByUser = async (walletAddress: string): Promise<Sca
     const scammerIds = interactions.map(interaction => interaction.scammer_id);
     console.log(`Found ${scammerIds.length} liked scammer IDs:`, scammerIds);
     
-    // Fetch the full scammer details for each ID
+    // Fetch the full scammer details for each ID (including deleted ones for the user who liked them)
     const { data: scammers, error: scammersError } = await supabase
       .from('scammers')
       .select('*')
-      .in('id', scammerIds)
-      .is('deleted_at', null);
+      .in('id', scammerIds);
     
     if (scammersError) {
       console.error('Error fetching scammers by ID:', scammersError);
@@ -185,7 +184,9 @@ export const getLikedScammersByUser = async (walletAddress: string): Promise<Sca
 };
 
 /**
- * Soft deletes a scammer report by setting the deleted_at timestamp
+ * Archives a scammer report by setting the deleted_at timestamp
+ * This makes it invisible in the UI but keeps the underlying record
+ * and preserves bounty contributions.
  */
 export const deleteScammer = async (id: string): Promise<boolean> => {
   try {
@@ -195,13 +196,13 @@ export const deleteScammer = async (id: string): Promise<boolean> => {
       .eq('id', id);
     
     if (error) {
-      console.error('Error deleting scammer:', error);
+      console.error('Error archiving scammer:', error);
       throw error;
     }
     
     return true;
   } catch (error) {
-    console.error('Exception deleting scammer:', error);
+    console.error('Exception archiving scammer:', error);
     throw error;
   }
 };

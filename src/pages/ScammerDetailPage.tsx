@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -89,13 +88,13 @@ const ScammerDetailPage = () => {
     onSuccess: () => {
       toast({
         title: "Success",
-        description: "The scammer report has been deleted successfully."
+        description: "The scammer report has been archived successfully."
       });
       navigate('/most-wanted');
     },
     onError: error => {
       handleError(error, {
-        fallbackMessage: "Failed to delete the scammer report. Please try again.",
+        fallbackMessage: "Failed to archive the scammer report. Please try again.",
         severity: ErrorSeverity.HIGH,
         context: "DELETE_SCAMMER"
       });
@@ -784,20 +783,20 @@ const ScammerDetailPage = () => {
         </div>
       </section>
 
-      {/* Delete confirmation dialog */}
+      {/* Archive confirmation dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete this scammer report
-              and remove any bounty contributions.
+              This action cannot be undone. This will archive this scammer report and make it invisible
+              to other users. Any bounty contributions will remain active and can still be transferred.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete} className="bg-red-600 text-white hover:bg-red-700">
-              Delete
+              Archive
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
