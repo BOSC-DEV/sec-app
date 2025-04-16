@@ -531,13 +531,18 @@ const ScammerDetailPage = () => {
       </div>;
   }
 
-  return <div>
+  return (
+    <div>
       <CompactHero title={scammer?.name} />
 
       <section className="icc-section bg-white">
         <div className="icc-container">
           <div className="flex items-center justify-between mb-6">
-            <Button variant="ghost" onClick={() => navigate('/most-wanted')} aria-label="Back to Most Wanted list">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate('/most-wanted')} 
+              aria-label="Back to Most Wanted list"
+            >
               <ArrowLeft className="h-4 w-4 mr-2" aria-hidden="true" />
               {isMobile ? 'Back' : 'Back to Most Wanted'}
             </Button>
@@ -742,11 +747,27 @@ const ScammerDetailPage = () => {
                 <h3 className="text-lg font-semibold text-icc-blue dark:text-white mb-3">Take Action</h3>
                 
                 <div className="flex space-x-2 mb-4">
-                  <Button variant={isLiked ? "default" : "outline"} size="sm" className={`flex-1 ${isLiked ? 'bg-green-600 hover:bg-green-700' : ''}`} onClick={handleLike} disabled={isLoading} aria-pressed={isLiked} aria-label="Like this report">
+                  <Button 
+                    variant={isLiked ? "gold" : "outline"} 
+                    size="sm" 
+                    className={`flex-1 ${isLiked ? 'hover:bg-icc-gold-dark' : ''}`} 
+                    onClick={handleLike} 
+                    disabled={isLoading} 
+                    aria-pressed={isLiked} 
+                    aria-label="Like this report"
+                  >
                     <ThumbsUp className="h-4 w-4 mr-1" aria-hidden="true" />
                     <span>{likes}</span>
                   </Button>
-                  <Button variant={isDisliked ? "default" : "outline"} size="sm" className={`flex-1 ${isDisliked ? 'bg-red-600 hover:bg-red-700' : ''}`} onClick={handleDislike} disabled={isLoading} aria-pressed={isDisliked} aria-label="Dislike this report">
+                  <Button 
+                    variant={isDisliked ? "gold" : "outline"} 
+                    size="sm" 
+                    className={`flex-1 ${isDisliked ? 'hover:bg-icc-gold-dark' : ''}`} 
+                    onClick={handleDislike} 
+                    disabled={isLoading} 
+                    aria-pressed={isDisliked} 
+                    aria-label="Dislike this report"
+                  >
                     <ThumbsDown className="h-4 w-4 mr-1" aria-hidden="true" />
                     <span>{dislikes}</span>
                   </Button>
@@ -813,7 +834,8 @@ const ScammerDetailPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>;
+    </div>
+  );
 };
 
 export default ScammerDetailPage;
