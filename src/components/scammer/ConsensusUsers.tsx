@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -88,7 +89,7 @@ const ConsensusUsers: React.FC<ConsensusUsersProps> = ({
               liked: interaction.liked
             };
           })
-          // Fix: Update type predicate to match ConsensusUser interface
+          // Fix: Correct the type predicate to properly match the ConsensusUser interface
           .filter((user): user is ConsensusUser => user !== null);
           
         setUsers(usersWithData);
