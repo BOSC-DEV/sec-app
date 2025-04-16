@@ -1,3 +1,4 @@
+
 export interface Scammer {
   id: string;
   name: string;
@@ -43,9 +44,6 @@ export interface Comment {
   dislikes: number;
   views: number;
 }
-
-// Note: We're keeping the interface definitions for reference,
-// but removing all the mock data and implementing real data services
 
 // Service Functions
 export const getScammers = () => {

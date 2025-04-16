@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Button } from '@/components/ui/button';
-import { Wallet, ExternalLink, Copy, LogOut } from 'lucide-react';
+import { ExternalLink, Copy, LogOut } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
@@ -42,13 +42,6 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
   const handleDisconnect = () => {
     disconnectWallet();
     navigate('/');
-  };
-
-  const formatWalletAddress = (address: string) => {
-    if (address.length > 12) {
-      return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
-    }
-    return address;
   };
 
   return <Card className="w-full dark:border-gray-700">

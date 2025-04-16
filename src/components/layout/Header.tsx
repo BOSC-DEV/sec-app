@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, User, Copy, Bell, LogIn, Wallet } from 'lucide-react';
+import { Menu, X, User, Copy, Bell, LogIn, Wallet, ExternalLink } from 'lucide-react';
 import ICCLogo from '../common/ICCLogo';
 import { useProfile } from '@/contexts/ProfileContext';
 import ThemeToggle from '@/components/common/ThemeToggle';
@@ -38,8 +39,16 @@ const Header = () => {
   const handleWalletButtonClick = () => {
     if (isConnected) {
       navigate('/profile');
-    } else {
+    } else if (isPhantomAvailable) {
       connectWallet();
+    } else {
+      // Open Phantom install page
+      window.open('https://phantom.app/', '_blank');
+      toast({
+        title: "Phantom Wallet Required",
+        description: "Please install Phantom wallet to continue",
+        variant: "default",
+      });
     }
     setIsMenuOpen(false);
   };
@@ -152,9 +161,16 @@ const Header = () => {
                   variant="gold"
                   size="sm"
                   className="flex items-center gap-2"
-                  onClick={connectWallet}
+                  onClick={handleWalletButtonClick}
                 >
-                  {isMobile ? <Wallet className="h-4 w-4 text-white" /> : (
+                  {!isPhantomAvailable ? (
+                    <>
+                      <ExternalLink className="h-4 w-4" />
+                      {!isMobile && "Install Phantom"}
+                    </>
+                  ) : isMobile ? (
+                    <Wallet className="h-4 w-4 text-white" />
+                  ) : (
                     <>
                       <LogIn className="h-4 w-4" />
                       Connect Wallet
