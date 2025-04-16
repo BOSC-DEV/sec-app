@@ -33,6 +33,7 @@ const NotificationsPage: React.FC = () => {
   const navigate = useNavigate();
   const [selectedTypes, setSelectedTypes] = useState<NotificationType[]>([]);
   
+  // Query for notifications
   const { 
     data: notifications = [], 
     refetch, 
@@ -43,20 +44,25 @@ const NotificationsPage: React.FC = () => {
     enabled: !!profile?.wallet_address,
   });
   
+  // Filter notifications by type
   const filteredNotifications = selectedTypes.length > 0
     ? notifications.filter(notification => selectedTypes.includes(notification.type as NotificationType))
     : notifications;
   
+  // Handle clicking a notification
   const handleNotificationClick = (notification: Notification) => {
+    // Mark as read first if not already read
     if (!notification.is_read) {
       markNotificationAsRead(notification.id);
     }
     
+    // Navigate based on entity type
     switch (notification.entity_type) {
       case EntityType.scammer:
         navigate(`/scammer/${notification.entity_id}`);
         break;
       case EntityType.comment:
+        // For comments, we need to navigate to the scammer page
         navigate(`/scammer/${notification.entity_id.split('-')[1]}`);
         break;
       case EntityType.announcement:
@@ -69,12 +75,14 @@ const NotificationsPage: React.FC = () => {
         navigate('/community');
         break;
       default:
+        // Default to community page
         navigate('/community');
     }
     
     refetch();
   };
   
+  // Mark all as read
   const handleMarkAllAsRead = async () => {
     if (profile?.wallet_address) {
       await markAllNotificationsAsRead(profile.wallet_address);
@@ -86,6 +94,7 @@ const NotificationsPage: React.FC = () => {
     }
   };
   
+  // Get icon based on notification type
   const getNotificationIcon = (type: NotificationType) => {
     switch (type) {
       case NotificationType.LIKE:
@@ -105,6 +114,7 @@ const NotificationsPage: React.FC = () => {
     }
   };
 
+  // Toggle a notification type in filter
   const toggleNotificationType = (type: NotificationType) => {
     setSelectedTypes(prev => {
       if (prev.includes(type)) {
@@ -115,6 +125,7 @@ const NotificationsPage: React.FC = () => {
     });
   };
   
+  // Check if filter is active for a type
   const isFilterActive = (type: NotificationType) => {
     return selectedTypes.includes(type);
   };
@@ -145,13 +156,13 @@ const NotificationsPage: React.FC = () => {
       </Helmet>
       
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
           <div className="flex items-center">
             <Bell className="h-5 w-5 mr-2" />
             <h1 className="text-xl font-semibold">Notifications</h1>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center space-x-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
@@ -159,7 +170,7 @@ const NotificationsPage: React.FC = () => {
                   Filter
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuContent align="end">
                 <DropdownMenuCheckboxItem
                   checked={isFilterActive(NotificationType.LIKE)}
                   onCheckedChange={() => toggleNotificationType(NotificationType.LIKE)}
@@ -218,11 +229,11 @@ const NotificationsPage: React.FC = () => {
             
             <Button 
               variant="outline" 
-              size="sm"
+              size="sm" 
               onClick={handleMarkAllAsRead}
             >
               <Check className="h-4 w-4 mr-2" />
-              Mark all
+              Mark all as read
             </Button>
           </div>
         </CardHeader>
