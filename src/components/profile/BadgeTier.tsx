@@ -1,12 +1,13 @@
+
 import React from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { BadgeInfo, BadgeTier as BadgeTierEnum, formatSecAmount } from '@/utils/badgeUtils';
+import { BadgeInfo, BadgeTier as BadgeTierEnum, formatSecAmount, MIN_SEC_FOR_BADGE } from '@/utils/badgeUtils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface BadgeTierProps {
-  badgeInfo: BadgeInfo;
+  badgeInfo: BadgeInfo | null;
   showProgress?: boolean;
   size?: 'sm' | 'md' | 'lg';
   showTooltip?: boolean;
@@ -23,6 +24,34 @@ const BadgeTier: React.FC<BadgeTierProps> = ({
   context = 'profile'
 }) => {
   const isMobile = useIsMobile();
+  
+  // If no badge info, user doesn't have enough SEC
+  if (!badgeInfo) {
+    // If we don't want to show anything when no badge, return null
+    if (context === 'chat') return null;
+    
+    // For profile context, show "No Badge" indicator
+    return (
+      <div className="inline-block">
+        <TooltipProvider>
+          <Tooltip delayDuration={100}>
+            <TooltipTrigger asChild>
+              <span className="text-muted-foreground text-xs">No Badge</span>
+            </TooltipTrigger>
+            <TooltipContent side="right" align="start" className="p-4 max-w-sm">
+              <div className="space-y-3">
+                <div className="font-semibold text-center">No Badge</div>
+                <div className="text-sm text-muted-foreground">
+                  Minimum {formatSecAmount(MIN_SEC_FOR_BADGE)} SEC required for a badge
+                </div>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+    );
+  }
+  
   const {
     tier,
     icon,

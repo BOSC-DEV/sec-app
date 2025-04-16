@@ -1,3 +1,4 @@
+
 export interface Scammer {
   id: string;
   name: string;

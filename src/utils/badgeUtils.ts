@@ -1,3 +1,4 @@
+
 // Define the badge tier enum with proper spacing and capitalization
 export enum BadgeTier {
   'Shrimp' = 'Shrimp',
@@ -30,7 +31,10 @@ export interface BadgeInfo {
   };
 }
 
-// Define badge tiers with their properties - Shrimp now starts at 0.0001%
+// Define minimum SEC amount required for ANY badge (1,000 SEC)
+export const MIN_SEC_FOR_BADGE = 1000;
+
+// Define badge tiers with their properties - Shrimp now starts at 0.0001% (1,000 SEC)
 export const BADGE_TIERS: { [key in BadgeTier]: { minPercent: number, color: string, icon: string } } = {
   [BadgeTier.Shrimp]: { minPercent: 0.0001, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦐' },
   [BadgeTier.Frog]: { minPercent: 0.01, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🐸' },
@@ -63,9 +67,14 @@ export const formatSecAmount = (amount: number): string => {
 /**
  * Calculate badge tier based on SEC balance
  * @param secBalance SEC token balance
- * @returns Badge information
+ * @returns Badge information or null if below minimum threshold
  */
-export const calculateBadgeTier = (secBalance: number): BadgeInfo => {
+export const calculateBadgeTier = (secBalance: number): BadgeInfo | null => {
+  // Check if user has minimum required SEC for ANY badge
+  if (secBalance < MIN_SEC_FOR_BADGE) {
+    return null; // No badge if below minimum threshold
+  }
+
   // Get all tiers sorted by min percent (ascending)
   const sortedTiers = Object.entries(BADGE_TIERS)
     .map(([tier, details]) => ({
@@ -78,7 +87,7 @@ export const calculateBadgeTier = (secBalance: number): BadgeInfo => {
     .sort((a, b) => a.minPercent - b.minPercent);
 
   // Find the highest tier the user qualifies for
-  let userTier = sortedTiers[0]; // Default to lowest tier (Shrimp) for any balance
+  let userTier = null;
   for (let i = sortedTiers.length - 1; i >= 0; i--) {
     if (secBalance >= sortedTiers[i].minHolding) {
       userTier = sortedTiers[i];
@@ -86,8 +95,13 @@ export const calculateBadgeTier = (secBalance: number): BadgeInfo => {
     }
   }
 
+  // If no tier found (shouldn't happen since we checked minimum already, but just in case)
+  if (!userTier) {
+    return null;
+  }
+
   // Find the next tier (if any)
-  const currentTierIndex = sortedTiers.findIndex(t => t.tier === userTier.tier);
+  const currentTierIndex = sortedTiers.findIndex(t => t.tier === userTier!.tier);
   const nextTier = currentTierIndex < sortedTiers.length - 1 
     ? sortedTiers[currentTierIndex + 1] 
     : null;

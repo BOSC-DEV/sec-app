@@ -2,7 +2,8 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BADGE_TIERS, BadgeTier, formatSecAmount } from '@/utils/badgeUtils';
+import { formatSecAmount, BADGE_TIERS, BadgeTier, TOTAL_SEC_SUPPLY, MIN_SEC_FOR_BADGE } from '@/utils/badgeUtils';
+import { AlertCircle } from 'lucide-react';
 
 const BadgeComparisonChart: React.FC = () => {
   const tiers = Object.entries(BADGE_TIERS).sort((a, b) => 
@@ -15,32 +16,41 @@ const BadgeComparisonChart: React.FC = () => {
         <CardTitle className="text-xl">SEC Holder Badge Tiers</CardTitle>
       </CardHeader>
       <CardContent>
+        <div className="mb-4 p-3 bg-muted/40 rounded-lg border border-dashed">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">
+              Minimum {formatSecAmount(MIN_SEC_FOR_BADGE)} SEC required to receive any badge
+            </p>
+          </div>
+        </div>
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {tiers.map(([tierKey, tierData]) => {
-            const tier = tierKey as BadgeTier;
-            const minHolding = (tierData.minPercent / 100) * 1_000_000_000;
+          {tiers.map(([tier, details]) => {
+            const tierName = tier as BadgeTier;
+            const minHolding = (details.minPercent / 100) * TOTAL_SEC_SUPPLY;
             
             return (
               <div 
-                key={tier} 
+                key={tierName} 
                 className="flex items-center p-3 rounded-lg border hover:bg-muted/50 transition-colors"
               >
-                <div className="mr-3 text-3xl">{tierData.icon}</div>
+                <div className="mr-3 text-3xl">{details.icon}</div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-semibold">{tier}</h3>
+                    <h3 className="font-semibold">{tierName}</h3>
                     <Badge 
                       variant="outline" 
-                      className={`${tierData.color.split(' ')[0]} text-xs`}
+                      className={`${details.color.split(' ')[0]} text-xs`}
                     >
-                      {tierData.minPercent}%
+                      {details.minPercent}%
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     Min: {formatSecAmount(minHolding)} SEC
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {tierData.minPercent}% of total supply
+                    {details.minPercent}% of total supply
                   </p>
                 </div>
               </div>

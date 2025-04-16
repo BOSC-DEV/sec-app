@@ -1,21 +1,22 @@
 
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { formatSecAmount, BADGE_TIERS, BadgeTier, TOTAL_SEC_SUPPLY } from '@/utils/badgeUtils';
+import { formatSecAmount, BADGE_TIERS, BadgeTier, TOTAL_SEC_SUPPLY, MIN_SEC_FOR_BADGE } from '@/utils/badgeUtils';
 import BadgeTierComponent from '@/components/profile/BadgeTier';
 import { calculateBadgeTier } from '@/utils/badgeUtils';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Progress } from '@/components/ui/progress';
+import { AlertCircle } from 'lucide-react';
 
-const BadgeTiersPage = () => {
+const BadgeTiersPage: React.FC = () => {
   const { profile } = useProfile();
   const secBalance = profile?.sec_balance || 0;
   const [currentBadgeInfo, setCurrentBadgeInfo] = useState(calculateBadgeTier(secBalance));
   
   useEffect(() => {
     setCurrentBadgeInfo(calculateBadgeTier(secBalance));
-    console.log(`Current SEC balance: ${secBalance}, Badge tier: ${calculateBadgeTier(secBalance).tier}`);
+    console.log(`Current SEC balance: ${secBalance}, Badge tier: ${calculateBadgeTier(secBalance)?.tier || 'None'}`);
   }, [secBalance]);
 
   const tiers = Object.entries(BADGE_TIERS).map(([tier, details]) => ({
@@ -48,10 +49,12 @@ const BadgeTiersPage = () => {
       ...tierInfo,
       progress: progressPercentage,
       progressText,
-      isCurrentTier: currentBadgeInfo.tier === tierInfo.tier,
+      isCurrentTier: currentBadgeInfo?.tier === tierInfo.tier,
       isUnlocked: secBalance >= tierInfo.minHolding
     };
   });
+
+  const hasBadge = secBalance >= MIN_SEC_FOR_BADGE;
 
   return (
     <div className="space-y-8">
@@ -63,6 +66,18 @@ const BadgeTiersPage = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {!hasBadge && (
+            <div className="mb-6 p-4 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-start gap-3">
+              <AlertCircle className="text-yellow-600 dark:text-yellow-400 h-5 w-5 mt-0.5" />
+              <div>
+                <h4 className="font-medium text-yellow-800 dark:text-yellow-300">No Badge Yet</h4>
+                <p className="text-sm text-yellow-700 dark:text-yellow-400">
+                  You need at least {formatSecAmount(MIN_SEC_FOR_BADGE)} SEC tokens to qualify for your first badge.
+                </p>
+              </div>
+            </div>
+          )}
+          
           <div className="overflow-auto">
             <Table>
               <TableHeader>
@@ -121,6 +136,9 @@ const BadgeTiersPage = () => {
             <p className="text-muted-foreground">
               Badges are automatically assigned based on your SEC token holdings. Higher tier badges 
               grant exclusive benefits and increased visibility in the community.
+            </p>
+            <p className="text-muted-foreground mt-2">
+              <strong>Minimum requirement:</strong> {formatSecAmount(MIN_SEC_FOR_BADGE)} SEC tokens
             </p>
           </div>
         </CardContent>
