@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { BountyContribution } from '@/types/dataTypes';
 import { notifyScammerBounty } from '@/services/notificationService';
+import { scammerExists } from '@/services/scammerService';
 
 // Function to add a new contribution
 export const addBountyContribution = async (
@@ -14,6 +15,12 @@ export const addBountyContribution = async (
   contributorProfilePic?: string
 ): Promise<BountyContribution | null> => {
   try {
+    // First verify the scammer exists (even if archived)
+    const exists = await scammerExists(scammerId);
+    if (!exists) {
+      throw new Error(`Scammer with ID ${scammerId} does not exist`);
+    }
+    
     const { data, error } = await supabase
       .from('bounty_contributions')
       .insert({
@@ -122,6 +129,12 @@ export const updateScammerBounty = async (
   isAddition: boolean
 ): Promise<boolean> => {
   try {
+    // First verify the scammer exists (even if archived)
+    const exists = await scammerExists(scammerId);
+    if (!exists) {
+      throw new Error(`Scammer with ID ${scammerId} does not exist`);
+    }
+    
     // Instead of using RPC functions that don't exist, use direct update
     const { data: scammer } = await supabase
       .from('scammers')
@@ -154,6 +167,12 @@ export const updateScammerBounty = async (
 // Adding a function with the alternative name to fix the import errors
 export const updateScammerBountyAmount = async (scammerId: string): Promise<boolean> => {
   try {
+    // First verify the scammer exists (even if archived)
+    const exists = await scammerExists(scammerId);
+    if (!exists) {
+      throw new Error(`Scammer with ID ${scammerId} does not exist`);
+    }
+    
     // Calculate the total bounty amount from all active contributions
     const { data, error } = await supabase
       .from('bounty_contributions')

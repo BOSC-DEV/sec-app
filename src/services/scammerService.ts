@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Scammer } from '@/types/dataTypes';
 import { handleError } from '@/utils/errorHandling';
@@ -56,7 +57,6 @@ export const getScammerById = async (id: string): Promise<Scammer | null> => {
     .from('scammers')
     .select('*')
     .eq('id', id)
-    .is('deleted_at', null)
     .single();
   
   if (error) {
@@ -122,7 +122,6 @@ export const getScammersByReporter = async (walletAddress: string): Promise<Scam
     .from('scammers')
     .select('*')
     .eq('added_by', walletAddress)
-    .is('deleted_at', null)
     .order('date_added', { ascending: false });
   
   if (error) {
@@ -168,8 +167,7 @@ export const getLikedScammersByUser = async (walletAddress: string): Promise<Sca
     const { data: scammers, error: scammersError } = await supabase
       .from('scammers')
       .select('*')
-      .in('id', scammerIds)
-      .is('deleted_at', null);
+      .in('id', scammerIds);
     
     if (scammersError) {
       console.error('Error fetching scammers by ID:', scammersError);
@@ -185,23 +183,50 @@ export const getLikedScammersByUser = async (walletAddress: string): Promise<Sca
 };
 
 /**
- * Soft deletes a scammer report by setting the deleted_at timestamp
+ * Archives a scammer report by setting the deleted_at timestamp
+ * The report will no longer appear in standard searches but bounties remain accessible
  */
 export const deleteScammer = async (id: string): Promise<boolean> => {
   try {
+    console.log(`Archiving scammer report: ${id}`);
+    
     const { error } = await supabase
       .from('scammers')
       .update({ deleted_at: new Date().toISOString() })
       .eq('id', id);
     
     if (error) {
-      console.error('Error deleting scammer:', error);
+      console.error('Error archiving scammer:', error);
       throw error;
     }
     
+    console.log(`Successfully archived scammer report: ${id}`);
     return true;
   } catch (error) {
-    console.error('Exception deleting scammer:', error);
+    console.error('Exception archiving scammer:', error);
     throw error;
+  }
+};
+
+/**
+ * Returns true if a scammer report exists, even if it's archived
+ */
+export const scammerExists = async (id: string): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase
+      .from('scammers')
+      .select('id')
+      .eq('id', id)
+      .maybeSingle();
+    
+    if (error) {
+      console.error('Error checking if scammer exists:', error);
+      throw error;
+    }
+    
+    return !!data;
+  } catch (error) {
+    console.error('Exception checking if scammer exists:', error);
+    return false;
   }
 };

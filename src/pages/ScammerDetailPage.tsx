@@ -88,13 +88,13 @@ const ScammerDetailPage = () => {
     onSuccess: () => {
       toast({
         title: "Success",
-        description: "The scammer report has been deleted successfully."
+        description: "The scammer report has been archived successfully."
       });
       navigate('/most-wanted');
     },
     onError: error => {
       handleError(error, {
-        fallbackMessage: "Failed to delete the scammer report. Please try again.",
+        fallbackMessage: "Failed to archive the scammer report. Please try again.",
         severity: ErrorSeverity.HIGH,
         context: "DELETE_SCAMMER"
       });
@@ -821,15 +821,15 @@ const ScammerDetailPage = () => {
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete this scammer report?</AlertDialogTitle>
+            <AlertDialogTitle>Archive this scammer report?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. The report will be permanently deleted from our database.
+              This will hide the report from public view, but any bounty contributions will remain active and transferrable.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
-              {deleteScammerMutation.isPending ? "Deleting..." : "Delete"}
+              {deleteScammerMutation.isPending ? "Archiving..." : "Archive Report"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
