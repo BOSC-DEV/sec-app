@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ICCLogo from '../common/ICCLogo';
 import TermsDialog from '../common/TermsDialog';
@@ -44,15 +43,17 @@ const Footer = () => {
   return <footer className="icc-footer">
       <div className="icc-container">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="md:col-span-1">
-            <Link to="/" className="flex items-center space-x-2 mb-4">
+          <div className="md:col-span-1 text-center md:text-left">
+            <Link to="/" className="flex justify-center md:justify-start items-center space-x-2 mb-4">
               <ICCLogo className="h-10 w-auto" />
               <div className="font-serif">
                 <div className="text-base font-bold leading-tight">Scams & E-crimes Commission</div>
               </div>
             </Link>
-            <p className="text-sm text-gray-300 dark:text-gray-400 mt-4">A decentralized crime registry bringing accountability and self governance to the new digital world.</p>
-            <div className="flex items-center space-x-4 mt-6">
+            <p className="text-sm text-gray-300 dark:text-gray-400 mt-4 text-center md:text-left">
+              A decentralized crime registry bringing accountability and self governance to the new digital world.
+            </p>
+            <div className="flex justify-center md:justify-start items-center space-x-4 mt-6">
               <a 
                 href="https://x.com/sandecommission" 
                 target="_blank" 
@@ -158,11 +159,8 @@ const Footer = () => {
           </div>
         </div>
         
-        <div className="border-t border-icc-blue-light dark:border-gray-700 mt-8 pt-8 text-sm text-gray-300 dark:text-gray-500">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p>&copy; {new Date().getFullYear()} Scams & E-crimes Commission. All rights reserved.</p>
-            <p className="mt-2 md:mt-0"></p>
-          </div>
+        <div className="border-t border-icc-blue-light dark:border-gray-700 mt-8 pt-8 text-sm text-gray-300 dark:text-gray-500 text-center md:text-left">
+          <p>&copy; {new Date().getFullYear()} Scams & E-crimes Commission. All rights reserved.</p>
         </div>
       </div>
 
