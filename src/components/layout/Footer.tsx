@@ -75,7 +75,7 @@ const Footer = () => {
                 onClick={copyToClipboard}
                 aria-label="Copy Contract Address"
               >
-                <Copy className="h-5 w-5" />
+                <Copy className="h-5 w-5 text-white" />
               </Button>
             </div>
           </div>
