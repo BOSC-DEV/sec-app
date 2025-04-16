@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -835,15 +836,11 @@ const ScammerDetailPage = () => {
                           <span>Community Consensus</span>
                           <span>{agreePercentage}% Agree</span>
                         </div>
-                        <Progress 
-                          value={agreePercentage} 
-                          className="h-2 bg-red-100" 
-                          animated={true}
-                          aria-valuemin={0} 
-                          aria-valuemax={100} 
-                          aria-valuenow={agreePercentage} 
-                          aria-label={`${agreePercentage}% agreement rate`}
-                        />
+                        <Progress value={agreePercentage} className="h-2 bg-red-100" aria-valuemin={0} aria-valuemax={100} aria-valuenow={agreePercentage} aria-label={`${agreePercentage}% agreement rate`}>
+                          <div className="h-full bg-green-500 transition-all" style={{
+                          width: `${agreePercentage}%`
+                        }} />
+                        </Progress>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>

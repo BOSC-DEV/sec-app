@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -44,6 +45,7 @@ const ConsensusUsers: React.FC<ConsensusUsersProps> = ({
     const fetchConsensusUsers = async () => {
       setIsLoading(true);
       try {
+        // Get user interactions for this scammer
         const { data: interactions, error: interactionsError } = await supabase
           .from('user_scammer_interactions')
           .select('user_id, liked, disliked')
@@ -59,6 +61,7 @@ const ConsensusUsers: React.FC<ConsensusUsersProps> = ({
           return;
         }
         
+        // Extract user IDs to fetch their profiles
         const userIds = interactions.map(interaction => interaction.user_id);
         
         const { data: profiles, error: profilesError } = await supabase
@@ -70,6 +73,7 @@ const ConsensusUsers: React.FC<ConsensusUsersProps> = ({
           throw profilesError;
         }
         
+        // Combine interaction data with profile data
         const usersWithData = interactions
           .filter(interaction => interaction.liked || interaction.disliked)
           .map(interaction => {
@@ -85,6 +89,7 @@ const ConsensusUsers: React.FC<ConsensusUsersProps> = ({
               liked: interaction.liked
             };
           })
+          // Fix: Use proper type predicate with correct nullability check
           .filter((user): user is ConsensusUser => user !== null);
           
         setUsers(usersWithData);
@@ -104,6 +109,7 @@ const ConsensusUsers: React.FC<ConsensusUsersProps> = ({
       fetchConsensusUsers();
     }
     
+    // Listen for real-time updates to user_scammer_interactions
     const channel = supabase
       .channel(`scammer-consensus-${scammerId}`)
       .on(

@@ -8,29 +8,16 @@ import { calculateBadgeTier } from '@/utils/badgeUtils';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Progress } from '@/components/ui/progress';
 import { AlertCircle } from 'lucide-react';
-import { useInView } from 'react-intersection-observer';
 
 const BadgeTiersPage: React.FC = () => {
   const { profile } = useProfile();
   const secBalance = profile?.sec_balance || 0;
   const [currentBadgeInfo, setCurrentBadgeInfo] = useState(calculateBadgeTier(secBalance));
-  const [animate, setAnimate] = useState(false);
-  const { ref, inView } = useInView({
-    triggerOnce: true,
-    threshold: 0.1,
-  });
   
   useEffect(() => {
     setCurrentBadgeInfo(calculateBadgeTier(secBalance));
     console.log(`Current SEC balance: ${secBalance}, Badge tier: ${calculateBadgeTier(secBalance)?.tier || 'None'}`);
   }, [secBalance]);
-
-  useEffect(() => {
-    if (inView) {
-      // Start animation when component comes into view
-      setAnimate(true);
-    }
-  }, [inView]);
 
   const tiers = Object.entries(BADGE_TIERS).map(([tier, details]) => ({
     tier: tier as BadgeTier,
@@ -70,7 +57,7 @@ const BadgeTiersPage: React.FC = () => {
   const hasBadge = secBalance >= MIN_SEC_FOR_BADGE;
 
   return (
-    <div className="space-y-8" ref={ref}>
+    <div className="space-y-8">
       <Card>
         <CardHeader>
           <CardTitle className="text-icc-gold">Badge Tiers</CardTitle>
@@ -102,7 +89,7 @@ const BadgeTiersPage: React.FC = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {tiersWithProgress.map((tierInfo, index) => {
+                {tiersWithProgress.map((tierInfo) => {
                   const badgeInfo = {
                     tier: tierInfo.tier,
                     color: tierInfo.color,
@@ -133,13 +120,7 @@ const BadgeTiersPage: React.FC = () => {
                       </TableCell>
                       <TableCell className="w-64">
                         <div className="space-y-1">
-                          <Progress 
-                            value={animate ? tierInfo.progress : 0} 
-                            animated={animate} 
-                            delay={index * 150} // Reduced delay to make animations more consistent
-                            color={tierInfo.isUnlocked ? "bg-primary" : "bg-muted"} 
-                            className={`h-2 ${tierInfo.isUnlocked ? "bg-primary/20" : "bg-muted"}`} 
-                          />
+                          <Progress value={tierInfo.progress} className={`h-2 ${tierInfo.isUnlocked ? "bg-primary/20" : "bg-muted"}`} />
                           <p className="text-xs text-muted-foreground">{tierInfo.progressText}</p>
                         </div>
                       </TableCell>

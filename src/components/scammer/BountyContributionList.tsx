@@ -8,8 +8,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Link } from 'react-router-dom';
 import { getProfilesByDisplayName } from '@/services/profileService';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
-import { useInView } from 'react-intersection-observer';
-import { Progress } from '@/components/ui/progress';
 
 interface BountyContributionListProps {
   contributions: BountyContribution[];
@@ -33,17 +31,6 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
   const [focused, setFocused] = useState<string | null>(null);
   const [contributorUsernames, setContributorUsernames] = useState<Record<string, string>>({});
   const renderTimestamp = React.useMemo(() => Date.now(), [contributions]);
-  const [animate, setAnimate] = useState(false);
-  const { ref, inView } = useInView({
-    triggerOnce: true,
-    threshold: 0.1,
-  });
-
-  useEffect(() => {
-    if (inView) {
-      setAnimate(true);
-    }
-  }, [inView]);
 
   useEffect(() => {
     const fetchContributorUsernames = async () => {
@@ -93,19 +80,11 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
       </div>;
   }
 
-  return <div className="space-y-4" ref={ref}>
+  return <div className="space-y-4">
       {userContributionAmount > 0 && <div className="bg-icc-blue-dark/10 dark:bg-[#FEF7CD] rounded-lg p-4 mb-4">
           <h4 className="text-icc-blue dark:text-icc-blue-dark mb-2 font-semibold text-center text-lg">My Contributions:</h4>
           <div className="text-2xl font-bold text-icc-gold flex items-center gap-1 px-[135px]">
             {formatCurrency(userContributionAmount)} <CurrencyIcon />
-          </div>
-          <div className="mt-3">
-            <Progress 
-              value={100} 
-              animated={animate} 
-              className="h-2 bg-primary/10" 
-              color="bg-icc-gold"
-            />
           </div>
         </div>}
 
