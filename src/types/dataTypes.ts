@@ -1,4 +1,3 @@
-
 export interface Scammer {
   id: string;
   name: string;
@@ -99,6 +98,7 @@ export interface SurveyOption {
 export interface SurveyVoter {
   userId: string;
   badgeTier: string;
+  username?: string;
 }
 
 export interface AnnouncementReply {

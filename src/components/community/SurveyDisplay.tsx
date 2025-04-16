@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -22,6 +23,7 @@ import useBadgeTier from '@/hooks/useBadgeTier';
 interface SurveyVoter {
   userId: string;
   badgeTier: string;
+  username?: string; // Adding username field locally as well
 }
 interface SurveyOption {
   text: string;
@@ -128,13 +130,13 @@ const SurveyDisplay: React.FC<SurveyProps> = ({
   };
 
   const renderBadgeBreakdown = (option: SurveyOption) => {
-    const votersByBadge: Record<string, string[]> = {};
+    const votersByBadge: Record<string, SurveyVoter[]> = {};
     
     option.voters.forEach(voter => {
       if (!votersByBadge[voter.badgeTier]) {
         votersByBadge[voter.badgeTier] = [];
       }
-      votersByBadge[voter.badgeTier].push(voter.userId);
+      votersByBadge[voter.badgeTier].push(voter);
     });
     
     return (
@@ -154,13 +156,17 @@ const SurveyDisplay: React.FC<SurveyProps> = ({
               <div className="text-xs space-y-1">
                 <p className="font-semibold">{badge} voters:</p>
                 <div className="space-y-1 max-h-[150px] overflow-y-auto">
-                  {voters.map((voterId, i) => (
+                  {voters.map((voter, i) => (
                     <div key={i} className="flex items-center gap-1.5">
-                      {voterId.includes('@') ? (
-                        <span className="text-muted-foreground">{voterId}</span>
+                      {voter.username ? (
+                        <Link to={`/profile/${voter.username}`} className="hover:underline text-blue-500">
+                          @{voter.username} <span className="text-muted-foreground">({voter.userId.substring(0, 6)}...)</span>
+                        </Link>
+                      ) : voter.userId.includes('@') ? (
+                        <span className="text-muted-foreground">{voter.userId}</span>
                       ) : (
-                        <Link to={`/profile/${voterId}`} className="hover:underline text-blue-500">
-                          {voterId}
+                        <Link to={`/profile/${voter.userId}`} className="hover:underline text-blue-500">
+                          {voter.userId.substring(0, 6)}...{voter.userId.substring(voter.userId.length - 4)}
                         </Link>
                       )}
                     </div>
