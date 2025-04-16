@@ -13,6 +13,8 @@ import { getProfileStatistics } from '@/services/statisticsService';
 import { Profile } from '@/types/dataTypes';
 import { formatNumber, formatProfileAge } from '@/lib/utils';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
+import BadgeTier from '@/components/profile/BadgeTier';
+import { calculateBadgeTier } from '@/utils/badgeUtils';
 
 type SortField = 'total_bounty' | 'rank' | 'name' | 'reports' | 'likes' | 'views' | 'comments' | 'bounty' | 'bounties_raised' | 'activity';
 type SortOrder = 'asc' | 'desc';
@@ -334,7 +336,17 @@ const LeaderboardPage = () => {
                                   </AvatarFallback>
                                 </Avatar>
                                 <div>
-                                  <div className="font-medium text-icc-blue dark:text-white">{profile.display_name}</div>
+                                  <div className="font-medium text-icc-blue dark:text-white flex items-center gap-2">
+                                    {profile.display_name}
+                                    {profile.sec_balance !== undefined && profile.sec_balance !== null && (
+                                      <BadgeTier 
+                                        badgeInfo={calculateBadgeTier(profile.sec_balance)}
+                                        size="sm"
+                                        showProgress={false}
+                                        context="chat"
+                                      />
+                                    )}
+                                  </div>
                                   <div className="text-sm text-gray-500 dark:text-gray-300">@{profile.username || profile.display_name.toLowerCase().replace(/\s/g, '')}</div>
                                 </div>
                               </div>
