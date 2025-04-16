@@ -2,7 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Notification, NotificationType, EntityType } from '@/types/dataTypes';
 import { handleError } from '@/utils/errorHandling';
 
-// Get notifications for the current user
+// Get notifications for the current user (limit to 100)
 export const getUserNotifications = async (userId: string): Promise<Notification[]> => {
   try {
     console.log("Fetching notifications for user:", userId);
@@ -12,7 +12,7 @@ export const getUserNotifications = async (userId: string): Promise<Notification
       .select('*')
       .eq('recipient_id', userId)
       .order('created_at', { ascending: false })
-      .limit(50);
+      .limit(100);  // Only fetch last 100 notifications
       
     if (error) {
       console.error("Error fetching notifications:", error);

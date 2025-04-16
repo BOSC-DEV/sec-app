@@ -10,7 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Bell, Check, CheckCheck, Sparkles, MessageSquare, ThumbsUp, CircleDollarSign, Info } from 'lucide-react';
+import { Bell, X, CheckCheck, Sparkles, MessageSquare, ThumbsUp, CircleDollarSign, Info } from 'lucide-react';
 
 interface NotificationDropdownProps {
   open: boolean;
@@ -30,20 +30,47 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     enabled: !!profile?.wallet_address && open,
   });
   
-  const refetchUnreadCount = () => {
-    refetch();
-  };
-  
-  const markAllAsRead = async () => {
+  const handleMarkAllAsRead = async () => {
     if (!profile?.wallet_address) return;
     
     await markAllNotificationsAsRead(profile.wallet_address);
+    // Update unread count immediately
+    if (window.setUnreadCount) {
+      window.setUnreadCount();
+    }
     refetch();
-    refetchUnreadCount();
   };
   
   const handleClose = () => {
     onOpenChange(false);
+  };
+
+  const handleLinkClick = (url: string) => {
+    // Check if URL has protocol, if not add https://
+    const fullUrl = url.startsWith('http://') || url.startsWith('https://')
+      ? url
+      : `https://${url}`;
+    window.open(fullUrl, '_blank', 'noopener,noreferrer');
+  };
+  
+  const processContent = (content: string) => {
+    // Match URLs with or without protocol
+    const urlRegex = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s]|(?<![\w/])[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\/[^\s<]*)?)/g;
+    
+    return content.split(urlRegex).map((part, index) => {
+      if (part.match(urlRegex)) {
+        return (
+          <span
+            key={index}
+            className="text-blue-500 hover:underline cursor-pointer"
+            onClick={() => handleLinkClick(part)}
+          >
+            {part}
+          </span>
+        );
+      }
+      return part;
+    });
   };
   
   const handleNotificationClick = async (notification: Notification) => {
@@ -70,7 +97,6 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     }
     
     refetch();
-    refetchUnreadCount();
     handleClose();
   };
   
@@ -94,16 +120,28 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="sm:max-w-md w-[90vw]">
-        <SheetHeader className="pb-4">
-          <SheetTitle className="flex justify-between items-center">
-            <div>Notifications</div>
+        <SheetHeader className="pb-4 flex flex-row items-center justify-between">
+          <SheetTitle className="flex-1">Notifications</SheetTitle>
+          <div className="flex items-center gap-2">
             {notifications.some(n => !n.is_read) && (
-              <Button variant="ghost" size="sm" onClick={markAllAsRead} className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleMarkAllAsRead}
+                className="h-8 w-8 p-0"
+              >
                 <CheckCheck className="h-4 w-4" />
-                <span>Mark all as read</span>
               </Button>
             )}
-          </SheetTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleClose}
+              className="h-8 w-8 p-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </SheetHeader>
         
         <ScrollArea className="h-[calc(100vh-8rem)]">
@@ -140,17 +178,26 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                   </div>
                   
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">{notification.content}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {format(new Date(notification.created_at), 'MMM d, yyyy • h:mm a')}
-                    </p>
-                  </div>
-                  
-                  {!notification.is_read && (
-                    <div className="ml-2 flex-shrink-0">
-                      <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium">
+                        {notification.actor_name || 'System'}
+                        {notification.actor_username && (
+                          <span className="text-icc-gold ml-1 font-bold">@{notification.actor_username}</span>
+                        )}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {format(new Date(notification.created_at), 'MMM d, yyyy • h:mm a')}
+                      </p>
                     </div>
-                  )}
+                    <p className="text-sm mt-1">
+                      {processContent(notification.content)}
+                    </p>
+                    {!notification.is_read && (
+                      <div className="ml-2 flex-shrink-0">
+                        <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

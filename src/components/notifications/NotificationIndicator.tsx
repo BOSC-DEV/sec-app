@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useProfile } from '@/contexts/ProfileContext';
 import { getUnreadNotificationsCount } from '@/services/notificationService';
 import { Bell } from 'lucide-react';
@@ -18,6 +18,7 @@ const NotificationIndicator: React.FC<NotificationIndicatorProps> = ({
   variant = 'ghost'
 }) => {
   const { profile } = useProfile();
+  const queryClient = useQueryClient();
   
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ['notifications-unread-count', profile?.wallet_address],
@@ -25,6 +26,16 @@ const NotificationIndicator: React.FC<NotificationIndicatorProps> = ({
     enabled: !!profile?.wallet_address,
     refetchInterval: 60000, // Refetch every minute
   });
+
+  // Expose method to manually set unread count to 0
+  React.useEffect(() => {
+    window.setUnreadCount = () => {
+      queryClient.setQueryData(
+        ['notifications-unread-count', profile?.wallet_address],
+        0
+      );
+    };
+  }, [queryClient, profile?.wallet_address]);
   
   return (
     <Button 
