@@ -590,7 +590,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
                 </TabsTrigger>
                 <TabsTrigger value="survey">
                   <BarChart3 className="h-4 w-4 mr-2" />
-                  Create Survey
+                  Create Poll
                 </TabsTrigger>
               </TabsList>
               
