@@ -552,16 +552,18 @@ const ScammerDetailPage = () => {
                     <Edit className="h-3.5 w-3.5" aria-hidden="true" />
                     {!isMobile && <span className="ml-1">Edit Report</span>}
                   </Button>
-                  <Button variant="gold" size="sm" onClick={handleDeleteScammer} aria-label="Delete this report">
-                    <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                    {!isMobile && <span className="ml-1">Delete Report</span>}
-                  </Button>
-                </>}
+                  
               
               <Button variant="outline" size="sm" onClick={handleShare} aria-label="Share this scammer report">
                 <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
                 {!isMobile && <span className="ml-1">Share</span>}
               </Button>
+              <Button variant="gold" size="sm" onClick={handleDeleteScammer} aria-label="Delete this report">
+                    <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                    {!isMobile && <span className="ml-1">Delete Report</span>}
+                  </Button>
+                </>}
+              
             </div>
           </div>
 
@@ -727,115 +729,4 @@ const ScammerDetailPage = () => {
                     </div>
                   </div>
                   <div className="flex justify-between items-center mb-3">
-                    <div className="text-sm text-gray-500 dark:text-gray-300 flex items-center">
-                      <Eye className="h-4 w-4 mr-1" aria-hidden="true" />
-                      {scammer.views} Views
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div className="text-sm text-gray-500 dark:text-gray-300 flex items-center">
-                      <Link2 className="h-4 w-4 mr-1" aria-hidden="true" />
-                      <button onClick={handleShare} className="hover:underline">
-                        Share
-                      </button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold text-icc-blue dark:text-white mb-3">Take Action</h3>
-                
-                <div className="flex space-x-2 mb-4">
-                  <Button 
-                    variant={isLiked ? "gold" : "outline"} 
-                    size="sm" 
-                    className={`flex-1 ${isLiked ? 'hover:bg-icc-gold-dark' : ''}`} 
-                    onClick={handleLike} 
-                    disabled={isLoading} 
-                    aria-pressed={isLiked} 
-                    aria-label="Like this report"
-                  >
-                    <ThumbsUp className="h-4 w-4 mr-1" aria-hidden="true" />
-                    <span>{likes}</span>
-                  </Button>
-                  <Button 
-                    variant={isDisliked ? "gold" : "outline"} 
-                    size="sm" 
-                    className={`flex-1 ${isDisliked ? 'hover:bg-icc-gold-dark' : ''}`} 
-                    onClick={handleDislike} 
-                    disabled={isLoading} 
-                    aria-pressed={isDisliked} 
-                    aria-label="Dislike this report"
-                  >
-                    <ThumbsDown className="h-4 w-4 mr-1" aria-hidden="true" />
-                    <span>{dislikes}</span>
-                  </Button>
-                </div>
-                
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="mb-3">
-                        <div className="flex justify-between text-sm text-icc-gray mb-1">
-                          <span>Community Consensus</span>
-                          <span>{agreePercentage}% Agree</span>
-                        </div>
-                        <Progress value={agreePercentage} className="h-2 bg-red-100" aria-valuemin={0} aria-valuemax={100} aria-valuenow={agreePercentage} aria-label={`${agreePercentage}% agreement rate`}>
-                          <div className="h-full bg-green-500 transition-all" style={{
-                          width: `${agreePercentage}%`
-                        }} />
-                        </Progress>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Based on {likes + dislikes} community votes</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                
-                {/* Display the BountyForm on desktop under the likes bar */}
-                {!isMobile && <div className="mt-6">
-                    <BountyForm scammerId={scammer.id} scammerName={scammer.name} developerWalletAddress={developerWalletAddress} />
-                    
-                    {/* Recent Contributions moved here */}
-                    <div className="mt-6">
-                      <BountyContributionList contributions={bountyContributions} isLoading={isLoadingBountyContributions} totalCount={totalContributions} onPageChange={handlePageChange} currentPage={contributionsPage} itemsPerPage={contributionsPerPage} userContributionAmount={userContributionAmount} />
-                    </div>
-                  </div>}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      
-      {/* Recent Contributions section */}
-      {isMobile && <div className="mt-8">
-          <BountyForm scammerId={scammer.id} scammerName={scammer.name} developerWalletAddress={developerWalletAddress} />
-          <div className="mt-6">
-            <BountyContributionList contributions={bountyContributions} isLoading={isLoadingBountyContributions} totalCount={totalContributions} onPageChange={handlePageChange} currentPage={contributionsPage} itemsPerPage={contributionsPerPage} userContributionAmount={userContributionAmount} />
-          </div>
-        </div>}
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete this scammer report?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. The report will be permanently deleted from our database.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
-              {deleteScammerMutation.isPending ? "Deleting..." : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
-  );
-};
-
-export default ScammerDetailPage;
+                    <div className="text-sm text-gray-500 dark:text-gray-300 flex items-center
