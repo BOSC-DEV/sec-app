@@ -25,7 +25,7 @@ const DeveloperWalletDisplay: React.FC<DeveloperWalletDisplayProps> = ({
   const shortAddress = `${developerWalletAddress.substring(0, 4)}...${developerWalletAddress.substring(developerWalletAddress.length - 4)}`;
   return <div className="mb-4">
       <div className="flex justify-between items-center mb-1">
-        <div className="text-sm font-medium text-icc-blue dark:text-white">Multi-Sig Treasury</div>
+        <div className="text-sm font-medium text-icc-blue dark:text-white my-[5px]">Multi-Sig Treasury</div>
         
       </div>
       <div className="bg-icc-gold-light/30 border border-icc-gold/30 rounded p-3 flex items-center justify-between">
