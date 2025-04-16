@@ -123,7 +123,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
       <SheetContent side="right" className="sm:max-w-md w-[90vw]">
         <SheetHeader className="pb-4 flex flex-row items-center justify-between">
           <SheetTitle className="flex-1">Notifications</SheetTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center">
             {notifications.some(n => !n.is_read) && (
               <Button
                 variant="ghost"
