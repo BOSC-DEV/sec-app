@@ -1,4 +1,3 @@
-
 export interface Scammer {
   id: string;
   name: string;
@@ -31,7 +30,7 @@ export interface Profile {
   bio: string;
   points: number;
   sec_balance?: number;
-  reports_count?: number;
+  reports_count?: reports_count?: number;
   likes_count?: number;
   views_count?: number;
   comments_count?: number;
@@ -88,6 +87,7 @@ export interface Announcement {
 export interface SurveyData {
   title: string;
   options: SurveyOption[];
+  poll_number?: number;
 }
 
 export interface SurveyOption {
