@@ -1,4 +1,3 @@
-
 export interface Scammer {
   id: string;
   name: string;
@@ -17,6 +16,7 @@ export interface Scammer {
   views: number;
   shares: number;
   comments: string[];
+  deleted_at: string | null;
 }
 
 export interface Profile {

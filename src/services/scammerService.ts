@@ -209,6 +209,32 @@ export const deleteScammer = async (id: string): Promise<boolean> => {
 };
 
 /**
+ * Unarchives a scammer report by clearing the deleted_at timestamp
+ * The report will reappear in standard searches 
+ */
+export const unarchiveScammer = async (id: string): Promise<boolean> => {
+  try {
+    console.log(`Unarchiving scammer report: ${id}`);
+    
+    const { error } = await supabase
+      .from('scammers')
+      .update({ deleted_at: null })
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Error unarchiving scammer:', error);
+      throw error;
+    }
+    
+    console.log(`Successfully unarchived scammer report: ${id}`);
+    return true;
+  } catch (error) {
+    console.error('Exception unarchiving scammer:', error);
+    throw error;
+  }
+};
+
+/**
  * Returns true if a scammer report exists, even if it's archived
  */
 export const scammerExists = async (id: string): Promise<boolean> => {
