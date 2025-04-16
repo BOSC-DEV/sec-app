@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -128,9 +127,7 @@ const SurveyDisplay: React.FC<SurveyProps> = ({
     }
   };
 
-  // Modified to show usernames instead of counts
   const renderBadgeBreakdown = (option: SurveyOption) => {
-    // Group voters by badge tier
     const votersByBadge: Record<string, string[]> = {};
     
     option.voters.forEach(voter => {
@@ -148,7 +145,8 @@ const SurveyDisplay: React.FC<SurveyProps> = ({
               <div className="text-xs py-0 px-1.5 bg-muted/40 rounded-md border border-border/50 cursor-help">
                 {badge === "Shrimp" ? "🦐" : badge === "Frog" ? "🐸" : badge === "Bull" ? "🐂" : 
                 badge === "Lion" ? "🦁" : badge === "King Cobra" ? "🐍" : badge === "Bull Shark" ? 
-                "🦈" : badge === "Bald Eagle" ? "🦅" : badge === "Great Ape" ? "🦍" : badge}
+                "🦈" : badge === "Bald Eagle" ? "🦅" : badge === "Great Ape" ? "🦍" : 
+                badge === "Whale" ? "🐋" : badge}
                 <span className="ml-1">{voters.length}</span>
               </div>
             </HoverCardTrigger>
