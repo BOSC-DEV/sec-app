@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { getScammerById, deleteScammer, unarchiveScammer } from '@/services/scammerService';
+import { getScammerById, deleteScammer } from '@/services/scammerService';
 import { getScammerComments, addComment } from '@/services/commentService';
 import { likeScammer, dislikeScammer, getUserScammerInteraction } from '@/services/interactionService';
 import { isScammerCreator } from '@/services/reportService';
-import { addBountyContribution, getScammerBountyContributions, getUserContributionAmountForScammer } from '@/services/bounty';
+import { addBountyContribution, getScammerBountyContributions, getUserContributionAmountForScammer } from '@/services/bountyService';
 import CompactHero from '@/components/common/CompactHero';
 import BountyContributionList from '@/components/scammer/BountyContributionList';
 import BountyTransferDialog from '@/components/scammer/BountyTransferDialog';
-import { ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, Link2, Eye, AlertTriangle, Shield, TrendingUp, Edit, Clipboard, Trash2, MessageSquare, Users, FileText, Wallet2, ShieldCheck, ArchiveRestore } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, Link2, Eye, AlertTriangle, Shield, TrendingUp, Edit, Clipboard, Trash2, MessageSquare, Users, FileText, Wallet2, ShieldCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
@@ -61,7 +61,6 @@ const ScammerDetailPage = () => {
   const [bountyComment, setBountyComment] = useState('');
   const developerWalletAddress = "A6X5A7ZSvez8BK82Z5tnZJC3qarGbsxRVv8Hc3DKBiZx";
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showUnarchiveDialog, setShowUnarchiveDialog] = useState(false);
   const [contributionsPage, setContributionsPage] = useState(1);
   const contributionsPerPage = 5;
   const [profileChangeCounter, setProfileChangeCounter] = useState(0);
@@ -91,38 +90,13 @@ const ScammerDetailPage = () => {
         title: "Success",
         description: "The scammer report has been archived successfully."
       });
-      queryClient.invalidateQueries({
-        queryKey: ['scammer', id]
-      });
+      navigate('/most-wanted');
     },
     onError: error => {
       handleError(error, {
         fallbackMessage: "Failed to archive the scammer report. Please try again.",
         severity: ErrorSeverity.HIGH,
         context: "DELETE_SCAMMER"
-      });
-    }
-  });
-
-  const unarchiveScammerMutation = useMutation({
-    mutationFn: () => {
-      if (!id) throw new Error("Scammer ID is required");
-      return unarchiveScammer(id);
-    },
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "The scammer report has been unarchived successfully."
-      });
-      queryClient.invalidateQueries({
-        queryKey: ['scammer', id]
-      });
-    },
-    onError: error => {
-      handleError(error, {
-        fallbackMessage: "Failed to unarchive the scammer report. Please try again.",
-        severity: ErrorSeverity.HIGH,
-        context: "UNARCHIVE_SCAMMER"
       });
     }
   });
@@ -494,16 +468,8 @@ const ScammerDetailPage = () => {
     setShowDeleteDialog(true);
   };
 
-  const handleUnarchiveScammer = () => {
-    setShowUnarchiveDialog(true);
-  };
-
   const confirmDelete = () => {
     deleteScammerMutation.mutate();
-  };
-
-  const confirmUnarchive = () => {
-    unarchiveScammerMutation.mutate();
   };
 
   const handleShare = async () => {
@@ -534,11 +500,8 @@ const ScammerDetailPage = () => {
 
   const developerWallet = `${developerWalletAddress.substring(0, 4)}...${developerWalletAddress.substring(developerWalletAddress.length - 4)}`;
 
-  const isArchived = scammer.deleted_at !== null;
-
   if (isLoadingScammer) {
-    return (
-      <div>
+    return <div>
         <CompactHero title="Loading..." />
         <section className="icc-section bg-white">
           <div className="icc-container">
@@ -548,13 +511,11 @@ const ScammerDetailPage = () => {
             <Skeleton className="h-6 w-1/2 mt-2" />
           </div>
         </section>
-      </div>
-    );
+      </div>;
   }
 
   if (errorScammer || !scammer) {
-    return (
-      <div>
+    return <div>
         <CompactHero title="Error" />
         <section className="icc-section bg-white">
           <div className="icc-container">
@@ -567,8 +528,7 @@ const ScammerDetailPage = () => {
             </p>
           </div>
         </section>
-      </div>
-    );
+      </div>;
   }
 
   return (
@@ -587,26 +547,16 @@ const ScammerDetailPage = () => {
               {isMobile ? 'Back' : 'Back to Most Wanted'}
             </Button>
             <div className="flex items-center space-x-2 md:space-x-3">
-              {isCreator && (
-                <>
+              {isCreator && <>
                   <Button variant="outline" size="sm" onClick={handleEditScammer} aria-label="Edit this report">
                     <Edit className="h-3.5 w-3.5" aria-hidden="true" />
                     {!isMobile && <span className="ml-1">Edit Report</span>}
                   </Button>
-                  
-                  {isArchived ? (
-                    <Button variant="gold" size="sm" onClick={handleUnarchiveScammer} aria-label="Unarchive this report">
-                      <ArchiveRestore className="h-3.5 w-3.5" aria-hidden="true" />
-                      {!isMobile && <span className="ml-1">Unarchive Report</span>}
-                    </Button>
-                  ) : (
-                    <Button variant="gold" size="sm" onClick={handleDeleteScammer} aria-label="Archive this report">
-                      <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                      {!isMobile && <span className="ml-1">Archive Report</span>}
-                    </Button>
-                  )}
-                </>
-              )}
+                  <Button variant="gold" size="sm" onClick={handleDeleteScammer} aria-label="Delete this report">
+                    <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                    {!isMobile && <span className="ml-1">Delete Report</span>}
+                  </Button>
+                </>}
               
               <Button variant="outline" size="sm" onClick={handleShare} aria-label="Share this scammer report">
                 <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
@@ -614,15 +564,6 @@ const ScammerDetailPage = () => {
               </Button>
             </div>
           </div>
-
-          {isArchived && (
-            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-md">
-              <div className="flex items-center gap-2 text-amber-800">
-                <AlertTriangle className="h-5 w-5" />
-                <p className="font-medium">This report has been archived and is no longer visible in public listings.</p>
-              </div>
-            </div>
-          )}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="md:col-span-2">
@@ -766,8 +707,7 @@ const ScammerDetailPage = () => {
                   <h3 className="text-lg font-semibold text-icc-blue dark:text-white mb-3">Reported By</h3>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  {creatorProfile ? (
-                    <Link to={`/profile/${creatorProfile.username || creatorProfile.wallet_address}`} className="flex items-center space-x-3 group hover:bg-gray-100 dark:hover:bg-icc-blue p-2 rounded-md transition-colors py-0 px-0 -mt-2">
+                  {creatorProfile ? <Link to={`/profile/${creatorProfile.username || creatorProfile.wallet_address}`} className="flex items-center space-x-3 group hover:bg-gray-100 dark:hover:bg-icc-blue p-2 rounded-md transition-colors py-0 px-0 -mt-2">
                       <Avatar className="group-hover:ring-2 group-hover:ring-icc-gold transition-all">
                         <AvatarImage src={creatorProfile.profile_pic_url} alt={`${creatorProfile.display_name}'s profile`} />
                         <AvatarFallback>{creatorProfile.display_name.substring(0, 2)}</AvatarFallback>
@@ -778,10 +718,7 @@ const ScammerDetailPage = () => {
                         </div>
                         <p className="text-sm text-gray-500 dark:text-gray-300">@{creatorProfile.username}</p>
                       </div>
-                    </Link>
-                  ) : (
-                    <p className="text-sm text-gray-500 dark:text-gray-300">Anonymous</p>
-                  )}
+                    </Link> : <p className="text-sm text-gray-500 dark:text-gray-300">Anonymous</p>}
                   <Separator className="my-4 dark:bg-gray-700" />
                   <div className="flex justify-between items-center mb-3">
                     <div className="text-sm text-gray-500 dark:text-gray-300 flex items-center">
@@ -789,55 +726,114 @@ const ScammerDetailPage = () => {
                       Added on {formatDate(scammer.date_added)}
                     </div>
                   </div>
-                  {isArchived && (
-                    <div className="flex justify-between items-center mb-3">
-                      <div className="text-sm text-amber-600 dark:text-amber-400 flex items-center">
-                        <Trash2 className="h-4 w-4 mr-1" aria-hidden="true" />
-                        Archived on {formatDate(scammer.deleted_at || '')}
-                      </div>
-                    </div>
-                  )}
                   <div className="flex justify-between items-center mb-3">
                     <div className="text-sm text-gray-500 dark:text-gray-300 flex items-center">
-                      {/* Additional content can be added here */}
+                      <Eye className="h-4 w-4 mr-1" aria-hidden="true" />
+                      {scammer.views} Views
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="text-sm text-gray-500 dark:text-gray-300 flex items-center">
+                      <Link2 className="h-4 w-4 mr-1" aria-hidden="true" />
+                      <button onClick={handleShare} className="hover:underline">
+                        Share
+                      </button>
                     </div>
                   </div>
                 </CardContent>
               </Card>
+
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold text-icc-blue dark:text-white mb-3">Take Action</h3>
+                
+                <div className="flex space-x-2 mb-4">
+                  <Button 
+                    variant={isLiked ? "gold" : "outline"} 
+                    size="sm" 
+                    className={`flex-1 ${isLiked ? 'hover:bg-icc-gold-dark' : ''}`} 
+                    onClick={handleLike} 
+                    disabled={isLoading} 
+                    aria-pressed={isLiked} 
+                    aria-label="Like this report"
+                  >
+                    <ThumbsUp className="h-4 w-4 mr-1" aria-hidden="true" />
+                    <span>{likes}</span>
+                  </Button>
+                  <Button 
+                    variant={isDisliked ? "gold" : "outline"} 
+                    size="sm" 
+                    className={`flex-1 ${isDisliked ? 'hover:bg-icc-gold-dark' : ''}`} 
+                    onClick={handleDislike} 
+                    disabled={isLoading} 
+                    aria-pressed={isDisliked} 
+                    aria-label="Dislike this report"
+                  >
+                    <ThumbsDown className="h-4 w-4 mr-1" aria-hidden="true" />
+                    <span>{dislikes}</span>
+                  </Button>
+                </div>
+                
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="mb-3">
+                        <div className="flex justify-between text-sm text-icc-gray mb-1">
+                          <span>Community Consensus</span>
+                          <span>{agreePercentage}% Agree</span>
+                        </div>
+                        <Progress value={agreePercentage} className="h-2 bg-red-100" aria-valuemin={0} aria-valuemax={100} aria-valuenow={agreePercentage} aria-label={`${agreePercentage}% agreement rate`}>
+                          <div className="h-full bg-green-500 transition-all" style={{
+                          width: `${agreePercentage}%`
+                        }} />
+                        </Progress>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Based on {likes + dislikes} community votes</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                
+                {/* Display the BountyForm on desktop under the likes bar */}
+                {!isMobile && <div className="mt-6">
+                    <BountyForm scammerId={scammer.id} scammerName={scammer.name} developerWalletAddress={developerWalletAddress} />
+                    
+                    {/* Recent Contributions moved here */}
+                    <div className="mt-6">
+                      <BountyContributionList contributions={bountyContributions} isLoading={isLoadingBountyContributions} totalCount={totalContributions} onPageChange={handlePageChange} currentPage={contributionsPage} itemsPerPage={contributionsPerPage} userContributionAmount={userContributionAmount} />
+                    </div>
+                  </div>}
+              </div>
             </div>
           </div>
-
-          <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Archive Report</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Are you sure you want to archive this report? This will remove it from public view, but associated bounty information will remain active.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={confirmDelete}>Archive</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-
-          <AlertDialog open={showUnarchiveDialog} onOpenChange={setShowUnarchiveDialog}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Unarchive Report</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Are you sure you want to unarchive this report? This will make it visible again in public listings.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={confirmUnarchive}>Unarchive</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
         </div>
       </section>
+      
+      {/* Recent Contributions section */}
+      {isMobile && <div className="mt-8">
+          <BountyForm scammerId={scammer.id} scammerName={scammer.name} developerWalletAddress={developerWalletAddress} />
+          <div className="mt-6">
+            <BountyContributionList contributions={bountyContributions} isLoading={isLoadingBountyContributions} totalCount={totalContributions} onPageChange={handlePageChange} currentPage={contributionsPage} itemsPerPage={contributionsPerPage} userContributionAmount={userContributionAmount} />
+          </div>
+        </div>}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Archive this scammer report?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will hide the report from public view, but any bounty contributions will remain active and transferrable.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+              {deleteScammerMutation.isPending ? "Archiving..." : "Archive Report"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
