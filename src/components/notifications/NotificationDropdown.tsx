@@ -124,16 +124,14 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
         <SheetHeader className="pb-4 flex flex-row items-center justify-between">
           <SheetTitle className="flex-1">Notifications</SheetTitle>
           <div className="flex items-center">
-            {notifications.some(n => !n.is_read) && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleMarkAllAsRead}
-                className="h-8 w-8 p-0"
-              >
-                <CheckCheck className="h-4 w-4" />
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleMarkAllAsRead}
+              className="h-8 w-8 p-0"
+            >
+              <CheckCheck className="h-4 w-4" />
+            </Button>
           </div>
         </SheetHeader>
         
