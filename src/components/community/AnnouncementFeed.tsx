@@ -395,14 +395,6 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
     setCurrentIndex(prev => (prev < filteredAnnouncements.length - 1 ? prev + 1 : 0));
   };
   
-  const linkifyContent = (content: string) => {
-    const urlRegex = /(https?:\/\/[^\s<]+)/g;
-    
-    return content.replace(urlRegex, url => 
-      `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline">${url}</a>`
-    );
-  };
-
   useEffect(() => {
     if (!filteredAnnouncements.length) return;
     
@@ -457,8 +449,6 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   
   const renderAnnouncementCard = (announcement: Announcement) => {
     const time = formatTimeAgo(announcement.created_at);
-    
-    const processedContent = linkifyContent(announcement.content);
     
     const surveyData = announcement.survey_data ? {
       id: announcement.id,
@@ -515,10 +505,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         <Separator />
         
         <CardContent className="py-4">
-          <div 
-            className="prose prose-sm max-w-none" 
-            dangerouslySetInnerHTML={{ __html: processedContent }} 
-          />
+          <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: announcement.content }} />
           
           {surveyData && (
             <SurveyDisplay 

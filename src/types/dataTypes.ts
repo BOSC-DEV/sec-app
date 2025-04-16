@@ -88,7 +88,6 @@ export interface Announcement {
 export interface SurveyData {
   title: string;
   options: SurveyOption[];
-  poll_number?: number;
 }
 
 export interface SurveyOption {

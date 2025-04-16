@@ -42,7 +42,6 @@ const ContributionForm = ({
             step="0.01"
             aria-labelledby="contribution-amount-label"
             aria-describedby="contribution-amount-currency"
-            placeholder="0.00"
           />
           <span id="contribution-amount-currency" className="text-icc-gold-dark dark:text-white font-medium flex items-center">
             <CurrencyIcon />

@@ -119,7 +119,7 @@ const LeaderboardPage = () => {
     <div>
       <CompactHero title="Leaderboard" subtitle="Top hunters tracking and reporting cryptocurrency scammers." />
 
-      <section className="py-12 bg-white dark:bg-icc-blue-dark">
+      <section className="py-12 bg-gradient-to-b from-white to-gray-50 dark:from-icc-blue-dark dark:to-icc-blue">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-6">
             <div className="relative w-full md:w-1/2 lg:w-1/3 mx-auto">

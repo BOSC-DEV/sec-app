@@ -23,7 +23,9 @@ import { useBadgeTier } from '@/hooks/useBadgeTier';
 import BadgeTier from '@/components/profile/BadgeTier';
 import { useIsMobile } from '@/hooks/use-mobile';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
+
 const PublicProfilePage = () => {
+  
   const {
     username
   } = useParams<{
@@ -36,6 +38,7 @@ const PublicProfilePage = () => {
     profile: currentUserProfile,
     disconnectWallet
   } = useProfile();
+  
   const {
     data: profile,
     isLoading,
@@ -46,10 +49,13 @@ const PublicProfilePage = () => {
     queryFn: () => getProfileByUsername(username || ''),
     enabled: !!username
   });
+  
   useEffect(() => {
     refetch();
   }, [location, refetch]);
+  
   const isOwnProfile = currentUserProfile?.wallet_address === profile?.wallet_address;
+  
   const {
     data: bountyContributions,
     isLoading: isLoadingBounties
@@ -58,7 +64,9 @@ const PublicProfilePage = () => {
     queryFn: () => getUserBountyContributions(profile?.wallet_address || '', 1, 50),
     enabled: !!profile?.wallet_address
   });
+  
   const badgeInfo = useBadgeTier(profile?.sec_balance || null);
+  
   const {
     data: scammerReports,
     isLoading: isLoadingReports
@@ -75,6 +83,7 @@ const PublicProfilePage = () => {
     queryFn: () => getLikedScammersByUser(profile?.wallet_address || ''),
     enabled: !!profile?.wallet_address
   });
+  
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
@@ -110,7 +119,9 @@ const PublicProfilePage = () => {
     disconnectWallet();
     navigate('/');
   };
+
   const isMobile = useIsMobile();
+
   if (error) {
     return <div className="container py-10">
         <Card>
@@ -128,6 +139,7 @@ const PublicProfilePage = () => {
         </Card>
       </div>;
   }
+  
   const renderProfileSkeleton = () => <div className="animate-pulse">
       <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
         <Skeleton className="w-32 h-32 rounded-full" />
@@ -138,28 +150,35 @@ const PublicProfilePage = () => {
         </div>
       </div>
     </div>;
+  
   const getInitials = (name: string) => {
     return name?.substring(0, 2).toUpperCase() || '👤';
   };
+  
   const truncateWalletAddress = (address: string) => {
     if (!address) return '';
     return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
   };
+  
   const defaultShareImage = '/lovable-uploads/3f23090d-4e36-43fc-b230-a8f898d7edd2.png';
   const pageImage = profile?.profile_pic_url || defaultShareImage;
   const pageTitle = profile ? `${profile.display_name} (@${profile.username}) | SEC.digital` : 'Profile | SEC.digital';
   const pageDescription = profile?.bio || `Check out this profile on SEC.digital - The Scams & E-crimes Commission`;
+  
   const formatDate = (dateString: string) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString();
   };
+  
   const formatCurrency = (amount: number) => {
     return amount.toLocaleString(undefined, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
   };
-  return <HelmetProvider>
+
+  return (
+    <HelmetProvider>
       <>
         <Helmet>
           <title>{pageTitle}</title>
@@ -193,19 +212,36 @@ const PublicProfilePage = () => {
                     <div className="flex flex-wrap items-center justify-center md:justify-between gap-2">
                       <div className="flex items-center gap-2 relative">
                         <h1 className="text-3xl font-bold text-icc-gold">{profile?.display_name}</h1>
-                        {badgeInfo && <div className="absolute -top-1 -right-6 ml-2">
-                            <BadgeTier badgeInfo={badgeInfo} showTooltip={true} size="sm" variant="plain" />
-                          </div>}
+                        {badgeInfo && (
+                          <div className="absolute -top-1 -right-6 ml-2">
+                            <BadgeTier 
+                              badgeInfo={badgeInfo} 
+                              showTooltip={true} 
+                              size="sm" 
+                              variant="plain" 
+                            />
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center space-x-3 mt-3 md:mt-0 p-0">
                         {isOwnProfile && <>
-                            <Button variant="outline" size="sm" onClick={handleEditProfile} className="flex items-center gap-1 border-neutral-500 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 
-                                           dark:border-icc-blue-light dark:text-white dark:hover:bg-icc-blue-dark dark:hover:text-white">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={handleEditProfile} 
+                              className="flex items-center gap-1 border-neutral-500 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 
+                                           dark:border-icc-blue-light dark:text-white dark:hover:bg-icc-blue-dark dark:hover:text-white"
+                            >
                               <Edit size={16} />
                               Edit
                             </Button>
-                            <Button variant="outline" size="sm" onClick={handleDisconnectWallet} className="flex items-center gap-1 border-red-500 text-red-700 hover:bg-red-50 hover:text-red-900
-                                           dark:border-red-400 dark:text-red-300 dark:hover:bg-red-900/20 dark:hover:text-red-200">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={handleDisconnectWallet} 
+                              className="flex items-center gap-1 border-red-500 text-red-700 hover:bg-red-50 hover:text-red-900
+                                           dark:border-red-400 dark:text-red-300 dark:hover:bg-red-900/20 dark:hover:text-red-200"
+                            >
                               <LogOut size={16} />
                               Disconnect
                             </Button>
@@ -243,40 +279,64 @@ const PublicProfilePage = () => {
             <Tabs defaultValue="reports" className="w-full" value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="w-full justify-start overflow-x-auto bg-background/60 backdrop-blur-sm rounded-lg border p-1 mb-6">
                 <TabsTrigger value="reports" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                  {isMobile ? <FileText className="h-5 w-5" /> : <>
+                  {isMobile ? (
+                    <FileText className="h-5 w-5" />
+                  ) : (
+                    <>
                       <FileText className="h-4 w-4 mr-2" />
                       Reports
-                    </>}
+                    </>
+                  )}
                 </TabsTrigger>
                 <TabsTrigger value="bounties" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                  {isMobile ? <Package className="h-5 w-5" /> : <>
+                  {isMobile ? (
+                    <Package className="h-5 w-5" />
+                  ) : (
+                    <>
                       <Package className="h-4 w-4 mr-2" />
                       Bounties
-                    </>}
+                    </>
+                  )}
                 </TabsTrigger>
                 <TabsTrigger value="wallet" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                  {isMobile ? <WalletIcon className="h-5 w-5" /> : <>
+                  {isMobile ? (
+                    <WalletIcon className="h-5 w-5" />
+                  ) : (
+                    <>
                       <WalletIcon className="h-4 w-4 mr-2" />
                       Wallet
-                    </>}
+                    </>
+                  )}
                 </TabsTrigger>
                 <TabsTrigger value="info" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                  {isMobile ? <Info className="h-5 w-5" /> : <>
+                  {isMobile ? (
+                    <Info className="h-5 w-5" />
+                  ) : (
+                    <>
                       <Info className="h-4 w-4 mr-2" />
                       Info
-                    </>}
+                    </>
+                  )}
                 </TabsTrigger>
                 <TabsTrigger value="activity" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                  {isMobile ? <ThumbsUp className="h-5 w-5" /> : <>
+                  {isMobile ? (
+                    <ThumbsUp className="h-5 w-5" />
+                  ) : (
+                    <>
                       <ThumbsUp className="h-4 w-4 mr-2" />
                       Agreed
-                    </>}
+                    </>
+                  )}
                 </TabsTrigger>
                 <TabsTrigger value="comments" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                  {isMobile ? <MessageSquare className="h-5 w-5" /> : <>
+                  {isMobile ? (
+                    <MessageSquare className="h-5 w-5" />
+                  ) : (
+                    <>
                       <MessageSquare className="h-4 w-4 mr-2" />
                       Comments
-                    </>}
+                    </>
+                  )}
                 </TabsTrigger>
               </TabsList>
                 
@@ -306,7 +366,7 @@ const PublicProfilePage = () => {
                     </div> : <div className="text-center py-12">
                       <p className="text-muted-foreground text-lg mb-6">No scammer reports yet</p>
                       <Button asChild>
-                        
+                        <Link to="/report">Report a Scammer <ExternalLink className="ml-2" size={16} /></Link>
                       </Button>
                     </div>}
                 </div>
@@ -345,7 +405,7 @@ const PublicProfilePage = () => {
                                     <span className="font-medium">{contribution.scammers.name}</span>
                                   </Link> : <span>Unknown Scammer</span>}
                               </TableCell>
-                              <TableCell className="font-mono font-medium text-icc-blue dark:text-white">
+                              <TableCell className="font-mono font-medium text-icc-blue">
                                 {formatCurrency(contribution.amount)} $SEC
                               </TableCell>
                               <TableCell className="max-w-[200px] truncate">
@@ -379,7 +439,11 @@ const PublicProfilePage = () => {
                   <div className="space-y-8">
                     {profile?.wallet_address ? <>
                         <WalletBalance walletAddress={profile.wallet_address} />
-                        <WalletInfo walletAddress={profile.wallet_address} isOwnProfile={isOwnProfile} secBalance={profile?.sec_balance} />
+                        <WalletInfo 
+                          walletAddress={profile.wallet_address} 
+                          isOwnProfile={isOwnProfile} 
+                          secBalance={profile?.sec_balance}
+                        />
                       </> : <div className="text-center py-12">
                         <p className="text-muted-foreground text-lg">No wallet information available</p>
                       </div>}
@@ -456,6 +520,8 @@ const PublicProfilePage = () => {
           </div>
         </div>
       </>
-    </HelmetProvider>;
+    </HelmetProvider>
+  );
 };
+
 export default PublicProfilePage;
