@@ -1,4 +1,11 @@
+
 import React from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { UseMutationResult } from '@tanstack/react-query';
+import { Profile } from '@/types/dataTypes';
+import CurrencyIcon from '@/components/common/CurrencyIcon';
 
 const ContributionForm: React.FC<{
   contributionAmount: string;
