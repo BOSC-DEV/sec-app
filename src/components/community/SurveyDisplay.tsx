@@ -212,7 +212,7 @@ const SurveyDisplay: React.FC<SurveyProps> = ({ survey, onVote }) => {
             disabled={selectedOption === undefined || isVoting}
             onClick={handleSubmitVote}
           >
-            {isVoting ? "Voting..." : "Submit Vote"}
+            {isVoting ? "Voting..." : "Vote"}
           </Button>
           
           <Button
