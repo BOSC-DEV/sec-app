@@ -35,6 +35,8 @@ import { Link } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import BountyForm from '@/components/scammer/BountyForm';
 import { ArrowLeftRight } from 'lucide-react';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+
 const ScammerDetailPage = () => {
   const {
     id
@@ -666,45 +668,49 @@ const ScammerDetailPage = () => {
             </div>
 
             <div>
-              <div className="bg-gray-50 rounded-lg shadow-md p-4">
-                <h3 className="text-lg font-semibold text-icc-blue dark:text-icc-blue mb-3">Reported By</h3>
-                {creatorProfile ? <Link to={`/profile/${creatorProfile.username || creatorProfile.wallet_address}`} className="flex items-center space-x-3 group hover:bg-gray-100 p-2 rounded-md transition-colors">
-                    <Avatar className="group-hover:ring-2 group-hover:ring-icc-gold transition-all">
-                      <AvatarImage src={creatorProfile.profile_pic_url} alt={`${creatorProfile.display_name}'s profile`} />
-                      <AvatarFallback>{creatorProfile.display_name.substring(0, 2)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="text-sm font-medium font-bold text-icc-blue dark:text-icc-blue leading-none group-hover:text-icc-gold transition-colors">
-                        {creatorProfile.display_name}
+              <Card className="mb-6 bg-gray-50 dark:bg-icc-blue-dark dark:text-white">
+                <CardHeader>
+                  <h3 className="text-lg font-semibold text-icc-blue dark:text-white mb-3">Reported By</h3>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  {creatorProfile ? <Link to={`/profile/${creatorProfile.username || creatorProfile.wallet_address}`} className="flex items-center space-x-3 group hover:bg-gray-100 dark:hover:bg-icc-blue p-2 rounded-md transition-colors">
+                      <Avatar className="group-hover:ring-2 group-hover:ring-icc-gold transition-all">
+                        <AvatarImage src={creatorProfile.profile_pic_url} alt={`${creatorProfile.display_name}'s profile`} />
+                        <AvatarFallback>{creatorProfile.display_name.substring(0, 2)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="text-sm font-medium font-bold text-icc-blue dark:text-white leading-none group-hover:text-icc-gold transition-colors">
+                          {creatorProfile.display_name}
+                        </div>
+                        <p className="text-sm text-gray-500 dark:text-gray-300">@{creatorProfile.username}</p>
                       </div>
-                      <p className="text-sm text-gray-500">@{creatorProfile.username}</p>
+                    </Link> : <p className="text-sm text-gray-500 dark:text-gray-300">Anonymous</p>}
+                  <Separator className="my-4 dark:bg-gray-700" />
+                  <div className="flex justify-between items-center mb-3">
+                    <div className="text-sm text-gray-500 dark:text-gray-300 flex items-center">
+                      <Calendar className="h-4 w-4 mr-1" aria-hidden="true" />
+                      Added on {formatDate(scammer.date_added)}
                     </div>
-                  </Link> : <p className="text-sm text-gray-500">Anonymous</p>}
-                <Separator className="my-4" />
-                <div className="flex justify-between items-center mb-3">
-                  <div className="text-sm text-gray-500 flex items-center">
-                    <Calendar className="h-4 w-4 mr-1" aria-hidden="true" />
-                    Added on {formatDate(scammer.date_added)}
                   </div>
-                </div>
-                <div className="flex justify-between items-center mb-3">
-                  <div className="text-sm text-gray-500 flex items-center">
-                    <Eye className="h-4 w-4 mr-1" aria-hidden="true" />
-                    {scammer.views} Views
+                  <div className="flex justify-between items-center mb-3">
+                    <div className="text-sm text-gray-500 dark:text-gray-300 flex items-center">
+                      <Eye className="h-4 w-4 mr-1" aria-hidden="true" />
+                      {scammer.views} Views
+                    </div>
                   </div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <div className="text-sm text-gray-500 flex items-center">
-                    <Link2 className="h-4 w-4 mr-1" aria-hidden="true" />
-                    <button onClick={handleShare} className="hover:underline">
-                      Share
-                    </button>
+                  <div className="flex justify-between items-center">
+                    <div className="text-sm text-gray-500 dark:text-gray-300 flex items-center">
+                      <Link2 className="h-4 w-4 mr-1" aria-hidden="true" />
+                      <button onClick={handleShare} className="hover:underline">
+                        Share
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
               <div className="mt-6">
-                <h3 className="text-lg font-semibold text-icc-blue mb-3">Take Action</h3>
+                <h3 className="text-lg font-semibold text-icc-blue dark:text-white mb-3">Take Action</h3>
                 
                 <div className="flex space-x-2 mb-4">
                   <Button variant={isLiked ? "default" : "outline"} size="sm" className={`flex-1 ${isLiked ? 'bg-green-600 hover:bg-green-700' : ''}`} onClick={handleLike} disabled={isLoading} aria-pressed={isLiked} aria-label="Like this report">
