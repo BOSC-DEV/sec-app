@@ -1,5 +1,7 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ICCLogo from '../common/ICCLogo';
 import TermsDialog from '../common/TermsDialog';
