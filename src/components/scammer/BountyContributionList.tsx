@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import { getProfilesByDisplayName } from '@/services/profileService';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
 import { useInView } from 'react-intersection-observer';
-import Progress from '@/components/ui/progress';
+import { Progress } from '@/components/ui/progress';
 
 interface BountyContributionListProps {
   contributions: BountyContribution[];
