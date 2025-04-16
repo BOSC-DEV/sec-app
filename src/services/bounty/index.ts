@@ -24,4 +24,3 @@ export {
   updateScammerBounty,
   updateScammerBountyAmount
 } from './bountyUpdateService';
-
