@@ -89,7 +89,7 @@ const ConsensusUsers: React.FC<ConsensusUsersProps> = ({
               liked: interaction.liked
             };
           })
-          // Fix: Use a proper type guard that matches the ConsensusUser interface with optional properties
+          // Fix: Use a type guard that properly handles the optional properties
           .filter((user): user is ConsensusUser => user !== null);
           
         setUsers(usersWithData);
