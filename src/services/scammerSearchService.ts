@@ -10,7 +10,7 @@ export const searchScammers = async (searchTerm: string): Promise<Scammer[]> => 
     const { data, error } = await supabase
       .from('scammers')
       .select('*')
-      .or(`name.ilike.%${searchTerm}%, aliases.cs.{${searchTerm}}, wallet_addresses.cs.{${searchTerm}}`)
+      .or(`name.ilike.%${searchTerm}%, wallet_addresses.cs.{%${searchTerm}%}, aliases.cs.{${searchTerm}}`)
       .is('deleted_at', null)
       .limit(5);
 
@@ -25,3 +25,4 @@ export const searchScammers = async (searchTerm: string): Promise<Scammer[]> => 
     return [];
   }
 };
+

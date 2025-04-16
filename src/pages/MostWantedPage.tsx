@@ -94,7 +94,8 @@ const MostWantedPage = () => {
     const filtered = scammers.filter(scammer => 
       scammer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (scammer.accused_of && scammer.accused_of.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (scammer.aliases && scammer.aliases.some(alias => alias.toLowerCase().includes(searchQuery.toLowerCase())))
+      (scammer.aliases && scammer.aliases.some(alias => alias.toLowerCase().includes(searchQuery.toLowerCase()))) ||
+      (scammer.wallet_addresses && scammer.wallet_addresses.some(address => address.toLowerCase().includes(searchQuery.toLowerCase())))
     );
     
     const sorted = [...filtered].sort((a, b) => {
