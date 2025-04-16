@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { 
   Announcement, 
@@ -116,73 +117,101 @@ export const createAnnouncement = async (announcement: Omit<Announcement, 'id' |
 
 export const createSurveyAnnouncement = async (
   title: string,
-  options: string[],
-  authorInfo: {
-    author_id: string;
-    author_name: string;
-    author_username?: string;
-    author_profile_pic?: string;
-    likes: number;
-    dislikes: number;
-  }
-): Promise<any> => {
+  optionTexts: string[],
+  announcement: Omit<Announcement, 'id' | 'created_at' | 'views' | 'content' | 'survey_data'>
+): Promise<Announcement | null> => {
   try {
-    const surveyOptions = options.map(option => ({
-      text: option,
+    const options: SurveyOption[] = optionTexts.map(text => ({
+      text,
       votes: 0,
-      voters: [] // Include empty voters array for each option
+      voters: []
     }));
-
-    const surveyData = {
+    
+    const surveyData: SurveyData = {
       title,
-      options: surveyOptions
+      options
     };
-
+    
     const { data, error } = await supabase
       .from('announcements')
       .insert({
-        content: `<p><strong>COMMUNITY POLL:</strong> ${title}</p>`,
-        ...authorInfo,
-        survey_data: surveyData,
-        views: 0
+        content: `<p>${title}</p>`,
+        author_id: announcement.author_id,
+        author_name: announcement.author_name,
+        author_username: announcement.author_username,
+        author_profile_pic: announcement.author_profile_pic,
+        likes: announcement.likes || 0,
+        dislikes: announcement.dislikes || 0,
+        survey_data: convertSurveyDataToJson(surveyData)
       })
       .select()
       .single();
-
-    if (error) throw error;
-    return data;
+      
+    if (error) {
+      console.error("Error creating survey announcement:", error);
+      return null;
+    }
+    
+    return {
+      ...data,
+      survey_data: convertJsonToSurveyData(data.survey_data)
+    } as Announcement;
   } catch (error) {
-    console.error('Error creating survey announcement:', error);
+    console.error('Error in createSurveyAnnouncement:', error);
     return null;
   }
 };
 
 export const getUserSurveyVote = async (announcementId: string, userId: string): Promise<number | undefined> => {
   try {
-    const { data: announcement, error } = await supabase
+    // First check localStorage for cached vote
+    try {
+      const storedVotes = JSON.parse(localStorage.getItem('userSurveyVotes') || '{}');
+      if (storedVotes[announcementId] !== undefined) {
+        console.log("Found vote in localStorage:", announcementId, storedVotes[announcementId]);
+        return storedVotes[announcementId];
+      }
+    } catch (error) {
+      console.error("Error reading from localStorage:", error);
+    }
+    
+    // If not in localStorage, check the database
+    const { data, error } = await supabase
       .from('announcements')
       .select('survey_data')
       .eq('id', announcementId)
       .single();
-    
-    if (error) throw error;
-    
-    if (!announcement?.survey_data) {
+      
+    if (error) {
+      console.error("Error fetching survey data:", error);
       return undefined;
     }
     
-    const surveyData = announcement.survey_data;
+    const surveyData = convertJsonToSurveyData(data?.survey_data);
     
-    for (let i = 0; i < surveyData.options.length; i++) {
-      const hasVoted = surveyData.options[i].voters.some(v => v.userId === userId);
-      if (hasVoted) {
-        return i;
+    if (surveyData) {
+      for (let i = 0; i < surveyData.options.length; i++) {
+        const option = surveyData.options[i];
+        const voterIndex = option.voters.findIndex((voter) => voter.userId === userId);
+        if (voterIndex !== -1) {
+          // Found the vote in the database, update localStorage
+          try {
+            const storedVotes = JSON.parse(localStorage.getItem('userSurveyVotes') || '{}');
+            localStorage.setItem('userSurveyVotes', JSON.stringify({
+              ...storedVotes,
+              [announcementId]: i
+            }));
+          } catch (error) {
+            console.error("Error updating localStorage:", error);
+          }
+          return i;
+        }
       }
     }
     
     return undefined;
   } catch (error) {
-    console.error('Error getting user survey vote:', error);
+    console.error("Error getting user survey vote:", error);
     return undefined;
   }
 };
@@ -194,58 +223,71 @@ export const voteSurvey = async (
   badgeTier: string
 ): Promise<boolean> => {
   try {
-    const { data: announcement, error } = await supabase
+    if (!canVoteInSurvey(badgeTier)) {
+      toast({
+        title: "Cannot vote",
+        description: "You need a badge tier to vote in surveys",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    const { data: announcement, error: fetchError } = await supabase
       .from('announcements')
       .select('survey_data')
       .eq('id', announcementId)
       .single();
-    
-    if (error) throw error;
-    
-    if (!announcement?.survey_data) {
-      throw new Error('Survey data not found');
-    }
-    
-    const surveyData = announcement.survey_data;
-    
-    let userHasVoted = false;
-    let previousVoteOptionIndex = -1;
-    
-    for (let i = 0; i < surveyData.options.length; i++) {
-      const voterIndex = surveyData.options[i].voters.findIndex(v => v.userId === userId);
       
-      if (voterIndex !== -1) {
-        userHasVoted = true;
-        previousVoteOptionIndex = i;
-        surveyData.options[i].voters.splice(voterIndex, 1);
-        surveyData.options[i].votes--;
-      }
+    if (fetchError) {
+      console.error("Error fetching survey data:", fetchError);
+      return false;
     }
     
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('username, profile_pic_url')
-      .eq('wallet_address', userId)
-      .single();
+    const surveyData = convertJsonToSurveyData(announcement?.survey_data);
     
-    surveyData.options[optionIndex].votes++;
-    surveyData.options[optionIndex].voters.push({
-      userId,
-      badgeTier,
-      username: profile?.username,
-      profilePic: profile?.profile_pic_url
-    });
+    if (surveyData) {
+      let userPreviousVote = -1;
+      
+      surveyData.options.forEach((option, index) => {
+        const voterIndex = option.voters.findIndex((voter) => voter.userId === userId);
+        if (voterIndex !== -1) {
+          userPreviousVote = index;
+          option.voters.splice(voterIndex, 1);
+          option.votes = Math.max(0, option.votes - 1);
+        }
+      });
+      
+      if (optionIndex >= 0 && optionIndex < surveyData.options.length) {
+        const option = surveyData.options[optionIndex];
+        option.voters.push({
+          userId,
+          badgeTier
+        });
+        option.votes += 1;
+      } else {
+        console.error("Invalid option index:", optionIndex);
+        return false;
+      }
+      
+      const { error: updateError } = await supabase
+        .from('announcements')
+        .update({
+          survey_data: convertSurveyDataToJson(surveyData)
+        })
+        .eq('id', announcementId);
+        
+      if (updateError) {
+        console.error("Error updating survey votes:", updateError);
+        return false;
+      }
+      
+      return true;
+    }
     
-    const { error: updateError } = await supabase
-      .from('announcements')
-      .update({ survey_data: surveyData })
-      .eq('id', announcementId);
-    
-    if (updateError) throw updateError;
-    
-    return true;
+    console.error("No survey data found for this announcement");
+    return false;
   } catch (error) {
-    console.error('Error voting in survey:', error);
+    console.error('Error in voteSurvey:', error);
     return false;
   }
 };
@@ -1304,50 +1346,4 @@ export const getUserChatMessageInteraction = async (messageId: string, userId: s
 export const isUserAdmin = async (username: string): Promise<boolean> => {
   const { ADMIN_USERNAMES } = await import('@/utils/adminUtils');
   return ADMIN_USERNAMES.includes(username);
-};
-
-// Adding profile information to survey voters
-export const getSurveyWithVoterProfiles = async (surveyId: string): Promise<any> => {
-  try {
-    const { data: announcement, error } = await supabase
-      .from('announcements')
-      .select('*')
-      .eq('id', surveyId)
-      .single();
-    
-    if (error) throw error;
-    
-    if (announcement?.survey_data) {
-      const surveyData = announcement.survey_data;
-      
-      // Enhance voters with profile information
-      for (let i = 0; i < surveyData.options.length; i++) {
-        for (let j = 0; j < surveyData.options[i].voters.length; j++) {
-          const voter = surveyData.options[i].voters[j];
-          
-          // Get profile info
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('username, profile_pic_url')
-            .eq('wallet_address', voter.userId)
-            .single();
-          
-          if (profile) {
-            surveyData.options[i].voters[j] = {
-              ...voter,
-              username: profile.username,
-              profilePic: profile.profile_pic_url
-            };
-          }
-        }
-      }
-      
-      announcement.survey_data = surveyData;
-    }
-    
-    return announcement;
-  } catch (error) {
-    console.error('Error fetching survey with voter profiles:', error);
-    return null;
-  }
 };
