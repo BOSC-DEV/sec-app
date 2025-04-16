@@ -84,12 +84,11 @@ const ConsensusUsers: React.FC<ConsensusUsersProps> = ({
             return {
               wallet_address: profile.wallet_address,
               display_name: profile.display_name,
-              username: profile.username ?? undefined,
+              username: profile.username,
               profile_pic_url: profile.profile_pic_url,
               liked: interaction.liked
             };
           })
-          // Fix: Use proper type predicate with correct nullability check
           .filter((user): user is ConsensusUser => user !== null);
           
         setUsers(usersWithData);
