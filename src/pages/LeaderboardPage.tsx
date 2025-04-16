@@ -71,6 +71,9 @@ const LeaderboardPage = () => {
       switch (sortField) {
         case 'total_bounty':
           comparison = (b.total_bounty || 0) - (a.total_bounty || 0);
+          if (comparison === 0 && a.created_at && b.created_at) {
+            comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          }
           break;
         case 'rank':
           comparison = (b.points || 0) - (a.points || 0);
