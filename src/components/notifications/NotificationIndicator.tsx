@@ -35,6 +35,11 @@ const NotificationIndicator: React.FC<NotificationIndicatorProps> = ({
         0
       );
     };
+
+    return () => {
+      // Clean up the global function when component unmounts
+      delete window.setUnreadCount;
+    };
   }, [queryClient, profile?.wallet_address]);
   
   return (

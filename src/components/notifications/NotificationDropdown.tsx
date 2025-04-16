@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -35,7 +36,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     
     await markAllNotificationsAsRead(profile.wallet_address);
     // Update unread count immediately
-    if (window.setUnreadCount) {
+    if (typeof window.setUnreadCount === 'function') {
       window.setUnreadCount();
     }
     refetch();
