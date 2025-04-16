@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { 
   Announcement, 
@@ -14,22 +13,18 @@ import { toast } from '@/hooks/use-toast';
 import { notifyReaction } from '@/services/notificationService';
 import { MAX_SURVEY_OPTIONS, canVoteInSurvey } from '@/utils/adminUtils';
 
-// Helper function to safely convert Json to SurveyData
 const convertJsonToSurveyData = (data: Json | null): SurveyData | null => {
   if (!data) return null;
   
   try {
-    // If it's a string, parse it
     const surveyData = typeof data === 'string' ? JSON.parse(data) : data;
     
-    // Check if it has the required structure
     if (typeof surveyData === 'object' && 
         surveyData !== null && 
         'title' in surveyData && 
         'options' in surveyData &&
         Array.isArray(surveyData.options)) {
       
-      // Validate and ensure proper structure
       return {
         title: String(surveyData.title),
         options: surveyData.options.map((option: any) => ({
@@ -51,12 +46,10 @@ const convertJsonToSurveyData = (data: Json | null): SurveyData | null => {
   return null;
 };
 
-// Helper function to convert SurveyData to Json for Supabase
 const convertSurveyDataToJson = (surveyData: SurveyData): Json => {
   return surveyData as unknown as Json;
 };
 
-// Announcements Functions
 export const getAnnouncements = async (): Promise<Announcement[]> => {
   try {
     const { data, error } = await supabase
@@ -69,7 +62,6 @@ export const getAnnouncements = async (): Promise<Announcement[]> => {
       return [];
     }
     
-    // Parse the survey_data if it exists and convert to proper SurveyData type
     const announcementsWithParsedData = data.map(item => {
       return {
         ...item,
@@ -92,7 +84,7 @@ export const createAnnouncement = async (announcement: Omit<Announcement, 'id' |
         content: announcement.content,
         author_id: announcement.author_id,
         author_name: announcement.author_name,
-        author_username: announcement.author_username || '', // Ensure it's not undefined
+        author_username: announcement.author_username || '',
         author_profile_pic: announcement.author_profile_pic,
         likes: announcement.likes || 0,
         dislikes: announcement.dislikes || 0
@@ -138,12 +130,12 @@ export const createSurveyAnnouncement = async (
         content: `<p>${title}</p>`,
         author_id: announcement.author_id,
         author_name: announcement.author_name,
-        author_username: announcement.author_username || '', // Ensure it's not undefined
+        author_username: announcement.author_username || '',
         author_profile_pic: announcement.author_profile_pic,
         likes: announcement.likes || 0,
         dislikes: announcement.dislikes || 0,
         survey_data: convertSurveyDataToJson(surveyData),
-        views: 0 // Add default views count
+        views: 0
       })
       .select()
       .single();
@@ -165,7 +157,6 @@ export const createSurveyAnnouncement = async (
 
 export const getUserSurveyVote = async (announcementId: string, userId: string): Promise<number | undefined> => {
   try {
-    // First check localStorage for cached vote
     try {
       const storedVotes = JSON.parse(localStorage.getItem('userSurveyVotes') || '{}');
       if (storedVotes[announcementId] !== undefined) {
@@ -176,7 +167,6 @@ export const getUserSurveyVote = async (announcementId: string, userId: string):
       console.error("Error reading from localStorage:", error);
     }
     
-    // If not in localStorage, check the database
     const { data, error } = await supabase
       .from('announcements')
       .select('survey_data')
@@ -195,7 +185,6 @@ export const getUserSurveyVote = async (announcementId: string, userId: string):
         const option = surveyData.options[i];
         const voterIndex = option.voters.findIndex((voter) => voter.userId === userId);
         if (voterIndex !== -1) {
-          // Found the vote in the database, update localStorage
           try {
             const storedVotes = JSON.parse(localStorage.getItem('userSurveyVotes') || '{}');
             localStorage.setItem('userSurveyVotes', JSON.stringify({
@@ -221,74 +210,57 @@ export const voteSurvey = async (
   announcementId: string,
   optionIndex: number,
   userId: string,
-  badgeTier: string
+  badgeTier: string,
+  displayName?: string,
+  username?: string
 ): Promise<boolean> => {
   try {
-    if (!canVoteInSurvey(badgeTier)) {
-      toast({
-        title: "Cannot vote",
-        description: "You need a badge tier to vote in surveys",
-        variant: "destructive",
-      });
-      return false;
-    }
-    
-    const { data: announcement, error: fetchError } = await supabase
+    const { data: announcement } = await supabase
       .from('announcements')
       .select('survey_data')
       .eq('id', announcementId)
       .single();
-      
-    if (fetchError) {
-      console.error("Error fetching survey data:", fetchError);
-      return false;
-    }
     
-    const surveyData = convertJsonToSurveyData(announcement?.survey_data);
+    if (!announcement?.survey_data) return false;
     
-    if (surveyData) {
-      let userPreviousVote = -1;
-      
-      surveyData.options.forEach((option, index) => {
-        const voterIndex = option.voters.findIndex((voter) => voter.userId === userId);
-        if (voterIndex !== -1) {
-          userPreviousVote = index;
-          option.voters.splice(voterIndex, 1);
-          option.votes = Math.max(0, option.votes - 1);
-        }
+    const surveyData = announcement.survey_data;
+    const options = [...surveyData.options];
+    
+    const alreadyVotedOptionIndex = options.findIndex(option => 
+      option.voters.some(voter => voter.userId === userId)
+    );
+    
+    if (alreadyVotedOptionIndex !== -1 && alreadyVotedOptionIndex !== optionIndex) {
+      options[alreadyVotedOptionIndex].voters = options[alreadyVotedOptionIndex].voters.filter(
+        voter => voter.userId !== userId
+      );
+      options[alreadyVotedOptionIndex].votes -= 1;
+    } else if (alreadyVotedOptionIndex !== optionIndex) {
+      options[optionIndex].voters.push({
+        userId,
+        badgeTier,
+        username
       });
-      
-      if (optionIndex >= 0 && optionIndex < surveyData.options.length) {
-        const option = surveyData.options[optionIndex];
-        option.voters.push({
-          userId,
-          badgeTier
-        });
-        option.votes += 1;
-      } else {
-        console.error("Invalid option index:", optionIndex);
-        return false;
-      }
-      
-      const { error: updateError } = await supabase
-        .from('announcements')
-        .update({
-          survey_data: convertSurveyDataToJson(surveyData)
-        })
-        .eq('id', announcementId);
-        
-      if (updateError) {
-        console.error("Error updating survey votes:", updateError);
-        return false;
-      }
-      
+      options[optionIndex].votes += 1;
+    } else {
       return true;
     }
     
-    console.error("No survey data found for this announcement");
-    return false;
+    const { error } = await supabase
+      .from('announcements')
+      .update({
+        survey_data: {
+          ...surveyData,
+          options
+        }
+      })
+      .eq('id', announcementId);
+    
+    if (error) throw error;
+    
+    return true;
   } catch (error) {
-    console.error('Error in voteSurvey:', error);
+    console.error('Error voting in survey:', error);
     return false;
   }
 };
@@ -348,7 +320,6 @@ export const incrementAnnouncementViews = async (id: string): Promise<boolean> =
   }
 };
 
-// Announcement Replies Functions
 export const getAnnouncementReplies = async (announcementId: string): Promise<AnnouncementReply[]> => {
   try {
     const { data, error } = await supabase
@@ -436,7 +407,6 @@ export const deleteAnnouncementReply = async (id: string): Promise<boolean> => {
   }
 };
 
-// Chat Message Functions
 export const getChatMessages = async (): Promise<ChatMessage[]> => {
   try {
     const { data, error } = await supabase
@@ -530,7 +500,6 @@ export const deleteChatMessage = async (id: string): Promise<boolean> => {
   }
 };
 
-// Interaction Functions
 export const likeAnnouncement = async (announcementId: string, userId: string): Promise<{ likes: number, dislikes: number } | null> => {
   try {
     const { data: interaction, error: fetchError } = await supabase
@@ -1209,7 +1178,6 @@ export const dislikeChatMessage = async (messageId: string, userId: string): Pro
   }
 };
 
-// Helper functions for counting reactions
 const countAnnouncementReactions = async (announcementId: string, reactionType: string): Promise<number> => {
   try {
     const { count, error } = await supabase
@@ -1270,7 +1238,6 @@ const countChatMessageReactions = async (messageId: string, reactionType: string
   }
 };
 
-// User interaction functions - to check if a user has reacted
 export const getUserAnnouncementInteraction = async (announcementId: string, userId: string): Promise<{ liked: boolean, disliked: boolean }> => {
   try {
     const { data, error } = await supabase
@@ -1343,7 +1310,6 @@ export const getUserChatMessageInteraction = async (messageId: string, userId: s
   }
 };
 
-// Admin functions
 export const isUserAdmin = async (username: string): Promise<boolean> => {
   const { ADMIN_USERNAMES } = await import('@/utils/adminUtils');
   return ADMIN_USERNAMES.includes(username);

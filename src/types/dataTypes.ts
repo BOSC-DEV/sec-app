@@ -99,6 +99,7 @@ export interface SurveyVoter {
   userId: string;
   badgeTier: string;
   username?: string;
+  displayName?: string;
 }
 
 export interface AnnouncementReply {

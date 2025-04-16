@@ -297,7 +297,9 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         announcementId, 
         optionIndex, 
         profile.wallet_address,
-        badgeInfo.tier
+        badgeInfo.tier,
+        profile.display_name,
+        profile.username
       );
       
       if (success) {

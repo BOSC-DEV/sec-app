@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -22,13 +23,16 @@ import useBadgeTier from '@/hooks/useBadgeTier';
 interface SurveyVoter {
   userId: string;
   badgeTier: string;
-  username?: string; // Adding username field locally as well
+  username?: string;
+  displayName?: string;
 }
+
 interface SurveyOption {
   text: string;
   votes: number;
   voters: SurveyVoter[];
 }
+
 interface SurveyProps {
   survey: {
     id: string;
@@ -165,7 +169,7 @@ const SurveyDisplay: React.FC<SurveyProps> = ({
                         <span className="text-muted-foreground">{voter.userId}</span>
                       ) : (
                         <Link to={`/wallet/${voter.userId}`} className="hover:underline text-blue-500">
-                          {voter.userId.substring(0, 6)}...{voter.userId.substring(voter.userId.length - 4)}
+                          {voter.displayName || 'User'} <span className="text-muted-foreground">({voter.userId.substring(0, 6)}...{voter.userId.substring(voter.userId.length - 4)})</span>
                         </Link>
                       )}
                     </div>
