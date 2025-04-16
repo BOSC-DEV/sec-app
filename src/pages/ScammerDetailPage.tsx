@@ -36,7 +36,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import BountyForm from '@/components/scammer/BountyForm';
 import { ArrowLeftRight } from 'lucide-react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
-
 const ScammerDetailPage = () => {
   const {
     id
@@ -673,7 +672,7 @@ const ScammerDetailPage = () => {
                   <h3 className="text-lg font-semibold text-icc-blue dark:text-white mb-3">Reported By</h3>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  {creatorProfile ? <Link to={`/profile/${creatorProfile.username || creatorProfile.wallet_address}`} className="flex items-center space-x-3 group hover:bg-gray-100 dark:hover:bg-icc-blue p-2 rounded-md transition-colors">
+                  {creatorProfile ? <Link to={`/profile/${creatorProfile.username || creatorProfile.wallet_address}`} className="flex items-center space-x-3 group hover:bg-gray-100 dark:hover:bg-icc-blue p-2 rounded-md transition-colors py-0 px-0">
                       <Avatar className="group-hover:ring-2 group-hover:ring-icc-gold transition-all">
                         <AvatarImage src={creatorProfile.profile_pic_url} alt={`${creatorProfile.display_name}'s profile`} />
                         <AvatarFallback>{creatorProfile.display_name.substring(0, 2)}</AvatarFallback>
