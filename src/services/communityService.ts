@@ -92,7 +92,7 @@ export const createAnnouncement = async (announcement: Omit<Announcement, 'id' |
         content: announcement.content,
         author_id: announcement.author_id,
         author_name: announcement.author_name,
-        author_username: announcement.author_username,
+        author_username: announcement.author_username || '', // Ensure it's not undefined
         author_profile_pic: announcement.author_profile_pic,
         likes: announcement.likes || 0,
         dislikes: announcement.dislikes || 0
@@ -138,11 +138,12 @@ export const createSurveyAnnouncement = async (
         content: `<p>${title}</p>`,
         author_id: announcement.author_id,
         author_name: announcement.author_name,
-        author_username: announcement.author_username,
+        author_username: announcement.author_username || '', // Ensure it's not undefined
         author_profile_pic: announcement.author_profile_pic,
         likes: announcement.likes || 0,
         dislikes: announcement.dislikes || 0,
-        survey_data: convertSurveyDataToJson(surveyData)
+        survey_data: convertSurveyDataToJson(surveyData),
+        views: 0 // Add default views count
       })
       .select()
       .single();
