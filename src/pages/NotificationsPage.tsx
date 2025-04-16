@@ -145,88 +145,85 @@ const NotificationsPage: React.FC = () => {
       </Helmet>
       
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div className="flex items-center">
             <Bell className="h-5 w-5 mr-2" />
             <h1 className="text-xl font-semibold">Notifications</h1>
           </div>
           
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="flex items-center gap-1">
-                    <Filter className="h-4 w-4" />
-                    Filter
+          <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filter
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuCheckboxItem
+                  checked={isFilterActive(NotificationType.LIKE)}
+                  onCheckedChange={() => toggleNotificationType(NotificationType.LIKE)}
+                >
+                  <ThumbsUp className="h-4 w-4 text-blue-500 mr-2" />
+                  Likes
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={isFilterActive(NotificationType.COMMENT)}
+                  onCheckedChange={() => toggleNotificationType(NotificationType.COMMENT)}
+                >
+                  <MessageSquare className="h-4 w-4 text-green-500 mr-2" />
+                  Comments
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={isFilterActive(NotificationType.BOUNTY)}
+                  onCheckedChange={() => toggleNotificationType(NotificationType.BOUNTY)}
+                >
+                  <Coins className="h-4 w-4 text-icc-gold mr-2" />
+                  Bounties
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={isFilterActive(NotificationType.REACTION)}
+                  onCheckedChange={() => toggleNotificationType(NotificationType.REACTION)}
+                >
+                  <Smile className="h-4 w-4 text-purple-500 mr-2" />
+                  Reactions
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={isFilterActive(NotificationType.SYSTEM)}
+                  onCheckedChange={() => toggleNotificationType(NotificationType.SYSTEM)}
+                >
+                  <Bell className="h-4 w-4 text-gray-500 mr-2" />
+                  System
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={isFilterActive(NotificationType.MENTION)}
+                  onCheckedChange={() => toggleNotificationType(NotificationType.MENTION)}
+                >
+                  <Bell className="h-4 w-4 text-orange-500 mr-2" />
+                  Mentions
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuSeparator />
+                <div className="px-2 py-1.5">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full"
+                    onClick={() => setSelectedTypes([])}
+                  >
+                    Clear Filters
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuCheckboxItem
-                    checked={isFilterActive(NotificationType.LIKE)}
-                    onCheckedChange={() => toggleNotificationType(NotificationType.LIKE)}
-                  >
-                    <ThumbsUp className="h-4 w-4 text-blue-500 mr-2" />
-                    Likes
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={isFilterActive(NotificationType.COMMENT)}
-                    onCheckedChange={() => toggleNotificationType(NotificationType.COMMENT)}
-                  >
-                    <MessageSquare className="h-4 w-4 text-green-500 mr-2" />
-                    Comments
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={isFilterActive(NotificationType.BOUNTY)}
-                    onCheckedChange={() => toggleNotificationType(NotificationType.BOUNTY)}
-                  >
-                    <Coins className="h-4 w-4 text-icc-gold mr-2" />
-                    Bounties
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={isFilterActive(NotificationType.REACTION)}
-                    onCheckedChange={() => toggleNotificationType(NotificationType.REACTION)}
-                  >
-                    <Smile className="h-4 w-4 text-purple-500 mr-2" />
-                    Reactions
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={isFilterActive(NotificationType.SYSTEM)}
-                    onCheckedChange={() => toggleNotificationType(NotificationType.SYSTEM)}
-                  >
-                    <Bell className="h-4 w-4 text-gray-500 mr-2" />
-                    System
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={isFilterActive(NotificationType.MENTION)}
-                    onCheckedChange={() => toggleNotificationType(NotificationType.MENTION)}
-                  >
-                    <Bell className="h-4 w-4 text-orange-500 mr-2" />
-                    Mentions
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuSeparator />
-                  <div className="px-2 py-1.5">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="w-full"
-                      onClick={() => setSelectedTypes([])}
-                    >
-                      Clear Filters
-                    </Button>
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleMarkAllAsRead}
-                className="flex items-center gap-1"
-              >
-                <Check className="h-4 w-4" />
-                Mark all
-              </Button>
-            </div>
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleMarkAllAsRead}
+            >
+              <Check className="h-4 w-4 mr-2" />
+              Mark all
+            </Button>
           </div>
         </CardHeader>
         
