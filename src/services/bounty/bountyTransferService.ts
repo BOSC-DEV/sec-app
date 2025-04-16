@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { BountyContribution } from "@/types/dataTypes";
 import { handleError, ErrorSeverity } from "@/utils/errorHandling";
@@ -14,7 +13,8 @@ export const transferBountyContribution = async (
   amount: number, 
   contributorId: string,
   contributorName: string,
-  contributorProfilePic?: string
+  contributorProfilePic?: string,
+  comment?: string
 ): Promise<{originalContribution: BountyContribution, newContribution: BountyContribution}> => {
   try {
     console.log(`Transferring ${amount} from contribution ${originalContributionId} to scammer ${targetScammerId}`);
@@ -41,17 +41,13 @@ export const transferBountyContribution = async (
       throw new Error("This contribution has already been transferred");
     }
     
-    // Step 4: Calculate transfer amount, ensuring 10% remains
-    const maxTransferAmount = originalContribution.amount * 0.9;
-    if (amount > maxTransferAmount) {
-      throw new Error(`You can only transfer up to 90% of the original amount (${maxTransferAmount.toFixed(2)} $SEC)`);
+    // Step 4: Calculate transfer amount (removed 90% limit)
+    if (amount > originalContribution.amount) {
+      throw new Error(`You can only transfer up to ${originalContribution.amount.toFixed(2)} $SEC`);
     }
     
     // Step 5: Calculate the remaining amount
     const remainingAmount = originalContribution.amount - amount;
-    if (remainingAmount < originalContribution.amount * 0.1) {
-      throw new Error("You must leave at least 10% of the original amount");
-    }
     
     // Step 6: Begin transaction
     // Update the original contribution
@@ -70,7 +66,7 @@ export const transferBountyContribution = async (
       throw updateError;
     }
     
-    // Step 7: Create the new contribution with the transferred amount
+    // Step 7: Create the new contribution with the transferred amount and comment
     const { data: newContribution, error: insertError } = await supabase
       .from("bounty_contributions")
       .insert({
@@ -79,7 +75,7 @@ export const transferBountyContribution = async (
         contributor_id: contributorId,
         contributor_name: contributorName,
         contributor_profile_pic: contributorProfilePic || null,
-        comment: `Transferred from another scammer bounty`,
+        comment: comment || `Transferred from another scammer bounty`,
         transferred_from_id: originalContributionId,
         is_active: true
       })

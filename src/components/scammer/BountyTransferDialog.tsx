@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -16,6 +15,7 @@ import { getScammerById } from '@/services/scammerService';
 import { formatCurrency } from '@/lib/utils';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
+import { Textarea } from '@/components/ui/textarea';
 
 interface BountyTransferDialogProps {
   scammerId: string;
@@ -37,15 +37,14 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
   const [sourceContributions, setSourceContributions] = useState<BountyContribution[]>([]);
   const [selectedContribution, setSelectedContribution] = useState<BountyContribution | null>(null);
   const [maxTransferAmount, setMaxTransferAmount] = useState<number>(0);
+  const [transferComment, setTransferComment] = useState('');
 
-  // Fetch user's transferable contributions
   useEffect(() => {
     const fetchTransferableContributions = async () => {
       if (!profile?.wallet_address || !isOpen) return;
       
       setIsLoading(true);
       try {
-        // Get all transferable contributions except ones already on this scammer
         const contributions = await getUserTransferableContributions(profile.wallet_address, scammerId);
         setSourceContributions(contributions);
       } catch (error) {
@@ -63,11 +62,9 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
     fetchTransferableContributions();
   }, [profile?.wallet_address, scammerId, isOpen, toast]);
 
-  // Update max transfer amount when selected contribution changes
   useEffect(() => {
     if (selectedContribution) {
-      // Max is 90% of the original contribution
-      const max = selectedContribution.amount * 0.9;
+      const max = selectedContribution.amount;
       setMaxTransferAmount(max);
       setTransferAmount(max.toFixed(2));
     } else {
@@ -84,7 +81,6 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
   const handleTransferAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     
-    // Validate input
     if (!value || isNaN(parseFloat(value))) {
       setTransferAmount('0');
       return;
@@ -92,14 +88,8 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
     
     const amount = parseFloat(value);
     
-    // Ensure it's not more than max allowed
     if (amount > maxTransferAmount) {
       setTransferAmount(maxTransferAmount.toFixed(2));
-      return;
-    }
-    
-    if (selectedContribution && amount > selectedContribution.amount * 0.9) {
-      setTransferAmount((selectedContribution.amount * 0.9).toFixed(2));
       return;
     }
     
@@ -107,7 +97,6 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
   };
 
   const handleTransferRequest = () => {
-    // Validation
     if (!selectedContribution) {
       toast({
         title: "Error",
@@ -127,16 +116,15 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
       return;
     }
     
-    if (amount > selectedContribution.amount * 0.9) {
+    if (amount > selectedContribution.amount) {
       toast({
         title: "Error",
-        description: `You can only transfer up to 90% (${(selectedContribution.amount * 0.9).toFixed(2)} $SEC) of the original contribution`,
+        description: `You can only transfer up to ${selectedContribution.amount.toFixed(2)} $SEC from this contribution`,
         variant: "destructive"
       });
       return;
     }
     
-    // Open confirmation dialog
     setConfirmDialogOpen(true);
   };
 
@@ -151,7 +139,8 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
         parseFloat(transferAmount),
         profile.wallet_address,
         profile.display_name,
-        profile.profile_pic_url
+        profile.profile_pic_url,
+        transferComment
       );
       
       toast({
@@ -159,13 +148,12 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
         description: `Successfully transferred ${transferAmount} $SEC to ${scammerName}`
       });
       
-      // Reset form and close dialogs
       setSelectedContribution(null);
       setTransferAmount('0');
+      setTransferComment('');
       setConfirmDialogOpen(false);
       setIsOpen(false);
       
-      // Trigger callback for parent to refresh data
       if (onTransferComplete) {
         onTransferComplete();
       }
@@ -246,7 +234,7 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
                       <div className="flex justify-between items-center">
                         <Label htmlFor="transfer-amount">Transfer Amount</Label>
                         <span className="text-sm text-gray-500">
-                          Max: {formatCurrency(maxTransferAmount)} <CurrencyIcon size="sm" />
+                          Available: {formatCurrency(maxTransferAmount)} <CurrencyIcon size="sm" />
                         </span>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -266,9 +254,21 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
                       </div>
                     </div>
 
+                    <div className="space-y-2">
+                      <Label htmlFor="transfer-comment">Transfer Comment (Optional)</Label>
+                      <Textarea
+                        id="transfer-comment"
+                        value={transferComment}
+                        onChange={(e) => setTransferComment(e.target.value)}
+                        placeholder="Add a comment about this transfer..."
+                        className="resize-none"
+                        disabled={isLoading}
+                      />
+                    </div>
+
                     <div className="space-y-1">
                       <div className="flex justify-between text-sm">
-                        <span>Amount to keep at original scammer:</span>
+                        <span>Remaining amount at original scammer:</span>
                         <span className="flex items-center">
                           {selectedContribution && formatCurrency(selectedContribution.amount - parseFloat(transferAmount || '0'))} <CurrencyIcon size="sm" className="ml-1" />
                         </span>
@@ -280,11 +280,6 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
                           0
                         } 
                       />
-                      {selectedContribution && (parseFloat(transferAmount) > selectedContribution.amount * 0.9) && (
-                        <p className="text-xs text-red-500 mt-1">
-                          At least 10% ({formatCurrency(selectedContribution.amount * 0.1)} <CurrencyIcon size="sm" />) must remain with the original scammer
-                        </p>
-                      )}
                     </div>
                   </>
                 )}
@@ -296,7 +291,7 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
                       isLoading || 
                       !selectedContribution || 
                       parseFloat(transferAmount) <= 0 ||
-                      parseFloat(transferAmount) > selectedContribution?.amount * 0.9
+                      parseFloat(transferAmount) > selectedContribution?.amount
                     }
                     className="w-full"
                   >
@@ -316,6 +311,11 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
             <AlertDialogDescription>
               Are you sure you want to transfer {formatCurrency(parseFloat(transferAmount))} <CurrencyIcon size="sm" /> from 
               {selectedContribution?.scammers?.name ? ` ${selectedContribution.scammers.name}` : ' the original scammer'} to {scammerName}?
+              {transferComment && (
+                <div className="mt-2">
+                  <strong>Comment:</strong> {transferComment}
+                </div>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
