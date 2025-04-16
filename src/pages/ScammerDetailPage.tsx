@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { getScammerById, deleteScammer } from '@/services/scammerService';
+import { getScammerById, deleteScammer, unarchiveScammer } from '@/services/scammerService';
 import { getScammerComments, addComment } from '@/services/commentService';
 import { likeScammer, dislikeScammer, getUserScammerInteraction } from '@/services/interactionService';
 import { isScammerCreator } from '@/services/reportService';
@@ -9,7 +9,7 @@ import { addBountyContribution, getScammerBountyContributions, getUserContributi
 import CompactHero from '@/components/common/CompactHero';
 import BountyContributionList from '@/components/scammer/BountyContributionList';
 import BountyTransferDialog from '@/components/scammer/BountyTransferDialog';
-import { ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, Link2, Eye, AlertTriangle, Shield, TrendingUp, Edit, Clipboard, Trash2, MessageSquare, Users, FileText, Wallet2, ShieldCheck } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, Link2, Eye, AlertTriangle, Shield, TrendingUp, Edit, Clipboard, Trash2, MessageSquare, Users, FileText, Wallet2, ShieldCheck, ArchiveRestore } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
@@ -61,6 +61,7 @@ const ScammerDetailPage = () => {
   const [bountyComment, setBountyComment] = useState('');
   const developerWalletAddress = "A6X5A7ZSvez8BK82Z5tnZJC3qarGbsxRVv8Hc3DKBiZx";
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showUnarchiveDialog, setShowUnarchiveDialog] = useState(false);
   const [contributionsPage, setContributionsPage] = useState(1);
   const contributionsPerPage = 5;
   const [profileChangeCounter, setProfileChangeCounter] = useState(0);
@@ -90,13 +91,38 @@ const ScammerDetailPage = () => {
         title: "Success",
         description: "The scammer report has been archived successfully."
       });
-      navigate('/most-wanted');
+      queryClient.invalidateQueries({
+        queryKey: ['scammer', id]
+      });
     },
     onError: error => {
       handleError(error, {
         fallbackMessage: "Failed to archive the scammer report. Please try again.",
         severity: ErrorSeverity.HIGH,
         context: "DELETE_SCAMMER"
+      });
+    }
+  });
+
+  const unarchiveScammerMutation = useMutation({
+    mutationFn: () => {
+      if (!id) throw new Error("Scammer ID is required");
+      return unarchiveScammer(id);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "The scammer report has been unarchived successfully."
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['scammer', id]
+      });
+    },
+    onError: error => {
+      handleError(error, {
+        fallbackMessage: "Failed to unarchive the scammer report. Please try again.",
+        severity: ErrorSeverity.HIGH,
+        context: "UNARCHIVE_SCAMMER"
       });
     }
   });
@@ -468,8 +494,16 @@ const ScammerDetailPage = () => {
     setShowDeleteDialog(true);
   };
 
+  const handleUnarchiveScammer = () => {
+    setShowUnarchiveDialog(true);
+  };
+
   const confirmDelete = () => {
     deleteScammerMutation.mutate();
+  };
+
+  const confirmUnarchive = () => {
+    unarchiveScammerMutation.mutate();
   };
 
   const handleShare = async () => {
@@ -499,6 +533,8 @@ const ScammerDetailPage = () => {
   };
 
   const developerWallet = `${developerWalletAddress.substring(0, 4)}...${developerWalletAddress.substring(developerWalletAddress.length - 4)}`;
+
+  const isArchived = scammer.deleted_at !== null;
 
   if (isLoadingScammer) {
     return (
@@ -557,10 +593,18 @@ const ScammerDetailPage = () => {
                     <Edit className="h-3.5 w-3.5" aria-hidden="true" />
                     {!isMobile && <span className="ml-1">Edit Report</span>}
                   </Button>
-                  <Button variant="gold" size="sm" onClick={handleDeleteScammer} aria-label="Archive this report">
-                    <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                    {!isMobile && <span className="ml-1">Archive Report</span>}
-                  </Button>
+                  
+                  {isArchived ? (
+                    <Button variant="gold" size="sm" onClick={handleUnarchiveScammer} aria-label="Unarchive this report">
+                      <ArchiveRestore className="h-3.5 w-3.5" aria-hidden="true" />
+                      {!isMobile && <span className="ml-1">Unarchive Report</span>}
+                    </Button>
+                  ) : (
+                    <Button variant="gold" size="sm" onClick={handleDeleteScammer} aria-label="Archive this report">
+                      <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      {!isMobile && <span className="ml-1">Archive Report</span>}
+                    </Button>
+                  )}
                 </>
               )}
               
@@ -570,6 +614,15 @@ const ScammerDetailPage = () => {
               </Button>
             </div>
           </div>
+
+          {isArchived && (
+            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-md">
+              <div className="flex items-center gap-2 text-amber-800">
+                <AlertTriangle className="h-5 w-5" />
+                <p className="font-medium">This report has been archived and is no longer visible in public listings.</p>
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="md:col-span-2">
@@ -736,6 +789,14 @@ const ScammerDetailPage = () => {
                       Added on {formatDate(scammer.date_added)}
                     </div>
                   </div>
+                  {isArchived && (
+                    <div className="flex justify-between items-center mb-3">
+                      <div className="text-sm text-amber-600 dark:text-amber-400 flex items-center">
+                        <Trash2 className="h-4 w-4 mr-1" aria-hidden="true" />
+                        Archived on {formatDate(scammer.deleted_at || '')}
+                      </div>
+                    </div>
+                  )}
                   <div className="flex justify-between items-center mb-3">
                     <div className="text-sm text-gray-500 dark:text-gray-300 flex items-center">
                       {/* Additional content can be added here */}
@@ -757,6 +818,21 @@ const ScammerDetailPage = () => {
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction onClick={confirmDelete}>Archive</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          <AlertDialog open={showUnarchiveDialog} onOpenChange={setShowUnarchiveDialog}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Unarchive Report</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to unarchive this report? This will make it visible again in public listings.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={confirmUnarchive}>Unarchive</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
