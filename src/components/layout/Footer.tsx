@@ -1,7 +1,5 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ICCLogo from '../common/ICCLogo';
 import TermsDialog from '../common/TermsDialog';
@@ -94,30 +92,30 @@ const Footer = () => {
           </div>
           
           <div>
-            <h4 className="text-white dark:text-gray-200 font-serif font-bold mb-4 mx-[7px]">Resources</h4>
+            <h4 className="text-white dark:text-gray-200 font-serif font-bold mb-4">Resources</h4>
             <ul className="space-y-2">
               <li>
-                <button onClick={() => setAboutOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full hover:bg-white/10 py-1 px-2 rounded transition-colors">
+                <button onClick={() => setAboutOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
                   About SEC
                 </button>
               </li>
               <li>
-                <button onClick={() => setFaqOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full hover:bg-white/10 py-1 px-2 rounded transition-colors">
+                <button onClick={() => setFaqOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
                   FAQ
                 </button>
               </li>
               <li>
-                <button onClick={() => setContactOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full hover:bg-white/10 py-1 px-2 rounded transition-colors">
+                <button onClick={() => setContactOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
                   Contact Us
                 </button>
               </li>
               <li>
-                <button onClick={() => setSafetyOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full hover:bg-white/10 py-1 px-2 rounded transition-colors">
+                <button onClick={() => setSafetyOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
                   Safety Guidelines
                 </button>
               </li>
               <li>
-                <Link to="/community" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full hover:bg-white/10 py-1 px-2 rounded transition-colors">
+                <Link to="/community" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
                   Community
                 </Link>
               </li>
@@ -126,7 +124,7 @@ const Footer = () => {
                   href="https://solscan.io/token/HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump"
                   target="_blank"
                   rel="noopener noreferrer" 
-                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full hover:bg-white/10 py-1 px-2 rounded transition-colors"
+                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors"
                 >
                   SEC Token
                 </a>
@@ -135,25 +133,25 @@ const Footer = () => {
           </div>
           
           <div>
-            <h4 className="text-white dark:text-gray-200 font-serif font-bold mb-4 mx-[7px]">Legal</h4>
+            <h4 className="text-white dark:text-gray-200 font-serif font-bold mb-4">Legal</h4>
             <ul className="space-y-2">
               <li>
-                <button onClick={() => setTermsOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full hover:bg-white/10 py-1 px-2 rounded transition-colors">
+                <button onClick={() => setTermsOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
                   Terms of Service
                 </button>
               </li>
               <li>
-                <button onClick={() => setPrivacyOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full hover:bg-white/10 py-1 px-2 rounded transition-colors">
+                <button onClick={() => setPrivacyOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
                   Privacy Policy
                 </button>
               </li>
               <li>
-                <button onClick={() => setDisclaimerOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full hover:bg-white/10 py-1 px-2 rounded transition-colors">
+                <button onClick={() => setDisclaimerOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
                   Disclaimer
                 </button>
               </li>
               <li>
-                <button onClick={() => setCookiesOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full hover:bg-white/10 py-1 px-2 rounded transition-colors">
+                <button onClick={() => setCookiesOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
                   Cookie Policy
                 </button>
               </li>
