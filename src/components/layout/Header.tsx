@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -112,59 +111,36 @@ const Header = () => {
             </nav>
           </div>
 
-          {/* Mobile: Center theme toggle, Desktop: Right-aligned controls */}
-          <div className="flex items-center">
-            {isMobile ? (
-              <div className="flex justify-between items-center w-full absolute left-0 right-0 px-4">
-                <div className="flex-1"></div> {/* Empty div for spacing */}
-                <div className="flex-1 flex justify-center">
-                  <ThemeToggle variant="outline" size="sm" className="bg-icc-gold/80" />
-                </div>
-                <div className="flex-1 flex justify-end space-x-3">
-                  {isConnected ? (
-                    <>
-                      <NotificationIndicator onClick={toggleNotifications} />
-                      <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light" onClick={handleProfileClick} aria-label="Profile">
-                        <User className="h-5 w-5" />
-                      </Button>
-                    </>
-                  ) : (
-                    <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light" onClick={handleWalletButtonClick} aria-label="Connect Wallet">
-                      <Wallet className="h-5 w-5" />
-                    </Button>
-                  )}
-                  <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light" onClick={toggleMenu} aria-label="Menu">
+          <div className="flex items-center space-x-2">
+            <ThemeToggle variant="outline" size="sm" className="mr-2" />
+            {isLoading ? <Button variant="outline" size="sm" disabled className="opacity-75">
+                Loading...
+              </Button> : isConnected ? <div className="flex items-center space-x-3">
+                <NotificationIndicator onClick={toggleNotifications} />
+                
+                <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light" onClick={handleProfileClick} aria-label="Profile">
+                  <User className="h-5 w-5" />
+                </Button>
+                {isMobile && <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light md:hidden" onClick={toggleMenu} aria-label="Menu">
                     {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-2">
-                <ThemeToggle variant="outline" size="sm" className="mr-2" />
-                {isLoading ? <Button variant="outline" size="sm" disabled className="opacity-75">
-                    Loading...
-                  </Button> : isConnected ? <div className="flex items-center space-x-3">
-                    <NotificationIndicator onClick={toggleNotifications} />
-                    
-                    <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light" onClick={handleProfileClick} aria-label="Profile">
-                      <User className="h-5 w-5" />
-                    </Button>
-                  </div> : <div className="flex items-center space-x-3">
-                    <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light" onClick={copyToClipboard} aria-label="Copy Contract Address">
-                      <Copy className="h-5 w-5 text-white" />
-                    </Button>
-                    <Button variant="gold" size="sm" className="flex items-center gap-2" onClick={handleWalletButtonClick}>
-                      {!isPhantomAvailable ? <>
-                          <ExternalLink className="h-4 w-4" />
-                          Install Phantom
-                        </> : <>
-                          <LogIn className="h-4 w-4" />
-                          Connect Wallet
-                        </>}
-                    </Button>
-                  </div>}
-              </div>
-            )}
+                  </Button>}
+              </div> : <div className="flex items-center space-x-3">
+                <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light" onClick={copyToClipboard} aria-label="Copy Contract Address">
+                  <Copy className="h-5 w-5" />
+                </Button>
+                <Button variant="gold" size="sm" className="flex items-center gap-2" onClick={handleWalletButtonClick}>
+                  {!isPhantomAvailable ? <>
+                      <ExternalLink className="h-4 w-4" />
+                      {!isMobile && "Install Phantom"}
+                    </> : isMobile ? <Wallet className="h-4 w-4 text-white" /> : <>
+                      <LogIn className="h-4 w-4" />
+                      Connect Wallet
+                    </>}
+                </Button>
+                {isMobile && <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light md:hidden" onClick={toggleMenu} aria-label="Menu">
+                    {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                  </Button>}
+              </div>}
           </div>
         </div>
       </div>
