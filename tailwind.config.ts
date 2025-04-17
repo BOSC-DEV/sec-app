@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -87,6 +88,15 @@ export default {
           card: "#1A1F2C",
           input: "#2A2F3C",
           hover: "#2C3242",
+        },
+        // Adding sidebar theme colors to match the image
+        sidebar: {
+          DEFAULT: "#1A1F2C",      // Dark blue background from image
+          foreground: "#FFFFFF",   // White text
+          border: "#2C3242",       // Slightly lighter blue for borders
+          accent: "#2C3242",       // Hover state background
+          "accent-foreground": "#FFFFFF", // Hover state text
+          ring: "#C8B06B",         // ICC gold for focus rings
         },
       },
       borderRadius: {
