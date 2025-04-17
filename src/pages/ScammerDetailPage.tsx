@@ -849,11 +849,7 @@ const ScammerDetailPage = () => {
                 
                 {!isMobile && (
                   <div className="mt-6">
-                    <BountyForm 
-                      scammerId={scammer.id} 
-                      scammerName={scammer.name} 
-                      developerWalletAddress={developerWalletAddress} 
-                    />
+                    <BountyForm scammerId={scammer.id} scammerName={scammer.name} developerWalletAddress={developerWalletAddress} />
                     
                     <div className="mt-6">
                       <BountyContributionList 
