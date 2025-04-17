@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { BountyContribution } from '@/types/dataTypes';
 import { formatDate, formatCurrency } from '@/lib/utils';
@@ -95,7 +96,7 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
 
   return <div className="space-y-4">
       {userContributionAmount > 0 && (
-        <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 text-green-800 dark:text-green-300 text-sm">
+        <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 text-green-800 dark:text-green-300 text-sm text-center">
           You've contributed {formatCurrency(userContributionAmount)} <CurrencyIcon size="sm" /> to this bounty
         </div>
       )}
@@ -164,3 +165,4 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
 };
 
 export default BountyContributionList;
+
