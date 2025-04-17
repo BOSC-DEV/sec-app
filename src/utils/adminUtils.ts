@@ -1,3 +1,4 @@
+
 import { toast } from "@/hooks/use-toast";
 
 export const ADMIN_USERNAMES = ['sec', 'thesec'];
@@ -10,7 +11,8 @@ export const getAdminList = (): string[] => {
 
 export const isAdmin = (username: string): boolean => {
   if (!username) return false;
-  return ADMIN_USERNAMES.includes(username.toLowerCase());
+  console.log(`Checking if ${username} is an admin`);
+  return ADMIN_USERNAMES.some(admin => admin.toLowerCase() === username.toLowerCase());
 };
 
 export const isBanned = (username: string): boolean => {
