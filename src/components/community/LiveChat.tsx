@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -16,12 +16,12 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import EmojiPicker from '@/components/community/EmojiPicker';
 import CommunityInteractionButtons from './CommunityInteractionButtons';
 import AdminContextMenu from './AdminContextMenu';
-import BadgeTier from '@/components/profile/BadgeTier';
+import BadgeTier from '@/components/profile/BadgeTier'; // Update this import
 import { calculateBadgeTier } from '@/utils/badgeUtils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useChatMessages } from '@/hooks/useChatMessages';
 import { useOnlineUsers } from '@/hooks/useOnlineUsers';
-import { isBanned, isAdmin } from '@/utils/adminUtils';
+import { isBanned } from '@/utils/adminUtils';
 
 const LiveChat = () => {
   const {
@@ -33,22 +33,12 @@ const LiveChat = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [isUserAdmin, setIsUserAdmin] = useState(false);
+  const [isAdmin] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
   const onlineCount = useOnlineUsers();
   const { messages, isLoading, hasMore, loadMore } = useChatMessages();
-
-  useEffect(() => {
-    if (profile?.username) {
-      const adminStatus = isAdmin(profile.username);
-      console.log(`User ${profile.username} admin status: ${adminStatus}`);
-      setIsUserAdmin(adminStatus);
-    } else {
-      setIsUserAdmin(false);
-    }
-  }, [profile?.username]);
 
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
@@ -135,7 +125,7 @@ const LiveChat = () => {
   };
 
   const handleDeleteMessage = async (messageId: string) => {
-    if (!isUserAdmin) return;
+    if (!isAdmin) return;
     try {
       // const success = await deleteChatMessage(messageId); // Assuming deleteChatMessage is implemented elsewhere
       // if (success) {
@@ -226,7 +216,7 @@ const LiveChat = () => {
                 {message.author_name}
               </span>
               {userBadge && <BadgeTier badgeInfo={userBadge} size="sm" showTooltip={true} context="chat" />}
-              {isUserAdmin && message.author_username === 'sec' && <span className="text-xs bg-icc-gold/20 text-icc-gold px-1 rounded ml-1">admin</span>}
+              {isAdmin && message.author_username === 'sec' && <span className="text-xs bg-icc-gold/20 text-icc-gold px-1 rounded ml-1">admin</span>}
             </div>
             
             <div className="text-sm break-words">
@@ -250,7 +240,7 @@ const LiveChat = () => {
           </div>
         </div>
       </div>;
-    return isUserAdmin ? <AdminContextMenu key={message.id} onDelete={() => handleDeleteMessage(message.id)} onBanUser={() => handleBanUser(message.author_username)}>
+    return isAdmin ? <AdminContextMenu key={message.id} onDelete={() => handleDeleteMessage(message.id)} onBanUser={() => handleBanUser(message.author_username)}>
         {messageContent}
       </AdminContextMenu> : messageContent;
   };
