@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,6 @@ import { addBountyContribution, getScammerBountyContributions, getUserContributi
 import CompactHero from '@/components/common/CompactHero';
 import BountyContributionList from '@/components/scammer/BountyContributionList';
 import BountyTransferDialog from '@/components/scammer/BountyTransferDialog';
-import ConsensusUsers from '@/components/scammer/ConsensusUsers';
 import { ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, Link2, Eye, AlertTriangle, Shield, TrendingUp, Edit, Clipboard, Trash2, MessageSquare, Users, FileText, Wallet2, ShieldCheck, ArchiveRestore } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
