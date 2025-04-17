@@ -777,7 +777,7 @@ const ScammerDetailPage = () => {
             </div>
             
             <div className="md:col-span-1">
-              <div className="bg-gray-50 rounded-lg p-4 shadow-sm sticky top-4">
+              <div className="bg-gray-50 rounded-lg p-4 shadow-sm sticky top-4 dark:bg-[#1A1F2C] dark:text-white">
                 <h3 className="text-xl font-bold text-icc-blue mb-4">Report Information</h3>
                 
                 <div className="space-y-4 mb-6">
