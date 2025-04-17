@@ -69,7 +69,7 @@ const PublicProfilePage = () => {
     queryFn: () => getUserBountyContributions(profile?.wallet_address || '', 1, 50),
     enabled: !!profile?.wallet_address
   });
-  const badgeInfo = useBadgeTier(profile?.sec_balance || null);
+  const badgeInfo = useBadgeTier(profile?.wallet_address || null);
   const {
     data: scammerReports,
     isLoading: isLoadingReports
@@ -170,7 +170,8 @@ const PublicProfilePage = () => {
       maximumFractionDigits: 2
     });
   };
-  return <HelmetProvider>
+  return (
+    <HelmetProvider>
       <>
         <Helmet>
           <title>{pageTitle}</title>
@@ -192,7 +193,8 @@ const PublicProfilePage = () => {
         <div className="container py-10">
           <div className="space-y-8">
             <div className="bg-background/60 backdrop-blur-sm rounded-lg p-6 border">
-              {isLoading ? renderProfileSkeleton() : <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
+              {isLoading ? renderProfileSkeleton() : (
+                <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
                   <Avatar className="w-32 h-32 border-4 border-background">
                     <AvatarImage src={profile?.profile_pic_url} alt={profile?.display_name} />
                     <AvatarFallback className="text-4xl bg-icc-gold/20 text-icc-gold">
@@ -204,9 +206,11 @@ const PublicProfilePage = () => {
                     <div className="flex flex-wrap items-center justify-center md:justify-between gap-2">
                       <div className="flex items-center gap-2 relative">
                         <h1 className="text-3xl font-bold text-icc-gold">{profile?.display_name}</h1>
-                        {badgeInfo && <div className="absolute -top-1 -right-6 ml-2">
+                        {badgeInfo && (
+                          <div className="absolute -top-1 -right-6 ml-2">
                             <BadgeTier badgeInfo={badgeInfo} showTooltip={true} size="sm" variant="plain" />
-                          </div>}
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center space-x-3 mt-3 md:mt-0 p-0">
                         {isOwnProfile && <>
@@ -248,7 +252,8 @@ const PublicProfilePage = () => {
                         </Badge>
                       </div>}
                   </div>
-                </div>}
+                </div>
+              )}
             </div>
             
             <Tabs defaultValue="reports" className="w-full" value={activeTab} onValueChange={setActiveTab}>
@@ -467,7 +472,8 @@ const PublicProfilePage = () => {
           </div>
         </div>
       </>
-    </HelmetProvider>;
+    </HelmetProvider>
+  );
 };
 
 export default PublicProfilePage;
