@@ -23,7 +23,6 @@ import { useBadgeTier } from '@/hooks/useBadgeTier';
 import BadgeTier from '@/components/profile/BadgeTier';
 import { useIsMobile } from '@/hooks/use-mobile';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
-
 const PublicProfilePage = () => {
   const {
     username,
@@ -449,7 +448,7 @@ const PublicProfilePage = () => {
                     </div> : <div className="text-center py-12">
                       <p className="text-muted-foreground text-lg mb-6">No liked scammer reports yet</p>
                       <Button asChild>
-                        <Link to="/most-wanted">Browse Scammers <ExternalLink className="ml-2" size={16} /></Link>
+                        
                       </Button>
                     </div>}
                 </div>
