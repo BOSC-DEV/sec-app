@@ -1,6 +1,5 @@
-
 import { supabase } from '@/integrations/supabase/client';
-import { Announcement, AnnouncementReply, SurveyData } from '@/types/dataTypes';
+import { Announcement, AnnouncementReply, SurveyData, SurveyVoter } from '@/types/dataTypes';
 import { isAdmin } from '@/utils/adminUtils';
 
 export const getAnnouncements = async (): Promise<Announcement[]> => {
@@ -14,8 +13,10 @@ export const getAnnouncements = async (): Promise<Announcement[]> => {
     
     // Transform the data to ensure proper typing for survey_data
     return (data || []).map(item => {
-      // Properly cast the survey_data to SurveyData
-      const surveyData = item.survey_data ? (item.survey_data as unknown as SurveyData) : null;
+      // Cast the survey_data to SurveyData or null
+      const surveyData = item.survey_data ? 
+        (item.survey_data as unknown as SurveyData) : 
+        null;
       
       return {
         ...item,
@@ -70,14 +71,12 @@ export const createAnnouncement = async (announcement: {
     if (error) throw error;
     
     // Handle potential survey_data in response
-    if (data && data.survey_data) {
-      return {
-        ...data,
-        survey_data: data.survey_data as unknown as SurveyData
-      } as Announcement;
-    }
+    const result = {
+      ...data,
+      survey_data: data.survey_data ? (data.survey_data as unknown as SurveyData) : null
+    } as Announcement;
     
-    return data as Announcement;
+    return result;
   } catch (error) {
     console.error('Error creating announcement:', error);
     return null;
@@ -146,7 +145,7 @@ export const createSurveyAnnouncement = async (
       voters: []
     }));
     
-    const surveyData = {
+    const surveyData: SurveyData = {
       title,
       options: surveyOptions
     };
@@ -155,7 +154,7 @@ export const createSurveyAnnouncement = async (
     const modifiedAnnouncement = {
       ...announcement,
       content: `<p>${title}</p>`,
-      survey_data: surveyData,
+      survey_data: surveyData as any, // Cast to any to avoid type issues with Json
       author_username: announcement.author_username || '',
     };
     
@@ -232,7 +231,7 @@ export const voteSurvey = async (
     if (userPreviousVote === optionIndex) {
       const { error: updateError } = await supabase
         .from('announcements')
-        .update({ survey_data: surveyData })
+        .update({ survey_data: surveyData as any }) // Cast to any to avoid type issues
         .eq('id', announcementId);
         
       if (updateError) throw updateError;
@@ -241,18 +240,21 @@ export const voteSurvey = async (
     
     // Add the user's vote to the selected option
     options[optionIndex].votes += 1;
-    options[optionIndex].voters.push({
+    
+    // Create voter object with correct properties (no timestamp)
+    const voterData: SurveyVoter = {
       userId,
       badgeTier,
-      displayName,
       username,
-      timestamp: new Date().toISOString()
-    });
+      displayName
+    };
+    
+    options[optionIndex].voters.push(voterData);
     
     // Update the announcement
     const { error: updateError } = await supabase
       .from('announcements')
-      .update({ survey_data: surveyData })
+      .update({ survey_data: surveyData as any }) // Cast to any to avoid type issues
       .eq('id', announcementId);
       
     if (updateError) throw updateError;
@@ -393,11 +395,25 @@ export const likeAnnouncement = async (announcementId: string, userId: string): 
         .delete()
         .eq('id', existingReaction.id);
         
-      // Decrement likes count - using direct update instead of rpc
+      // Decrement likes count
       await supabase
         .from('announcements')
-        .update({ likes: supabase.sql`likes - 1` })
+        .update({ likes: supabase.rpc('decrement_likes') })
         .eq('id', announcementId);
+        
+      // Alternative approach: first get current count then update
+      const { data: currentAnnouncement } = await supabase
+        .from('announcements')
+        .select('likes')
+        .eq('id', announcementId)
+        .single();
+        
+      if (currentAnnouncement) {
+        await supabase
+          .from('announcements')
+          .update({ likes: Math.max(0, (currentAnnouncement.likes || 0) - 1) })
+          .eq('id', announcementId);
+      }
     } else {
       // First, remove dislike if exists
       const { data: existingDislike } = await supabase
@@ -414,11 +430,19 @@ export const likeAnnouncement = async (announcementId: string, userId: string): 
           .delete()
           .eq('id', existingDislike.id);
           
-        // Decrement dislikes count - using direct update instead of rpc
-        await supabase
+        // Decrement dislikes count
+        const { data: currentDislikeCount } = await supabase
           .from('announcements')
-          .update({ dislikes: supabase.sql`dislikes - 1` })
-          .eq('id', announcementId);
+          .select('dislikes')
+          .eq('id', announcementId)
+          .single();
+          
+        if (currentDislikeCount) {
+          await supabase
+            .from('announcements')
+            .update({ dislikes: Math.max(0, (currentDislikeCount.dislikes || 0) - 1) })
+            .eq('id', announcementId);
+        }
       }
       
       // Add new like
@@ -430,11 +454,19 @@ export const likeAnnouncement = async (announcementId: string, userId: string): 
           reaction_type: 'like'
         });
         
-      // Increment likes count - using direct update instead of rpc
-      await supabase
+      // Increment likes count
+      const { data: currentLikeCount } = await supabase
         .from('announcements')
-        .update({ likes: supabase.sql`likes + 1` })
-        .eq('id', announcementId);
+        .select('likes')
+        .eq('id', announcementId)
+        .single();
+        
+      if (currentLikeCount) {
+        await supabase
+          .from('announcements')
+          .update({ likes: (currentLikeCount.likes || 0) + 1 })
+          .eq('id', announcementId);
+      }
     }
     
     // Get updated counts
@@ -468,11 +500,19 @@ export const dislikeAnnouncement = async (announcementId: string, userId: string
         .delete()
         .eq('id', existingReaction.id);
         
-      // Decrement dislikes count - using direct update instead of rpc
-      await supabase
+      // Decrement dislikes count
+      const { data: currentDislikeCount } = await supabase
         .from('announcements')
-        .update({ dislikes: supabase.sql`dislikes - 1` })
-        .eq('id', announcementId);
+        .select('dislikes')
+        .eq('id', announcementId)
+        .single();
+        
+      if (currentDislikeCount) {
+        await supabase
+          .from('announcements')
+          .update({ dislikes: Math.max(0, (currentDislikeCount.dislikes || 0) - 1) })
+          .eq('id', announcementId);
+      }
     } else {
       // First, remove like if exists
       const { data: existingLike } = await supabase
@@ -489,11 +529,19 @@ export const dislikeAnnouncement = async (announcementId: string, userId: string
           .delete()
           .eq('id', existingLike.id);
           
-        // Decrement likes count - using direct update instead of rpc
-        await supabase
+        // Decrement likes count
+        const { data: currentLikeCount } = await supabase
           .from('announcements')
-          .update({ likes: supabase.sql`likes - 1` })
-          .eq('id', announcementId);
+          .select('likes')
+          .eq('id', announcementId)
+          .single();
+          
+        if (currentLikeCount) {
+          await supabase
+            .from('announcements')
+            .update({ likes: Math.max(0, (currentLikeCount.likes || 0) - 1) })
+            .eq('id', announcementId);
+        }
       }
       
       // Add new dislike
@@ -505,11 +553,19 @@ export const dislikeAnnouncement = async (announcementId: string, userId: string
           reaction_type: 'dislike'
         });
         
-      // Increment dislikes count - using direct update instead of rpc
-      await supabase
+      // Increment dislikes count
+      const { data: currentDislikeCount } = await supabase
         .from('announcements')
-        .update({ dislikes: supabase.sql`dislikes + 1` })
-        .eq('id', announcementId);
+        .select('dislikes')
+        .eq('id', announcementId)
+        .single();
+        
+      if (currentDislikeCount) {
+        await supabase
+          .from('announcements')
+          .update({ dislikes: (currentDislikeCount.dislikes || 0) + 1 })
+          .eq('id', announcementId);
+      }
     }
     
     // Get updated counts
@@ -544,11 +600,19 @@ export const likeReply = async (replyId: string, userId: string): Promise<any> =
         .delete()
         .eq('id', existingReaction.id);
         
-      // Decrement likes count - using direct update instead of rpc
-      await supabase
+      // Decrement likes count
+      const { data: currentLikeCount } = await supabase
         .from('announcement_replies')
-        .update({ likes: supabase.sql`likes - 1` })
-        .eq('id', replyId);
+        .select('likes')
+        .eq('id', replyId)
+        .single();
+        
+      if (currentLikeCount) {
+        await supabase
+          .from('announcement_replies')
+          .update({ likes: Math.max(0, (currentLikeCount.likes || 0) - 1) })
+          .eq('id', replyId);
+      }
     } else {
       // First, remove dislike if exists
       const { data: existingDislike } = await supabase
@@ -565,11 +629,19 @@ export const likeReply = async (replyId: string, userId: string): Promise<any> =
           .delete()
           .eq('id', existingDislike.id);
           
-        // Decrement dislikes count - using direct update instead of rpc
-        await supabase
+        // Decrement dislikes count
+        const { data: currentDislikeCount } = await supabase
           .from('announcement_replies')
-          .update({ dislikes: supabase.sql`dislikes - 1` })
-          .eq('id', replyId);
+          .select('dislikes')
+          .eq('id', replyId)
+          .single();
+          
+        if (currentDislikeCount) {
+          await supabase
+            .from('announcement_replies')
+            .update({ dislikes: Math.max(0, (currentDislikeCount.dislikes || 0) - 1) })
+            .eq('id', replyId);
+        }
       }
       
       // Add new like
@@ -581,11 +653,19 @@ export const likeReply = async (replyId: string, userId: string): Promise<any> =
           reaction_type: 'like'
         });
         
-      // Increment likes count - using direct update instead of rpc
-      await supabase
+      // Increment likes count
+      const { data: currentLikeCount } = await supabase
         .from('announcement_replies')
-        .update({ likes: supabase.sql`likes + 1` })
-        .eq('id', replyId);
+        .select('likes')
+        .eq('id', replyId)
+        .single();
+        
+      if (currentLikeCount) {
+        await supabase
+          .from('announcement_replies')
+          .update({ likes: (currentLikeCount.likes || 0) + 1 })
+          .eq('id', replyId);
+      }
     }
     
     // Get updated counts
@@ -619,11 +699,19 @@ export const dislikeReply = async (replyId: string, userId: string): Promise<any
         .delete()
         .eq('id', existingReaction.id);
         
-      // Decrement dislikes count - using direct update instead of rpc
-      await supabase
+      // Decrement dislikes count
+      const { data: currentDislikeCount } = await supabase
         .from('announcement_replies')
-        .update({ dislikes: supabase.sql`dislikes - 1` })
-        .eq('id', replyId);
+        .select('dislikes')
+        .eq('id', replyId)
+        .single();
+        
+      if (currentDislikeCount) {
+        await supabase
+          .from('announcement_replies')
+          .update({ dislikes: Math.max(0, (currentDislikeCount.dislikes || 0) - 1) })
+          .eq('id', replyId);
+      }
     } else {
       // First, remove like if exists
       const { data: existingLike } = await supabase
@@ -640,11 +728,19 @@ export const dislikeReply = async (replyId: string, userId: string): Promise<any
           .delete()
           .eq('id', existingLike.id);
           
-        // Decrement likes count - using direct update instead of rpc
-        await supabase
+        // Decrement likes count
+        const { data: currentLikeCount } = await supabase
           .from('announcement_replies')
-          .update({ likes: supabase.sql`likes - 1` })
-          .eq('id', replyId);
+          .select('likes')
+          .eq('id', replyId)
+          .single();
+          
+        if (currentLikeCount) {
+          await supabase
+            .from('announcement_replies')
+            .update({ likes: Math.max(0, (currentLikeCount.likes || 0) - 1) })
+            .eq('id', replyId);
+        }
       }
       
       // Add new dislike
@@ -656,11 +752,19 @@ export const dislikeReply = async (replyId: string, userId: string): Promise<any
           reaction_type: 'dislike'
         });
         
-      // Increment dislikes count - using direct update instead of rpc
-      await supabase
+      // Increment dislikes count
+      const { data: currentDislikeCount } = await supabase
         .from('announcement_replies')
-        .update({ dislikes: supabase.sql`dislikes + 1` })
-        .eq('id', replyId);
+        .select('dislikes')
+        .eq('id', replyId)
+        .single();
+        
+      if (currentDislikeCount) {
+        await supabase
+          .from('announcement_replies')
+          .update({ dislikes: (currentDislikeCount.dislikes || 0) + 1 })
+          .eq('id', replyId);
+      }
     }
     
     // Get updated counts
@@ -695,11 +799,19 @@ export const likeChatMessage = async (messageId: string, userId: string): Promis
         .delete()
         .eq('id', existingReaction.id);
         
-      // Decrement likes count - using direct update instead of rpc
-      await supabase
+      // Decrement likes count
+      const { data: currentLikeCount } = await supabase
         .from('chat_messages')
-        .update({ likes: supabase.sql`likes - 1` })
-        .eq('id', messageId);
+        .select('likes')
+        .eq('id', messageId)
+        .single();
+        
+      if (currentLikeCount) {
+        await supabase
+          .from('chat_messages')
+          .update({ likes: Math.max(0, (currentLikeCount.likes || 0) - 1) })
+          .eq('id', messageId);
+      }
     } else {
       // First, remove dislike if exists
       const { data: existingDislike } = await supabase
@@ -716,11 +828,19 @@ export const likeChatMessage = async (messageId: string, userId: string): Promis
           .delete()
           .eq('id', existingDislike.id);
           
-        // Decrement dislikes count - using direct update instead of rpc
-        await supabase
+        // Decrement dislikes count
+        const { data: currentDislikeCount } = await supabase
           .from('chat_messages')
-          .update({ dislikes: supabase.sql`dislikes - 1` })
-          .eq('id', messageId);
+          .select('dislikes')
+          .eq('id', messageId)
+          .single();
+          
+        if (currentDislikeCount) {
+          await supabase
+            .from('chat_messages')
+            .update({ dislikes: Math.max(0, (currentDislikeCount.dislikes || 0) - 1) })
+            .eq('id', messageId);
+        }
       }
       
       // Add new like
@@ -732,11 +852,19 @@ export const likeChatMessage = async (messageId: string, userId: string): Promis
           reaction_type: 'like'
         });
         
-      // Increment likes count - using direct update instead of rpc
-      await supabase
+      // Increment likes count
+      const { data: currentLikeCount } = await supabase
         .from('chat_messages')
-        .update({ likes: supabase.sql`likes + 1` })
-        .eq('id', messageId);
+        .select('likes')
+        .eq('id', messageId)
+        .single();
+        
+      if (currentLikeCount) {
+        await supabase
+          .from('chat_messages')
+          .update({ likes: (currentLikeCount.likes || 0) + 1 })
+          .eq('id', messageId);
+      }
     }
     
     // Get updated counts
@@ -770,11 +898,19 @@ export const dislikeChatMessage = async (messageId: string, userId: string): Pro
         .delete()
         .eq('id', existingReaction.id);
         
-      // Decrement dislikes count - using direct update instead of rpc
-      await supabase
+      // Decrement dislikes count
+      const { data: currentDislikeCount } = await supabase
         .from('chat_messages')
-        .update({ dislikes: supabase.sql`dislikes - 1` })
-        .eq('id', messageId);
+        .select('dislikes')
+        .eq('id', messageId)
+        .single();
+        
+      if (currentDislikeCount) {
+        await supabase
+          .from('chat_messages')
+          .update({ dislikes: Math.max(0, (currentDislikeCount.dislikes || 0) - 1) })
+          .eq('id', messageId);
+      }
     } else {
       // First, remove like if exists
       const { data: existingLike } = await supabase
@@ -791,11 +927,19 @@ export const dislikeChatMessage = async (messageId: string, userId: string): Pro
           .delete()
           .eq('id', existingLike.id);
           
-        // Decrement likes count - using direct update instead of rpc
-        await supabase
+        // Decrement likes count
+        const { data: currentLikeCount } = await supabase
           .from('chat_messages')
-          .update({ likes: supabase.sql`likes - 1` })
-          .eq('id', messageId);
+          .select('likes')
+          .eq('id', messageId)
+          .single();
+          
+        if (currentLikeCount) {
+          await supabase
+            .from('chat_messages')
+            .update({ likes: Math.max(0, (currentLikeCount.likes || 0) - 1) })
+            .eq('id', messageId);
+        }
       }
       
       // Add new dislike
@@ -807,11 +951,19 @@ export const dislikeChatMessage = async (messageId: string, userId: string): Pro
           reaction_type: 'dislike'
         });
         
-      // Increment dislikes count - using direct update instead of rpc
-      await supabase
+      // Increment dislikes count
+      const { data: currentDislikeCount } = await supabase
         .from('chat_messages')
-        .update({ dislikes: supabase.sql`dislikes + 1` })
-        .eq('id', messageId);
+        .select('dislikes')
+        .eq('id', messageId)
+        .single();
+        
+      if (currentDislikeCount) {
+        await supabase
+          .from('chat_messages')
+          .update({ dislikes: (currentDislikeCount.dislikes || 0) + 1 })
+          .eq('id', messageId);
+      }
     }
     
     // Get updated counts
