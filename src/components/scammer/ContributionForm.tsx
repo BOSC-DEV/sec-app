@@ -39,7 +39,7 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
             type="number" 
             value={contributionAmount} 
             onChange={e => setContributionAmount(e.target.value)} 
-            className="bg-icc-gold-light/30 border-icc-gold/30 text-icc-blue-dark dark:text-white" 
+            className="bg-icc-gold-light/30 border-icc-gold/30 text-icc-blue-dark dark:text-white dark:bg-icc-gold-dark/20 dark:border-icc-gold/50" 
             min="0" 
             step="0.01" 
             aria-labelledby="contribution-amount-label" 
@@ -57,13 +57,14 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
           value={bountyComment} 
           onChange={e => setBountyComment(e.target.value)} 
           placeholder="Why are you contributing to this bounty?" 
-          className="bg-icc-gold-light/30 border-icc-gold/30 text-icc-blue-dark dark:text-white" 
+          className="bg-icc-gold-light/30 border-icc-gold/30 text-icc-blue-dark dark:text-white dark:bg-icc-gold-dark/20 dark:border-icc-gold/50" 
           aria-labelledby="contribution-comment-label" 
         />
       </div>
       
       <Button 
-        className="w-full bg-icc-gold hover:bg-icc-gold-dark text-icc-blue-dark dark:text-white border-icc-gold-dark font-medium" 
+        variant="gold"
+        className="w-full bg-icc-gold hover:bg-icc-gold-dark text-icc-blue-dark dark:text-white dark:bg-icc-gold-dark dark:hover:bg-icc-gold/80 border-icc-gold-dark font-medium" 
         onClick={handleAddBounty} 
         disabled={isProcessing || (addBountyContributionMutation && addBountyContributionMutation.isPending)} 
         aria-label="Contribute to bounty"

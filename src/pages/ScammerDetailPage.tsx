@@ -668,10 +668,11 @@ const ScammerDetailPage = () => {
                       value={commentText} 
                       onChange={e => setCommentText(e.target.value)} 
                       aria-label="Comment text" 
-                      className="w-full" 
+                      className="w-full dark:bg-icc-gold-dark/20 dark:border-icc-gold/50" 
                     />
                     <Button 
                       className="w-full" 
+                      variant="gold"
                       onClick={handleAddComment} 
                       disabled={addCommentMutation.isPending} 
                       aria-label="Add comment"
@@ -830,18 +831,40 @@ const ScammerDetailPage = () => {
                   <div className="mb-3">
                     <label htmlFor="amount" className="block text-sm text-gray-500 mb-1">Amount in SEC</label>
                     <div className="relative">
-                      <Input id="amount" type="number" min="0" step="0.01" value={contributionAmount} onChange={e => setContributionAmount(e.target.value)} className="pl-7" aria-label="Bounty amount in SEC" />
+                      <Input 
+                        id="amount" 
+                        type="number" 
+                        min="0" 
+                        step="0.01" 
+                        value={contributionAmount} 
+                        onChange={e => setContributionAmount(e.target.value)} 
+                        className="pl-7 dark:bg-icc-gold-dark/20 dark:border-icc-gold/50" 
+                        aria-label="Bounty amount in SEC" 
+                      />
                       <CurrencyIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                     </div>
                   </div>
                   
                   <div className="mb-3">
                     <label htmlFor="comment" className="block text-sm text-gray-500 mb-1">Comment (Optional)</label>
-                    <Textarea id="comment" value={bountyComment} onChange={e => setBountyComment(e.target.value)} className="h-24 resize-none" placeholder="Add a comment with your contribution..." aria-label="Bounty comment" />
+                    <Textarea 
+                      id="comment" 
+                      value={bountyComment} 
+                      onChange={e => setBountyComment(e.target.value)} 
+                      className="h-24 resize-none dark:bg-icc-gold-dark/20 dark:border-icc-gold/50" 
+                      placeholder="Add a comment with your contribution..." 
+                      aria-label="Bounty comment" 
+                    />
                   </div>
                   
-                  <Button onClick={handleAddBounty} className="w-full" disabled={isLoading} aria-label="Add bounty contribution">
-                    <DollarSign className="h-4 w-4 mr-1" aria-hidden="true" />
+                  <Button 
+                    onClick={handleAddBounty} 
+                    variant="gold"
+                    className="w-full dark:bg-icc-gold-dark dark:hover:bg-icc-gold/80" 
+                    disabled={isLoading} 
+                    aria-label="Add bounty contribution"
+                  >
+                    <CurrencyIcon className="h-4 w-4 mr-1" aria-hidden="true" />
                     {isLoading ? 'Processing...' : 'Contribute to Bounty'}
                   </Button>
                   
