@@ -7,11 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from '@/components/ui/form';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useForm } from 'react-hook-form';
 import { toast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import OptimizedImage from '@/components/common/OptimizedImage';
+import BadgeDelegation from '@/components/profile/BadgeDelegation';
 
 interface ProfileFormValues {
   display_name: string;
@@ -183,88 +184,101 @@ const ProfilePage = () => {
             </div>}
         </CardHeader>
         <CardContent>
-          <div className="flex justify-center mb-6">
-            <div className="relative group">
-              <Avatar className="h-24 w-24 cursor-pointer" key={avatarKey}>
-                {avatarUrl ? <AvatarImage src={`${avatarUrl}${avatarUrl.includes('?') ? '&' : '?'}v=${avatarKey}`} alt="Profile" /> : <AvatarFallback className="bg-icc-blue text-white text-xl">
-                    {getInitials(form.getValues().display_name)}
-                  </AvatarFallback>}
-              </Avatar>
-              <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onClick={handleAvatarClick}>
-                <Camera className="h-8 w-8 text-white" />
+          <Tabs defaultValue="profile" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="profile">Profile</TabsTrigger>
+              <TabsTrigger value="delegation">Badge Delegation</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="profile">
+              <div className="flex justify-center mb-6">
+                <div className="relative group">
+                  <Avatar className="h-24 w-24 cursor-pointer" key={avatarKey}>
+                    {avatarUrl ? <AvatarImage src={`${avatarUrl}${avatarUrl.includes('?') ? '&' : '?'}v=${avatarKey}`} alt="Profile" /> : <AvatarFallback className="bg-icc-blue text-white text-xl">
+                        {getInitials(form.getValues().display_name)}
+                      </AvatarFallback>}
+                  </Avatar>
+                  <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onClick={handleAvatarClick}>
+                    <Camera className="h-8 w-8 text-white" />
+                  </div>
+                  <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
+                </div>
               </div>
-              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
-            </div>
-          </div>
 
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField control={form.control} name="display_name" render={({
-              field
-            }) => <FormItem>
-                    <FormLabel>Display Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter your display name" {...field} />
-                    </FormControl>
-                  </FormItem>} />
-              
-              <FormField control={form.control} name="username" render={({
-              field
-            }) => <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input placeholder="your_username" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      Your profile will be accessible at sec.digital/
-                    </FormDescription>
-                  </FormItem>} />
-              
-              <FormField control={form.control} name="bio" render={({
-              field
-            }) => <FormItem>
-                    <FormLabel>Bio</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Tell us about yourself" className="min-h-[120px]" {...field} />
-                    </FormControl>
-                  </FormItem>} />
-              
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">Social Links</h3>
-                
-                <FormField control={form.control} name="x_link" render={({
-                field
-              }) => <FormItem>
-                      <div className="flex items-center">
-                        <Twitter className="mr-2 h-5 w-5 text-muted-foreground" />
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <FormField control={form.control} name="display_name" render={({
+                  field
+                }) => <FormItem>
+                        <FormLabel>Display Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="X (Twitter) URL" {...field} />
+                          <Input placeholder="Enter your display name" {...field} />
                         </FormControl>
-                      </div>
-                    </FormItem>} />
-                
-                <FormField control={form.control} name="website_link" render={({
-                field
-              }) => <FormItem>
-                      <div className="flex items-center">
-                        <Globe className="mr-2 h-5 w-5 text-muted-foreground" />
-                        <FormControl>
-                          <Input placeholder="Website URL" {...field} />
-                        </FormControl>
-                      </div>
-                    </FormItem>} />
-              </div>
+                      </FormItem>} />
               
-              <CardFooter className="flex justify-between px-0 pt-6">
-                <Button type="button" variant="outline" onClick={() => navigate('/')}>
-                  Cancel
-                </Button>
-                <Button type="submit" className="bg-icc-gold hover:bg-icc-gold-light text-icc-blue" disabled={isSaving}>
-                  {isSaving ? 'Saving...' : isNewProfile ? 'Create Profile' : 'Save Changes'}
-                </Button>
-              </CardFooter>
-            </form>
-          </Form>
+                  <FormField control={form.control} name="username" render={({
+                  field
+                }) => <FormItem>
+                        <FormLabel>Username</FormLabel>
+                        <FormControl>
+                          <Input placeholder="your_username" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Your profile will be accessible at sec.digital/
+                        </FormDescription>
+                      </FormItem>} />
+              
+                  <FormField control={form.control} name="bio" render={({
+                  field
+                }) => <FormItem>
+                        <FormLabel>Bio</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Tell us about yourself" className="min-h-[120px]" {...field} />
+                        </FormControl>
+                      </FormItem>} />
+              
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium">Social Links</h3>
+                    
+                    <FormField control={form.control} name="x_link" render={({
+                    field
+                  }) => <FormItem>
+                          <div className="flex items-center">
+                            <Twitter className="mr-2 h-5 w-5 text-muted-foreground" />
+                            <FormControl>
+                              <Input placeholder="X (Twitter) URL" {...field} />
+                            </FormControl>
+                          </div>
+                        </FormItem>} />
+                    
+                    <FormField control={form.control} name="website_link" render={({
+                    field
+                  }) => <FormItem>
+                          <div className="flex items-center">
+                            <Globe className="mr-2 h-5 w-5 text-muted-foreground" />
+                            <FormControl>
+                              <Input placeholder="Website URL" {...field} />
+                            </FormControl>
+                          </div>
+                        </FormItem>} />
+                  </div>
+                  
+                  <CardFooter className="flex justify-between px-0 pt-6">
+                    <Button type="button" variant="outline" onClick={() => navigate('/')}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" className="bg-icc-gold hover:bg-icc-gold-light text-icc-blue" disabled={isSaving}>
+                      {isSaving ? 'Saving...' : isNewProfile ? 'Create Profile' : 'Save Changes'}
+                    </Button>
+                  </CardFooter>
+                </form>
+              </Form>
+            </TabsContent>
+            
+            <TabsContent value="delegation">
+              <BadgeDelegation />
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>;
