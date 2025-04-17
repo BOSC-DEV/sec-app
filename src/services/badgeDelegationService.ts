@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { handleError, ErrorSeverity } from '@/utils/errorHandling';
@@ -98,19 +99,31 @@ export const removeBadgeDelegation = async (delegatedWallet: string, delegatorWa
   console.log(`Removing delegation: delegated=${delegatedWallet}, delegator=${delegatorWallet}`);
   
   try {
+    // Force hard delete instead of soft delete to ensure the delegation is removed
     const { error } = await supabase
       .from('delegated_badges')
       .delete()
       .eq('delegator_wallet', delegatorWallet)
-      .eq('delegated_wallet', delegatedWallet)
-      .eq('active', true);
+      .eq('delegated_wallet', delegatedWallet);
 
     if (error) {
       console.error('Error removing badge delegation:', error);
       throw error;
     }
-
+    
     console.log('Delegation successfully removed');
+    
+    // Verify the delegation was actually deleted
+    const { data: checkData } = await supabase
+      .from('delegated_badges')
+      .select('*')
+      .eq('delegator_wallet', delegatorWallet)
+      .eq('delegated_wallet', delegatedWallet);
+    
+    if (checkData && checkData.length > 0) {
+      console.error('Delegation still exists after deletion:', checkData);
+      throw new Error('Failed to delete delegation from database');
+    }
     
   } catch (error) {
     handleError(error, {

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
@@ -39,10 +39,11 @@ const BadgeDelegation: React.FC = () => {
   const [delegationLimit, setDelegationLimit] = useState<number>(0);
   const [currentDelegations, setCurrentDelegations] = useState<number>(0);
 
-  const loadDelegations = async () => {
+  const loadDelegations = useCallback(async () => {
     if (!profile?.wallet_address) return;
     
     try {
+      setIsLoading(true);
       console.log('Loading delegations for wallet:', profile.wallet_address);
       const delegationsData = await getDelegatedBadges(profile.wallet_address);
       console.log('Delegations data:', delegationsData);
@@ -61,8 +62,10 @@ const BadgeDelegation: React.FC = () => {
         description: 'Failed to load delegations',
         variant: 'destructive',
       });
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [profile?.wallet_address]);
 
   useEffect(() => {
     const loadDelegationInfo = async () => {
@@ -89,7 +92,7 @@ const BadgeDelegation: React.FC = () => {
     };
     
     loadDelegationInfo();
-  }, [profile?.wallet_address]);
+  }, [profile?.wallet_address, loadDelegations]);
 
   useEffect(() => {
     const searchUsers = async () => {
@@ -218,6 +221,13 @@ const BadgeDelegation: React.FC = () => {
       
       // Force refresh delegations list and count
       await loadDelegations();
+      
+      // Remove from local state immediately to update UI
+      setDelegations(current => 
+        current.filter(d => d.delegated_wallet !== delegatedWallet)
+      );
+      setCurrentDelegations(prev => Math.max(0, prev - 1));
+      
     } catch (error) {
       console.error('Error removing delegation:', error);
       toast({
