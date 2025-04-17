@@ -63,19 +63,18 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editContent, setEditContent] = useState('');
   const [editingAnnouncementId, setEditingAnnouncementId] = useState<string | null>(null);
-  
-  const { data: announcements = [], refetch, isLoading } = useQuery({
-    queryKey: ['announcements'],
-    queryFn: getAnnouncements,
-  });
+
+  console.log("AnnouncementFeed rendering. Profile username:", profile?.username);
+  console.log("Announcement Tab state:", announcementTab);
   
   useEffect(() => {
-    const checkPermissions = async () => {
+    const checkAdminStatus = async () => {
+      console.log("Checking admin status for:", profile?.username);
       let adminStatus = false;
       
       if (profile?.username) {
         adminStatus = isAdmin(profile.username);
-        console.log(`User ${profile.username} admin status from hardcoded list: ${adminStatus}`);
+        console.log(`Admin check from hardcoded list for ${profile.username}: ${adminStatus}`);
         
         if (!adminStatus) {
           try {
@@ -88,18 +87,24 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         }
       }
       
+      console.log(`Final admin status for ${profile?.username}: ${adminStatus}`);
       setIsUserAdmin(adminStatus);
       
       const isWhale = badgeInfo?.tier === BadgeTier.Whale;
+      console.log(`Whale badge status: ${isWhale}, Badge tier: ${badgeInfo?.tier}`);
       
       const hasCreatePermission = adminStatus || isWhale;
-      console.log(`Permission check results - Admin: ${adminStatus}, Whale: ${isWhale}, Can Create: ${hasCreatePermission}`);
-      
+      console.log(`Setting can create announcements to: ${hasCreatePermission}`);
       setCanCreateAnnouncements(hasCreatePermission);
     };
     
-    checkPermissions();
-  }, [profile?.username, badgeInfo]);
+    checkAdminStatus();
+  }, [profile?.username, badgeInfo?.tier]);
+  
+  const { data: announcements = [], refetch, isLoading } = useQuery({
+    queryKey: ['announcements'],
+    queryFn: getAnnouncements,
+  });
   
   useEffect(() => {
     const loadUserVotes = async () => {
@@ -176,6 +181,8 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log("Submit button clicked. Can create:", canCreateAnnouncements);
+    
     if (!canCreateAnnouncements) {
       toast({
         title: "Unauthorized",
@@ -197,6 +204,12 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
     setIsSubmitting(true);
     
     try {
+      console.log("Creating announcement with data:", {
+        author_id: profile?.wallet_address,
+        author_name: profile?.display_name,
+        author_username: profile?.username
+      });
+      
       const createdAnnouncement = await createAnnouncement({
         content: newAnnouncement,
         author_id: profile?.wallet_address || '',
@@ -580,7 +593,14 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
                 {isUserAdminState ? "Admin Tools" : "Whale Badge Privileges"}
               </h3>
             </div>
-            <Tabs value={announcementTab} onValueChange={(value) => setAnnouncementTab(value as 'post' | 'survey')}>
+            <Tabs 
+              defaultValue="post" 
+              value={announcementTab} 
+              onValueChange={(value) => {
+                console.log("Tab changed to:", value);
+                setAnnouncementTab(value as 'post' | 'survey');
+              }}
+            >
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="post">
                   <Megaphone className="h-4 w-4 mr-2" />
@@ -594,14 +614,17 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
               
               <TabsContent value="post" className="mt-4">
                 <form onSubmit={handleSubmit}>
-                  <RichTextEditor 
-                    value={newAnnouncement}
-                    onChange={setNewAnnouncement}
-                  />
+                  <div className="rich-editor-container">
+                    <RichTextEditor 
+                      value={newAnnouncement}
+                      onChange={setNewAnnouncement}
+                    />
+                  </div>
                   <div className="mt-3 flex justify-end">
                     <Button 
                       type="submit" 
                       disabled={isSubmitting || !newAnnouncement.trim()}
+                      onClick={() => console.log("Submit button clicked in form")}
                     >
                       {isSubmitting ? "Posting..." : "Post Announcement"}
                     </Button>

@@ -22,6 +22,8 @@ const CommunityPage = () => {
   const [splitScreen, setSplitScreen] = useState(true);
   const isMobile = useIsMobile();
 
+  console.log("CommunityPage rendering. Connected:", isConnected);
+
   useEffect(() => {
     if (isMobile) {
       setSplitScreen(false);
