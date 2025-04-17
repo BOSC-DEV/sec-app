@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -8,6 +7,7 @@ import { calculateBadgeTier } from '@/utils/badgeUtils';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Progress } from '@/components/ui/progress';
 import { AlertCircle } from 'lucide-react';
+import BadgeDelegation from './BadgeDelegation';
 
 const BadgeTiersPage: React.FC = () => {
   const { profile } = useProfile();
@@ -143,6 +143,8 @@ const BadgeTiersPage: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      <BadgeDelegation />
     </div>
   );
 };

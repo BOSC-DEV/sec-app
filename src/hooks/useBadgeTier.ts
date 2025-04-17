@@ -1,35 +1,56 @@
+
 import { useState, useEffect } from 'react';
 import { calculateBadgeTier, BadgeInfo, MIN_SEC_FOR_BADGE } from '@/utils/badgeUtils';
+import { getDelegatedBadges } from '@/services/badgeDelegationService';
+import { getProfileByWallet } from '@/services/profileService';
 
-/**
- * Hook to get badge tier information based on SEC balance
- * @param secBalance The user's SEC balance (can be null/undefined if not loaded yet)
- * @returns Badge information or null if below threshold
- */
-export const useBadgeTier = (secBalance: number | null): BadgeInfo | null => {
+export const useBadgeTier = (walletAddress: string | null): BadgeInfo | null => {
   const [badgeInfo, setBadgeInfo] = useState<BadgeInfo | null>(null);
   
   useEffect(() => {
-    if (secBalance !== null && secBalance !== undefined) {
+    const fetchBadgeInfo = async () => {
+      if (!walletAddress) {
+        setBadgeInfo(null);
+        return;
+      }
+
       try {
-        // If the balance is less than minimum required, set to null
-        if (secBalance < MIN_SEC_FOR_BADGE) {
-          setBadgeInfo(null);
-          console.log(`No badge awarded: SEC balance ${secBalance} is below minimum requirement of ${MIN_SEC_FOR_BADGE}`);
-          return;
+        // First check if this wallet has any delegated badges
+        const delegations = await getDelegatedBadges(walletAddress);
+        if (delegations.length > 0) {
+          // Find a delegation where this wallet is the delegated wallet
+          const delegation = delegations.find(d => d.delegated_wallet === walletAddress && d.active);
+          
+          if (delegation) {
+            // Get the delegator's profile to use their SEC balance
+            const delegatorProfile = await getProfileByWallet(delegation.delegator_wallet);
+            if (delegatorProfile?.sec_balance) {
+              const delegatedBadgeInfo = calculateBadgeTier(delegatorProfile.sec_balance);
+              setBadgeInfo(delegatedBadgeInfo);
+              return;
+            }
+          }
         }
-        
-        // Otherwise calculate the badge tier
-        const calculatedBadgeInfo = calculateBadgeTier(secBalance);
-        setBadgeInfo(calculatedBadgeInfo);
-        console.log(`Badge tier calculated: ${calculatedBadgeInfo?.tier || 'None'} for balance: ${secBalance}`);
+
+        // If no valid delegation found, fall back to the wallet's own SEC balance
+        const profile = await getProfileByWallet(walletAddress);
+        if (profile?.sec_balance !== null && profile?.sec_balance !== undefined) {
+          if (profile.sec_balance < MIN_SEC_FOR_BADGE) {
+            setBadgeInfo(null);
+            return;
+          }
+          
+          const calculatedBadgeInfo = calculateBadgeTier(profile.sec_balance);
+          setBadgeInfo(calculatedBadgeInfo);
+        }
       } catch (error) {
         console.error("Error calculating badge tier:", error);
-        // Set to null in case of error
         setBadgeInfo(null);
       }
-    }
-  }, [secBalance]);
+    };
+
+    fetchBadgeInfo();
+  }, [walletAddress]);
   
   return badgeInfo;
 };

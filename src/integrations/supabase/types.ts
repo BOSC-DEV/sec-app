@@ -301,6 +301,30 @@ export type Database = {
           },
         ]
       }
+      delegated_badges: {
+        Row: {
+          active: boolean
+          created_at: string
+          delegated_wallet: string
+          delegator_wallet: string
+          id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          delegated_wallet: string
+          delegator_wallet: string
+          id?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          delegated_wallet?: string
+          delegator_wallet?: string
+          id?: string
+        }
+        Relationships: []
+      }
       key_updates: {
         Row: {
           category: string
