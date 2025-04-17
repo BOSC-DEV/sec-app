@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,6 +21,7 @@ import {
 } from "@/components/ui/popover";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Profile } from '@/types/dataTypes';
 
 const BadgeDelegation: React.FC = () => {
   const { profile } = useProfile();
@@ -31,14 +31,13 @@ const BadgeDelegation: React.FC = () => {
   const [delegations, setDelegations] = useState<{ delegated_wallet: string; display_name?: string }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [availableUsers, setAvailableUsers] = useState<{ display_name: string; wallet_address: string; username?: string }[]>([]);
+  const [availableUsers, setAvailableUsers] = useState<Profile[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
   const loadDelegations = async () => {
     if (!profile?.wallet_address) return;
     try {
       const data = await getDelegatedBadges(profile.wallet_address);
-      // Only show delegations where the current user is the delegator
       const filteredDelegations = data.filter(d => d.delegator_wallet === profile.wallet_address);
       setDelegations(filteredDelegations);
     } catch (error) {
@@ -51,25 +50,22 @@ const BadgeDelegation: React.FC = () => {
     }
   };
 
-  // Load initial delegations
   useEffect(() => {
     loadDelegations();
   }, [profile?.wallet_address]);
 
-  // Search and load available users
   useEffect(() => {
-    if (!searchQuery || searchQuery.length < 2) {
-      setAvailableUsers([]);
-      setIsSearching(false);
-      return;
-    }
-    
-    setIsSearching(true);
-    
     const searchUsers = async () => {
+      if (!searchQuery || searchQuery.length < 2) {
+        setAvailableUsers([]);
+        setIsSearching(false);
+        return;
+      }
+      
+      setIsSearching(true);
+      
       try {
         const users = await getProfilesByDisplayName(searchQuery);
-        // Filter out users who already have delegations or have SEC balance or are the current user
         const filteredUsers = users.filter(user => 
           user.wallet_address !== profile?.wallet_address && 
           !delegations.some(d => d.delegated_wallet === user.wallet_address) &&
@@ -83,12 +79,8 @@ const BadgeDelegation: React.FC = () => {
         setIsSearching(false);
       }
     };
-    
-    // Add debounce to avoid excessive API calls
-    const debounceTimer = setTimeout(() => {
-      searchUsers();
-    }, 300);
-    
+
+    const debounceTimer = setTimeout(searchUsers, 300);
     return () => clearTimeout(debounceTimer);
   }, [searchQuery, delegations, profile?.wallet_address]);
 
@@ -139,22 +131,18 @@ const BadgeDelegation: React.FC = () => {
 
   const currentBadge = profile?.sec_balance ? calculateBadgeTier(profile.sec_balance) : null;
 
-  // Safe way to handle search input changes
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
   };
 
-  // Reset search when popover opens/closes
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
     if (!newOpen) {
-      // When closing, wait a bit before clearing search to avoid flicker
       setTimeout(() => {
         setSearchQuery('');
         setAvailableUsers([]);
       }, 100);
     } else {
-      // Clear immediately when opening
       setSearchQuery('');
       setAvailableUsers([]);
     }
@@ -181,33 +169,36 @@ const BadgeDelegation: React.FC = () => {
           </div>
 
           <div className="flex space-x-2">
-            <Popover open={open} onOpenChange={handleOpenChange}>
+            <Popover open={open} onOpenChange={setOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   role="combobox"
                   aria-expanded={open}
                   className="justify-between w-full"
+                  disabled={isLoading}
                 >
                   {selectedUserName ? selectedUserName : "Search for a user..."}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="p-0 w-full">
+              <PopoverContent className="p-0 w-[400px]">
                 <Command>
                   <CommandInput 
                     placeholder="Search by username or display name..." 
-                    onValueChange={handleSearchChange}
                     value={searchQuery}
+                    onValueChange={setSearchQuery}
                   />
-                  {isSearching ? (
-                    <div className="py-6 text-center text-sm">Searching...</div>
-                  ) : (
-                    <>
-                      <CommandEmpty>
-                        {searchQuery.length < 2 ? "Type at least 2 characters" : "No user found"}
-                      </CommandEmpty>
-                      {availableUsers && availableUsers.length > 0 && (
+                  <div className="max-h-[300px] overflow-auto">
+                    {isSearching ? (
+                      <div className="py-6 text-center text-sm">Searching...</div>
+                    ) : (
+                      <>
+                        <CommandEmpty>
+                          {searchQuery.length < 2 
+                            ? "Type at least 2 characters to search" 
+                            : "No users found"}
+                        </CommandEmpty>
                         <CommandGroup>
                           {availableUsers.map((user) => (
                             <CommandItem
@@ -215,8 +206,9 @@ const BadgeDelegation: React.FC = () => {
                               value={user.wallet_address}
                               onSelect={() => {
                                 setSelectedUser(user.wallet_address);
-                                setSelectedUserName(user.display_name || user.username || user.wallet_address);
+                                setSelectedUserName(user.display_name);
                                 setOpen(false);
+                                setSearchQuery('');
                               }}
                             >
                               <Check
@@ -225,13 +217,13 @@ const BadgeDelegation: React.FC = () => {
                                   selectedUser === user.wallet_address ? "opacity-100" : "opacity-0"
                                 )}
                               />
-                              {user.display_name || "Unnamed User"} {user.username ? `(@${user.username})` : ""}
+                              {user.display_name} {user.username ? `(@${user.username})` : ""}
                             </CommandItem>
                           ))}
                         </CommandGroup>
-                      )}
-                    </>
-                  )}
+                      </>
+                    )}
+                  </div>
                 </Command>
               </PopoverContent>
             </Popover>
@@ -249,22 +241,19 @@ const BadgeDelegation: React.FC = () => {
               <p className="text-sm text-muted-foreground">No active delegations</p>
             ) : (
               <div className="space-y-2">
-                {delegations.map((delegation) => {
-                  const displayName = delegation.display_name || delegation.delegated_wallet;
-                  return (
-                    <div key={delegation.delegated_wallet} className="flex items-center justify-between p-2 border rounded">
-                      <span className="text-sm">{displayName}</span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleRemoveDelegation(delegation.delegated_wallet)}
-                        disabled={isLoading}
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  );
-                })}
+                {delegations.map((delegation) => (
+                  <div key={delegation.delegated_wallet} className="flex items-center justify-between p-2 border rounded">
+                    <span className="text-sm">{delegation.display_name || delegation.delegated_wallet}</span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleRemoveDelegation(delegation.delegated_wallet)}
+                      disabled={isLoading}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ))}
               </div>
             )}
           </div>

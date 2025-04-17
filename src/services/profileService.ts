@@ -1,4 +1,3 @@
-
 import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 import { getConnection } from '@/utils/phantomWallet';
@@ -55,13 +54,19 @@ export const getProfileByUsername = async (username: string): Promise<Profile | 
 // Get profiles by display name or username - used for search and delegation
 export const getProfilesByDisplayName = async (searchQuery: string): Promise<Profile[]> => {
   try {
-    // Search by either display_name or username containing the search query
+    if (!searchQuery || searchQuery.length < 2) return [];
+    
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
-      .or(`display_name.ilike.%${searchQuery}%, username.ilike.%${searchQuery}%`);
+      .or(`display_name.ilike.%${searchQuery}%,username.ilike.%${searchQuery}%`)
+      .limit(10);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error searching profiles:', error);
+      throw error;
+    }
+
     return data || [];
   } catch (error) {
     console.error('Error searching profiles:', error);
