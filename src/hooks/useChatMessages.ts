@@ -35,6 +35,77 @@ export const useChatMessages = () => {
     }
   };
 
+  const sendChatMessage = async (messageData: {
+    content: string;
+    author_id: string;
+    author_name: string;
+    author_username?: string;
+    author_profile_pic?: string;
+    image_file?: File | null;
+  }) => {
+    try {
+      let imageUrl = null;
+      
+      // If there's an image file, upload it first
+      if (messageData.image_file) {
+        const fileExt = messageData.image_file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+        const filePath = `chat-images/${fileName}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('community')
+          .upload(filePath, messageData.image_file);
+          
+        if (uploadError) throw uploadError;
+        
+        const { data } = supabase.storage
+          .from('community')
+          .getPublicUrl(filePath);
+          
+        imageUrl = data.publicUrl;
+      }
+      
+      // Now insert the chat message with the image URL if available
+      const { data, error } = await supabase
+        .from('chat_messages')
+        .insert({
+          content: messageData.content,
+          author_id: messageData.author_id,
+          author_name: messageData.author_name,
+          author_username: messageData.author_username,
+          author_profile_pic: messageData.author_profile_pic,
+          image_url: imageUrl,
+          likes: 0,
+          dislikes: 0
+        })
+        .select()
+        .single();
+        
+      if (error) throw error;
+      
+      return data as ChatMessage;
+    } catch (error) {
+      console.error('Error sending chat message:', error);
+      throw error;
+    }
+  };
+
+  const deleteChatMessage = async (messageId: string) => {
+    try {
+      const { error } = await supabase
+        .from('chat_messages')
+        .delete()
+        .eq('id', messageId);
+        
+      if (error) throw error;
+      
+      return true;
+    } catch (error) {
+      console.error('Error deleting chat message:', error);
+      return false;
+    }
+  };
+
   const loadMore = () => {
     if (!hasMore || isLoading) return;
     fetchMessages(messages.length);
@@ -64,6 +135,8 @@ export const useChatMessages = () => {
     messages,
     isLoading,
     hasMore,
-    loadMore
+    loadMore,
+    sendChatMessage,
+    deleteChatMessage
   };
 };

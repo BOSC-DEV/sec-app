@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -38,7 +39,7 @@ const LiveChat = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
   const onlineCount = useOnlineUsers();
-  const { messages, isLoading, hasMore, loadMore } = useChatMessages();
+  const { messages, isLoading, hasMore, loadMore, sendChatMessage, deleteChatMessage } = useChatMessages();
 
   useEffect(() => {
     if (profile?.username) {
@@ -49,6 +50,10 @@ const LiveChat = () => {
       setIsUserAdmin(false);
     }
   }, [profile?.username]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
@@ -111,14 +116,14 @@ const LiveChat = () => {
     }
     setIsSubmitting(true);
     try {
-      // await sendChatMessage({ // Assuming sendChatMessage is implemented elsewhere
-      //   content: newMessage,
-      //   author_id: profile?.wallet_address || '',
-      //   author_name: profile?.display_name || '',
-      //   author_username: profile?.username || '',
-      //   author_profile_pic: profile?.profile_pic_url || '',
-      //   image_file: imageFile
-      // });
+      await sendChatMessage({
+        content: newMessage,
+        author_id: profile?.wallet_address || '',
+        author_name: profile?.display_name || '',
+        author_username: profile?.username || '',
+        author_profile_pic: profile?.profile_pic_url || '',
+        image_file: imageFile
+      });
       setNewMessage('');
       setImageFile(null);
       setImagePreview(null);
@@ -137,18 +142,16 @@ const LiveChat = () => {
   const handleDeleteMessage = async (messageId: string) => {
     if (!isUserAdmin) return;
     try {
-      // const success = await deleteChatMessage(messageId); // Assuming deleteChatMessage is implemented elsewhere
-      // if (success) {
-      toast({
-        title: "Message deleted",
-        description: "The message has been deleted successfully",
-        variant: "default"
-      });
-      //   const data = await getChatMessages(); // Assuming getChatMessages is implemented elsewhere
-      //   setMessages(data);
-      // } else {
-      //   throw new Error("Failed to delete message");
-      // }
+      const success = await deleteChatMessage(messageId);
+      if (success) {
+        toast({
+          title: "Message deleted",
+          description: "The message has been deleted successfully",
+          variant: "default"
+        });
+      } else {
+        throw new Error("Failed to delete message");
+      }
     } catch (error) {
       console.error('Error deleting message:', error);
       toast({
@@ -206,7 +209,10 @@ const LiveChat = () => {
   };
 
   const renderMessage = (message: any, index: number) => {
-    const userBadge = null; //message.author_id ? userSecBalances[message.author_id] !== undefined ? calculateBadgeTier(userSecBalances[message.author_id]) : null : null;
+    // Get badge info based on SEC balance
+    const userBadge = message.author_id && profile?.sec_balance !== undefined ? 
+      calculateBadgeTier(profile.sec_balance) : null;
+    
     const isCurrentUser = message.author_id === profile?.wallet_address;
     const time = formatTimeAgo(message.created_at);
     const messageContent = <div key={message.id} className="flex my-6">
