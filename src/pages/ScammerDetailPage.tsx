@@ -782,25 +782,25 @@ const ScammerDetailPage = () => {
                 
                 <div className="space-y-4 mb-6">
                   <div className="flex items-center">
-                    <Calendar className="h-5 w-5 text-icc-blue mr-2" aria-hidden="true" />
+                    <Calendar className="h-5 w-5 text-icc-blue mr-2 dark:text-white" aria-hidden="true" />
                     <div>
-                      <div className="text-sm text-gray-500">Reported on</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-300">Reported on</div>
                       <div className="font-medium">{formatDate(scammer.date_added)}</div>
                     </div>
                   </div>
                   
                   <div className="flex items-center">
-                    <Eye className="h-5 w-5 text-icc-blue mr-2" aria-hidden="true" />
+                    <Eye className="h-5 w-5 text-icc-blue mr-2 dark:text-white" aria-hidden="true" />
                     <div>
-                      <div className="text-sm text-gray-500">Views</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-300">Views</div>
                       <div className="font-medium">{scammer.views?.toLocaleString() || 0}</div>
                     </div>
                   </div>
                   
                   {creatorProfile && <div className="flex items-center">
-                      <User className="h-5 w-5 text-icc-blue mr-2" aria-hidden="true" />
+                      <User className="h-5 w-5 text-icc-blue mr-2 dark:text-white" aria-hidden="true" />
                       <div>
-                        <div className="text-sm text-gray-500">Reported by</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-300">Reported by</div>
                         <Link to={`/profile/${creatorProfile.wallet_address}`} className="font-medium text-icc-blue hover:underline">
                           {creatorProfile.display_name}
                         </Link>
