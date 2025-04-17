@@ -78,7 +78,12 @@ const BadgeDelegation: React.FC = () => {
       }
     };
     
-    searchUsers();
+    // Add debounce to avoid excessive API calls
+    const debounceTimer = setTimeout(() => {
+      searchUsers();
+    }, 300);
+    
+    return () => clearTimeout(debounceTimer);
   }, [searchQuery, delegations, profile?.wallet_address]);
 
   const handleAddDelegation = async () => {
@@ -167,11 +172,10 @@ const BadgeDelegation: React.FC = () => {
                     placeholder="Search by username or display name..." 
                     onValueChange={setSearchQuery}
                   />
-                  {availableUsers.length === 0 ? (
-                    <CommandEmpty>
-                      {searchQuery.length < 2 ? "Type at least 2 characters" : "No user found"}
-                    </CommandEmpty>
-                  ) : (
+                  <CommandEmpty>
+                    {searchQuery.length < 2 ? "Type at least 2 characters" : "No user found"}
+                  </CommandEmpty>
+                  {availableUsers.length > 0 && (
                     <CommandGroup>
                       {availableUsers.map((user) => (
                         <CommandItem
