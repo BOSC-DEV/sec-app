@@ -37,7 +37,6 @@ import BountyForm from '@/components/scammer/BountyForm';
 import { ArrowLeftRight } from 'lucide-react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-
 const ScammerDetailPage = () => {
   const {
     id
@@ -69,7 +68,6 @@ const ScammerDetailPage = () => {
   const isMobile = useIsMobile();
   const [visibleComments, setVisibleComments] = useState(5);
   const [visibleContributions, setVisibleContributions] = useState(5);
-
   useEffect(() => {
     const handleProfileUpdated = () => {
       console.log("Profile updated event received, refreshing contributions");
@@ -83,7 +81,6 @@ const ScammerDetailPage = () => {
       window.removeEventListener(PROFILE_UPDATED_EVENT, handleProfileUpdated);
     };
   }, [id, queryClient]);
-
   const deleteScammerMutation = useMutation({
     mutationFn: () => {
       if (!id) throw new Error("Scammer ID is required");
@@ -104,7 +101,6 @@ const ScammerDetailPage = () => {
       });
     }
   });
-
   const unarchiveScammerMutation = useMutation({
     mutationFn: () => {
       if (!id) throw new Error("Scammer ID is required");
@@ -127,7 +123,6 @@ const ScammerDetailPage = () => {
       });
     }
   });
-
   const {
     data: scammer,
     isLoading: isLoadingScammer,
@@ -137,7 +132,6 @@ const ScammerDetailPage = () => {
     queryFn: () => getScammerById(id || ''),
     enabled: !!id
   });
-
   const {
     data: comments,
     isLoading: isLoadingComments,
@@ -147,7 +141,6 @@ const ScammerDetailPage = () => {
     queryFn: () => getScammerComments(id || ''),
     enabled: !!id
   });
-
   const {
     data: bountyContributionsData,
     isLoading: isLoadingBountyContributions
@@ -157,7 +150,6 @@ const ScammerDetailPage = () => {
     enabled: !!id,
     placeholderData: previousData => previousData
   });
-
   const {
     data: userContributionAmount = 0,
     isLoading: isLoadingUserContribution
@@ -166,10 +158,8 @@ const ScammerDetailPage = () => {
     queryFn: () => getUserContributionAmountForScammer(id || '', profile?.wallet_address || ''),
     enabled: !!id && !!profile?.wallet_address
   });
-
   const bountyContributions = bountyContributionsData?.contributions || [];
   const totalContributions = bountyContributionsData?.totalCount || 0;
-
   useEffect(() => {
     const checkIsCreator = async () => {
       if (!profile?.wallet_address || !id) return;
@@ -186,7 +176,6 @@ const ScammerDetailPage = () => {
     };
     checkIsCreator();
   }, [id, profile?.wallet_address]);
-
   useEffect(() => {
     const fetchUserInteraction = async () => {
       if (!profile?.wallet_address || !scammer?.id) return;
@@ -209,7 +198,6 @@ const ScammerDetailPage = () => {
     };
     fetchUserInteraction();
   }, [scammer?.id, profile?.wallet_address]);
-
   useEffect(() => {
     if (scammer) {
       setLikes(scammer.likes || 0);
@@ -222,7 +210,6 @@ const ScammerDetailPage = () => {
       }
     }
   }, [scammer]);
-
   useEffect(() => {
     const fetchCreatorProfile = async () => {
       if (scammer?.added_by) {
@@ -240,18 +227,15 @@ const ScammerDetailPage = () => {
     };
     fetchCreatorProfile();
   }, [scammer?.added_by]);
-
   useEffect(() => {
     if (profile) {
       setProfileChangeCounter(prev => prev + 1);
     }
   }, [profile?.display_name, profile?.profile_pic_url]);
-
   const handleEditScammer = () => {
     if (!id) return;
     navigate(`/report/${id}`);
   };
-
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
       toast({
@@ -260,7 +244,6 @@ const ScammerDetailPage = () => {
       });
     });
   };
-
   const addCommentMutation = useMutation({
     mutationFn: (newComment: {
       scammer_id: string;
@@ -287,7 +270,6 @@ const ScammerDetailPage = () => {
       });
     }
   });
-
   const addBountyContributionMutation = useMutation({
     mutationFn: (contribution: {
       scammer_id: string;
@@ -320,7 +302,6 @@ const ScammerDetailPage = () => {
       });
     }
   });
-
   const handleLike = async () => {
     if (!profile?.wallet_address) {
       toast({
@@ -367,7 +348,6 @@ const ScammerDetailPage = () => {
       setIsLoading(false);
     }
   };
-
   const handleDislike = async () => {
     if (!profile?.wallet_address) {
       toast({
@@ -411,7 +391,6 @@ const ScammerDetailPage = () => {
       setIsLoading(false);
     }
   };
-
   const handleAddComment = () => {
     if (!profile) {
       toast({
@@ -437,7 +416,6 @@ const ScammerDetailPage = () => {
       author_profile_pic: profile.profile_pic_url
     });
   };
-
   const handleAddBounty = async () => {
     if (!profile) {
       await connectPhantomWallet();
@@ -486,27 +464,21 @@ const ScammerDetailPage = () => {
       setIsLoading(false);
     }
   };
-
   const handlePageChange = (page: number) => {
     setContributionsPage(page);
   };
-
   const handleDeleteScammer = () => {
     setShowDeleteDialog(true);
   };
-
   const handleUnarchiveScammer = () => {
     setShowUnarchiveDialog(true);
   };
-
   const confirmDelete = () => {
     deleteScammerMutation.mutate();
   };
-
   const confirmUnarchive = () => {
     unarchiveScammerMutation.mutate();
   };
-
   const handleShare = async () => {
     try {
       const url = `${window.location.origin}/scammer/${scammer?.id || id}`;
@@ -523,7 +495,6 @@ const ScammerDetailPage = () => {
       });
     }
   };
-
   const handleTransferComplete = () => {
     queryClient.invalidateQueries({
       queryKey: ['bountyContributions', id]
@@ -532,9 +503,7 @@ const ScammerDetailPage = () => {
       queryKey: ['scammer', id]
     });
   };
-
   const developerWallet = `${developerWalletAddress.substring(0, 4)}...${developerWalletAddress.substring(developerWalletAddress.length - 4)}`;
-
   if (isLoadingScammer) {
     return <div>
         <CompactHero title="Loading..." />
@@ -548,7 +517,6 @@ const ScammerDetailPage = () => {
         </section>
       </div>;
   }
-
   if (errorScammer || !scammer) {
     return <div>
         <CompactHero title="Error" />
@@ -565,7 +533,6 @@ const ScammerDetailPage = () => {
         </section>
       </div>;
   }
-
   return <div>
       <CompactHero title={scammer?.name} />
 
@@ -696,41 +663,23 @@ const ScammerDetailPage = () => {
                 <TabsContent value="comments" className="mt-2">
                   <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="comments-section">Comments</h2>
                   <div className="mb-4">
-                    <Textarea 
-                      placeholder="Write your comment here..." 
-                      value={commentText} 
-                      onChange={e => setCommentText(e.target.value)} 
-                      aria-label="Comment text" 
-                    />
-                    <Button 
-                      className="mt-2 w-full md:w-auto" 
-                      onClick={handleAddComment} 
-                      disabled={addCommentMutation.isPending} 
-                      aria-label="Add comment"
-                    >
+                    <Textarea placeholder="Write your comment here..." value={commentText} onChange={e => setCommentText(e.target.value)} aria-label="Comment text" />
+                    <Button className="mt-2 w-full md:w-auto" onClick={handleAddComment} disabled={addCommentMutation.isPending} aria-label="Add comment">
                       {addCommentMutation.isPending ? 'Adding...' : 'Add Comment'}
                     </Button>
                   </div>
 
-                  {isLoadingComments ? (
-                    <div className="space-y-4" aria-live="polite" aria-busy="true">
-                      {[1, 2, 3].map(index => (
-                        <div key={index} className="flex items-start space-x-4">
+                  {isLoadingComments ? <div className="space-y-4" aria-live="polite" aria-busy="true">
+                      {[1, 2, 3].map(index => <div key={index} className="flex items-start space-x-4">
                           <Skeleton className="h-10 w-10 rounded-full" />
                           <div>
                             <Skeleton className="h-4 w-32 mb-1" />
                             <Skeleton className="h-4 w-64" />
                           </div>
-                        </div>
-                      ))}
+                        </div>)}
                       <span className="sr-only">Loading comments...</span>
-                    </div>
-                  ) : errorComments ? (
-                    <div className="text-red-500">Error loading comments.</div>
-                  ) : comments && comments.length > 0 ? (
-                    <div aria-label="Comments section">
-                      {comments.slice(0, visibleComments).map(comment => (
-                        <div key={comment.id} className="flex items-start space-x-4 py-4 border-b">
+                    </div> : errorComments ? <div className="text-red-500">Error loading comments.</div> : comments && comments.length > 0 ? <div aria-label="Comments section">
+                      {comments.slice(0, visibleComments).map(comment => <div key={comment.id} className="flex items-start space-x-4 py-4 border-b">
                           <Avatar>
                             <AvatarImage src={comment.author_profile_pic || '/placeholder.svg'} alt={`${comment.author_name}'s profile`} />
                             <AvatarFallback>{comment.author_name.substring(0, 2)}</AvatarFallback>
@@ -740,21 +689,11 @@ const ScammerDetailPage = () => {
                             <div className="text-sm text-gray-500">{formatDate(comment.created_at)}</div>
                             <p className="mt-1">{comment.content}</p>
                           </div>
-                        </div>
-                      ))}
-                      {comments.length > visibleComments && (
-                        <Button 
-                          variant="outline" 
-                          className="w-full mt-4" 
-                          onClick={() => setVisibleComments(prev => prev + 5)}
-                        >
+                        </div>)}
+                      {comments.length > visibleComments && <Button variant="outline" className="w-full mt-4" onClick={() => setVisibleComments(prev => prev + 5)}>
                           Load More Comments
-                        </Button>
-                      )}
-                    </div>
-                  ) : (
-                    <div aria-live="polite">No comments yet. Be the first to comment!</div>
-                  )}
+                        </Button>}
+                    </div> : <div aria-live="polite">No comments yet. Be the first to comment!</div>}
                 </TabsContent>
                 
                 <TabsContent value="links" className="mt-2">
@@ -895,55 +834,26 @@ const ScammerDetailPage = () => {
                     {isLoading ? 'Processing...' : 'Contribute to Bounty'}
                   </Button>
                   
-                  {userContributionAmount > 0 && <div className="mt-2 text-sm text-center text-gray-500">
-                      Your total contribution: <span className="font-medium">{userContributionAmount} SEC</span>
-                    </div>}
+                  {userContributionAmount > 0}
                 </div>
 
-                {bountyContributions.length > 0 && (
-                  <>
-                    {isCreator && scammer.bounty_amount > 0 && (
-                      <div className="mt-4 mb-4">
-                        <BountyTransferDialog 
-                          scammerId={scammer.id} 
-                          scammerName={scammer.name} 
-                          bountyAmount={scammer.bounty_amount} 
-                          onTransferComplete={handleTransferComplete} 
-                        />
-                      </div>
-                    )}
+                {bountyContributions.length > 0 && <>
+                    {isCreator && scammer.bounty_amount > 0 && <div className="mt-4 mb-4">
+                        <BountyTransferDialog scammerId={scammer.id} scammerName={scammer.name} bountyAmount={scammer.bounty_amount} onTransferComplete={handleTransferComplete} />
+                      </div>}
 
                     <div>
                       <div className="flex items-center justify-between mb-3">
-                        {totalContributions > contributionsPerPage && (
-                          <Button variant="link" onClick={() => navigate(`/bounties/${scammer.id}`)} className="text-xs p-0 h-auto">
-                            View All
-                          </Button>
-                        )}
+                        {totalContributions > contributionsPerPage}
                       </div>
                       
-                      <BountyContributionList 
-                        contributions={bountyContributions.slice(0, visibleContributions)} 
-                        totalCount={totalContributions} 
-                        currentPage={contributionsPage} 
-                        itemsPerPage={contributionsPerPage} 
-                        onPageChange={handlePageChange} 
-                        isLoading={isLoadingBountyContributions}
-                        userContributionAmount={userContributionAmount}
-                      />
+                      <BountyContributionList contributions={bountyContributions.slice(0, visibleContributions)} totalCount={totalContributions} currentPage={contributionsPage} itemsPerPage={contributionsPerPage} onPageChange={handlePageChange} isLoading={isLoadingBountyContributions} userContributionAmount={userContributionAmount} />
                       
-                      {bountyContributions.length > visibleContributions && (
-                        <Button 
-                          variant="outline" 
-                          className="w-full mt-4" 
-                          onClick={() => setVisibleContributions(prev => prev + 5)}
-                        >
+                      {bountyContributions.length > visibleContributions && <Button variant="outline" className="w-full mt-4" onClick={() => setVisibleContributions(prev => prev + 5)}>
                           Load More Contributions
-                        </Button>
-                      )}
+                        </Button>}
                     </div>
-                  </>
-                )}
+                  </>}
               </div>
             </div>
           </div>
@@ -981,5 +891,4 @@ const ScammerDetailPage = () => {
       </AlertDialog>
     </div>;
 };
-
 export default ScammerDetailPage;
