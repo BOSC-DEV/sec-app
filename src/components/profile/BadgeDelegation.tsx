@@ -43,10 +43,15 @@ const BadgeDelegation: React.FC = () => {
     if (!profile?.wallet_address) return;
     
     try {
+      console.log('Loading delegations for wallet:', profile.wallet_address);
       const delegationsData = await getDelegatedBadges(profile.wallet_address);
+      console.log('Delegations data:', delegationsData);
+      
       const activeDelegations = delegationsData.filter(d => 
         d.delegator_wallet === profile.wallet_address && d.active
       );
+      console.log('Active delegations:', activeDelegations);
+      
       setDelegations(activeDelegations);
       setCurrentDelegations(activeDelegations.length);
     } catch (error) {
@@ -203,7 +208,9 @@ const BadgeDelegation: React.FC = () => {
     
     setIsLoading(true);
     try {
+      console.log(`Removing delegation from ${profile.wallet_address} to ${delegatedWallet}`);
       await removeBadgeDelegation(delegatedWallet, profile.wallet_address);
+      
       toast({
         title: 'Success',
         description: 'Badge delegation removed successfully',

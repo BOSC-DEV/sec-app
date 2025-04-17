@@ -102,15 +102,24 @@ export const addBadgeDelegation = async (delegatedWallet: string, delegatorWalle
 };
 
 export const removeBadgeDelegation = async (delegatedWallet: string, delegatorWallet: string): Promise<void> => {
-  // Use delete operation instead of updating 'active' flag to fully remove the delegation
-  const { error } = await supabase
+  console.log(`Removing delegation: delegated=${delegatedWallet}, delegator=${delegatorWallet}`);
+  
+  // Use delete operation to fully remove the delegation
+  const { error, count } = await supabase
     .from('delegated_badges')
     .delete()
     .eq('delegator_wallet', delegatorWallet)
-    .eq('delegated_wallet', delegatedWallet);
+    .eq('delegated_wallet', delegatedWallet)
+    .select('count');
+
+  console.log(`Deletion result: count=${count}, error=${error ? JSON.stringify(error) : 'none'}`);
 
   if (error) {
     console.error('Error removing badge delegation:', error);
     throw error;
+  }
+  
+  if (count === 0) {
+    console.warn('No delegations were removed, record may not exist');
   }
 };
