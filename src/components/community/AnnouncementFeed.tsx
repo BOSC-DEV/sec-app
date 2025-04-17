@@ -43,6 +43,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { formatTimeAgo } from '@/utils/formatTime';
 import { useBadgeTier } from '@/hooks/useBadgeTier';
 import { isAdmin } from '@/utils/adminUtils';
+import { BadgeTier } from '@/utils/badgeUtils';
 
 const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false }) => {
   const { profile, isConnected } = useProfile();
@@ -52,6 +53,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   const [viewedAnnouncements, setViewedAnnouncements] = useState<Set<string>>(new Set());
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isUserAdminState, setIsUserAdmin] = useState(false);
+  const [canCreateAnnouncements, setCanCreateAnnouncements] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [announcementTab, setAnnouncementTab] = useState<'post' | 'survey'>('post');
   const [userSurveyVotes, setUserSurveyVotes] = useState<Record<string, number>>({});
@@ -84,7 +86,10 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
     } else {
       setIsUserAdmin(false);
     }
-  }, [profile?.username]);
+
+    const isWhale = badgeInfo?.tier === BadgeTier.Whale;
+    setCanCreateAnnouncements(isUserAdminState || isWhale);
+  }, [profile?.username, isUserAdminState, badgeInfo]);
   
   const { data: announcements = [], refetch, isLoading } = useQuery({
     queryKey: ['announcements'],
@@ -166,10 +171,10 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!isUserAdminState) {
+    if (!canCreateAnnouncements) {
       toast({
         title: "Unauthorized",
-        description: "Only admins can post announcements",
+        description: "Only administrators and Whale badge holders can post announcements",
         variant: "destructive",
       });
       return;
@@ -231,10 +236,10 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   };
   
   const handleCreateSurvey = async (title: string, options: string[]) => {
-    if (!isUserAdminState) {
+    if (!canCreateAnnouncements) {
       toast({
         title: "Unauthorized",
-        description: "Only admins can create surveys",
+        description: "Only administrators and Whale badge holders can create surveys",
         variant: "destructive",
       });
       return;
@@ -583,12 +588,14 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         </Card>
       )}
       
-      {isUserAdminState && (
+      {(isUserAdminState || badgeInfo?.tier === BadgeTier.Whale) && (
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center">
               <Megaphone className="h-5 w-5 mr-2 text-icc-gold" />
-              <h3 className="text-lg font-medium">Admin Tools</h3>
+              <h3 className="text-lg font-medium">
+                {isUserAdminState ? "Admin Tools" : "Whale Badge Privileges"}
+              </h3>
             </div>
             <Tabs value={announcementTab} onValueChange={(value) => setAnnouncementTab(value as 'post' | 'survey')}>
               <TabsList className="grid w-full grid-cols-2">
