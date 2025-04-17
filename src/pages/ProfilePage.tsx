@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProfile } from '@/contexts/ProfileContext';
-import { Twitter, Globe, Camera, Upload, LogOut, Cog } from 'lucide-react';
+import { Twitter, Globe, Camera, Upload, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,7 +13,6 @@ import { toast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import BadgeDelegation from '@/components/profile/BadgeDelegation';
-
 interface ProfileFormValues {
   display_name: string;
   username: string;
@@ -21,7 +20,6 @@ interface ProfileFormValues {
   x_link: string;
   website_link: string;
 }
-
 const ProfilePage = () => {
   const {
     isConnected,
@@ -47,13 +45,11 @@ const ProfilePage = () => {
       website_link: ''
     }
   });
-
   useEffect(() => {
     if (!isConnected && !isLoading) {
       navigate('/');
     }
   }, [isConnected, isLoading, navigate]);
-
   useEffect(() => {
     if (profile) {
       setAvatarUrl(profile.profile_pic_url || null);
@@ -66,11 +62,9 @@ const ProfilePage = () => {
       });
     }
   }, [profile, form]);
-
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
   };
-
   const handleDisconnect = () => {
     disconnectWallet();
     navigate('/');
@@ -79,7 +73,6 @@ const ProfilePage = () => {
       description: 'Your wallet has been disconnected'
     });
   };
-
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -114,7 +107,6 @@ const ProfilePage = () => {
       });
     }
   };
-
   const onSubmit = async (data: ProfileFormValues) => {
     if (!walletAddress || !profile) return;
     try {
@@ -142,7 +134,6 @@ const ProfilePage = () => {
       setIsSaving(false);
     }
   };
-
   if (isLoading) {
     return <div className="container py-10">
         <Card>
@@ -157,19 +148,17 @@ const ProfilePage = () => {
         </Card>
       </div>;
   }
-
   const isNewProfile = !profile;
   const getInitials = (name: string) => {
     return name?.substring(0, 2).toUpperCase() || '👤';
   };
-
   return <div className="container py-10">
       <Card className="max-w-3xl mx-auto">
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
               <CardTitle className="text-2xl flex items-center gap-2">
-                <Cog className="h-5 w-5" /> Settings
+                Edit
               </CardTitle>
             </div>
             <Button variant="outline" size="sm" onClick={handleDisconnect} className="text-icc-red border-icc-red-light hover:text-icc-red flex items-center gap-2 bg-neutral-50">
@@ -282,5 +271,4 @@ const ProfilePage = () => {
       </Card>
     </div>;
 };
-
 export default ProfilePage;
