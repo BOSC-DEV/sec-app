@@ -106,10 +106,10 @@ export const removeBadgeDelegation = async (delegatedWallet: string, delegatorWa
   console.log(`Removing delegation: delegated=${delegatedWallet}, delegator=${delegatorWallet}`);
   
   try {
-    // Use delete operation but without the count select which is causing the error
+    // Update the active status to false instead of trying to delete the record
     const { error } = await supabase
       .from('delegated_badges')
-      .delete()
+      .update({ active: false })
       .eq('delegator_wallet', delegatorWallet)
       .eq('delegated_wallet', delegatedWallet);
 
@@ -118,19 +118,19 @@ export const removeBadgeDelegation = async (delegatedWallet: string, delegatorWa
       throw error;
     }
     
-    // Check if the delegation was actually removed by fetching it after deletion
-    const { data: remainingDelegation } = await supabase
+    // Check if the delegation was actually updated
+    const { data: remainingActiveDelegation } = await supabase
       .from('delegated_badges')
       .select('*')
       .eq('delegator_wallet', delegatorWallet)
       .eq('delegated_wallet', delegatedWallet)
       .eq('active', true);
       
-    if (remainingDelegation && remainingDelegation.length > 0) {
-      console.warn('Delegation still exists after attempted deletion:', remainingDelegation);
+    if (remainingActiveDelegation && remainingActiveDelegation.length > 0) {
+      console.warn('Delegation still exists after attempted update:', remainingActiveDelegation);
       throw new Error('Failed to remove delegation, it still exists');
     } else {
-      console.log('Delegation successfully removed');
+      console.log('Delegation successfully deactivated');
     }
   } catch (error) {
     handleError(error, {
