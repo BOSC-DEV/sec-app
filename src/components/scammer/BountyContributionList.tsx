@@ -8,7 +8,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Link } from 'react-router-dom';
 import { getProfilesByDisplayName } from '@/services/profileService';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
-
 interface BountyContributionListProps {
   contributions: BountyContribution[];
   isLoading: boolean;
@@ -18,7 +17,6 @@ interface BountyContributionListProps {
   itemsPerPage?: number;
   userContributionAmount?: number;
 }
-
 const BountyContributionList: React.FC<BountyContributionListProps> = ({
   contributions,
   isLoading,
@@ -31,7 +29,6 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
   const [focused, setFocused] = useState<string | null>(null);
   const [contributorUsernames, setContributorUsernames] = useState<Record<string, string>>({});
   const renderTimestamp = React.useMemo(() => Date.now(), [contributions]);
-
   useEffect(() => {
     const fetchContributorUsernames = async () => {
       const usernamesMap: Record<string, string> = {};
@@ -55,17 +52,14 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
       fetchContributorUsernames();
     }
   }, [contributions]);
-
   const totalPages = Math.max(1, Math.ceil(totalCount / itemsPerPage));
   const hasPreviousPage = currentPage > 1;
   const hasNextPage = currentPage < totalPages;
-
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages && onPageChange) {
       onPageChange(newPage);
     }
   };
-
   if (isLoading) {
     return <div role="status" aria-live="polite" aria-busy="true" className="text-center py-4">
         <div className="animate-pulse h-4 bg-gray-200 rounded w-3/4 mx-auto mb-3" />
@@ -73,20 +67,13 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
         <span className="sr-only">Loading bounty contributions...</span>
       </div>;
   }
-
   if (!contributions || contributions.length === 0) {
     return <div role="status" aria-live="polite" className="text-center py-4 text-icc-gray">
         <p>No contributions yet. Be the first to add to this bounty!</p>
       </div>;
   }
-
   return <div className="space-y-4">
-      {userContributionAmount > 0 && <div className="bg-icc-blue-dark/10 dark:bg-[#FEF7CD] rounded-lg p-4 mb-4">
-          <h4 className="text-icc-blue dark:text-icc-blue-dark mb-2 font-semibold text-center text-lg">My Contributions:</h4>
-          <div className="text-2xl font-bold text-icc-gold flex items-center gap-1 px-[135px]">
-            {formatCurrency(userContributionAmount)} <CurrencyIcon />
-          </div>
-        </div>}
+      {userContributionAmount > 0}
 
       <h4 id="contributions-heading" className="font-serif font-bold text-icc-blue text-lg text-center">Recent Contributors:</h4>
       
@@ -149,5 +136,4 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
         </div>}
     </div>;
 };
-
 export default BountyContributionList;

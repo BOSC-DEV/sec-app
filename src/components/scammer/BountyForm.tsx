@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { toast } from '@/hooks/use-toast';
@@ -10,13 +9,11 @@ import DeveloperWalletDisplay from './DeveloperWalletDisplay';
 import ContributionForm from './ContributionForm';
 import BountyTransferDialog from './BountyTransferDialog';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
-
 interface BountyFormProps {
   scammerId: string;
   scammerName: string;
   developerWalletAddress: string;
 }
-
 const BountyForm: React.FC<BountyFormProps> = ({
   scammerId,
   scammerName,
@@ -30,7 +27,6 @@ const BountyForm: React.FC<BountyFormProps> = ({
   const [contributionAmount, setContributionAmount] = useState('0.00');
   const [bountyComment, setBountyComment] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-
   const addBountyContributionMutation = useMutation({
     mutationFn: (contribution: {
       scammer_id: string;
@@ -66,7 +62,6 @@ const BountyForm: React.FC<BountyFormProps> = ({
       setIsProcessing(false);
     }
   });
-
   const handleAddBounty = async () => {
     if (!profile) {
       await connectWallet();
@@ -130,7 +125,6 @@ const BountyForm: React.FC<BountyFormProps> = ({
       setIsProcessing(false);
     }
   };
-
   const handleTransferComplete = () => {
     queryClient.invalidateQueries({
       queryKey: ['bountyContributions', scammerId]
@@ -139,35 +133,6 @@ const BountyForm: React.FC<BountyFormProps> = ({
       queryKey: ['scammer', scammerId]
     });
   };
-
-  return (
-    <div id="bounty-section" className="bg-icc-gold-light/20 border border-icc-gold rounded-lg p-5 mt-4">
-      <h4 className="font-bold text-xl text-icc-blue dark:text-white mb-2">Contribute to Bounty</h4>
-      
-      <DeveloperWalletDisplay developerWalletAddress={developerWalletAddress} />
-      
-      <ContributionForm 
-        contributionAmount={contributionAmount} 
-        setContributionAmount={setContributionAmount} 
-        bountyComment={bountyComment} 
-        setBountyComment={setBountyComment} 
-        isProcessing={isProcessing} 
-        addBountyContributionMutation={addBountyContributionMutation} 
-        handleAddBounty={handleAddBounty} 
-        profile={profile} 
-      />
-      
-      {profile && (
-        <div className="flex items-center space-x-2 mt-4">
-          <BountyTransferDialog 
-            scammerId={scammerId} 
-            scammerName={scammerName} 
-            onTransferComplete={handleTransferComplete} 
-          />
-        </div>
-      )}
-    </div>
-  );
+  return;
 };
-
 export default BountyForm;
