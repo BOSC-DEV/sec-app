@@ -42,8 +42,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { formatTimeAgo } from '@/utils/formatTime';
 import { useBadgeTier } from '@/hooks/useBadgeTier';
-
-const ADMIN_USERNAMES = ['sec', 'thesec'];
+import { isAdmin as checkIsAdmin } from '@/utils/adminUtils';
 
 interface AnnouncementFeedProps {
   useCarousel?: boolean;
@@ -68,16 +67,11 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   const [editingAnnouncementId, setEditingAnnouncementId] = useState<string | null>(null);
   
   useEffect(() => {
-    const checkAdmin = async () => {
-      if (profile?.username) {
-        const admin = await isUserAdmin(profile.username);
-        setIsAdmin(admin);
-      } else {
-        setIsAdmin(false);
-      }
-    };
-    
-    checkAdmin();
+    if (profile?.username) {
+      setIsAdmin(checkIsAdmin(profile.username));
+    } else {
+      setIsAdmin(false);
+    }
   }, [profile?.username]);
   
   const { data: announcements = [], refetch, isLoading } = useQuery({
