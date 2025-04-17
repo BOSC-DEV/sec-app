@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { toast } from '@/hooks/use-toast';
@@ -9,11 +10,13 @@ import DeveloperWalletDisplay from './DeveloperWalletDisplay';
 import ContributionForm from './ContributionForm';
 import BountyTransferDialog from './BountyTransferDialog';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
+
 interface BountyFormProps {
   scammerId: string;
   scammerName: string;
   developerWalletAddress: string;
 }
+
 const BountyForm: React.FC<BountyFormProps> = ({
   scammerId,
   scammerName,
@@ -27,6 +30,7 @@ const BountyForm: React.FC<BountyFormProps> = ({
   const [contributionAmount, setContributionAmount] = useState('0.00');
   const [bountyComment, setBountyComment] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  
   const addBountyContributionMutation = useMutation({
     mutationFn: (contribution: {
       scammer_id: string;
@@ -62,6 +66,7 @@ const BountyForm: React.FC<BountyFormProps> = ({
       setIsProcessing(false);
     }
   });
+  
   const handleAddBounty = async () => {
     if (!profile) {
       await connectWallet();
@@ -74,6 +79,7 @@ const BountyForm: React.FC<BountyFormProps> = ({
         return;
       }
     }
+    
     const amount = parseFloat(contributionAmount);
     if (!amount || amount <= 0) {
       toast({
@@ -83,6 +89,7 @@ const BountyForm: React.FC<BountyFormProps> = ({
       });
       return;
     }
+    
     setIsProcessing(true);
     try {
       if (!developerWalletAddress || developerWalletAddress.trim() === '') {
@@ -94,17 +101,20 @@ const BountyForm: React.FC<BountyFormProps> = ({
         setIsProcessing(false);
         return;
       }
+      
       console.log(`Processing bounty transaction of ${amount} SEC to ${developerWalletAddress}`);
       console.log('Developer wallet address type and value:', {
         address: developerWalletAddress,
         type: typeof developerWalletAddress,
         length: developerWalletAddress.length
       });
+      
       const transactionSignature = await sendTransactionToDevWallet(developerWalletAddress, amount);
       if (!transactionSignature) {
         setIsProcessing(false);
         return;
       }
+      
       console.log("Recording bounty contribution in database");
       addBountyContributionMutation.mutate({
         scammer_id: scammerId,
@@ -125,6 +135,7 @@ const BountyForm: React.FC<BountyFormProps> = ({
       setIsProcessing(false);
     }
   };
+  
   const handleTransferComplete = () => {
     queryClient.invalidateQueries({
       queryKey: ['bountyContributions', scammerId]
@@ -133,6 +144,32 @@ const BountyForm: React.FC<BountyFormProps> = ({
       queryKey: ['scammer', scammerId]
     });
   };
-  return;
+  
+  return (
+    <div className="bg-gray-50 dark:bg-icc-blue-dark p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+      <h3 className="text-xl font-serif font-bold text-icc-blue dark:text-white mb-3">Add Bounty for {scammerName}</h3>
+      
+      <p className="text-sm text-icc-gray dark:text-gray-300 mb-4">
+        Contribute to the bounty for catching this scammer. All funds go to the developer wallet to maintain this site.
+      </p>
+      
+      <DeveloperWalletDisplay walletAddress={developerWalletAddress} />
+      
+      <ContributionForm
+        amount={contributionAmount}
+        comment={bountyComment}
+        onAmountChange={setContributionAmount}
+        onCommentChange={setBountyComment}
+        onSubmit={handleAddBounty}
+        isProcessing={isProcessing}
+        buttonText="Add Bounty"
+      />
+      
+      <div className="mt-4 border-t pt-4 border-gray-200 dark:border-gray-700">
+        <BountyTransferDialog scammerId={scammerId} onTransferComplete={handleTransferComplete} />
+      </div>
+    </div>
+  );
 };
+
 export default BountyForm;

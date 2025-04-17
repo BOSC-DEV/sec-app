@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { BountyContribution } from '@/types/dataTypes';
 import { formatDate, formatCurrency } from '@/lib/utils';
@@ -8,6 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Link } from 'react-router-dom';
 import { getProfilesByDisplayName } from '@/services/profileService';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
+
 interface BountyContributionListProps {
   contributions: BountyContribution[];
   isLoading: boolean;
@@ -17,6 +19,7 @@ interface BountyContributionListProps {
   itemsPerPage?: number;
   userContributionAmount?: number;
 }
+
 const BountyContributionList: React.FC<BountyContributionListProps> = ({
   contributions,
   isLoading,
@@ -29,9 +32,11 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
   const [focused, setFocused] = useState<string | null>(null);
   const [contributorUsernames, setContributorUsernames] = useState<Record<string, string>>({});
   const renderTimestamp = React.useMemo(() => Date.now(), [contributions]);
+
   useEffect(() => {
     const fetchContributorUsernames = async () => {
       const usernamesMap: Record<string, string> = {};
+      
       await Promise.all(contributions.map(async contribution => {
         try {
           const profiles = await getProfilesByDisplayName(contribution.contributor_name);
@@ -46,20 +51,25 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
           usernamesMap[contribution.contributor_name] = contribution.contributor_name;
         }
       }));
+      
       setContributorUsernames(usernamesMap);
     };
+    
     if (contributions.length > 0) {
       fetchContributorUsernames();
     }
   }, [contributions]);
+
   const totalPages = Math.max(1, Math.ceil(totalCount / itemsPerPage));
   const hasPreviousPage = currentPage > 1;
   const hasNextPage = currentPage < totalPages;
+
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages && onPageChange) {
       onPageChange(newPage);
     }
   };
+
   if (isLoading) {
     return <div role="status" aria-live="polite" aria-busy="true" className="text-center py-4">
         <div className="animate-pulse h-4 bg-gray-200 rounded w-3/4 mx-auto mb-3" />
@@ -67,13 +77,19 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
         <span className="sr-only">Loading bounty contributions...</span>
       </div>;
   }
+
   if (!contributions || contributions.length === 0) {
     return <div role="status" aria-live="polite" className="text-center py-4 text-icc-gray">
         <p>No contributions yet. Be the first to add to this bounty!</p>
       </div>;
   }
+
   return <div className="space-y-4">
-      {userContributionAmount > 0}
+      {userContributionAmount > 0 && (
+        <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 text-green-800 dark:text-green-300 text-sm">
+          You've contributed {formatCurrency(userContributionAmount)} <CurrencyIcon size="sm" /> to this bounty
+        </div>
+      )}
 
       <h4 id="contributions-heading" className="font-serif font-bold text-icc-blue text-lg text-center">Recent Contributors:</h4>
       
@@ -82,6 +98,7 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
         const stableKey = `contribution-${contribution.id}`;
         const profilePicUrl = contribution.contributor_profile_pic ? `${contribution.contributor_profile_pic}${contribution.contributor_profile_pic.includes('?') ? '&' : '?'}t=${renderTimestamp}` : '/placeholder.svg';
         const profileLink = contributorUsernames[contribution.contributor_name] ? `/profile/${contributorUsernames[contribution.contributor_name]}` : `/profile/${contribution.contributor_name}`;
+        
         return <div key={stableKey} className={`border border-icc-gold-light/30 rounded-lg p-3 bg-icc-gold-light/10 transition ${focused === contribution.id ? 'ring-2 ring-icc-gold' : ''}`} onFocus={() => setFocused(contribution.id)} onBlur={() => setFocused(null)} tabIndex={0}>
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-2">
@@ -136,4 +153,5 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
         </div>}
     </div>;
 };
+
 export default BountyContributionList;

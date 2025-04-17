@@ -847,25 +847,28 @@ const ScammerDetailPage = () => {
                   </Tooltip>
                 </TooltipProvider>
                 
-                {!isMobile && <div className="mt-6">
+                {!isMobile && (
+                  <div className="mt-6">
                     <BountyForm scammerId={scammer.id} scammerName={scammer.name} developerWalletAddress={developerWalletAddress} />
                     
                     <div className="mt-6">
-                      <BountyContributionList contributions={bountyContributions} isLoading={isLoadingBountyContributions} totalCount={totalContributions} onPageChange={handlePageChange} currentPage={contributionsPage} itemsPerPage={contributionsPerPage} userContributionAmount={userContributionAmount} />
+                      <BountyContributionList 
+                        contributions={bountyContributions} 
+                        isLoading={isLoadingBountyContributions} 
+                        totalCount={totalContributions} 
+                        onPageChange={handlePageChange} 
+                        currentPage={contributionsPage} 
+                        itemsPerPage={contributionsPerPage} 
+                        userContributionAmount={userContributionAmount}
+                      />
                     </div>
-                  </div>}
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
       </section>
-      
-      <div className="mt-8">
-          <BountyForm scammerId={scammer.id} scammerName={scammer.name} developerWalletAddress={developerWalletAddress} />
-          <div className="mt-6">
-            <BountyContributionList contributions={bountyContributions} isLoading={isLoadingBountyContributions} totalCount={totalContributions} onPageChange={handlePageChange} currentPage={contributionsPage} itemsPerPage={contributionsPerPage} userContributionAmount={userContributionAmount} />
-          </div>
-        </div>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
