@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -284,7 +283,7 @@ const LiveChat = () => {
             <h3 className="text-lg font-medium">Chat</h3>
             <div className="flex items-center ml-4">
               <CircleDot className="h-5 w-5 text-green-500 mr-2 animate-pulse" />
-              <span className="text-lg font-medium text-gray-900">{onlineCount}</span>
+              <span className="text-lg font-medium text-gray-900 dark:text-white">{onlineCount}</span>
             </div>
           </div>
         </div>
