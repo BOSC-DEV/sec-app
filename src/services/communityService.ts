@@ -1,5 +1,6 @@
+
 import { supabase } from '@/integrations/supabase/client';
-import { Announcement } from '@/types/dataTypes';
+import { Announcement, AnnouncementReply } from '@/types/dataTypes';
 import { isAdmin } from '@/utils/adminUtils';
 
 export const getAnnouncements = async (): Promise<Announcement[]> => {
@@ -10,7 +11,8 @@ export const getAnnouncements = async (): Promise<Announcement[]> => {
       .order('created_at', { ascending: false });
       
     if (error) throw error;
-    return data as Announcement[];
+    // Add explicit type conversion to handle the Json to SurveyData conversion
+    return (data as unknown) as Announcement[];
   } catch (error) {
     console.error('Error fetching announcements:', error);
     return [];
@@ -44,16 +46,22 @@ export const createAnnouncement = async (announcement: {
   dislikes: number;
 }): Promise<Announcement | null> => {
   try {
+    // Create a modified announcement object with author_username as a required field
+    // providing an empty string as default if it's not provided
+    const modifiedAnnouncement = {
+      ...announcement,
+      author_username: announcement.author_username || '',
+    };
+    
     const { data, error } = await supabase
       .from('announcements')
-      .insert({
-        ...announcement
-      })
+      .insert(modifiedAnnouncement)
       .select()
       .single();
       
     if (error) throw error;
-    return data as Announcement;
+    // Add explicit type conversion
+    return (data as unknown) as Announcement;
   } catch (error) {
     console.error('Error creating announcement:', error);
     return null;
@@ -127,18 +135,23 @@ export const createSurveyAnnouncement = async (
       options: surveyOptions
     };
     
+    // Create a modified announcement object with author_username as a required field
+    const modifiedAnnouncement = {
+      ...announcement,
+      content: `<p>${title}</p>`,
+      survey_data: surveyData,
+      author_username: announcement.author_username || '',
+    };
+    
     const { data, error } = await supabase
       .from('announcements')
-      .insert({
-        ...announcement,
-        content: `<p>${title}</p>`,
-        survey_data: surveyData
-      })
+      .insert(modifiedAnnouncement)
       .select()
       .single();
       
     if (error) throw error;
-    return data as Announcement;
+    // Add explicit type conversion
+    return (data as unknown) as Announcement;
   } catch (error) {
     console.error('Error creating survey announcement:', error);
     return null;
@@ -165,6 +178,11 @@ export const voteSurvey = async (
     if (!announcement || !announcement.survey_data) return false;
     
     const surveyData = announcement.survey_data;
+    // Add explicit type check and conversion
+    if (!surveyData.options || !Array.isArray(surveyData.options)) {
+      throw new Error('Invalid survey data structure');
+    }
+    
     const options = surveyData.options;
     
     if (optionIndex < 0 || optionIndex >= options.length) {
@@ -174,7 +192,12 @@ export const voteSurvey = async (
     // Check if user has already voted for a different option
     let userPreviousVote = -1;
     for (let i = 0; i < options.length; i++) {
-      const voterIndex = options[i].voters.findIndex(voter => voter.userId === userId);
+      if (!options[i].voters) {
+        options[i].voters = [];
+        continue;
+      }
+      
+      const voterIndex = options[i].voters.findIndex((voter: any) => voter.userId === userId);
       if (voterIndex !== -1) {
         userPreviousVote = i;
         // Remove the user's previous vote
@@ -234,9 +257,16 @@ export const getUserSurveyVote = async (
     if (error) throw error;
     if (!data || !data.survey_data) return undefined;
     
-    const options = data.survey_data.options;
+    // Add type check
+    const surveyData = data.survey_data;
+    if (!surveyData.options || !Array.isArray(surveyData.options)) {
+      return undefined;
+    }
+    
+    const options = surveyData.options;
     for (let i = 0; i < options.length; i++) {
-      if (options[i].voters.some(voter => voter.userId === userId)) {
+      if (options[i].voters && Array.isArray(options[i].voters) && 
+          options[i].voters.some((voter: any) => voter.userId === userId)) {
         return i;
       }
     }
@@ -245,5 +275,594 @@ export const getUserSurveyVote = async (
   } catch (error) {
     console.error('Error getting user survey vote:', error);
     return undefined;
+  }
+};
+
+// Announcement-reply related functions
+export const getAnnouncementReplies = async (announcementId: string): Promise<AnnouncementReply[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('announcement_replies')
+      .select('*')
+      .eq('announcement_id', announcementId)
+      .order('created_at', { ascending: true });
+      
+    if (error) throw error;
+    return data as AnnouncementReply[];
+  } catch (error) {
+    console.error('Error fetching announcement replies:', error);
+    return [];
+  }
+};
+
+export const addAnnouncementReply = async (reply: {
+  announcement_id: string;
+  content: string;
+  author_id: string;
+  author_name: string;
+  author_username?: string;
+  author_profile_pic?: string;
+  likes: number;
+  dislikes: number;
+}): Promise<AnnouncementReply | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('announcement_replies')
+      .insert({
+        ...reply,
+        author_username: reply.author_username || null
+      })
+      .select()
+      .single();
+      
+    if (error) throw error;
+    return data as AnnouncementReply;
+  } catch (error) {
+    console.error('Error adding announcement reply:', error);
+    return null;
+  }
+};
+
+export const deleteAnnouncementReply = async (replyId: string): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('announcement_replies')
+      .delete()
+      .eq('id', replyId);
+      
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error('Error deleting announcement reply:', error);
+    return false;
+  }
+};
+
+export const editAnnouncementReply = async (replyId: string, content: string): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('announcement_replies')
+      .update({ content })
+      .eq('id', replyId);
+      
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error('Error editing announcement reply:', error);
+    return false;
+  }
+};
+
+// Like/dislike functions for announcements
+export const likeAnnouncement = async (announcementId: string, userId: string): Promise<any> => {
+  try {
+    const { data: existingReaction } = await supabase
+      .from('announcement_reactions')
+      .select('*')
+      .eq('announcement_id', announcementId)
+      .eq('user_id', userId)
+      .eq('reaction_type', 'like')
+      .single();
+      
+    // Check if already liked, then unlike
+    if (existingReaction) {
+      await supabase
+        .from('announcement_reactions')
+        .delete()
+        .eq('id', existingReaction.id);
+        
+      // Decrement likes count
+      await supabase
+        .from('announcements')
+        .update({ likes: supabase.rpc('decrement', { x: 1 }) })
+        .eq('id', announcementId);
+    } else {
+      // First, remove dislike if exists
+      const { data: existingDislike } = await supabase
+        .from('announcement_reactions')
+        .select('*')
+        .eq('announcement_id', announcementId)
+        .eq('user_id', userId)
+        .eq('reaction_type', 'dislike')
+        .single();
+        
+      if (existingDislike) {
+        await supabase
+          .from('announcement_reactions')
+          .delete()
+          .eq('id', existingDislike.id);
+          
+        // Decrement dislikes count
+        await supabase
+          .from('announcements')
+          .update({ dislikes: supabase.rpc('decrement', { x: 1 }) })
+          .eq('id', announcementId);
+      }
+      
+      // Add new like
+      await supabase
+        .from('announcement_reactions')
+        .insert({
+          announcement_id: announcementId,
+          user_id: userId,
+          reaction_type: 'like'
+        });
+        
+      // Increment likes count
+      await supabase
+        .from('announcements')
+        .update({ likes: supabase.rpc('increment', { x: 1 }) })
+        .eq('id', announcementId);
+    }
+    
+    // Get updated counts
+    const { data: updated } = await supabase
+      .from('announcements')
+      .select('likes, dislikes')
+      .eq('id', announcementId)
+      .single();
+      
+    return updated;
+  } catch (error) {
+    console.error('Error liking announcement:', error);
+    return null;
+  }
+};
+
+export const dislikeAnnouncement = async (announcementId: string, userId: string): Promise<any> => {
+  try {
+    const { data: existingReaction } = await supabase
+      .from('announcement_reactions')
+      .select('*')
+      .eq('announcement_id', announcementId)
+      .eq('user_id', userId)
+      .eq('reaction_type', 'dislike')
+      .single();
+      
+    // Check if already disliked, then un-dislike
+    if (existingReaction) {
+      await supabase
+        .from('announcement_reactions')
+        .delete()
+        .eq('id', existingReaction.id);
+        
+      // Decrement dislikes count
+      await supabase
+        .from('announcements')
+        .update({ dislikes: supabase.rpc('decrement', { x: 1 }) })
+        .eq('id', announcementId);
+    } else {
+      // First, remove like if exists
+      const { data: existingLike } = await supabase
+        .from('announcement_reactions')
+        .select('*')
+        .eq('announcement_id', announcementId)
+        .eq('user_id', userId)
+        .eq('reaction_type', 'like')
+        .single();
+        
+      if (existingLike) {
+        await supabase
+          .from('announcement_reactions')
+          .delete()
+          .eq('id', existingLike.id);
+          
+        // Decrement likes count
+        await supabase
+          .from('announcements')
+          .update({ likes: supabase.rpc('decrement', { x: 1 }) })
+          .eq('id', announcementId);
+      }
+      
+      // Add new dislike
+      await supabase
+        .from('announcement_reactions')
+        .insert({
+          announcement_id: announcementId,
+          user_id: userId,
+          reaction_type: 'dislike'
+        });
+        
+      // Increment dislikes count
+      await supabase
+        .from('announcements')
+        .update({ dislikes: supabase.rpc('increment', { x: 1 }) })
+        .eq('id', announcementId);
+    }
+    
+    // Get updated counts
+    const { data: updated } = await supabase
+      .from('announcements')
+      .select('likes, dislikes')
+      .eq('id', announcementId)
+      .single();
+      
+    return updated;
+  } catch (error) {
+    console.error('Error disliking announcement:', error);
+    return null;
+  }
+};
+
+// Like/dislike functions for replies
+export const likeReply = async (replyId: string, userId: string): Promise<any> => {
+  try {
+    const { data: existingReaction } = await supabase
+      .from('reply_reactions')
+      .select('*')
+      .eq('reply_id', replyId)
+      .eq('user_id', userId)
+      .eq('reaction_type', 'like')
+      .single();
+      
+    // Check if already liked, then unlike
+    if (existingReaction) {
+      await supabase
+        .from('reply_reactions')
+        .delete()
+        .eq('id', existingReaction.id);
+        
+      // Decrement likes count
+      await supabase
+        .from('announcement_replies')
+        .update({ likes: supabase.rpc('decrement', { x: 1 }) })
+        .eq('id', replyId);
+    } else {
+      // First, remove dislike if exists
+      const { data: existingDislike } = await supabase
+        .from('reply_reactions')
+        .select('*')
+        .eq('reply_id', replyId)
+        .eq('user_id', userId)
+        .eq('reaction_type', 'dislike')
+        .single();
+        
+      if (existingDislike) {
+        await supabase
+          .from('reply_reactions')
+          .delete()
+          .eq('id', existingDislike.id);
+          
+        // Decrement dislikes count
+        await supabase
+          .from('announcement_replies')
+          .update({ dislikes: supabase.rpc('decrement', { x: 1 }) })
+          .eq('id', replyId);
+      }
+      
+      // Add new like
+      await supabase
+        .from('reply_reactions')
+        .insert({
+          reply_id: replyId,
+          user_id: userId,
+          reaction_type: 'like'
+        });
+        
+      // Increment likes count
+      await supabase
+        .from('announcement_replies')
+        .update({ likes: supabase.rpc('increment', { x: 1 }) })
+        .eq('id', replyId);
+    }
+    
+    // Get updated counts
+    const { data: updated } = await supabase
+      .from('announcement_replies')
+      .select('likes, dislikes')
+      .eq('id', replyId)
+      .single();
+      
+    return updated;
+  } catch (error) {
+    console.error('Error liking reply:', error);
+    return null;
+  }
+};
+
+export const dislikeReply = async (replyId: string, userId: string): Promise<any> => {
+  try {
+    const { data: existingReaction } = await supabase
+      .from('reply_reactions')
+      .select('*')
+      .eq('reply_id', replyId)
+      .eq('user_id', userId)
+      .eq('reaction_type', 'dislike')
+      .single();
+      
+    // Check if already disliked, then un-dislike
+    if (existingReaction) {
+      await supabase
+        .from('reply_reactions')
+        .delete()
+        .eq('id', existingReaction.id);
+        
+      // Decrement dislikes count
+      await supabase
+        .from('announcement_replies')
+        .update({ dislikes: supabase.rpc('decrement', { x: 1 }) })
+        .eq('id', replyId);
+    } else {
+      // First, remove like if exists
+      const { data: existingLike } = await supabase
+        .from('reply_reactions')
+        .select('*')
+        .eq('reply_id', replyId)
+        .eq('user_id', userId)
+        .eq('reaction_type', 'like')
+        .single();
+        
+      if (existingLike) {
+        await supabase
+          .from('reply_reactions')
+          .delete()
+          .eq('id', existingLike.id);
+          
+        // Decrement likes count
+        await supabase
+          .from('announcement_replies')
+          .update({ likes: supabase.rpc('decrement', { x: 1 }) })
+          .eq('id', replyId);
+      }
+      
+      // Add new dislike
+      await supabase
+        .from('reply_reactions')
+        .insert({
+          reply_id: replyId,
+          user_id: userId,
+          reaction_type: 'dislike'
+        });
+        
+      // Increment dislikes count
+      await supabase
+        .from('announcement_replies')
+        .update({ dislikes: supabase.rpc('increment', { x: 1 }) })
+        .eq('id', replyId);
+    }
+    
+    // Get updated counts
+    const { data: updated } = await supabase
+      .from('announcement_replies')
+      .select('likes, dislikes')
+      .eq('id', replyId)
+      .single();
+      
+    return updated;
+  } catch (error) {
+    console.error('Error disliking reply:', error);
+    return null;
+  }
+};
+
+// Functions for chat messages
+export const likeChatMessage = async (messageId: string, userId: string): Promise<any> => {
+  try {
+    const { data: existingReaction } = await supabase
+      .from('chat_message_reactions')
+      .select('*')
+      .eq('message_id', messageId)
+      .eq('user_id', userId)
+      .eq('reaction_type', 'like')
+      .single();
+      
+    // Check if already liked, then unlike
+    if (existingReaction) {
+      await supabase
+        .from('chat_message_reactions')
+        .delete()
+        .eq('id', existingReaction.id);
+        
+      // Decrement likes count
+      await supabase
+        .from('chat_messages')
+        .update({ likes: supabase.rpc('decrement', { x: 1 }) })
+        .eq('id', messageId);
+    } else {
+      // First, remove dislike if exists
+      const { data: existingDislike } = await supabase
+        .from('chat_message_reactions')
+        .select('*')
+        .eq('message_id', messageId)
+        .eq('user_id', userId)
+        .eq('reaction_type', 'dislike')
+        .single();
+        
+      if (existingDislike) {
+        await supabase
+          .from('chat_message_reactions')
+          .delete()
+          .eq('id', existingDislike.id);
+          
+        // Decrement dislikes count
+        await supabase
+          .from('chat_messages')
+          .update({ dislikes: supabase.rpc('decrement', { x: 1 }) })
+          .eq('id', messageId);
+      }
+      
+      // Add new like
+      await supabase
+        .from('chat_message_reactions')
+        .insert({
+          message_id: messageId,
+          user_id: userId,
+          reaction_type: 'like'
+        });
+        
+      // Increment likes count
+      await supabase
+        .from('chat_messages')
+        .update({ likes: supabase.rpc('increment', { x: 1 }) })
+        .eq('id', messageId);
+    }
+    
+    // Get updated counts
+    const { data: updated } = await supabase
+      .from('chat_messages')
+      .select('likes, dislikes')
+      .eq('id', messageId)
+      .single();
+      
+    return updated;
+  } catch (error) {
+    console.error('Error liking chat message:', error);
+    return null;
+  }
+};
+
+export const dislikeChatMessage = async (messageId: string, userId: string): Promise<any> => {
+  try {
+    const { data: existingReaction } = await supabase
+      .from('chat_message_reactions')
+      .select('*')
+      .eq('message_id', messageId)
+      .eq('user_id', userId)
+      .eq('reaction_type', 'dislike')
+      .single();
+      
+    // Check if already disliked, then un-dislike
+    if (existingReaction) {
+      await supabase
+        .from('chat_message_reactions')
+        .delete()
+        .eq('id', existingReaction.id);
+        
+      // Decrement dislikes count
+      await supabase
+        .from('chat_messages')
+        .update({ dislikes: supabase.rpc('decrement', { x: 1 }) })
+        .eq('id', messageId);
+    } else {
+      // First, remove like if exists
+      const { data: existingLike } = await supabase
+        .from('chat_message_reactions')
+        .select('*')
+        .eq('message_id', messageId)
+        .eq('user_id', userId)
+        .eq('reaction_type', 'like')
+        .single();
+        
+      if (existingLike) {
+        await supabase
+          .from('chat_message_reactions')
+          .delete()
+          .eq('id', existingLike.id);
+          
+        // Decrement likes count
+        await supabase
+          .from('chat_messages')
+          .update({ likes: supabase.rpc('decrement', { x: 1 }) })
+          .eq('id', messageId);
+      }
+      
+      // Add new dislike
+      await supabase
+        .from('chat_message_reactions')
+        .insert({
+          message_id: messageId,
+          user_id: userId,
+          reaction_type: 'dislike'
+        });
+        
+      // Increment dislikes count
+      await supabase
+        .from('chat_messages')
+        .update({ dislikes: supabase.rpc('increment', { x: 1 }) })
+        .eq('id', messageId);
+    }
+    
+    // Get updated counts
+    const { data: updated } = await supabase
+      .from('chat_messages')
+      .select('likes, dislikes')
+      .eq('id', messageId)
+      .single();
+      
+    return updated;
+  } catch (error) {
+    console.error('Error disliking chat message:', error);
+    return null;
+  }
+};
+
+// Functions for getting user interaction status
+export const getUserAnnouncementInteraction = async (announcementId: string, userId: string): Promise<{liked: boolean, disliked: boolean}> => {
+  try {
+    const { data, error } = await supabase
+      .from('announcement_reactions')
+      .select('reaction_type')
+      .eq('announcement_id', announcementId)
+      .eq('user_id', userId);
+      
+    if (error) throw error;
+    
+    const liked = data?.some(reaction => reaction.reaction_type === 'like') || false;
+    const disliked = data?.some(reaction => reaction.reaction_type === 'dislike') || false;
+    
+    return { liked, disliked };
+  } catch (error) {
+    console.error('Error getting user announcement interaction:', error);
+    return { liked: false, disliked: false };
+  }
+};
+
+export const getUserReplyInteraction = async (replyId: string, userId: string): Promise<{liked: boolean, disliked: boolean}> => {
+  try {
+    const { data, error } = await supabase
+      .from('reply_reactions')
+      .select('reaction_type')
+      .eq('reply_id', replyId)
+      .eq('user_id', userId);
+      
+    if (error) throw error;
+    
+    const liked = data?.some(reaction => reaction.reaction_type === 'like') || false;
+    const disliked = data?.some(reaction => reaction.reaction_type === 'dislike') || false;
+    
+    return { liked, disliked };
+  } catch (error) {
+    console.error('Error getting user reply interaction:', error);
+    return { liked: false, disliked: false };
+  }
+};
+
+export const getUserChatMessageInteraction = async (messageId: string, userId: string): Promise<{liked: boolean, disliked: boolean}> => {
+  try {
+    const { data, error } = await supabase
+      .from('chat_message_reactions')
+      .select('reaction_type')
+      .eq('message_id', messageId)
+      .eq('user_id', userId);
+      
+    if (error) throw error;
+    
+    const liked = data?.some(reaction => reaction.reaction_type === 'like') || false;
+    const disliked = data?.some(reaction => reaction.reaction_type === 'dislike') || false;
+    
+    return { liked, disliked };
+  } catch (error) {
+    console.error('Error getting user chat message interaction:', error);
+    return { liked: false, disliked: false };
   }
 };
