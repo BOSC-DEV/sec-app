@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -65,44 +64,42 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   const [editContent, setEditContent] = useState('');
   const [editingAnnouncementId, setEditingAnnouncementId] = useState<string | null>(null);
   
-  // First, get the announcement data
   const { data: announcements = [], refetch, isLoading } = useQuery({
     queryKey: ['announcements'],
     queryFn: getAnnouncements,
   });
   
-  // Next, check admin status and set permissions
   useEffect(() => {
-    if (profile?.username) {
-      const adminStatus = isAdmin(profile.username);
-      console.log(`User ${profile.username} admin status: ${adminStatus}`);
-      setIsUserAdmin(adminStatus);
+    const checkPermissions = async () => {
+      let adminStatus = false;
       
-      const checkAdmin = async () => {
-        if (!adminStatus && profile?.username) {
+      if (profile?.username) {
+        adminStatus = isAdmin(profile.username);
+        console.log(`User ${profile.username} admin status from hardcoded list: ${adminStatus}`);
+        
+        if (!adminStatus) {
           try {
             const serverAdminStatus = await isUserAdmin(profile.username);
             console.log(`Server admin check for ${profile.username}: ${serverAdminStatus}`);
-            setIsUserAdmin(prevStatus => prevStatus || serverAdminStatus);
+            adminStatus = serverAdminStatus;
           } catch (error) {
             console.error('Error checking admin status:', error);
           }
         }
-      };
+      }
       
-      checkAdmin();
-    } else {
-      setIsUserAdmin(false);
-    }
-  }, [profile?.username]);
-  
-  // Separately check for Whale badge and admin status to set permissions
-  useEffect(() => {
-    const isWhale = badgeInfo?.tier === BadgeTier.Whale;
-    const hasPermission = isUserAdminState || isWhale;
-    console.log(`Setting permissions - Admin: ${isUserAdminState}, Whale: ${isWhale}, Can Create: ${hasPermission}`);
-    setCanCreateAnnouncements(hasPermission);
-  }, [isUserAdminState, badgeInfo]);
+      setIsUserAdmin(adminStatus);
+      
+      const isWhale = badgeInfo?.tier === BadgeTier.Whale;
+      
+      const hasCreatePermission = adminStatus || isWhale;
+      console.log(`Permission check results - Admin: ${adminStatus}, Whale: ${isWhale}, Can Create: ${hasCreatePermission}`);
+      
+      setCanCreateAnnouncements(hasCreatePermission);
+    };
+    
+    checkPermissions();
+  }, [profile?.username, badgeInfo]);
   
   useEffect(() => {
     const loadUserVotes = async () => {
@@ -574,7 +571,6 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   
   return (
     <div className="space-y-6">
-      {/* Admin/Whale Tools Section - Render this FIRST */}
       {(isUserAdminState || badgeInfo?.tier === BadgeTier.Whale) && (
         <Card>
           <CardHeader className="pb-3">
@@ -624,7 +620,6 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         </Card>
       )}
       
-      {/* Search Bar Section - Render this SECOND */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
@@ -647,7 +642,6 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         </Card>
       )}
       
-      {/* Announcements Section - Render this LAST */}
       {useCarousel ? (
         <>
           <Carousel className="w-full">
