@@ -22,10 +22,7 @@ const BountyForm: React.FC<BountyFormProps> = ({
   scammerName,
   developerWalletAddress
 }) => {
-  const {
-    profile,
-    connectWallet
-  } = useProfile();
+  const { profile, connectWallet } = useProfile();
   const queryClient = useQueryClient();
   const [contributionAmount, setContributionAmount] = useState('0.00');
   const [bountyComment, setBountyComment] = useState('');
@@ -153,20 +150,26 @@ const BountyForm: React.FC<BountyFormProps> = ({
         Contribute to the bounty for catching this scammer. All funds go to the developer wallet to maintain this site.
       </p>
       
-      <DeveloperWalletDisplay walletAddress={developerWalletAddress} />
+      <DeveloperWalletDisplay developerWalletAddress={developerWalletAddress} />
       
       <ContributionForm
-        amount={contributionAmount}
-        comment={bountyComment}
-        onAmountChange={setContributionAmount}
-        onCommentChange={setBountyComment}
-        onSubmit={handleAddBounty}
+        contributionAmount={contributionAmount}
+        setContributionAmount={setContributionAmount}
+        bountyComment={bountyComment}
+        setBountyComment={setBountyComment}
+        handleAddBounty={handleAddBounty}
         isProcessing={isProcessing}
+        addBountyContributionMutation={addBountyContributionMutation}
+        profile={profile}
         buttonText="Add Bounty"
       />
       
       <div className="mt-4 border-t pt-4 border-gray-200 dark:border-gray-700">
-        <BountyTransferDialog scammerId={scammerId} onTransferComplete={handleTransferComplete} />
+        <BountyTransferDialog 
+          scammerId={scammerId} 
+          scammerName={scammerName}
+          onTransferComplete={handleTransferComplete} 
+        />
       </div>
     </div>
   );
