@@ -1,4 +1,3 @@
-
 import { toast } from "@/hooks/use-toast";
 
 export const ADMIN_USERNAMES = ['sec', 'thesec'];
@@ -36,7 +35,14 @@ export type SurveyVote = {
   userId: string;
   optionIndex: number;
   badgeTier: string;
-  timestamp: string;
+};
+
+// Required minimum badge tier to vote in surveys
+export const MINIMUM_VOTING_BADGE = 'Shrimp';
+
+// Check if a user can vote based on their badge tier
+export const canVoteInSurvey = (badgeTier: string | null): boolean => {
+  return !!badgeTier; // Any badge holder (including Shrimp) can vote
 };
 
 export const validateSurvey = (
@@ -61,12 +67,4 @@ export const validateSurvey = (
   }
   
   return { valid: true, message: "" };
-};
-
-// Required minimum badge tier to vote in surveys
-export const MINIMUM_VOTING_BADGE = 'Shrimp';
-
-// Check if a user can vote based on their badge tier
-export const canVoteInSurvey = (badgeTier: string | null): boolean => {
-  return !!badgeTier; // Any badge holder (including Shrimp) can vote
 };

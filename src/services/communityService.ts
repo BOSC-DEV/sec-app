@@ -396,12 +396,6 @@ export const likeAnnouncement = async (announcementId: string, userId: string): 
         .eq('id', existingReaction.id);
         
       // Decrement likes count
-      await supabase
-        .from('announcements')
-        .update({ likes: supabase.rpc('decrement_likes') })
-        .eq('id', announcementId);
-        
-      // Alternative approach: first get current count then update
       const { data: currentAnnouncement } = await supabase
         .from('announcements')
         .select('likes')
