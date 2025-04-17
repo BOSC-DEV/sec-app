@@ -175,7 +175,7 @@ const ProfilePage = () => {
           <Tabs defaultValue="profile" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="profile">Profile</TabsTrigger>
-              <TabsTrigger value="delegation">Badge Delegation</TabsTrigger>
+              <TabsTrigger value="delegation">Wallet Delegation</TabsTrigger>
             </TabsList>
             
             <TabsContent value="profile">
