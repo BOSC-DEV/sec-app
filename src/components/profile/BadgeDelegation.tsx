@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,9 +23,8 @@ import {
 } from "@/components/ui/popover";
 import { Check, ChevronsUpDown, UserPlus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Profile } from '@/types/dataTypes';
 import ErrorBoundary from "@/components/common/ErrorBoundary";
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 const BadgeDelegation: React.FC = () => {
   const { profile } = useProfile();
@@ -34,10 +34,31 @@ const BadgeDelegation: React.FC = () => {
   const [delegations, setDelegations] = useState<{ delegated_wallet: string; display_name?: string }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [availableUsers, setAvailableUsers] = useState<Profile[]>([]);
+  const [availableUsers, setAvailableUsers] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [delegationLimit, setDelegationLimit] = useState<number>(0);
   const [currentDelegations, setCurrentDelegations] = useState<number>(0);
+
+  // Define the loadDelegations function
+  const loadDelegations = async () => {
+    if (!profile?.wallet_address) return;
+    
+    try {
+      const delegationsData = await getDelegatedBadges(profile.wallet_address);
+      const activeDelegations = delegationsData.filter(d => 
+        d.delegator_wallet === profile.wallet_address && d.active
+      );
+      setDelegations(activeDelegations);
+      setCurrentDelegations(activeDelegations.length);
+    } catch (error) {
+      console.error('Error loading delegations:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load delegations',
+        variant: 'destructive',
+      });
+    }
+  };
 
   useEffect(() => {
     const loadDelegationInfo = async () => {
