@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { handleError, ErrorSeverity } from '@/utils/errorHandling';
@@ -25,13 +24,10 @@ export const getDelegatedBadges = async (walletAddress: string): Promise<Delegat
     throw error;
   }
 
-  // If we have delegations, fetch the display names and usernames for the delegator wallets
   if (data && data.length > 0) {
     try {
-      // Get all delegator wallet addresses
       const delegatorWallets = data.map(d => d.delegator_wallet);
       
-      // Fetch profiles for these wallets
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('wallet_address, display_name, username')
@@ -39,7 +35,6 @@ export const getDelegatedBadges = async (walletAddress: string): Promise<Delegat
       
       if (profilesError) throw profilesError;
       
-      // Add display names and usernames to the delegations
       return data.map(delegation => {
         const matchingProfile = profiles?.find(p => p.wallet_address === delegation.delegator_wallet);
         return {
@@ -59,7 +54,6 @@ export const getDelegatedBadges = async (walletAddress: string): Promise<Delegat
 
 export const addBadgeDelegation = async (delegatedWallet: string, delegatorWallet: string): Promise<void> => {
   try {
-    // First, check how many active delegations the delegator has
     const { data: existingDelegations, error: delegationError } = await supabase
       .from('delegated_badges')
       .select('*')
@@ -68,7 +62,6 @@ export const addBadgeDelegation = async (delegatedWallet: string, delegatorWalle
 
     if (delegationError) throw delegationError;
 
-    // Get the delegator's profile to check their delegation limit
     const { data: delegatorProfile, error: profileError } = await supabase
       .from('profiles')
       .select('delegation_limit')
@@ -85,7 +78,6 @@ export const addBadgeDelegation = async (delegatedWallet: string, delegatorWalle
       throw new Error(`You have reached your delegation limit of ${delegatorProfile.delegation_limit}`);
     }
 
-    // If we haven't reached the limit, proceed with the delegation
     const { error } = await supabase
       .from('delegated_badges')
       .insert([{
@@ -106,32 +98,20 @@ export const removeBadgeDelegation = async (delegatedWallet: string, delegatorWa
   console.log(`Removing delegation: delegated=${delegatedWallet}, delegator=${delegatorWallet}`);
   
   try {
-    // Update the active status to false instead of trying to delete the record
     const { error } = await supabase
       .from('delegated_badges')
-      .update({ active: false })
+      .delete()
       .eq('delegator_wallet', delegatorWallet)
-      .eq('delegated_wallet', delegatedWallet);
+      .eq('delegated_wallet', delegatedWallet)
+      .eq('active', true);
 
     if (error) {
       console.error('Error removing badge delegation:', error);
       throw error;
     }
+
+    console.log('Delegation successfully removed');
     
-    // Check if the delegation was actually updated
-    const { data: remainingActiveDelegation } = await supabase
-      .from('delegated_badges')
-      .select('*')
-      .eq('delegator_wallet', delegatorWallet)
-      .eq('delegated_wallet', delegatedWallet)
-      .eq('active', true);
-      
-    if (remainingActiveDelegation && remainingActiveDelegation.length > 0) {
-      console.warn('Delegation still exists after attempted update:', remainingActiveDelegation);
-      throw new Error('Failed to remove delegation, it still exists');
-    } else {
-      console.log('Delegation successfully deactivated');
-    }
   } catch (error) {
     handleError(error, {
       fallbackMessage: 'Failed to remove badge delegation',
