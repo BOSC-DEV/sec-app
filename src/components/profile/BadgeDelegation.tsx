@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -255,9 +254,9 @@ const BadgeDelegation: React.FC = () => {
           <CardTitle>Badge Delegation</CardTitle>
           <CardDescription>
             Allow other users to display your {currentBadge?.tier} badge
-            {delegationLimit >= 0 && (
+            {delegationLimit > 0 && (
               <div className="mt-1 text-sm text-muted-foreground">
-                Delegation limit: {currentDelegations} / {delegationLimit || 0}
+                Delegation limit: {currentDelegations} / {delegationLimit}
               </div>
             )}
           </CardDescription>
