@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,7 +23,7 @@ import {
 import { Check, ChevronsUpDown, UserPlus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Profile } from '@/types/dataTypes';
-import { ErrorBoundary } from '@/components/common/ErrorBoundary';
+import ErrorBoundary from "@/components/common/ErrorBoundary";
 
 const BadgeDelegation: React.FC = () => {
   const { profile } = useProfile();
@@ -69,7 +68,6 @@ const BadgeDelegation: React.FC = () => {
       
       try {
         const users = await getProfilesByDisplayName(searchQuery);
-        // Only show users who don't have SEC tokens already and aren't already delegated
         const filteredUsers = users.filter(user => 
           user.wallet_address !== profile?.wallet_address && 
           !delegations.some(d => d.delegated_wallet === user.wallet_address) &&
@@ -138,7 +136,6 @@ const BadgeDelegation: React.FC = () => {
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
     if (!newOpen) {
-      // Clear search state when closing the popover
       setSearchQuery('');
       setAvailableUsers([]);
     }
