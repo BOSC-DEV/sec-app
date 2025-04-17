@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -814,8 +813,8 @@ const ScammerDetailPage = () => {
                 
                 <TabsContent value="evidence" className="mt-2">
                   <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="evidence-section">Evidence</h2>
-                  {scammer?.evidence ? (
-                    <p className="text-icc-gray whitespace-pre-line">{scammer.evidence}</p>
+                  {scammer?.accused_of ? (
+                    <p className="text-icc-gray whitespace-pre-line">{scammer.accused_of}</p>
                   ) : (
                     <p className="text-icc-gray">No evidence provided.</p>
                   )}
@@ -998,9 +997,9 @@ const ScammerDetailPage = () => {
                     
                     <BountyContributionList 
                       contributions={bountyContributions} 
-                      total={totalContributions} 
-                      page={contributionsPage}
-                      perPage={contributionsPerPage}
+                      totalCount={totalContributions} 
+                      currentPage={contributionsPage}
+                      itemsPerPage={contributionsPerPage}
                       onPageChange={handlePageChange}
                       isLoading={isLoadingBountyContributions}
                     />
@@ -1011,7 +1010,7 @@ const ScammerDetailPage = () => {
                   <div className="mt-4">
                     <BountyTransferDialog 
                       scammerId={scammer.id} 
-                      creatorWallet={profile?.wallet_address || ''} 
+                      scammerName={scammer.name} 
                       bountyAmount={scammer.bounty_amount} 
                       onTransferComplete={handleTransferComplete}
                     />

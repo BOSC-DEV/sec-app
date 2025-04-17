@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { BountyContribution } from '@/types/dataTypes';
 import { formatDate, formatCurrency } from '@/lib/utils';
@@ -14,9 +13,12 @@ interface BountyContributionListProps {
   contributions: BountyContribution[];
   isLoading: boolean;
   totalCount?: number;
+  total?: number;
   onPageChange?: (page: number) => void;
   currentPage?: number;
+  page?: number;
   itemsPerPage?: number;
+  perPage?: number;
   userContributionAmount?: number;
 }
 
@@ -24,14 +26,21 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
   contributions,
   isLoading,
   totalCount = 0,
+  total,
   onPageChange,
   currentPage = 1,
+  page,
   itemsPerPage = 10,
+  perPage,
   userContributionAmount = 0
 }) => {
   const [focused, setFocused] = useState<string | null>(null);
   const [contributorUsernames, setContributorUsernames] = useState<Record<string, string>>({});
   const renderTimestamp = React.useMemo(() => Date.now(), [contributions]);
+
+  const effectiveTotal = totalCount || total || 0;
+  const effectivePage = currentPage || page || 1;
+  const effectivePerPage = itemsPerPage || perPage || 10;
 
   useEffect(() => {
     const fetchContributorUsernames = async () => {
@@ -60,9 +69,9 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
     }
   }, [contributions]);
 
-  const totalPages = Math.max(1, Math.ceil(totalCount / itemsPerPage));
-  const hasPreviousPage = currentPage > 1;
-  const hasNextPage = currentPage < totalPages;
+  const totalPages = Math.max(1, Math.ceil(effectiveTotal / effectivePerPage));
+  const hasPreviousPage = effectivePage > 1;
+  const hasNextPage = effectivePage < totalPages;
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages && onPageChange) {
@@ -137,16 +146,16 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
       </div>
       
       {totalPages > 1 && onPageChange && <div className="flex justify-between items-center pt-3">
-          <Button variant="outline" size="sm" onClick={() => handlePageChange(currentPage - 1)} disabled={!hasPreviousPage} aria-label="Previous page">
+          <Button variant="outline" size="sm" onClick={() => handlePageChange(effectivePage - 1)} disabled={!hasPreviousPage} aria-label="Previous page">
             <ArrowLeftIcon className="h-4 w-4 mr-1" aria-hidden="true" />
             Prev
           </Button>
           
           <span className="text-sm text-icc-gray" aria-live="polite">
-            Page {currentPage} of {totalPages}
+            Page {effectivePage} of {totalPages}
           </span>
           
-          <Button variant="outline" size="sm" onClick={() => handlePageChange(currentPage + 1)} disabled={!hasNextPage} aria-label="Next page">
+          <Button variant="outline" size="sm" onClick={() => handlePageChange(effectivePage + 1)} disabled={!hasNextPage} aria-label="Next page">
             Next
             <ArrowRightIcon className="h-4 w-4 ml-1" aria-hidden="true" />
           </Button>

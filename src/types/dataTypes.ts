@@ -17,6 +17,7 @@ export interface Scammer {
   shares: number;
   comments: string[];
   deleted_at: string | null;
+  evidence?: string;
 }
 
 export interface Profile {
