@@ -13,7 +13,6 @@ import { toast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import BadgeDelegation from '@/components/profile/BadgeDelegation';
-
 interface ProfileFormValues {
   display_name: string;
   username: string;
@@ -21,7 +20,6 @@ interface ProfileFormValues {
   x_link: string;
   website_link: string;
 }
-
 const ProfilePage = () => {
   const {
     isConnected,
@@ -38,7 +36,6 @@ const ProfilePage = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarKey, setAvatarKey] = useState(Date.now());
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const form = useForm<ProfileFormValues>({
     defaultValues: {
       display_name: '',
@@ -48,13 +45,11 @@ const ProfilePage = () => {
       website_link: ''
     }
   });
-
   useEffect(() => {
     if (!isConnected && !isLoading) {
       navigate('/');
     }
   }, [isConnected, isLoading, navigate]);
-
   useEffect(() => {
     if (profile) {
       setAvatarUrl(profile.profile_pic_url || null);
@@ -67,11 +62,9 @@ const ProfilePage = () => {
       });
     }
   }, [profile, form]);
-
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
   };
-
   const handleDisconnect = () => {
     disconnectWallet();
     navigate('/');
@@ -80,7 +73,6 @@ const ProfilePage = () => {
       description: 'Your wallet has been disconnected'
     });
   };
-
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -115,7 +107,6 @@ const ProfilePage = () => {
       });
     }
   };
-
   const onSubmit = async (data: ProfileFormValues) => {
     if (!walletAddress || !profile) return;
     try {
@@ -143,7 +134,6 @@ const ProfilePage = () => {
       setIsSaving(false);
     }
   };
-
   if (isLoading) {
     return <div className="container py-10">
         <Card>
@@ -158,12 +148,10 @@ const ProfilePage = () => {
         </Card>
       </div>;
   }
-
   const isNewProfile = !profile;
   const getInitials = (name: string) => {
     return name?.substring(0, 2).toUpperCase() || '👤';
   };
-
   return <div className="container py-10">
       <Card className="max-w-3xl mx-auto">
         <CardHeader>
@@ -191,7 +179,7 @@ const ProfilePage = () => {
             </TabsList>
             
             <TabsContent value="profile">
-              <div className="flex justify-center mb-6">
+              <div className="flex justify-center mb-6 py-[30px]">
                 <div className="relative group">
                   <Avatar className="h-24 w-24 cursor-pointer" key={avatarKey}>
                     {avatarUrl ? <AvatarImage src={`${avatarUrl}${avatarUrl.includes('?') ? '&' : '?'}v=${avatarKey}`} alt="Profile" /> : <AvatarFallback className="bg-icc-blue text-white text-xl">
@@ -283,5 +271,4 @@ const ProfilePage = () => {
       </Card>
     </div>;
 };
-
 export default ProfilePage;
