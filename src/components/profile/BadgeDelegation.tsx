@@ -2,19 +2,20 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { addBadgeDelegation, getDelegatedBadges, removeBadgeDelegation } from '@/services/badgeDelegationService';
 import { useProfile } from '@/contexts/ProfileContext';
 import BadgeTier from './BadgeTier';
 import { calculateBadgeTier } from '@/utils/badgeUtils';
-import { PublicKey } from '@solana/web3.js';
+import { getProfilesByDisplayName } from '@/services/profileService';
 
 const BadgeDelegation: React.FC = () => {
   const { profile } = useProfile();
-  const [newDelegatedWallet, setNewDelegatedWallet] = useState('');
+  const [selectedUser, setSelectedUser] = useState<string>('');
   const [delegations, setDelegations] = useState<{ delegated_wallet: string }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [availableUsers, setAvailableUsers] = useState<{ display_name: string; wallet_address: string }[]>([]);
 
   const loadDelegations = async () => {
     if (!profile?.wallet_address) return;
@@ -31,38 +32,42 @@ const BadgeDelegation: React.FC = () => {
     }
   };
 
+  // Load initial delegations
   useEffect(() => {
     loadDelegations();
   }, [profile?.wallet_address]);
 
-  const validateSolanaAddress = (address: string): boolean => {
-    try {
-      new PublicKey(address);
-      return true;
-    } catch {
-      return false;
-    }
-  };
+  // Search and load available users
+  useEffect(() => {
+    const loadUsers = async () => {
+      if (!profile?.display_name) return;
+      try {
+        const users = await getProfilesByDisplayName("");
+        // Filter out users who already have delegations
+        const filteredUsers = users.filter(user => 
+          user.wallet_address !== profile.wallet_address && 
+          !delegations.some(d => d.delegated_wallet === user.wallet_address) &&
+          user.sec_balance === 0 // Only show users with no SEC balance
+        );
+        setAvailableUsers(filteredUsers);
+      } catch (error) {
+        console.error('Error loading users:', error);
+      }
+    };
+    loadUsers();
+  }, [profile?.display_name, delegations]);
 
   const handleAddDelegation = async () => {
-    if (!profile?.wallet_address) return;
-    if (!validateSolanaAddress(newDelegatedWallet)) {
-      toast({
-        title: 'Invalid address',
-        description: 'Please enter a valid Solana wallet address',
-        variant: 'destructive',
-      });
-      return;
-    }
-
+    if (!profile?.wallet_address || !selectedUser) return;
+    
     setIsLoading(true);
     try {
-      await addBadgeDelegation(newDelegatedWallet, profile.wallet_address);
+      await addBadgeDelegation(selectedUser, profile.wallet_address);
       toast({
         title: 'Success',
         description: 'Badge delegation added successfully',
       });
-      setNewDelegatedWallet('');
+      setSelectedUser('');
       loadDelegations();
     } catch (error) {
       toast({
@@ -103,7 +108,7 @@ const BadgeDelegation: React.FC = () => {
       <CardHeader>
         <CardTitle>Badge Delegation</CardTitle>
         <CardDescription>
-          Allow other wallets to display your {currentBadge?.tier} badge
+          Allow other users to display your {currentBadge?.tier} badge
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -113,21 +118,27 @@ const BadgeDelegation: React.FC = () => {
             <div className="flex items-center space-x-2">
               <BadgeTier badgeInfo={currentBadge} showTooltip={true} />
               <span className="text-sm text-muted-foreground">
-                This badge will be shared with delegated wallets
+                This badge will be shared with delegated users
               </span>
             </div>
           </div>
 
           <div className="flex space-x-2">
-            <Input
-              placeholder="Enter wallet address to delegate"
-              value={newDelegatedWallet}
-              onChange={(e) => setNewDelegatedWallet(e.target.value)}
-              className="flex-1"
-            />
+            <Select value={selectedUser} onValueChange={setSelectedUser}>
+              <SelectTrigger className="flex-1">
+                <SelectValue placeholder="Select a user to delegate" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableUsers.map((user) => (
+                  <SelectItem key={user.wallet_address} value={user.wallet_address}>
+                    {user.display_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Button 
               onClick={handleAddDelegation} 
-              disabled={isLoading || !newDelegatedWallet}
+              disabled={isLoading || !selectedUser}
             >
               Add
             </Button>
@@ -139,19 +150,22 @@ const BadgeDelegation: React.FC = () => {
               <p className="text-sm text-muted-foreground">No active delegations</p>
             ) : (
               <div className="space-y-2">
-                {delegations.map((delegation) => (
-                  <div key={delegation.delegated_wallet} className="flex items-center justify-between p-2 border rounded">
-                    <code className="text-sm">{delegation.delegated_wallet}</code>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleRemoveDelegation(delegation.delegated_wallet)}
-                      disabled={isLoading}
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                ))}
+                {delegations.map((delegation) => {
+                  const delegatedUser = availableUsers.find(u => u.wallet_address === delegation.delegated_wallet);
+                  return (
+                    <div key={delegation.delegated_wallet} className="flex items-center justify-between p-2 border rounded">
+                      <span className="text-sm">{delegatedUser?.display_name || delegation.delegated_wallet}</span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleRemoveDelegation(delegation.delegated_wallet)}
+                        disabled={isLoading}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
