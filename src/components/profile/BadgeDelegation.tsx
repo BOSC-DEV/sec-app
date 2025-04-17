@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -39,7 +38,6 @@ const BadgeDelegation: React.FC = () => {
   const [delegationLimit, setDelegationLimit] = useState<number>(0);
   const [currentDelegations, setCurrentDelegations] = useState<number>(0);
 
-  // Define the loadDelegations function
   const loadDelegations = async () => {
     if (!profile?.wallet_address) return;
     
@@ -108,11 +106,19 @@ const BadgeDelegation: React.FC = () => {
       
       try {
         const users = await getProfilesByDisplayName(searchQuery);
-        const filteredUsers = users.filter(user => 
-          user.wallet_address !== profile?.wallet_address && 
-          !delegations.some(d => d.delegated_wallet === user.wallet_address) &&
-          (!user.sec_balance || user.sec_balance === 0)
-        );
+        const filteredUsers = users.filter(async user => {
+          if (user.wallet_address === profile?.wallet_address) return false;
+          if (delegations.some(d => d.delegated_wallet === user.wallet_address)) return false;
+          if (user.sec_balance && user.sec_balance > 0) return false;
+          
+          const userDelegations = await getDelegatedBadges(user.wallet_address);
+          return !userDelegations.some(d => 
+            d.delegated_wallet === user.wallet_address && 
+            d.active && 
+            d.delegator_wallet !== profile?.wallet_address
+          );
+        });
+        
         setAvailableUsers(filteredUsers);
       } catch (error) {
         console.error('Error searching users:', error);
@@ -134,6 +140,40 @@ const BadgeDelegation: React.FC = () => {
         variant: 'destructive',
       });
       return;
+    }
+
+    const delegatorDelegations = await getDelegatedBadges(profile.wallet_address);
+    const isDelegated = delegatorDelegations.some(d => 
+      d.delegated_wallet === profile.wallet_address && 
+      d.active
+    );
+
+    if (isDelegated) {
+      const delegator = delegatorDelegations.find(d => 
+        d.delegated_wallet === profile.wallet_address && 
+        d.active
+      );
+
+      if (delegator) {
+        const { data: delegatorProfile } = await supabase
+          .from('profiles')
+          .select('sec_balance')
+          .eq('wallet_address', delegator.delegator_wallet)
+          .single();
+
+        const ownBadge = profile.sec_balance ? calculateBadgeTier(profile.sec_balance) : null;
+        const delegatorBadge = delegatorProfile?.sec_balance ? calculateBadgeTier(delegatorProfile.sec_balance) : null;
+
+        if (!ownBadge || !delegatorBadge || 
+            getBadgeTierRank(ownBadge.tier) <= getBadgeTierRank(delegatorBadge.tier)) {
+          toast({
+            title: 'Cannot Delegate',
+            description: 'You cannot delegate badges while using a delegated badge unless you have your own higher tier badge.',
+            variant: 'destructive',
+          });
+          return;
+        }
+      }
     }
     
     setIsLoading(true);
@@ -197,6 +237,14 @@ const BadgeDelegation: React.FC = () => {
       setSearchQuery('');
       setAvailableUsers([]);
     }
+  };
+
+  const getBadgeTierRank = (tier: string) => {
+    const tiers = [
+      'Shrimp', 'Frog', 'Bull', 'Lion', 'King Cobra',
+      'Bull Shark', 'Great Ape', 'Bald Eagle', 'Goat', 'T-Rex', 'Whale'
+    ];
+    return tiers.indexOf(tier);
   };
 
   return (
