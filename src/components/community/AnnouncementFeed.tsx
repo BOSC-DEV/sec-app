@@ -28,7 +28,10 @@ import {
   ChevronLeft, 
   ChevronRight,
   Search,
-  BarChart3
+  BarChart3,
+  Plus,
+  MessageSquarePlus,
+  Send
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
@@ -39,7 +42,7 @@ import RichTextEditor from './RichTextEditor';
 import SurveyCreator from './SurveyCreator';
 import SurveyDisplay from './SurveyDisplay';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { formatTimeAgo } from '@/utils/formatTime';
 import { useBadgeTier } from '@/hooks/useBadgeTier';
 import { isAdmin as checkIsAdmin, ADMIN_USERNAMES } from '@/utils/adminUtils';
@@ -65,6 +68,8 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editContent, setEditContent] = useState('');
   const [editingAnnouncementId, setEditingAnnouncementId] = useState<string | null>(null);
+  
+  const [adminPostDialogOpen, setAdminPostDialogOpen] = useState(false);
   
   useEffect(() => {
     if (profile?.username) {
@@ -202,6 +207,8 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
           description: "Your announcement has been posted and all users have been notified",
           variant: "default",
         });
+        
+        setAdminPostDialogOpen(false);
       } else {
         throw new Error("Failed to create announcement");
       }
@@ -440,6 +447,16 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
           <p className="text-muted-foreground text-center mt-1">
             Check back later for updates from the team
           </p>
+          {isAdmin && (
+            <Button 
+              variant="iccblue" 
+              className="mt-4 flex items-center gap-2"
+              onClick={() => setAdminPostDialogOpen(true)}
+            >
+              <Plus className="h-4 w-4" />
+              Create First Announcement
+            </Button>
+          )}
         </CardContent>
       </Card>
     );
@@ -551,14 +568,78 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   
   return (
     <div className="space-y-6">
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search announcements..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9"
-        />
+      <div className="flex items-center justify-between gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search announcements..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        
+        {isAdmin && (
+          <Dialog open={adminPostDialogOpen} onOpenChange={setAdminPostDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="iccblue" className="flex items-center gap-2">
+                <MessageSquarePlus className="h-4 w-4" />
+                <span>Post Announcement</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[700px]">
+              <DialogHeader>
+                <DialogTitle>Create New Announcement</DialogTitle>
+              </DialogHeader>
+              <Tabs defaultValue="post" value={announcementTab} onValueChange={(value) => setAnnouncementTab(value as 'post' | 'survey')}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="post">
+                    <Megaphone className="h-4 w-4 mr-2" />
+                    Post Announcement
+                  </TabsTrigger>
+                  <TabsTrigger value="survey">
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Create Poll
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="post" className="mt-4">
+                  <form onSubmit={handleSubmit}>
+                    <RichTextEditor 
+                      value={newAnnouncement}
+                      onChange={setNewAnnouncement}
+                    />
+                    <div className="mt-3 flex justify-end">
+                      <Button 
+                        type="submit" 
+                        disabled={isSubmitting || !newAnnouncement.trim()}
+                      >
+                        {isSubmitting ? (
+                          <span className="flex items-center">
+                            <span className="animate-spin mr-2">⋮</span>
+                            Posting...
+                          </span>
+                        ) : (
+                          <span className="flex items-center">
+                            <Send className="h-4 w-4 mr-2" />
+                            Post Announcement
+                          </span>
+                        )}
+                      </Button>
+                    </div>
+                  </form>
+                </TabsContent>
+                
+                <TabsContent value="survey" className="mt-4">
+                  <SurveyCreator 
+                    onCreateSurvey={handleCreateSurvey}
+                    isSubmitting={isSurveySubmitting}
+                  />
+                </TabsContent>
+              </Tabs>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
       
       {filteredAnnouncements.length === 0 && searchQuery !== '' && (
@@ -573,50 +654,25 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         </Card>
       )}
       
-      {isAdmin && (
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center">
-              <Megaphone className="h-5 w-5 mr-2 text-icc-gold" />
-              <h3 className="text-lg font-medium">Admin Tools</h3>
-            </div>
-            <Tabs value={announcementTab} onValueChange={(value) => setAnnouncementTab(value as 'post' | 'survey')}>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="post">
-                  <Megaphone className="h-4 w-4 mr-2" />
-                  Post Announcement
-                </TabsTrigger>
-                <TabsTrigger value="survey">
-                  <BarChart3 className="h-4 w-4 mr-2" />
-                  Create Poll
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="post" className="mt-4">
-                <form onSubmit={handleSubmit}>
-                  <RichTextEditor 
-                    value={newAnnouncement}
-                    onChange={setNewAnnouncement}
-                  />
-                  <div className="mt-3 flex justify-end">
-                    <Button 
-                      type="submit" 
-                      disabled={isSubmitting || !newAnnouncement.trim()}
-                    >
-                      {isSubmitting ? "Posting..." : "Post Announcement"}
-                    </Button>
-                  </div>
-                </form>
-              </TabsContent>
-              
-              <TabsContent value="survey" className="mt-4">
-                <SurveyCreator 
-                  onCreateSurvey={handleCreateSurvey}
-                  isSubmitting={isSurveySubmitting}
-                />
-              </TabsContent>
-            </Tabs>
-          </CardHeader>
+      {filteredAnnouncements.length === 0 && searchQuery === '' && (
+        <Card className="bg-muted/50">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-xl font-medium text-center">No Announcements Yet</h3>
+            <p className="text-muted-foreground text-center mt-1">
+              Check back later for updates from the team
+            </p>
+            {isAdmin && (
+              <Button 
+                variant="iccblue" 
+                className="mt-4 flex items-center gap-2"
+                onClick={() => setAdminPostDialogOpen(true)}
+              >
+                <Plus className="h-4 w-4" />
+                Create First Announcement
+              </Button>
+            )}
+          </CardContent>
         </Card>
       )}
       
