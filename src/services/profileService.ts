@@ -52,18 +52,19 @@ export const getProfileByUsername = async (username: string): Promise<Profile | 
   }
 };
 
-// Get profiles by display name - used in bounty components
-export const getProfilesByDisplayName = async (displayName: string): Promise<Profile[]> => {
+// Get profiles by display name or username - used for search and delegation
+export const getProfilesByDisplayName = async (searchQuery: string): Promise<Profile[]> => {
   try {
+    // Search by either display_name or username containing the search query
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('display_name', displayName);
+      .or(`display_name.ilike.%${searchQuery}%, username.ilike.%${searchQuery}%`);
 
     if (error) throw error;
     return data || [];
   } catch (error) {
-    console.error('Error fetching profiles by display name:', error);
+    console.error('Error searching profiles:', error);
     return [];
   }
 };

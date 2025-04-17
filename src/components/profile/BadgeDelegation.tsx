@@ -2,26 +2,45 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { addBadgeDelegation, getDelegatedBadges, removeBadgeDelegation } from '@/services/badgeDelegationService';
 import { useProfile } from '@/contexts/ProfileContext';
 import BadgeTier from './BadgeTier';
 import { calculateBadgeTier } from '@/utils/badgeUtils';
 import { getProfilesByDisplayName } from '@/services/profileService';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const BadgeDelegation: React.FC = () => {
   const { profile } = useProfile();
+  const [open, setOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string>('');
-  const [delegations, setDelegations] = useState<{ delegated_wallet: string }[]>([]);
+  const [selectedUserName, setSelectedUserName] = useState<string>('');
+  const [delegations, setDelegations] = useState<{ delegated_wallet: string; display_name?: string }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [availableUsers, setAvailableUsers] = useState<{ display_name: string; wallet_address: string }[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [availableUsers, setAvailableUsers] = useState<{ display_name: string; wallet_address: string; username?: string }[]>([]);
 
   const loadDelegations = async () => {
     if (!profile?.wallet_address) return;
     try {
       const data = await getDelegatedBadges(profile.wallet_address);
-      setDelegations(data.filter(d => d.delegator_wallet === profile.wallet_address));
+      // Only show delegations where the current user is the delegator
+      const filteredDelegations = data.filter(d => d.delegator_wallet === profile.wallet_address);
+      setDelegations(filteredDelegations);
     } catch (error) {
       console.error('Error loading delegations:', error);
       toast({
@@ -39,23 +58,23 @@ const BadgeDelegation: React.FC = () => {
 
   // Search and load available users
   useEffect(() => {
-    const loadUsers = async () => {
-      if (!profile?.display_name) return;
+    const searchUsers = async () => {
       try {
-        const users = await getProfilesByDisplayName("");
-        // Filter out users who already have delegations
+        const users = await getProfilesByDisplayName(searchQuery);
+        // Filter out users who already have delegations or have SEC balance
         const filteredUsers = users.filter(user => 
-          user.wallet_address !== profile.wallet_address && 
+          user.wallet_address !== profile?.wallet_address && 
           !delegations.some(d => d.delegated_wallet === user.wallet_address) &&
-          user.sec_balance === 0 // Only show users with no SEC balance
+          (!user.sec_balance || user.sec_balance === 0) // Only show users with no SEC balance
         );
         setAvailableUsers(filteredUsers);
       } catch (error) {
-        console.error('Error loading users:', error);
+        console.error('Error searching users:', error);
       }
     };
-    loadUsers();
-  }, [profile?.display_name, delegations]);
+    
+    searchUsers();
+  }, [searchQuery, delegations, profile?.wallet_address]);
 
   const handleAddDelegation = async () => {
     if (!profile?.wallet_address || !selectedUser) return;
@@ -68,6 +87,7 @@ const BadgeDelegation: React.FC = () => {
         description: 'Badge delegation added successfully',
       });
       setSelectedUser('');
+      setSelectedUserName('');
       loadDelegations();
     } catch (error) {
       toast({
@@ -124,18 +144,49 @@ const BadgeDelegation: React.FC = () => {
           </div>
 
           <div className="flex space-x-2">
-            <Select value={selectedUser} onValueChange={setSelectedUser}>
-              <SelectTrigger className="flex-1">
-                <SelectValue placeholder="Select a user to delegate" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableUsers.map((user) => (
-                  <SelectItem key={user.wallet_address} value={user.wallet_address}>
-                    {user.display_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={open}
+                  className="justify-between w-full"
+                >
+                  {selectedUserName ? selectedUserName : "Search for a user..."}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="p-0 w-full">
+                <Command>
+                  <CommandInput 
+                    placeholder="Search by username or display name..." 
+                    onValueChange={setSearchQuery}
+                  />
+                  <CommandEmpty>No user found</CommandEmpty>
+                  <CommandGroup>
+                    {availableUsers.map((user) => (
+                      <CommandItem
+                        key={user.wallet_address}
+                        value={user.wallet_address}
+                        onSelect={() => {
+                          setSelectedUser(user.wallet_address);
+                          setSelectedUserName(user.display_name || user.username || user.wallet_address);
+                          setOpen(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            selectedUser === user.wallet_address ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {user.display_name || "Unnamed User"} {user.username ? `(@${user.username})` : ""}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
             <Button 
               onClick={handleAddDelegation} 
               disabled={isLoading || !selectedUser}
@@ -152,9 +203,10 @@ const BadgeDelegation: React.FC = () => {
               <div className="space-y-2">
                 {delegations.map((delegation) => {
                   const delegatedUser = availableUsers.find(u => u.wallet_address === delegation.delegated_wallet);
+                  const displayName = delegatedUser?.display_name || delegation.display_name || delegation.delegated_wallet;
                   return (
                     <div key={delegation.delegated_wallet} className="flex items-center justify-between p-2 border rounded">
-                      <span className="text-sm">{delegatedUser?.display_name || delegation.delegated_wallet}</span>
+                      <span className="text-sm">{displayName}</span>
                       <Button
                         variant="outline"
                         size="sm"
