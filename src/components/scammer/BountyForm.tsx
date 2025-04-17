@@ -169,6 +169,7 @@ const BountyForm: React.FC<BountyFormProps> = ({
           scammerId={scammerId} 
           scammerName={scammerName}
           onTransferComplete={handleTransferComplete} 
+          bountyAmount={0} // Add default bountyAmount to fix the error
         />
       </div>
     </div>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -21,7 +22,7 @@ interface BountyTransferDialogProps {
   scammerId: string;
   scammerName?: string;
   creatorWallet?: string;
-  bountyAmount: number;
+  bountyAmount?: number; // Made optional
   onTransferComplete?: () => void;
 }
 
@@ -29,7 +30,7 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
   scammerId,
   scammerName,
   creatorWallet,
-  bountyAmount,
+  bountyAmount = 0, // Provide default value
   onTransferComplete
 }) => {
   const { toast } = useToast();

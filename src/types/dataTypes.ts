@@ -71,7 +71,6 @@ export interface BountyContribution {
   transferred_to_id?: string;
 }
 
-// Community feature types
 export interface Announcement {
   id: string;
   content: string;
