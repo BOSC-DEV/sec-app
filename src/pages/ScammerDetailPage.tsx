@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -716,7 +717,6 @@ const ScammerDetailPage = () => {
                       <span className="hidden md:inline">Official Response</span>
                     </TabsTrigger>
                   </TabsList>
-                  
                 </div>
                 
                 <TabsContent value="comments" className="mt-2">
@@ -733,17 +733,25 @@ const ScammerDetailPage = () => {
                     </Button>
                   </div>
 
-                  {isLoadingComments ? <div className="space-y-4" aria-live="polite" aria-busy="true">
-                      {[1, 2, 3].map(index => <div key={index} className="flex items-start space-x-4">
+                  {isLoadingComments ? (
+                    <div className="space-y-4" aria-live="polite" aria-busy="true">
+                      {[1, 2, 3].map(index => (
+                        <div key={index} className="flex items-start space-x-4">
                           <Skeleton className="h-10 w-10 rounded-full" />
                           <div>
                             <Skeleton className="h-4 w-32 mb-1" />
                             <Skeleton className="h-4 w-64" />
                           </div>
-                        </div>)}
+                        </div>
+                      ))}
                       <span className="sr-only">Loading comments...</span>
-                    </div> : errorComments ? <div className="text-red-500">Error loading comments.</div> : comments && comments.length > 0 ? <div aria-label="Comments section">
-                        {comments.map(comment => <div key={comment.id} className="flex items-start space-x-4 py-4 border-b">
+                    </div>
+                  ) : errorComments ? (
+                    <div className="text-red-500">Error loading comments.</div>
+                  ) : comments && comments.length > 0 ? (
+                    <div aria-label="Comments section">
+                      {comments.map(comment => (
+                        <div key={comment.id} className="flex items-start space-x-4 py-4 border-b">
                           <Avatar>
                             <AvatarImage src={comment.author_profile_pic || '/placeholder.svg'} alt={`${comment.author_name}'s profile`} />
                             <AvatarFallback>{comment.author_name.substring(0, 2)}</AvatarFallback>
@@ -753,33 +761,299 @@ const ScammerDetailPage = () => {
                             <div className="text-sm text-gray-500">{formatDate(comment.created_at)}</div>
                             <p className="mt-1">{comment.content}</p>
                           </div>
-                        </div>)}
-                      </div> : <div aria-live="polite">No comments yet. Be the first to comment!</div>}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div aria-live="polite">No comments yet. Be the first to comment!</div>
+                  )}
                 </TabsContent>
                 
                 <TabsContent value="links" className="mt-2">
                   <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="links-section">Links</h2>
-                  {scammer?.links && scammer.links.length > 0 ? <ul className="list-disc pl-5 space-y-2">
-                      {scammer.links.map((link, index) => <li key={index} className="text-icc-gray">
+                  {scammer?.links && scammer.links.length > 0 ? (
+                    <ul className="list-disc pl-5 space-y-2">
+                      {scammer.links.map((link, index) => (
+                        <li key={index} className="text-icc-gray">
                           <a href={link.startsWith('http') ? link : `https://${link}`} target="_blank" rel="noopener noreferrer" className="text-icc-blue hover:underline">
                             {link}
                           </a>
-                        </li>)}
-                    </ul> : <p className="text-icc-gray">No links provided.</p>}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-icc-gray">No links provided.</p>
+                  )}
                 </TabsContent>
                 
                 <TabsContent value="aliases" className="mt-2">
                   <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="aliases-section">Aliases</h2>
-                  {scammer?.aliases && scammer.aliases.length > 0 ? <div className="flex flex-wrap gap-2">
-                      {scammer.aliases.map((alias, index) => <Badge key={index} className="bg-icc-blue text-white py-2 px-4">{alias}</Badge>)}
-                    </div> : <p className="text-icc-gray">No aliases provided.</p>}
+                  {scammer?.aliases && scammer.aliases.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {scammer.aliases.map((alias, index) => (
+                        <Badge key={index} className="bg-icc-blue text-white py-2 px-4">{alias}</Badge>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-icc-gray">No aliases provided.</p>
+                  )}
                 </TabsContent>
                 
                 <TabsContent value="accomplices" className="mt-2">
                   <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="accomplices-section">Known Accomplices</h2>
-                  {scammer?.accomplices && scammer.accomplices.length > 0 ? <div className="flex flex-wrap gap-2">
-                      {scammer.accomplices.map((accomplice, index) => <Badge key={index} className="bg-icc-blue text-white py-2 px-4">{accomplice}</Badge>)}
-                    </div> : <p className="text-icc-gray">No accomplices listed.</p>}
+                  {scammer?.accomplices && scammer.accomplices.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {scammer.accomplices.map((accomplice, index) => (
+                        <Badge key={index} className="bg-icc-blue text-white py-2 px-4">{accomplice}</Badge>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-icc-gray">No accomplices listed.</p>
+                  )}
                 </TabsContent>
                 
-                <TabsContent value
+                <TabsContent value="evidence" className="mt-2">
+                  <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="evidence-section">Evidence</h2>
+                  {scammer?.evidence ? (
+                    <p className="text-icc-gray whitespace-pre-line">{scammer.evidence}</p>
+                  ) : (
+                    <p className="text-icc-gray">No evidence provided.</p>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="wallet-addresses" className="mt-2">
+                  <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="wallet-section">Wallet Addresses</h2>
+                  {scammer?.wallet_addresses && scammer.wallet_addresses.length > 0 ? (
+                    <div className="space-y-2">
+                      {scammer.wallet_addresses.map((wallet, index) => (
+                        <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
+                          <span className="font-mono text-sm">{wallet}</span>
+                          <Button variant="ghost" size="sm" onClick={() => copyToClipboard(wallet)} className="ml-2" aria-label="Copy wallet address">
+                            <Copy className="h-4 w-4" aria-hidden="true" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-icc-gray">No wallet addresses provided.</p>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="official" className="mt-2">
+                  <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="official-response-section">Official Response</h2>
+                  {scammer?.official_response ? (
+                    <div className="bg-gray-50 p-4 rounded-md border-l-4 border-icc-blue">
+                      <h3 className="font-medium text-icc-blue mb-2">Official Statement:</h3>
+                      <p className="text-icc-gray whitespace-pre-line">{scammer.official_response}</p>
+                    </div>
+                  ) : (
+                    <p className="text-icc-gray">No official response has been issued yet.</p>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </div>
+            
+            <div className="md:col-span-1">
+              <div className="bg-gray-50 rounded-lg p-4 shadow-sm sticky top-4">
+                <h3 className="text-xl font-bold text-icc-blue mb-4">Report Information</h3>
+                
+                <div className="space-y-4 mb-6">
+                  <div className="flex items-center">
+                    <Calendar className="h-5 w-5 text-icc-blue mr-2" aria-hidden="true" />
+                    <div>
+                      <div className="text-sm text-gray-500">Reported on</div>
+                      <div className="font-medium">{formatDate(scammer.date_added)}</div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center">
+                    <Eye className="h-5 w-5 text-icc-blue mr-2" aria-hidden="true" />
+                    <div>
+                      <div className="text-sm text-gray-500">Views</div>
+                      <div className="font-medium">{scammer.views?.toLocaleString() || 0}</div>
+                    </div>
+                  </div>
+                  
+                  {creatorProfile && (
+                    <div className="flex items-center">
+                      <User className="h-5 w-5 text-icc-blue mr-2" aria-hidden="true" />
+                      <div>
+                        <div className="text-sm text-gray-500">Reported by</div>
+                        <Link to={`/profile/${creatorProfile.wallet_address}`} className="font-medium text-icc-blue hover:underline">
+                          {creatorProfile.display_name}
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Desktop Take Action Section */}
+                <div className="hidden md:block mb-6">
+                  <h3 className="text-lg font-semibold text-icc-blue mb-3">Take Action</h3>
+                  
+                  <div className="flex space-x-2 mb-4">
+                    <Button 
+                      variant={isLiked ? "gold" : "outline"} 
+                      size="sm" 
+                      className={`flex-1 ${isLiked ? 'hover:bg-icc-gold-dark' : ''}`} 
+                      onClick={handleLike} 
+                      disabled={isLoading} 
+                      aria-pressed={isLiked} 
+                      aria-label="Like this report"
+                    >
+                      <ThumbsUp className="h-4 w-4 mr-1" aria-hidden="true" />
+                      <span>{likes}</span>
+                    </Button>
+                    <Button 
+                      variant={isDisliked ? "gold" : "outline"} 
+                      size="sm" 
+                      className={`flex-1 ${isDisliked ? 'hover:bg-icc-gold-dark' : ''}`} 
+                      onClick={handleDislike} 
+                      disabled={isLoading} 
+                      aria-pressed={isDisliked} 
+                      aria-label="Dislike this report"
+                    >
+                      <ThumbsDown className="h-4 w-4 mr-1" aria-hidden="true" />
+                      <span>{dislikes}</span>
+                    </Button>
+                  </div>
+                  
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="mb-3">
+                          <div className="flex justify-between text-sm text-icc-gray mb-1">
+                            <span>Community Consensus</span>
+                            <span>{agreePercentage}% Agree</span>
+                          </div>
+                          <Progress value={agreePercentage} className="h-2 bg-red-100" aria-valuemin={0} aria-valuemax={100} aria-valuenow={agreePercentage} aria-label={`${agreePercentage}% agreement rate`} />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Based on {likes + dislikes} community votes</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-icc-blue mb-3">Contribute to Bounty</h3>
+                  
+                  <div className="mb-3">
+                    <label htmlFor="amount" className="block text-sm text-gray-500 mb-1">Amount in SEC</label>
+                    <div className="relative">
+                      <Input 
+                        id="amount" 
+                        type="number" 
+                        min="0" 
+                        step="0.01" 
+                        value={contributionAmount} 
+                        onChange={e => setContributionAmount(e.target.value)} 
+                        className="pl-7" 
+                        aria-label="Bounty amount in SEC" 
+                      />
+                      <CurrencyIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                    </div>
+                  </div>
+                  
+                  <div className="mb-3">
+                    <label htmlFor="comment" className="block text-sm text-gray-500 mb-1">Comment (Optional)</label>
+                    <Textarea 
+                      id="comment" 
+                      value={bountyComment} 
+                      onChange={e => setBountyComment(e.target.value)} 
+                      className="h-24 resize-none" 
+                      placeholder="Add a comment with your contribution..." 
+                      aria-label="Bounty comment"
+                    />
+                  </div>
+                  
+                  <Button 
+                    onClick={handleAddBounty} 
+                    className="w-full" 
+                    disabled={isLoading} 
+                    aria-label="Add bounty contribution"
+                  >
+                    <DollarSign className="h-4 w-4 mr-1" aria-hidden="true" />
+                    {isLoading ? 'Processing...' : 'Contribute to Bounty'}
+                  </Button>
+                  
+                  {userContributionAmount > 0 && (
+                    <div className="mt-2 text-sm text-center text-gray-500">
+                      Your total contribution: <span className="font-medium">{userContributionAmount} SEC</span>
+                    </div>
+                  )}
+                </div>
+
+                {bountyContributions.length > 0 && (
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-lg font-semibold text-icc-blue">Recent Contributions</h3>
+                      {totalContributions > contributionsPerPage && (
+                        <Button variant="link" onClick={() => navigate(`/bounties/${scammer.id}`)} className="text-xs p-0 h-auto">
+                          View All
+                        </Button>
+                      )}
+                    </div>
+                    
+                    <BountyContributionList 
+                      contributions={bountyContributions} 
+                      total={totalContributions} 
+                      page={contributionsPage}
+                      perPage={contributionsPerPage}
+                      onPageChange={handlePageChange}
+                      isLoading={isLoadingBountyContributions}
+                    />
+                  </div>
+                )}
+                
+                {isCreator && scammer.bounty_amount > 0 && (
+                  <div className="mt-4">
+                    <BountyTransferDialog 
+                      scammerId={scammer.id} 
+                      creatorWallet={profile?.wallet_address || ''} 
+                      bountyAmount={scammer.bounty_amount} 
+                      onTransferComplete={handleTransferComplete}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Archive this report?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will hide the report from the Most Wanted list and search results. You can unarchive it later.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Archive Report</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showUnarchiveDialog} onOpenChange={setShowUnarchiveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unarchive this report?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will make the report visible again in the Most Wanted list and search results.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmUnarchive}>Unarchive Report</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+};
+
+export default ScammerDetailPage;
