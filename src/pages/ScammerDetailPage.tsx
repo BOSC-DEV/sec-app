@@ -589,7 +589,7 @@ const ScammerDetailPage = () => {
 
               {/* Mobile Take Action Section */}
               <div className="block md:hidden mb-6">
-                <h3 className="text-lg font-semibold text-icc-blue dark:text-white mb-3">Take Action</h3>
+                
                 
                 <div className="flex space-x-2 mb-4">
                   <Button variant={isLiked ? "gold" : "outline"} size="sm" className={`flex-1 ${isLiked ? 'hover:bg-icc-gold-dark' : ''}`} onClick={handleLike} disabled={isLoading} aria-pressed={isLiked} aria-label="Like this report">
