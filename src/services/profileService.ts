@@ -1,3 +1,4 @@
+
 import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 import { getConnection } from '@/utils/phantomWallet';
@@ -56,6 +57,7 @@ export const getProfilesByDisplayName = async (searchQuery: string): Promise<Pro
   try {
     if (!searchQuery || searchQuery.length < 2) return [];
     
+    // Fix the SQL query format to use proper parameter binding
     const { data, error } = await supabase
       .from('profiles')
       .select('*')

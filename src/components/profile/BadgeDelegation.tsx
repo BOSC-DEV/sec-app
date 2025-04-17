@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,15 +14,17 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, UserPlus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Profile } from '@/types/dataTypes';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
 const BadgeDelegation: React.FC = () => {
   const { profile } = useProfile();
@@ -66,6 +69,7 @@ const BadgeDelegation: React.FC = () => {
       
       try {
         const users = await getProfilesByDisplayName(searchQuery);
+        // Only show users who don't have SEC tokens already and aren't already delegated
         const filteredUsers = users.filter(user => 
           user.wallet_address !== profile?.wallet_address && 
           !delegations.some(d => d.delegated_wallet === user.wallet_address) &&
@@ -131,135 +135,132 @@ const BadgeDelegation: React.FC = () => {
 
   const currentBadge = profile?.sec_balance ? calculateBadgeTier(profile.sec_balance) : null;
 
-  const handleSearchChange = (value: string) => {
-    setSearchQuery(value);
-  };
-
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
     if (!newOpen) {
-      setTimeout(() => {
-        setSearchQuery('');
-        setAvailableUsers([]);
-      }, 100);
-    } else {
+      // Clear search state when closing the popover
       setSearchQuery('');
       setAvailableUsers([]);
     }
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Badge Delegation</CardTitle>
-        <CardDescription>
-          Allow other users to display your {currentBadge?.tier} badge
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="flex flex-col space-y-2">
-            <label className="text-sm font-medium">Your Current Badge</label>
-            <div className="flex items-center space-x-2">
-              <BadgeTier badgeInfo={currentBadge} showTooltip={true} />
-              <span className="text-sm text-muted-foreground">
-                This badge will be shared with delegated users
-              </span>
+    <ErrorBoundary>
+      <Card>
+        <CardHeader>
+          <CardTitle>Badge Delegation</CardTitle>
+          <CardDescription>
+            Allow other users to display your {currentBadge?.tier} badge
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex flex-col space-y-2">
+              <label className="text-sm font-medium">Your Current Badge</label>
+              <div className="flex items-center space-x-2">
+                <BadgeTier badgeInfo={currentBadge} showTooltip={true} />
+                <span className="text-sm text-muted-foreground">
+                  This badge will be shared with delegated users
+                </span>
+              </div>
+            </div>
+
+            <div className="flex space-x-2">
+              <Popover open={open} onOpenChange={handleOpenChange}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                    className="justify-between w-full"
+                    disabled={isLoading}
+                  >
+                    {selectedUserName ? selectedUserName : "Search for a user..."}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="p-0 w-[400px]">
+                  <Command>
+                    <CommandInput 
+                      placeholder="Search by username or display name..." 
+                      value={searchQuery}
+                      onValueChange={setSearchQuery}
+                    />
+                    <CommandList>
+                      {isSearching && (
+                        <div className="py-6 text-center text-sm">Searching...</div>
+                      )}
+                      {!isSearching && (
+                        <>
+                          <CommandEmpty>
+                            {searchQuery.length < 2 
+                              ? "Type at least 2 characters to search" 
+                              : "No users found"}
+                          </CommandEmpty>
+                          <CommandGroup>
+                            {availableUsers && availableUsers.map((user) => (
+                              <CommandItem
+                                key={user.wallet_address}
+                                value={user.wallet_address}
+                                onSelect={() => {
+                                  setSelectedUser(user.wallet_address);
+                                  setSelectedUserName(user.display_name);
+                                  setOpen(false);
+                                  setSearchQuery('');
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    selectedUser === user.wallet_address ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                {user.display_name} {user.username ? `(@${user.username})` : ""}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </>
+                      )}
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              <Button 
+                onClick={handleAddDelegation} 
+                disabled={isLoading || !selectedUser}
+              >
+                <UserPlus className="mr-2 h-4 w-4" />
+                Add
+              </Button>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Current Delegations</h3>
+              {delegations.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No active delegations</p>
+              ) : (
+                <div className="space-y-2">
+                  {delegations.map((delegation) => (
+                    <div key={delegation.delegated_wallet} className="flex items-center justify-between p-2 border rounded">
+                      <span className="text-sm">{delegation.display_name || delegation.delegated_wallet}</span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleRemoveDelegation(delegation.delegated_wallet)}
+                        disabled={isLoading}
+                      >
+                        <X className="mr-1 h-4 w-4" />
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
-
-          <div className="flex space-x-2">
-            <Popover open={open} onOpenChange={setOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={open}
-                  className="justify-between w-full"
-                  disabled={isLoading}
-                >
-                  {selectedUserName ? selectedUserName : "Search for a user..."}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="p-0 w-[400px]">
-                <Command>
-                  <CommandInput 
-                    placeholder="Search by username or display name..." 
-                    value={searchQuery}
-                    onValueChange={setSearchQuery}
-                  />
-                  <div className="max-h-[300px] overflow-auto">
-                    {isSearching ? (
-                      <div className="py-6 text-center text-sm">Searching...</div>
-                    ) : (
-                      <>
-                        <CommandEmpty>
-                          {searchQuery.length < 2 
-                            ? "Type at least 2 characters to search" 
-                            : "No users found"}
-                        </CommandEmpty>
-                        <CommandGroup>
-                          {availableUsers.map((user) => (
-                            <CommandItem
-                              key={user.wallet_address}
-                              value={user.wallet_address}
-                              onSelect={() => {
-                                setSelectedUser(user.wallet_address);
-                                setSelectedUserName(user.display_name);
-                                setOpen(false);
-                                setSearchQuery('');
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  selectedUser === user.wallet_address ? "opacity-100" : "opacity-0"
-                                )}
-                              />
-                              {user.display_name} {user.username ? `(@${user.username})` : ""}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </>
-                    )}
-                  </div>
-                </Command>
-              </PopoverContent>
-            </Popover>
-            <Button 
-              onClick={handleAddDelegation} 
-              disabled={isLoading || !selectedUser}
-            >
-              Add
-            </Button>
-          </div>
-
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium">Current Delegations</h3>
-            {delegations.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No active delegations</p>
-            ) : (
-              <div className="space-y-2">
-                {delegations.map((delegation) => (
-                  <div key={delegation.delegated_wallet} className="flex items-center justify-between p-2 border rounded">
-                    <span className="text-sm">{delegation.display_name || delegation.delegated_wallet}</span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleRemoveDelegation(delegation.delegated_wallet)}
-                      disabled={isLoading}
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </ErrorBoundary>
   );
 };
 
