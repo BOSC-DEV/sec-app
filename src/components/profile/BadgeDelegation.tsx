@@ -46,7 +46,7 @@ const BadgeDelegation: React.FC = () => {
       console.error('Error loading delegations:', error);
       toast({
         title: 'Error',
-        description: 'Failed to load badge delegations',
+        description: 'Failed to load badge delegations. Please try again.',
         variant: 'destructive',
       });
     }
@@ -87,7 +87,14 @@ const BadgeDelegation: React.FC = () => {
   }, [searchQuery, delegations, profile?.wallet_address]);
 
   const handleAddDelegation = async () => {
-    if (!profile?.wallet_address || !selectedUser) return;
+    if (!profile?.wallet_address || !selectedUser) {
+      toast({
+        title: 'Error',
+        description: 'Please select a user to delegate your badge to.',
+        variant: 'destructive',
+      });
+      return;
+    }
     
     setIsLoading(true);
     try {
@@ -98,20 +105,30 @@ const BadgeDelegation: React.FC = () => {
       });
       setSelectedUser('');
       setSelectedUserName('');
-      loadDelegations();
+      await loadDelegations();
     } catch (error) {
+      console.error('Error adding delegation:', error);
       toast({
         title: 'Error',
-        description: 'Failed to add badge delegation',
+        description: 'Failed to add badge delegation. Please try again.',
         variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
+      setOpen(false);
     }
   };
 
   const handleRemoveDelegation = async (delegatedWallet: string) => {
-    if (!profile?.wallet_address) return;
+    if (!profile?.wallet_address) {
+      toast({
+        title: 'Error',
+        description: 'You must be logged in to remove delegations.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     setIsLoading(true);
     try {
       await removeBadgeDelegation(delegatedWallet, profile.wallet_address);
@@ -119,11 +136,12 @@ const BadgeDelegation: React.FC = () => {
         title: 'Success',
         description: 'Badge delegation removed successfully',
       });
-      loadDelegations();
+      await loadDelegations();
     } catch (error) {
+      console.error('Error removing delegation:', error);
       toast({
         title: 'Error',
-        description: 'Failed to remove badge delegation',
+        description: 'Failed to remove badge delegation. Please try again.',
         variant: 'destructive',
       });
     } finally {
