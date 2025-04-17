@@ -68,16 +68,22 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   const [editingAnnouncementId, setEditingAnnouncementId] = useState<string | null>(null);
   
   useEffect(() => {
-    const checkAdmin = async () => {
-      if (profile?.username) {
-        const admin = await isUserAdmin(profile.username);
-        setIsAdmin(admin);
-      } else {
-        setIsAdmin(false);
-      }
-    };
-    
-    checkAdmin();
+    if (profile?.username && ADMIN_USERNAMES.includes(profile.username.toLowerCase())) {
+      console.log(`Admin user detected: ${profile.username}`);
+      setIsAdmin(true);
+    } else {
+      const checkAdmin = async () => {
+        if (profile?.username) {
+          const admin = await isUserAdmin(profile.username);
+          console.log(`Admin check for ${profile.username}: ${admin}`);
+          setIsAdmin(admin);
+        } else {
+          setIsAdmin(false);
+        }
+      };
+      
+      checkAdmin();
+    }
   }, [profile?.username]);
   
   const { data: announcements = [], refetch, isLoading } = useQuery({

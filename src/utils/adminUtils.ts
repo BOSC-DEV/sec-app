@@ -10,7 +10,8 @@ export const getAdminList = (): string[] => {
 };
 
 export const isAdmin = (username: string): boolean => {
-  return ADMIN_USERNAMES.includes(username);
+  if (!username) return false;
+  return ADMIN_USERNAMES.includes(username.toLowerCase());
 };
 
 export const isBanned = (username: string): boolean => {
