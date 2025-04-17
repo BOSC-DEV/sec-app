@@ -67,6 +67,8 @@ const ScammerDetailPage = () => {
   const contributionsPerPage = 5;
   const [profileChangeCounter, setProfileChangeCounter] = useState(0);
   const isMobile = useIsMobile();
+  const [visibleComments, setVisibleComments] = useState(5);
+  const [visibleContributions, setVisibleContributions] = useState(5);
 
   useEffect(() => {
     const handleProfileUpdated = () => {
@@ -694,23 +696,41 @@ const ScammerDetailPage = () => {
                 <TabsContent value="comments" className="mt-2">
                   <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="comments-section">Comments</h2>
                   <div className="mb-4">
-                    <Textarea placeholder="Write your comment here..." value={commentText} onChange={e => setCommentText(e.target.value)} aria-label="Comment text" />
-                    <Button className="mt-2 w-full md:w-auto" onClick={handleAddComment} disabled={addCommentMutation.isPending} aria-label="Add comment">
+                    <Textarea 
+                      placeholder="Write your comment here..." 
+                      value={commentText} 
+                      onChange={e => setCommentText(e.target.value)} 
+                      aria-label="Comment text" 
+                    />
+                    <Button 
+                      className="mt-2 w-full md:w-auto" 
+                      onClick={handleAddComment} 
+                      disabled={addCommentMutation.isPending} 
+                      aria-label="Add comment"
+                    >
                       {addCommentMutation.isPending ? 'Adding...' : 'Add Comment'}
                     </Button>
                   </div>
 
-                  {isLoadingComments ? <div className="space-y-4" aria-live="polite" aria-busy="true">
-                      {[1, 2, 3].map(index => <div key={index} className="flex items-start space-x-4">
+                  {isLoadingComments ? (
+                    <div className="space-y-4" aria-live="polite" aria-busy="true">
+                      {[1, 2, 3].map(index => (
+                        <div key={index} className="flex items-start space-x-4">
                           <Skeleton className="h-10 w-10 rounded-full" />
                           <div>
                             <Skeleton className="h-4 w-32 mb-1" />
                             <Skeleton className="h-4 w-64" />
                           </div>
-                        </div>)}
+                        </div>
+                      ))}
                       <span className="sr-only">Loading comments...</span>
-                    </div> : errorComments ? <div className="text-red-500">Error loading comments.</div> : comments && comments.length > 0 ? <div aria-label="Comments section">
-                      {comments.map(comment => <div key={comment.id} className="flex items-start space-x-4 py-4 border-b">
+                    </div>
+                  ) : errorComments ? (
+                    <div className="text-red-500">Error loading comments.</div>
+                  ) : comments && comments.length > 0 ? (
+                    <div aria-label="Comments section">
+                      {comments.slice(0, visibleComments).map(comment => (
+                        <div key={comment.id} className="flex items-start space-x-4 py-4 border-b">
                           <Avatar>
                             <AvatarImage src={comment.author_profile_pic || '/placeholder.svg'} alt={`${comment.author_name}'s profile`} />
                             <AvatarFallback>{comment.author_name.substring(0, 2)}</AvatarFallback>
@@ -720,8 +740,21 @@ const ScammerDetailPage = () => {
                             <div className="text-sm text-gray-500">{formatDate(comment.created_at)}</div>
                             <p className="mt-1">{comment.content}</p>
                           </div>
-                        </div>)}
-                    </div> : <div aria-live="polite">No comments yet. Be the first to comment!</div>}
+                        </div>
+                      ))}
+                      {comments.length > visibleComments && (
+                        <Button 
+                          variant="outline" 
+                          className="w-full mt-4" 
+                          onClick={() => setVisibleComments(prev => prev + 5)}
+                        >
+                          Load More Comments
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    <div aria-live="polite">No comments yet. Be the first to comment!</div>
+                  )}
                 </TabsContent>
                 
                 <TabsContent value="links" className="mt-2">
@@ -890,13 +923,24 @@ const ScammerDetailPage = () => {
                       </div>
                       
                       <BountyContributionList 
-                        contributions={bountyContributions} 
+                        contributions={bountyContributions.slice(0, visibleContributions)} 
                         totalCount={totalContributions} 
                         currentPage={contributionsPage} 
                         itemsPerPage={contributionsPerPage} 
                         onPageChange={handlePageChange} 
-                        isLoading={isLoadingBountyContributions} 
+                        isLoading={isLoadingBountyContributions}
+                        userContributionAmount={userContributionAmount}
                       />
+                      
+                      {bountyContributions.length > visibleContributions && (
+                        <Button 
+                          variant="outline" 
+                          className="w-full mt-4" 
+                          onClick={() => setVisibleContributions(prev => prev + 5)}
+                        >
+                          Load More Contributions
+                        </Button>
+                      )}
                     </div>
                   </>
                 )}
