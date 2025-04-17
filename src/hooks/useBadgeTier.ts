@@ -29,7 +29,15 @@ export const useBadgeTier = (walletAddressOrBalance: string | number | null): Ba
 
       // If a string is passed, treat it as wallet address
       try {
-        // First check if this wallet has any delegated badges
+        // First check the wallet's own SEC balance
+        const profile = await getProfileByWallet(walletAddressOrBalance);
+        let ownBadgeInfo: BadgeInfo | null = null;
+        
+        if (profile?.sec_balance !== null && profile?.sec_balance !== undefined && profile.sec_balance >= MIN_SEC_FOR_BADGE) {
+          ownBadgeInfo = calculateBadgeTier(profile.sec_balance);
+        }
+        
+        // Check if this wallet has any delegated badges
         const delegations = await getDelegatedBadges(walletAddressOrBalance);
         if (delegations.length > 0) {
           // Find a delegation where this wallet is the delegated wallet
@@ -38,25 +46,30 @@ export const useBadgeTier = (walletAddressOrBalance: string | number | null): Ba
           if (delegation) {
             // Get the delegator's profile to use their SEC balance
             const delegatorProfile = await getProfileByWallet(delegation.delegator_wallet);
-            if (delegatorProfile?.sec_balance) {
+            if (delegatorProfile?.sec_balance && delegatorProfile.sec_balance >= MIN_SEC_FOR_BADGE) {
               const delegatedBadgeInfo = calculateBadgeTier(delegatorProfile.sec_balance);
-              setBadgeInfo(delegatedBadgeInfo);
-              return;
+              
+              // If the user has their own badge, compare the tiers
+              if (ownBadgeInfo) {
+                // Get tier indices for comparison (higher index = higher tier)
+                const ownTierIndex = Object.values(ownBadgeInfo.tier).indexOf(ownBadgeInfo.tier);
+                const delegatedTierIndex = Object.values(delegatedBadgeInfo.tier).indexOf(delegatedBadgeInfo.tier);
+                
+                // Use the higher tier badge
+                setBadgeInfo(ownTierIndex >= delegatedTierIndex ? ownBadgeInfo : delegatedBadgeInfo);
+                return;
+              } else {
+                // If user has no own badge, use the delegated one
+                setBadgeInfo(delegatedBadgeInfo);
+                return;
+              }
             }
           }
         }
 
-        // If no valid delegation found, fall back to the wallet's own SEC balance
-        const profile = await getProfileByWallet(walletAddressOrBalance);
-        if (profile?.sec_balance !== null && profile?.sec_balance !== undefined) {
-          if (profile.sec_balance < MIN_SEC_FOR_BADGE) {
-            setBadgeInfo(null);
-            return;
-          }
-          
-          const calculatedBadgeInfo = calculateBadgeTier(profile.sec_balance);
-          setBadgeInfo(calculatedBadgeInfo);
-        }
+        // If we got here, either there's no valid delegation or the user's own badge is higher
+        // Fall back to the wallet's own SEC balance if available
+        setBadgeInfo(ownBadgeInfo);
       } catch (error) {
         console.error("Error calculating badge tier:", error);
         setBadgeInfo(null);
