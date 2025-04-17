@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -64,6 +65,13 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   const [editContent, setEditContent] = useState('');
   const [editingAnnouncementId, setEditingAnnouncementId] = useState<string | null>(null);
   
+  // First, get the announcement data
+  const { data: announcements = [], refetch, isLoading } = useQuery({
+    queryKey: ['announcements'],
+    queryFn: getAnnouncements,
+  });
+  
+  // Next, check admin status and set permissions
   useEffect(() => {
     if (profile?.username) {
       const adminStatus = isAdmin(profile.username);
@@ -86,15 +94,15 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
     } else {
       setIsUserAdmin(false);
     }
-
-    const isWhale = badgeInfo?.tier === BadgeTier.Whale;
-    setCanCreateAnnouncements(isUserAdminState || isWhale);
-  }, [profile?.username, isUserAdminState, badgeInfo]);
+  }, [profile?.username]);
   
-  const { data: announcements = [], refetch, isLoading } = useQuery({
-    queryKey: ['announcements'],
-    queryFn: getAnnouncements,
-  });
+  // Separately check for Whale badge and admin status to set permissions
+  useEffect(() => {
+    const isWhale = badgeInfo?.tier === BadgeTier.Whale;
+    const hasPermission = isUserAdminState || isWhale;
+    console.log(`Setting permissions - Admin: ${isUserAdminState}, Whale: ${isWhale}, Can Create: ${hasPermission}`);
+    setCanCreateAnnouncements(hasPermission);
+  }, [isUserAdminState, badgeInfo]);
   
   useEffect(() => {
     const loadUserVotes = async () => {
@@ -566,28 +574,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   
   return (
     <div className="space-y-6">
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search announcements..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9"
-        />
-      </div>
-      
-      {filteredAnnouncements.length === 0 && searchQuery !== '' && (
-        <Card className="bg-muted/50">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-xl font-medium text-center">No Matching Announcements</h3>
-            <p className="text-muted-foreground text-center mt-1">
-              No announcements match your search query "{searchQuery}"
-            </p>
-          </CardContent>
-        </Card>
-      )}
-      
+      {/* Admin/Whale Tools Section - Render this FIRST */}
       {(isUserAdminState || badgeInfo?.tier === BadgeTier.Whale) && (
         <Card>
           <CardHeader className="pb-3">
@@ -637,6 +624,30 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         </Card>
       )}
       
+      {/* Search Bar Section - Render this SECOND */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search announcements..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9"
+        />
+      </div>
+      
+      {filteredAnnouncements.length === 0 && searchQuery !== '' && (
+        <Card className="bg-muted/50">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-xl font-medium text-center">No Matching Announcements</h3>
+            <p className="text-muted-foreground text-center mt-1">
+              No announcements match your search query "{searchQuery}"
+            </p>
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Announcements Section - Render this LAST */}
       {useCarousel ? (
         <>
           <Carousel className="w-full">
