@@ -33,7 +33,6 @@ const BadgeDelegation: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [availableUsers, setAvailableUsers] = useState<{ display_name: string; wallet_address: string; username?: string }[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [commandKey, setCommandKey] = useState(Date.now());
 
   const loadDelegations = async () => {
     if (!profile?.wallet_address) return;
@@ -145,14 +144,20 @@ const BadgeDelegation: React.FC = () => {
     setSearchQuery(value);
   };
 
-  // Reset command component when popover opens to avoid stale state
+  // Reset search when popover opens/closes
   const handleOpenChange = (newOpen: boolean) => {
-    if (newOpen) {
-      setCommandKey(Date.now()); // Force remount Command component
-      setSearchQuery(''); // Clear previous search
-      setAvailableUsers([]); // Clear previous results
-    }
     setOpen(newOpen);
+    if (!newOpen) {
+      // When closing, wait a bit before clearing search to avoid flicker
+      setTimeout(() => {
+        setSearchQuery('');
+        setAvailableUsers([]);
+      }, 100);
+    } else {
+      // Clear immediately when opening
+      setSearchQuery('');
+      setAvailableUsers([]);
+    }
   };
 
   return (
@@ -189,47 +194,45 @@ const BadgeDelegation: React.FC = () => {
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="p-0 w-full">
-                {open && (
-                  <Command key={commandKey}>
-                    <CommandInput 
-                      placeholder="Search by username or display name..." 
-                      onValueChange={handleSearchChange}
-                      value={searchQuery}
-                    />
-                    {isSearching ? (
-                      <div className="py-6 text-center text-sm">Searching...</div>
-                    ) : (
-                      <>
-                        <CommandEmpty>
-                          {searchQuery.length < 2 ? "Type at least 2 characters" : "No user found"}
-                        </CommandEmpty>
-                        {availableUsers.length > 0 && (
-                          <CommandGroup>
-                            {availableUsers.map((user) => (
-                              <CommandItem
-                                key={user.wallet_address}
-                                value={user.wallet_address}
-                                onSelect={() => {
-                                  setSelectedUser(user.wallet_address);
-                                  setSelectedUserName(user.display_name || user.username || user.wallet_address);
-                                  setOpen(false);
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    selectedUser === user.wallet_address ? "opacity-100" : "opacity-0"
-                                  )}
-                                />
-                                {user.display_name || "Unnamed User"} {user.username ? `(@${user.username})` : ""}
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        )}
-                      </>
-                    )}
-                  </Command>
-                )}
+                <Command>
+                  <CommandInput 
+                    placeholder="Search by username or display name..." 
+                    onValueChange={handleSearchChange}
+                    value={searchQuery}
+                  />
+                  {isSearching ? (
+                    <div className="py-6 text-center text-sm">Searching...</div>
+                  ) : (
+                    <>
+                      <CommandEmpty>
+                        {searchQuery.length < 2 ? "Type at least 2 characters" : "No user found"}
+                      </CommandEmpty>
+                      {availableUsers && availableUsers.length > 0 && (
+                        <CommandGroup>
+                          {availableUsers.map((user) => (
+                            <CommandItem
+                              key={user.wallet_address}
+                              value={user.wallet_address}
+                              onSelect={() => {
+                                setSelectedUser(user.wallet_address);
+                                setSelectedUserName(user.display_name || user.username || user.wallet_address);
+                                setOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  selectedUser === user.wallet_address ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              {user.display_name || "Unnamed User"} {user.username ? `(@${user.username})` : ""}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      )}
+                    </>
+                  )}
+                </Command>
               </PopoverContent>
             </Popover>
             <Button 
