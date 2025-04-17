@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -101,6 +102,7 @@ export const addBadgeDelegation = async (delegatedWallet: string, delegatorWalle
 };
 
 export const removeBadgeDelegation = async (delegatedWallet: string, delegatorWallet: string): Promise<void> => {
+  // Use delete operation instead of updating 'active' flag to fully remove the delegation
   const { error } = await supabase
     .from('delegated_badges')
     .delete()

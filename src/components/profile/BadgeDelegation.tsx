@@ -72,12 +72,7 @@ const BadgeDelegation: React.FC = () => {
         if (profileError) throw profileError;
         setDelegationLimit(profileData?.delegation_limit || 0);
 
-        const delegationsData = await getDelegatedBadges(profile.wallet_address);
-        const activeDelegations = delegationsData.filter(d => 
-          d.delegator_wallet === profile.wallet_address && d.active
-        );
-        setCurrentDelegations(activeDelegations.length);
-        setDelegations(activeDelegations);
+        await loadDelegations();
       } catch (error) {
         console.error('Error loading delegation info:', error);
         toast({
@@ -89,10 +84,6 @@ const BadgeDelegation: React.FC = () => {
     };
     
     loadDelegationInfo();
-  }, [profile?.wallet_address]);
-
-  useEffect(() => {
-    loadDelegations();
   }, [profile?.wallet_address]);
 
   useEffect(() => {
@@ -217,6 +208,8 @@ const BadgeDelegation: React.FC = () => {
         title: 'Success',
         description: 'Badge delegation removed successfully',
       });
+      
+      // Force refresh delegations list and count
       await loadDelegations();
     } catch (error) {
       console.error('Error removing delegation:', error);
