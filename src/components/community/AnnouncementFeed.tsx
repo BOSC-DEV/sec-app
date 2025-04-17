@@ -41,7 +41,7 @@ import SurveyDisplay from './SurveyDisplay';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { formatTimeAgo } from '@/utils/formatTime';
-import { useBadgeTier } from '@/hooks/useBadgeTier';
+import { useBadgeTier } from '@/hooks/use-badge-tier';
 import { isAdmin } from '@/utils/adminUtils';
 import { BadgeTier } from '@/utils/badgeUtils';
 

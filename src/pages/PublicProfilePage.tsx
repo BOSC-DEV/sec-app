@@ -23,6 +23,7 @@ import { useBadgeTier } from '@/hooks/useBadgeTier';
 import BadgeTier from '@/components/profile/BadgeTier';
 import { useIsMobile } from '@/hooks/use-mobile';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
+
 const PublicProfilePage = () => {
   const {
     username,
@@ -468,4 +469,5 @@ const PublicProfilePage = () => {
       </>
     </HelmetProvider>;
 };
+
 export default PublicProfilePage;

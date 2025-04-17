@@ -4,22 +4,36 @@ import { calculateBadgeTier, BadgeInfo, MIN_SEC_FOR_BADGE } from '@/utils/badgeU
 import { getDelegatedBadges } from '@/services/badgeDelegationService';
 import { getProfileByWallet } from '@/services/profileService';
 
-export const useBadgeTier = (walletAddress: string | null): BadgeInfo | null => {
+export const useBadgeTier = (walletAddressOrBalance: string | number | null): BadgeInfo | null => {
   const [badgeInfo, setBadgeInfo] = useState<BadgeInfo | null>(null);
   
   useEffect(() => {
     const fetchBadgeInfo = async () => {
-      if (!walletAddress) {
+      // If null is passed, reset badge info
+      if (walletAddressOrBalance === null) {
         setBadgeInfo(null);
         return;
       }
 
+      // If a number is passed, treat it as direct SEC balance
+      if (typeof walletAddressOrBalance === 'number') {
+        if (walletAddressOrBalance < MIN_SEC_FOR_BADGE) {
+          setBadgeInfo(null);
+          return;
+        }
+        
+        const calculatedBadgeInfo = calculateBadgeTier(walletAddressOrBalance);
+        setBadgeInfo(calculatedBadgeInfo);
+        return;
+      }
+
+      // If a string is passed, treat it as wallet address
       try {
         // First check if this wallet has any delegated badges
-        const delegations = await getDelegatedBadges(walletAddress);
+        const delegations = await getDelegatedBadges(walletAddressOrBalance);
         if (delegations.length > 0) {
           // Find a delegation where this wallet is the delegated wallet
-          const delegation = delegations.find(d => d.delegated_wallet === walletAddress && d.active);
+          const delegation = delegations.find(d => d.delegated_wallet === walletAddressOrBalance && d.active);
           
           if (delegation) {
             // Get the delegator's profile to use their SEC balance
@@ -33,7 +47,7 @@ export const useBadgeTier = (walletAddress: string | null): BadgeInfo | null => 
         }
 
         // If no valid delegation found, fall back to the wallet's own SEC balance
-        const profile = await getProfileByWallet(walletAddress);
+        const profile = await getProfileByWallet(walletAddressOrBalance);
         if (profile?.sec_balance !== null && profile?.sec_balance !== undefined) {
           if (profile.sec_balance < MIN_SEC_FOR_BADGE) {
             setBadgeInfo(null);
@@ -50,7 +64,7 @@ export const useBadgeTier = (walletAddress: string | null): BadgeInfo | null => 
     };
 
     fetchBadgeInfo();
-  }, [walletAddress]);
+  }, [walletAddressOrBalance]);
   
   return badgeInfo;
 };
