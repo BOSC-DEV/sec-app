@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { addBadgeDelegation, getDelegatedBadges, removeBadgeDelegation } from '@/services/badgeDelegationService';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -59,17 +58,23 @@ const BadgeDelegation: React.FC = () => {
   // Search and load available users
   useEffect(() => {
     const searchUsers = async () => {
+      if (!searchQuery || searchQuery.length < 2) {
+        setAvailableUsers([]);
+        return;
+      }
+      
       try {
         const users = await getProfilesByDisplayName(searchQuery);
-        // Filter out users who already have delegations or have SEC balance
+        // Filter out users who already have delegations or have SEC balance or are the current user
         const filteredUsers = users.filter(user => 
           user.wallet_address !== profile?.wallet_address && 
           !delegations.some(d => d.delegated_wallet === user.wallet_address) &&
-          (!user.sec_balance || user.sec_balance === 0) // Only show users with no SEC balance
+          (!user.sec_balance || user.sec_balance === 0)
         );
         setAvailableUsers(filteredUsers);
       } catch (error) {
         console.error('Error searching users:', error);
+        setAvailableUsers([]);
       }
     };
     
@@ -162,28 +167,33 @@ const BadgeDelegation: React.FC = () => {
                     placeholder="Search by username or display name..." 
                     onValueChange={setSearchQuery}
                   />
-                  <CommandEmpty>No user found</CommandEmpty>
-                  <CommandGroup>
-                    {availableUsers.map((user) => (
-                      <CommandItem
-                        key={user.wallet_address}
-                        value={user.wallet_address}
-                        onSelect={() => {
-                          setSelectedUser(user.wallet_address);
-                          setSelectedUserName(user.display_name || user.username || user.wallet_address);
-                          setOpen(false);
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            selectedUser === user.wallet_address ? "opacity-100" : "opacity-0"
-                          )}
-                        />
-                        {user.display_name || "Unnamed User"} {user.username ? `(@${user.username})` : ""}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
+                  {availableUsers.length === 0 ? (
+                    <CommandEmpty>
+                      {searchQuery.length < 2 ? "Type at least 2 characters" : "No user found"}
+                    </CommandEmpty>
+                  ) : (
+                    <CommandGroup>
+                      {availableUsers.map((user) => (
+                        <CommandItem
+                          key={user.wallet_address}
+                          value={user.wallet_address}
+                          onSelect={() => {
+                            setSelectedUser(user.wallet_address);
+                            setSelectedUserName(user.display_name || user.username || user.wallet_address);
+                            setOpen(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              selectedUser === user.wallet_address ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {user.display_name || "Unnamed User"} {user.username ? `(@${user.username})` : ""}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  )}
                 </Command>
               </PopoverContent>
             </Popover>
@@ -202,8 +212,7 @@ const BadgeDelegation: React.FC = () => {
             ) : (
               <div className="space-y-2">
                 {delegations.map((delegation) => {
-                  const delegatedUser = availableUsers.find(u => u.wallet_address === delegation.delegated_wallet);
-                  const displayName = delegatedUser?.display_name || delegation.display_name || delegation.delegated_wallet;
+                  const displayName = delegation.display_name || delegation.delegated_wallet;
                   return (
                     <div key={delegation.delegated_wallet} className="flex items-center justify-between p-2 border rounded">
                       <span className="text-sm">{displayName}</span>
