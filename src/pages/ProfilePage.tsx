@@ -179,7 +179,7 @@ const ProfilePage = () => {
             </TabsList>
             
             <TabsContent value="profile">
-              <div className="flex justify-center mb-6 py-[30px]">
+              <div className="flex justify-center mb-6 py-[50px]">
                 <div className="relative group">
                   <Avatar className="h-24 w-24 cursor-pointer" key={avatarKey}>
                     {avatarUrl ? <AvatarImage src={`${avatarUrl}${avatarUrl.includes('?') ? '&' : '?'}v=${avatarKey}`} alt="Profile" /> : <AvatarFallback className="bg-icc-blue text-white text-xl">
