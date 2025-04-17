@@ -1,5 +1,5 @@
-
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface DelegatedBadge {
   id: string;
@@ -48,7 +48,6 @@ export const getDelegatedBadges = async (walletAddress: string): Promise<Delegat
       });
     } catch (err) {
       console.error('Error fetching delegation display names:', err);
-      // Return original data if there was an error fetching display names
       return data;
     }
   }
@@ -57,19 +56,47 @@ export const getDelegatedBadges = async (walletAddress: string): Promise<Delegat
 };
 
 export const addBadgeDelegation = async (delegatedWallet: string, delegatorWallet: string): Promise<void> => {
-  const { error } = await supabase
-    .from('delegated_badges')
-    .insert([
-      {
+  try {
+    // First, check how many active delegations the delegator has
+    const { data: existingDelegations, error: delegationError } = await supabase
+      .from('delegated_badges')
+      .select('*')
+      .eq('delegator_wallet', delegatorWallet)
+      .eq('active', true);
+
+    if (delegationError) throw delegationError;
+
+    // Get the delegator's profile to check their delegation limit
+    const { data: delegatorProfile, error: profileError } = await supabase
+      .from('profiles')
+      .select('delegation_limit')
+      .eq('wallet_address', delegatorWallet)
+      .single();
+
+    if (profileError) throw profileError;
+
+    if (!delegatorProfile) {
+      throw new Error('Delegator profile not found');
+    }
+
+    if (existingDelegations.length >= delegatorProfile.delegation_limit) {
+      throw new Error(`You have reached your delegation limit of ${delegatorProfile.delegation_limit}`);
+    }
+
+    // If we haven't reached the limit, proceed with the delegation
+    const { error } = await supabase
+      .from('delegated_badges')
+      .insert([{
         delegator_wallet: delegatorWallet,
         delegated_wallet: delegatedWallet,
         active: true
-      }
-    ]);
+      }]);
 
-  if (error) {
+    if (error) throw error;
+
+  } catch (error: any) {
     console.error('Error adding badge delegation:', error);
-    throw error;
+    throw new Error(error.message || 'Failed to add badge delegation');
   }
 };
 

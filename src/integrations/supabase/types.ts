@@ -440,6 +440,7 @@ export type Database = {
         Row: {
           bio: string | null
           created_at: string
+          delegation_limit: number | null
           display_name: string
           id: string
           points: number | null
@@ -453,6 +454,7 @@ export type Database = {
         Insert: {
           bio?: string | null
           created_at?: string
+          delegation_limit?: number | null
           display_name: string
           id: string
           points?: number | null
@@ -466,6 +468,7 @@ export type Database = {
         Update: {
           bio?: string | null
           created_at?: string
+          delegation_limit?: number | null
           display_name?: string
           id?: string
           points?: number | null

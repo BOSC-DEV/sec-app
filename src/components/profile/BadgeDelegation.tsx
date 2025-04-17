@@ -24,6 +24,7 @@ import { Check, ChevronsUpDown, UserPlus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Profile } from '@/types/dataTypes';
 import ErrorBoundary from "@/components/common/ErrorBoundary";
+import { supabase } from '@/lib/supabase';
 
 const BadgeDelegation: React.FC = () => {
   const { profile } = useProfile();
@@ -35,22 +36,40 @@ const BadgeDelegation: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [availableUsers, setAvailableUsers] = useState<Profile[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [delegationLimit, setDelegationLimit] = useState<number>(0);
+  const [currentDelegations, setCurrentDelegations] = useState<number>(0);
 
-  const loadDelegations = async () => {
-    if (!profile?.wallet_address) return;
-    try {
-      const data = await getDelegatedBadges(profile.wallet_address);
-      const filteredDelegations = data.filter(d => d.delegator_wallet === profile.wallet_address);
-      setDelegations(filteredDelegations);
-    } catch (error) {
-      console.error('Error loading delegations:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load badge delegations. Please try again.',
-        variant: 'destructive',
-      });
-    }
-  };
+  useEffect(() => {
+    const loadDelegationInfo = async () => {
+      if (!profile?.wallet_address) return;
+      try {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('delegation_limit')
+          .eq('wallet_address', profile.wallet_address)
+          .single();
+
+        if (profileError) throw profileError;
+        setDelegationLimit(profileData?.delegation_limit || 0);
+
+        const delegationsData = await getDelegatedBadges(profile.wallet_address);
+        const activeDelegations = delegationsData.filter(d => 
+          d.delegator_wallet === profile.wallet_address && d.active
+        );
+        setCurrentDelegations(activeDelegations.length);
+        setDelegations(activeDelegations);
+      } catch (error) {
+        console.error('Error loading delegation info:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load delegation information',
+          variant: 'destructive',
+        });
+      }
+    };
+    
+    loadDelegationInfo();
+  }, [profile?.wallet_address]);
 
   useEffect(() => {
     loadDelegations();
@@ -166,6 +185,11 @@ const BadgeDelegation: React.FC = () => {
           <CardTitle>Badge Delegation</CardTitle>
           <CardDescription>
             Allow other users to display your {currentBadge?.tier} badge
+            {delegationLimit > 0 && (
+              <div className="mt-1 text-sm text-muted-foreground">
+                Delegation limit: {currentDelegations} / {delegationLimit}
+              </div>
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent>
