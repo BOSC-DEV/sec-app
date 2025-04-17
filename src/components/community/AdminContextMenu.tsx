@@ -29,7 +29,6 @@ const AdminContextMenu: React.FC<AdminContextMenuProps> = ({
 }) => {
   const handleBanUser = () => {
     if (authorUsername && onBanUser) {
-      console.log(`Banning user: ${authorUsername}`);
       banUser(authorUsername);
       toast({
         title: "User banned",

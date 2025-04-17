@@ -1,7 +1,7 @@
 
 import { toast } from "@/hooks/use-toast";
 
-export const ADMIN_USERNAMES = ['sec', 'thesec', 'willy'];
+export const ADMIN_USERNAMES = ['sec', 'thesec'];
 
 export const BANNED_USERNAMES: string[] = [];
 
@@ -10,9 +10,7 @@ export const getAdminList = (): string[] => {
 };
 
 export const isAdmin = (username: string): boolean => {
-  if (!username) return false;
-  console.log(`Checking if ${username} is an admin`);
-  return ADMIN_USERNAMES.some(admin => admin.toLowerCase() === username.toLowerCase());
+  return ADMIN_USERNAMES.includes(username);
 };
 
 export const isBanned = (username: string): boolean => {
@@ -37,14 +35,7 @@ export type SurveyVote = {
   userId: string;
   optionIndex: number;
   badgeTier: string;
-};
-
-// Required minimum badge tier to vote in surveys
-export const MINIMUM_VOTING_BADGE = 'Shrimp';
-
-// Check if a user can vote based on their badge tier
-export const canVoteInSurvey = (badgeTier: string | null): boolean => {
-  return !!badgeTier; // Any badge holder (including Shrimp) can vote
+  timestamp: string;
 };
 
 export const validateSurvey = (
@@ -69,4 +60,12 @@ export const validateSurvey = (
   }
   
   return { valid: true, message: "" };
+};
+
+// Required minimum badge tier to vote in surveys
+export const MINIMUM_VOTING_BADGE = 'Shrimp';
+
+// Check if a user can vote based on their badge tier
+export const canVoteInSurvey = (badgeTier: string | null): boolean => {
+  return !!badgeTier; // Any badge holder (including Shrimp) can vote
 };

@@ -42,7 +42,12 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { formatTimeAgo } from '@/utils/formatTime';
 import { useBadgeTier } from '@/hooks/useBadgeTier';
-import { isAdmin } from '@/utils/adminUtils';
+
+const ADMIN_USERNAMES = ['sec', 'thesec'];
+
+interface AnnouncementFeedProps {
+  useCarousel?: boolean;
+}
 
 const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false }) => {
   const { profile, isConnected } = useProfile();
@@ -51,7 +56,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   const [isSurveySubmitting, setIsSurveySubmitting] = useState(false);
   const [viewedAnnouncements, setViewedAnnouncements] = useState<Set<string>>(new Set());
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isUserAdmin, setIsUserAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [announcementTab, setAnnouncementTab] = useState<'post' | 'survey'>('post');
   const [userSurveyVotes, setUserSurveyVotes] = useState<Record<string, number>>({});
@@ -63,27 +68,16 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   const [editingAnnouncementId, setEditingAnnouncementId] = useState<string | null>(null);
   
   useEffect(() => {
-    if (profile?.username) {
-      const adminStatus = isAdmin(profile.username);
-      console.log(`User ${profile.username} admin status: ${adminStatus}`);
-      setIsUserAdmin(adminStatus);
-      
-      const checkAdmin = async () => {
-        if (!adminStatus && profile?.username) {
-          try {
-            const serverAdminStatus = await isUserAdmin(profile.username);
-            console.log(`Server admin check for ${profile.username}: ${serverAdminStatus}`);
-            setIsUserAdmin(prevStatus => prevStatus || serverAdminStatus);
-          } catch (error) {
-            console.error('Error checking admin status:', error);
-          }
-        }
-      };
-      
-      checkAdmin();
-    } else {
-      setIsUserAdmin(false);
-    }
+    const checkAdmin = async () => {
+      if (profile?.username) {
+        const admin = await isUserAdmin(profile.username);
+        setIsAdmin(admin);
+      } else {
+        setIsAdmin(false);
+      }
+    };
+    
+    checkAdmin();
   }, [profile?.username]);
   
   const { data: announcements = [], refetch, isLoading } = useQuery({
@@ -166,7 +160,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!isUserAdmin) {
+    if (!isAdmin) {
       toast({
         title: "Unauthorized",
         description: "Only admins can post announcements",
@@ -231,7 +225,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   };
   
   const handleCreateSurvey = async (title: string, options: string[]) => {
-    if (!isUserAdmin) {
+    if (!isAdmin) {
       toast({
         title: "Unauthorized",
         description: "Only admins can create surveys",
@@ -339,7 +333,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   };
   
   const handleDeleteAnnouncement = async (id: string) => {
-    if (!isUserAdmin) return;
+    if (!isAdmin) return;
     
     try {
       const success = await deleteAnnouncement(id);
@@ -370,7 +364,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   };
   
   const handleEditAnnouncement = async () => {
-    if (!editingAnnouncementId || !isUserAdmin) return;
+    if (!editingAnnouncementId || !isAdmin) return;
     
     try {
       const updated = await editAnnouncement(editingAnnouncementId, editContent);
@@ -541,14 +535,14 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
           
           <AnnouncementReplies 
             announcementId={announcement.id} 
-            isAdmin={isUserAdmin} 
+            isAdmin={isAdmin} 
             refetch={refetch}
           />
         </CardFooter>
       </Card>
     );
     
-    return isUserAdmin ? (
+    return isAdmin ? (
       <AdminContextMenu 
         key={announcement.id}
         onEdit={() => openEditDialog(announcement)}
@@ -583,7 +577,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         </Card>
       )}
       
-      {isUserAdmin && (
+      {isAdmin && (
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center">
@@ -678,9 +672,5 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
     </div>
   );
 };
-
-interface AnnouncementFeedProps {
-  useCarousel?: boolean;
-}
 
 export default AnnouncementFeed;
