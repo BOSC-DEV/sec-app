@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { handleError, ErrorSeverity } from '@/utils/errorHandling';
 
 interface DelegatedBadge {
   id: string;
@@ -104,22 +105,39 @@ export const addBadgeDelegation = async (delegatedWallet: string, delegatorWalle
 export const removeBadgeDelegation = async (delegatedWallet: string, delegatorWallet: string): Promise<void> => {
   console.log(`Removing delegation: delegated=${delegatedWallet}, delegator=${delegatorWallet}`);
   
-  // Use delete operation to fully remove the delegation
-  const { error, count } = await supabase
-    .from('delegated_badges')
-    .delete()
-    .eq('delegator_wallet', delegatorWallet)
-    .eq('delegated_wallet', delegatedWallet)
-    .select('count');
+  try {
+    // Use delete operation but without the count select which is causing the error
+    const { error } = await supabase
+      .from('delegated_badges')
+      .delete()
+      .eq('delegator_wallet', delegatorWallet)
+      .eq('delegated_wallet', delegatedWallet);
 
-  console.log(`Deletion result: count=${count}, error=${error ? JSON.stringify(error) : 'none'}`);
-
-  if (error) {
-    console.error('Error removing badge delegation:', error);
+    if (error) {
+      console.error('Error removing badge delegation:', error);
+      throw error;
+    }
+    
+    // Check if the delegation was actually removed by fetching it after deletion
+    const { data: remainingDelegation } = await supabase
+      .from('delegated_badges')
+      .select('*')
+      .eq('delegator_wallet', delegatorWallet)
+      .eq('delegated_wallet', delegatedWallet)
+      .eq('active', true);
+      
+    if (remainingDelegation && remainingDelegation.length > 0) {
+      console.warn('Delegation still exists after attempted deletion:', remainingDelegation);
+      throw new Error('Failed to remove delegation, it still exists');
+    } else {
+      console.log('Delegation successfully removed');
+    }
+  } catch (error) {
+    handleError(error, {
+      fallbackMessage: 'Failed to remove badge delegation',
+      severity: ErrorSeverity.MEDIUM,
+      context: 'Badge Delegation Removal'
+    });
     throw error;
-  }
-  
-  if (count === 0) {
-    console.warn('No delegations were removed, record may not exist');
   }
 };
