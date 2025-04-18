@@ -29,17 +29,17 @@ export const isAdmin = async (username: string): Promise<boolean> => {
 
   // If not in hardcoded list, check database
   try {
-    const { data: isDbAdmin, error } = await supabase
-      .rpc('is_admin', { username_param: username.toLowerCase() })
-      .single();
-
+    // Use a direct function call that returns boolean
+    const { data, error } = await supabase
+      .rpc('is_admin', { username_param: username.toLowerCase() });
+    
     if (error) {
       console.error('Error checking admin status in database:', error);
       return false;
     }
 
-    console.log(`Database admin check for ${username}:`, isDbAdmin);
-    return isDbAdmin || false;
+    console.log(`Database admin check for ${username}:`, data);
+    return !!data;
   } catch (error) {
     console.error('Error in isAdmin check:', error);
     return false;
