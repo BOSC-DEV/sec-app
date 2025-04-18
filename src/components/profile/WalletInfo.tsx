@@ -29,61 +29,30 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
     delegator_username?: string;
     display_name?: string;
   } | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [forceRefresh, setForceRefresh] = useState(0); // Add a counter to force refresh
 
   useEffect(() => {
     const loadDelegationInfo = async () => {
-      if (!walletAddress) {
-        setDelegationInfo(null);
-        return;
-      }
+      if (!walletAddress) return;
       
-      setIsLoading(true);
       try {
-        // Add the forceRefresh counter to the log to confirm we're getting fresh data
-        console.log(`Loading delegation info for ${walletAddress} (refresh #${forceRefresh})`);
-        
-        // Force fresh data every time
         const delegations = await getDelegatedBadges(walletAddress);
-        
-        // Find if this wallet is delegated a badge from someone - only active delegations
-        const delegation = delegations.find(d => d.delegated_wallet === walletAddress && d.active === true);
+        // Find if this wallet is delegated a badge from someone
+        const delegation = delegations.find(d => d.delegated_wallet === walletAddress && d.active);
         
         if (delegation) {
-          console.log('Found active delegation:', delegation);
           setDelegationInfo({
             delegator_wallet: delegation.delegator_wallet,
             delegator_username: delegation.delegator_username,
             display_name: delegation.display_name
           });
-        } else {
-          // Clear delegation info if no active delegation is found
-          console.log('No active delegation found for wallet:', walletAddress);
-          setDelegationInfo(null);
         }
       } catch (error) {
         console.error('Error loading delegation info:', error);
-        // On error, clear delegation info to avoid showing stale data
-        setDelegationInfo(null);
-      } finally {
-        setIsLoading(false);
       }
     };
     
     loadDelegationInfo();
-    
-    // Set up a refresh interval to check for delegation changes very frequently
-    const intervalId = setInterval(() => {
-      // Increment the force refresh counter to ensure we're not getting cached data
-      setForceRefresh(prev => prev + 1);
-      loadDelegationInfo();
-    }, 1000); // Check every 1 second for more immediate updates
-    
-    return () => {
-      clearInterval(intervalId); // Clean up the interval when the component unmounts
-    };
-  }, [walletAddress, forceRefresh]);
+  }, [walletAddress]);
 
   const copyWalletAddress = () => {
     if (walletAddress) {
