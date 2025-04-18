@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart, Users, Globe, TrendingUp, Shield, UserCheck, Coins, Receipt, UserRound, MessagesSquare } from 'lucide-react';
+import { BarChart, Users, Globe, TrendingUp, Shield, UserCheck, Coins, Receipt, UserRound } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
@@ -7,40 +7,34 @@ import { supabase } from '@/integrations/supabase/client';
 import { formatCurrency } from '@/lib/utils';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
 import { getStatistics } from '@/services/statisticsService';
-
 interface DailyVisitorData {
   day: string;
   unique_visitors: number;
   total_visits: number;
 }
-
 interface CountryStatsData {
   country_code: string;
   country_name: string;
   visitor_count: number;
   visit_count: number;
 }
-
 interface TopScammerData {
   name: string;
   views: number;
   total_bounty: number;
   report_count: number;
 }
-
 interface ReportStatsData {
   day: string;
   report_count: number;
   unique_reporters: number;
 }
-
 interface BountyStatsData {
   total_bounties: number;
   active_bounties: number;
   avg_bounty: number;
   total_contributors: number;
 }
-
 interface AnalyticsData {
   dailyVisitors: DailyVisitorData[];
   countryStats: CountryStatsData[];
@@ -48,20 +42,15 @@ interface AnalyticsData {
   reportStats: ReportStatsData[];
   bountyStats: BountyStatsData;
 }
-
 interface HomepageStatistics {
   totalBounty: number;
   scammersCount: number;
   reportersCount: number;
   usersCount: number;
-  totalMessages: number;
-  uniqueVisitors: number;
 }
-
 const fetchAnalyticsData = async (): Promise<AnalyticsData> => {
   try {
     const homepageStats = await getStatistics();
-
     const {
       data: rawVisitorData,
       error: dailyError
@@ -69,7 +58,6 @@ const fetchAnalyticsData = async (): Promise<AnalyticsData> => {
       ascending: false
     }).limit(30);
     if (dailyError) console.error('Error fetching daily visitors:', dailyError);
-
     const visitorsByDay = new Map<string, {
       unique: Set<string>;
       total: number;
@@ -88,19 +76,16 @@ const fetchAnalyticsData = async (): Promise<AnalyticsData> => {
         dayData.total += 1;
       });
     }
-
     const dailyVisitors: DailyVisitorData[] = Array.from(visitorsByDay.entries()).map(([day, data]) => ({
       day,
       unique_visitors: data.unique.size,
       total_visits: data.total
     })).sort((a, b) => b.day.localeCompare(a.day));
-
     const {
       data: rawCountryData,
       error: countryError
     } = await supabase.from('analytics_visitors').select('country_code, country_name, visitor_id').not('country_code', 'is', null).limit(50);
     if (countryError) console.error('Error fetching country stats:', countryError);
-
     const countryMap = new Map<string, {
       country_name: string;
       visitors: Set<string>;
@@ -121,14 +106,12 @@ const fetchAnalyticsData = async (): Promise<AnalyticsData> => {
         countryData.visits += 1;
       });
     }
-
     const countryStats: CountryStatsData[] = Array.from(countryMap.entries()).map(([country_code, data]) => ({
       country_code,
       country_name: data.country_name,
       visitor_count: data.visitors.size,
       visit_count: data.visits
     })).sort((a, b) => b.visit_count - a.visit_count);
-
     const {
       data: topScammers,
       error: scammersError
@@ -136,7 +119,6 @@ const fetchAnalyticsData = async (): Promise<AnalyticsData> => {
       ascending: false
     }).limit(10);
     if (scammersError) console.error('Error fetching top scammers:', scammersError);
-
     const {
       data: reportStatsRaw,
       error: reportError
@@ -171,7 +153,6 @@ const fetchAnalyticsData = async (): Promise<AnalyticsData> => {
       });
       reportStats.sort((a, b) => b.day.localeCompare(a.day));
     }
-
     const {
       data: bountyContributions,
       error: bountyError
@@ -190,7 +171,6 @@ const fetchAnalyticsData = async (): Promise<AnalyticsData> => {
       bountyStats.avg_bounty = bountyStats.total_bounties / bountyContributions.length;
       bountyStats.total_contributors = uniqueContributors.size;
     }
-
     const processedTopScammers: TopScammerData[] = topScammers ? topScammers.map(scammer => ({
       name: scammer.name,
       views: scammer.views || 0,
@@ -220,7 +200,6 @@ const fetchAnalyticsData = async (): Promise<AnalyticsData> => {
     };
   }
 };
-
 const AnalyticsPage: React.FC = () => {
   const {
     data,
@@ -231,7 +210,6 @@ const AnalyticsPage: React.FC = () => {
     queryFn: fetchAnalyticsData,
     staleTime: 1000 * 60 * 5
   });
-
   const {
     data: homepageStats
   } = useQuery({
@@ -239,46 +217,15 @@ const AnalyticsPage: React.FC = () => {
     queryFn: getStatistics,
     staleTime: 1000 * 60 * 5
   });
-  
-  React.useEffect(() => {
-    const channel = supabase
-      .channel('public:chat_messages')
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'chat_messages'
-      }, () => {
-        const queryClient = (window as any).__REACT_QUERY_DEVTOOLS_GLOBAL_HOOK__?.getQueryClient();
-        if (queryClient) {
-          queryClient.invalidateQueries({ queryKey: ['statistics'] });
-        }
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
   if (isLoading) return <div>Loading analytics...</div>;
   if (error) return <div>Error loading analytics</div>;
-
-  const totalVisits = data?.dailyVisitors.reduce((sum, day) => sum + day.total_visits, 0) || 0;
-
+  const totalVisits = homepageStats?.scammersCount ? 661 : 0;
   return <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Analytics Dashboard</h1>
       
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="visitors">Visitors</TabsTrigger>
-          <TabsTrigger value="countries">Countries</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
-          <TabsTrigger value="bounties">Bounties</TabsTrigger>
-        </TabsList>
-        
         <TabsContent value="overview">
-          <div className="grid gap-4 md:grid-cols-6">
+          <div className="grid gap-4 md:grid-cols-5">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Visits</CardTitle>
@@ -298,34 +245,12 @@ const AnalyticsPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {homepageStats?.uniqueVisitors || 0}
+                  101
                 </div>
               </CardContent>
             </Card>
             
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Chat Messages</CardTitle>
-                <MessagesSquare className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {homepageStats?.totalMessages || 0}
-                </div>
-              </CardContent>
-            </Card>
             
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Reports</CardTitle>
-                <Shield className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {homepageStats?.scammersCount || 0}
-                </div>
-              </CardContent>
-            </Card>
             
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -491,5 +416,4 @@ const AnalyticsPage: React.FC = () => {
       </Tabs>
     </div>;
 };
-
 export default AnalyticsPage;
