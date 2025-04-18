@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,21 +8,18 @@ import { Gift, Search } from 'lucide-react';
 import { giftBadge, searchEligibleRecipients } from '@/services/badgeService';
 import { BadgeInfo } from '@/utils/badgeUtils';
 import { debounce } from 'lodash';
-
 interface Recipient {
   wallet_address: string;
   username?: string;
   display_name: string;
   profile_pic_url?: string;
 }
-
 interface BadgeGiftingProps {
   walletAddress: string;
   badgeInfo: BadgeInfo | null;
   delegationLimit: number;
   remainingDelegations: number;
 }
-
 const BadgeGifting: React.FC<BadgeGiftingProps> = ({
   walletAddress,
   badgeInfo,
@@ -43,39 +39,32 @@ const BadgeGifting: React.FC<BadgeGiftingProps> = ({
       walletAddress
     });
   }, [delegationLimit, remainingDelegations, walletAddress]);
-
-  const debouncedSearch = useCallback(
-    debounce(async (term: string) => {
-      if (term.trim().length > 2) {
-        try {
-          const results = await searchEligibleRecipients(term);
-          setRecipients(results);
-        } catch (error) {
-          toast({
-            title: 'Error',
-            description: 'Failed to search for recipients',
-            variant: 'destructive'
-          });
-        }
-      } else {
-        setRecipients([]);
+  const debouncedSearch = useCallback(debounce(async (term: string) => {
+    if (term.trim().length > 2) {
+      try {
+        const results = await searchEligibleRecipients(term);
+        setRecipients(results);
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: 'Failed to search for recipients',
+          variant: 'destructive'
+        });
       }
-    }, 300),
-    []
-  );
-
+    } else {
+      setRecipients([]);
+    }
+  }, 300), []);
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const term = e.target.value;
     setSearchTerm(term);
     debouncedSearch(term);
   };
-
   const handleSelectRecipient = (recipient: Recipient) => {
     setRecipientWallet(recipient.wallet_address);
     setSearchTerm(recipient.username || recipient.display_name);
     setRecipients([]);
   };
-
   const handleGiftBadge = async () => {
     if (!recipientWallet.trim()) {
       toast({
@@ -85,7 +74,6 @@ const BadgeGifting: React.FC<BadgeGiftingProps> = ({
       });
       return;
     }
-
     if (recipientWallet === walletAddress) {
       toast({
         title: "Error",
@@ -94,11 +82,12 @@ const BadgeGifting: React.FC<BadgeGiftingProps> = ({
       });
       return;
     }
-
     setIsLoading(true);
     try {
-      const { success, error } = await giftBadge(walletAddress, recipientWallet);
-      
+      const {
+        success,
+        error
+      } = await giftBadge(walletAddress, recipientWallet);
       if (success) {
         toast({
           title: "Success",
@@ -122,13 +111,10 @@ const BadgeGifting: React.FC<BadgeGiftingProps> = ({
       setIsLoading(false);
     }
   };
-
   if (!badgeInfo) {
     return null;
   }
-
-  return (
-    <Card className="mt-4">
+  return <Card className="mt-4">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <Gift className="h-5 w-5" />
@@ -141,50 +127,30 @@ const BadgeGifting: React.FC<BadgeGiftingProps> = ({
       <CardContent>
         <div className="space-y-4">
           <div>
-            <Badge variant="tier" className="mb-2">
-              {badgeInfo.icon} {badgeInfo.tier}
-            </Badge>
+            
           </div>
           <div className="relative">
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <Input
-                  placeholder="Search recipient by username or name"
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                  className="pr-10"
-                />
+                <Input placeholder="Search recipient by username or name" value={searchTerm} onChange={handleSearchChange} className="pr-10" />
                 <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               </div>
-              <Button 
-                onClick={handleGiftBadge} 
-                disabled={isLoading || remainingDelegations === 0 || !recipientWallet}
-              >
+              <Button onClick={handleGiftBadge} disabled={isLoading || remainingDelegations === 0 || !recipientWallet}>
                 {isLoading ? "Gifting..." : "Gift Badge"}
               </Button>
             </div>
-            {recipients.length > 0 && (
-              <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border rounded-md shadow-lg">
-                {recipients.map((recipient) => (
-                  <div 
-                    key={recipient.wallet_address}
-                    onClick={() => handleSelectRecipient(recipient)}
-                    className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center"
-                  >
+            {recipients.length > 0 && <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border rounded-md shadow-lg">
+                {recipients.map(recipient => <div key={recipient.wallet_address} onClick={() => handleSelectRecipient(recipient)} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center">
                     <div className="flex-1">
                       <div className="font-medium">
                         {recipient.username || recipient.display_name}
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  </div>)}
+              </div>}
           </div>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default BadgeGifting;
