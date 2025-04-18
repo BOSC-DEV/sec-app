@@ -14,6 +14,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useChatMessages } from '@/hooks/useChatMessages';
 import BadgeTier from '../profile/BadgeTier';
 import { useBadgeTier } from '@/hooks/useBadgeTier';
+import { ChatMessage } from '@/types/dataTypes';
 
 const LiveChat = () => {
   const { profile } = useProfile();
