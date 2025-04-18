@@ -673,7 +673,7 @@ const ScammerDetailPage = () => {
                   <div className="mb-4">
                     <Textarea placeholder="Write your comment here..." value={commentText} onChange={e => setCommentText(e.target.value)} aria-label="Comment text" />
                     <Button 
-                      className="mt-2 w-full md:w-auto" 
+                      className="mt-2 w-full" 
                       onClick={handleAddComment} 
                       disabled={addCommentMutation.isPending} 
                       aria-label="Add comment"
