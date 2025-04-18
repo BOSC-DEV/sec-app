@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -134,70 +133,12 @@ const BadgeDelegation: React.FC = () => {
   }, [searchQuery, delegations, profile?.wallet_address]);
 
   const handleAddDelegation = async () => {
-    if (!profile?.wallet_address || !selectedUser) {
-      toast({
-        title: 'Error',
-        description: 'Please select a user to delegate your badge to.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    const delegatorDelegations = await getDelegatedBadges(profile.wallet_address);
-    const isDelegated = delegatorDelegations.some(d => 
-      d.delegated_wallet === profile.wallet_address && 
-      d.active
-    );
-
-    if (isDelegated) {
-      const delegator = delegatorDelegations.find(d => 
-        d.delegated_wallet === profile.wallet_address && 
-        d.active
-      );
-
-      if (delegator) {
-        const { data: delegatorProfile } = await supabase
-          .from('profiles')
-          .select('sec_balance')
-          .eq('wallet_address', delegator.delegator_wallet)
-          .single();
-
-        const ownBadge = profile.sec_balance ? calculateBadgeTier(profile.sec_balance) : null;
-        const delegatorBadge = delegatorProfile?.sec_balance ? calculateBadgeTier(delegatorProfile.sec_balance) : null;
-
-        if (!ownBadge || !delegatorBadge || 
-            getBadgeTierRank(ownBadge.tier) <= getBadgeTierRank(delegatorBadge.tier)) {
-          toast({
-            title: 'Cannot Delegate',
-            description: 'You cannot delegate badges while using a delegated badge unless you have your own higher tier badge.',
-            variant: 'destructive',
-          });
-          return;
-        }
-      }
-    }
-    
-    setIsLoading(true);
-    try {
-      await addBadgeDelegation(selectedUser, profile.wallet_address);
-      toast({
-        title: 'Success',
-        description: 'Badge delegation added successfully',
-      });
-      setSelectedUser('');
-      setSelectedUserName('');
-      await loadDelegations();
-    } catch (error) {
-      console.error('Error adding delegation:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to add badge delegation. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-      setOpen(false);
-    }
+    toast({
+      title: "Under Maintenance",
+      description: "Badge delegation is temporarily unavailable. Please try again later.",
+      variant: "destructive",
+    });
+    return;
   };
 
   const handleRemoveDelegation = async (delegatedWallet: string) => {
