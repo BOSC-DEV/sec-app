@@ -37,6 +37,7 @@ import BountyForm from '@/components/scammer/BountyForm';
 import { ArrowLeftRight } from 'lucide-react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+
 const ScammerDetailPage = () => {
   const {
     id
@@ -66,8 +67,7 @@ const ScammerDetailPage = () => {
   const contributionsPerPage = 5;
   const [profileChangeCounter, setProfileChangeCounter] = useState(0);
   const isMobile = useIsMobile();
-  const [visibleComments, setVisibleComments] = useState(5);
-  const [visibleContributions, setVisibleContributions] = useState(5);
+
   useEffect(() => {
     const handleProfileUpdated = () => {
       console.log("Profile updated event received, refreshing contributions");
@@ -81,6 +81,7 @@ const ScammerDetailPage = () => {
       window.removeEventListener(PROFILE_UPDATED_EVENT, handleProfileUpdated);
     };
   }, [id, queryClient]);
+
   const deleteScammerMutation = useMutation({
     mutationFn: () => {
       if (!id) throw new Error("Scammer ID is required");
@@ -101,6 +102,7 @@ const ScammerDetailPage = () => {
       });
     }
   });
+
   const unarchiveScammerMutation = useMutation({
     mutationFn: () => {
       if (!id) throw new Error("Scammer ID is required");
@@ -123,6 +125,7 @@ const ScammerDetailPage = () => {
       });
     }
   });
+
   const {
     data: scammer,
     isLoading: isLoadingScammer,
@@ -132,6 +135,7 @@ const ScammerDetailPage = () => {
     queryFn: () => getScammerById(id || ''),
     enabled: !!id
   });
+
   const {
     data: comments,
     isLoading: isLoadingComments,
@@ -141,6 +145,7 @@ const ScammerDetailPage = () => {
     queryFn: () => getScammerComments(id || ''),
     enabled: !!id
   });
+
   const {
     data: bountyContributionsData,
     isLoading: isLoadingBountyContributions
@@ -150,6 +155,7 @@ const ScammerDetailPage = () => {
     enabled: !!id,
     placeholderData: previousData => previousData
   });
+
   const {
     data: userContributionAmount = 0,
     isLoading: isLoadingUserContribution
@@ -158,8 +164,10 @@ const ScammerDetailPage = () => {
     queryFn: () => getUserContributionAmountForScammer(id || '', profile?.wallet_address || ''),
     enabled: !!id && !!profile?.wallet_address
   });
+
   const bountyContributions = bountyContributionsData?.contributions || [];
   const totalContributions = bountyContributionsData?.totalCount || 0;
+
   useEffect(() => {
     const checkIsCreator = async () => {
       if (!profile?.wallet_address || !id) return;
@@ -176,6 +184,7 @@ const ScammerDetailPage = () => {
     };
     checkIsCreator();
   }, [id, profile?.wallet_address]);
+
   useEffect(() => {
     const fetchUserInteraction = async () => {
       if (!profile?.wallet_address || !scammer?.id) return;
@@ -198,6 +207,7 @@ const ScammerDetailPage = () => {
     };
     fetchUserInteraction();
   }, [scammer?.id, profile?.wallet_address]);
+
   useEffect(() => {
     if (scammer) {
       setLikes(scammer.likes || 0);
@@ -210,6 +220,7 @@ const ScammerDetailPage = () => {
       }
     }
   }, [scammer]);
+
   useEffect(() => {
     const fetchCreatorProfile = async () => {
       if (scammer?.added_by) {
@@ -227,15 +238,18 @@ const ScammerDetailPage = () => {
     };
     fetchCreatorProfile();
   }, [scammer?.added_by]);
+
   useEffect(() => {
     if (profile) {
       setProfileChangeCounter(prev => prev + 1);
     }
   }, [profile?.display_name, profile?.profile_pic_url]);
+
   const handleEditScammer = () => {
     if (!id) return;
     navigate(`/report/${id}`);
   };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
       toast({
@@ -244,6 +258,7 @@ const ScammerDetailPage = () => {
       });
     });
   };
+
   const addCommentMutation = useMutation({
     mutationFn: (newComment: {
       scammer_id: string;
@@ -270,6 +285,7 @@ const ScammerDetailPage = () => {
       });
     }
   });
+
   const addBountyContributionMutation = useMutation({
     mutationFn: (contribution: {
       scammer_id: string;
@@ -302,6 +318,7 @@ const ScammerDetailPage = () => {
       });
     }
   });
+
   const handleLike = async () => {
     if (!profile?.wallet_address) {
       toast({
@@ -348,6 +365,7 @@ const ScammerDetailPage = () => {
       setIsLoading(false);
     }
   };
+
   const handleDislike = async () => {
     if (!profile?.wallet_address) {
       toast({
@@ -391,6 +409,7 @@ const ScammerDetailPage = () => {
       setIsLoading(false);
     }
   };
+
   const handleAddComment = () => {
     if (!profile) {
       toast({
@@ -416,6 +435,7 @@ const ScammerDetailPage = () => {
       author_profile_pic: profile.profile_pic_url
     });
   };
+
   const handleAddBounty = async () => {
     if (!profile) {
       await connectPhantomWallet();
@@ -464,21 +484,27 @@ const ScammerDetailPage = () => {
       setIsLoading(false);
     }
   };
+
   const handlePageChange = (page: number) => {
     setContributionsPage(page);
   };
+
   const handleDeleteScammer = () => {
     setShowDeleteDialog(true);
   };
+
   const handleUnarchiveScammer = () => {
     setShowUnarchiveDialog(true);
   };
+
   const confirmDelete = () => {
     deleteScammerMutation.mutate();
   };
+
   const confirmUnarchive = () => {
     unarchiveScammerMutation.mutate();
   };
+
   const handleShare = async () => {
     try {
       const url = `${window.location.origin}/scammer/${scammer?.id || id}`;
@@ -495,6 +521,7 @@ const ScammerDetailPage = () => {
       });
     }
   };
+
   const handleTransferComplete = () => {
     queryClient.invalidateQueries({
       queryKey: ['bountyContributions', id]
@@ -503,7 +530,9 @@ const ScammerDetailPage = () => {
       queryKey: ['scammer', id]
     });
   };
+
   const developerWallet = `${developerWalletAddress.substring(0, 4)}...${developerWalletAddress.substring(developerWalletAddress.length - 4)}`;
+
   if (isLoadingScammer) {
     return <div>
         <CompactHero title="Loading..." />
@@ -517,6 +546,7 @@ const ScammerDetailPage = () => {
         </section>
       </div>;
   }
+
   if (errorScammer || !scammer) {
     return <div>
         <CompactHero title="Error" />
@@ -533,30 +563,42 @@ const ScammerDetailPage = () => {
         </section>
       </div>;
   }
-  return <div>
+
+  return (
+    <div>
       <CompactHero title={scammer?.name} />
 
       <section className="icc-section bg-white">
         <div className="icc-container">
-          {scammer.deleted_at && <Alert variant="destructive" className="mb-6">
+          {scammer.deleted_at && (
+            <Alert variant="destructive" className="mb-6">
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>Archived Report</AlertTitle>
               <AlertDescription>
                 This scammer report has been archived and is no longer visible in search results.
               </AlertDescription>
-            </Alert>}
+            </Alert>
+          )}
           
           <div className="flex items-center justify-between mb-6">
-            <Button variant="ghost" onClick={() => navigate('/most-wanted')} aria-label="Back to Most Wanted list">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate('/most-wanted')} 
+              aria-label="Back to Most Wanted list"
+            >
               <ArrowLeft className="h-4 w-4 mr-2" aria-hidden="true" />
               {isMobile ? 'Back' : 'Back to Most Wanted'}
             </Button>
             <div className="flex items-center space-x-2 md:space-x-3">
-              {isCreator && <>
-                  {scammer.deleted_at ? <Button variant="gold" size="sm" onClick={handleUnarchiveScammer} aria-label="Unarchive this report">
+              {isCreator && (
+                <>
+                  {scammer.deleted_at ? (
+                    <Button variant="gold" size="sm" onClick={handleUnarchiveScammer} aria-label="Unarchive this report">
                       <ArchiveRestore className="h-3.5 w-3.5" aria-hidden="true" />
                       {!isMobile && <span className="ml-1">Unarchive Report</span>}
-                    </Button> : <>
+                    </Button>
+                  ) : (
+                    <>
                       <Button variant="outline" size="sm" onClick={handleEditScammer} aria-label="Edit this report">
                         <Edit className="h-3.5 w-3.5" aria-hidden="true" />
                         {!isMobile && <span className="ml-1">Edit Report</span>}
@@ -565,8 +607,10 @@ const ScammerDetailPage = () => {
                         <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                         {!isMobile && <span className="ml-1">Archive Report</span>}
                       </Button>
-                    </>}
-                </>}
+                    </>
+                  )}
+                </>
+              )}
               
               <Button variant="outline" size="sm" onClick={handleShare} aria-label="Share this scammer report">
                 <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
@@ -587,43 +631,6 @@ const ScammerDetailPage = () => {
               <div className="mt-4 mb-6">
                 <h2 className="icc-title">{scammer?.name}'s Accusations</h2>
                 <p className="text-lg text-icc-gray-dark dark:text-white mt-2">{scammer.accused_of}</p>
-              </div>
-
-              {/* Mobile Take Action Section */}
-              <div className="block md:hidden mb-6">
-                
-                
-                <div className="flex space-x-2 mb-4">
-                  <Button variant={isLiked ? "gold" : "outline"} size="sm" className={`flex-1 ${isLiked ? 'hover:bg-icc-gold-dark' : ''}`} onClick={handleLike} disabled={isLoading} aria-pressed={isLiked} aria-label="Like this report">
-                    <ThumbsUp className="h-4 w-4 mr-1" aria-hidden="true" />
-                    <span>{likes}</span>
-                  </Button>
-                  <Button variant={isDisliked ? "gold" : "outline"} size="sm" className={`flex-1 ${isDisliked ? 'hover:bg-icc-gold-dark' : ''}`} onClick={handleDislike} disabled={isLoading} aria-pressed={isDisliked} aria-label="Dislike this report">
-                    <ThumbsDown className="h-4 w-4 mr-1" aria-hidden="true" />
-                    <span>{dislikes}</span>
-                  </Button>
-                </div>
-                
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="mb-3">
-                        <div className="flex justify-between text-sm text-icc-gray mb-1">
-                          <span className="dark:text-white">Community Consensus</span>
-                          <span className="dark:text-white">{agreePercentage}% Agree</span>
-                        </div>
-                        <Progress value={agreePercentage} className="h-2 bg-red-100" aria-valuemin={0} aria-valuemax={100} aria-valuenow={agreePercentage} aria-label={`${agreePercentage}% agreement rate`}>
-                          <div className="h-full bg-green-500 transition-all" style={{
-                          width: `${agreePercentage}%`
-                        }} />
-                        </Progress>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Based on {likes + dislikes} community votes</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
               </div>
 
               <Tabs defaultValue="comments" className="w-full mb-6">
@@ -658,20 +665,15 @@ const ScammerDetailPage = () => {
                       <span className="hidden md:inline">Official Response</span>
                     </TabsTrigger>
                   </TabsList>
+                  
                 </div>
                 
                 <TabsContent value="comments" className="mt-2">
                   <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="comments-section">Comments</h2>
-                  <div className="mb-4 grid grid-cols-1 gap-2">
-                    <Textarea 
-                      placeholder="Write your comment here..." 
-                      value={commentText} 
-                      onChange={e => setCommentText(e.target.value)} 
-                      aria-label="Comment text" 
-                      className="w-full" 
-                    />
+                  <div className="mb-4">
+                    <Textarea placeholder="Write your comment here..." value={commentText} onChange={e => setCommentText(e.target.value)} aria-label="Comment text" />
                     <Button 
-                      className="w-full" 
+                      className="mt-2 w-full md:w-auto" 
                       onClick={handleAddComment} 
                       disabled={addCommentMutation.isPending} 
                       aria-label="Add comment"
@@ -690,7 +692,7 @@ const ScammerDetailPage = () => {
                         </div>)}
                       <span className="sr-only">Loading comments...</span>
                     </div> : errorComments ? <div className="text-red-500">Error loading comments.</div> : comments && comments.length > 0 ? <div aria-label="Comments section">
-                      {comments.slice(0, visibleComments).map(comment => <div key={comment.id} className="flex items-start space-x-4 py-4 border-b">
+                        {comments.map(comment => <div key={comment.id} className="flex items-start space-x-4 py-4 border-b">
                           <Avatar>
                             <AvatarImage src={comment.author_profile_pic || '/placeholder.svg'} alt={`${comment.author_name}'s profile`} />
                             <AvatarFallback>{comment.author_name.substring(0, 2)}</AvatarFallback>
@@ -701,10 +703,7 @@ const ScammerDetailPage = () => {
                             <p className="mt-1">{comment.content}</p>
                           </div>
                         </div>)}
-                      {comments.length > visibleComments && <Button variant="outline" className="w-full mt-4" onClick={() => setVisibleComments(prev => prev + 5)}>
-                          Load More Comments
-                        </Button>}
-                    </div> : <div aria-live="polite">No comments yet. Be the first to comment!</div>}
+                      </div> : <div aria-live="polite">No comments yet. Be the first to comment!</div>}
                 </TabsContent>
                 
                 <TabsContent value="links" className="mt-2">
@@ -734,154 +733,161 @@ const ScammerDetailPage = () => {
                 
                 <TabsContent value="evidence" className="mt-2">
                   <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="evidence-section">Evidence</h2>
-                  {scammer?.accused_of ? <p className="text-icc-gray whitespace-pre-line">{scammer.accused_of}</p> : <p className="text-icc-gray">No evidence provided.</p>}
+                  <div className="text-icc-gray">No evidence provided.</div>
                 </TabsContent>
                 
                 <TabsContent value="wallet-addresses" className="mt-2">
-                  <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="wallet-section">Wallet Addresses</h2>
-                  {scammer?.wallet_addresses && scammer.wallet_addresses.length > 0 ? <div className="space-y-2">
-                      {scammer.wallet_addresses.map((wallet, index) => <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
-                          <span className="font-mono text-sm">{wallet}</span>
-                          <Button variant="ghost" size="sm" onClick={() => copyToClipboard(wallet)} className="ml-2" aria-label="Copy wallet address">
-                            <Copy className="h-4 w-4" aria-hidden="true" />
+                  <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="wallets-section">Wallet Addresses</h2>
+                  {scammer?.wallet_addresses && scammer.wallet_addresses.length > 0 ? <ul className="list-disc pl-5 space-y-2 text-icc-gray">
+                      {scammer.wallet_addresses.map((address, index) => <li key={index} className="flex items-center">
+                          <span className="font-mono mr-2">{address}</span>
+                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => copyToClipboard(address)} aria-label={`Copy wallet address ${address}`}>
+                            <Copy className="h-3.5 w-3.5 text-icc-blue" aria-hidden="true" />
                           </Button>
-                        </div>)}
-                    </div> : <p className="text-icc-gray">No wallet addresses provided.</p>}
+                        </li>)}
+                    </ul> : <p className="text-icc-gray">No wallet addresses provided.</p>}
                 </TabsContent>
                 
                 <TabsContent value="official" className="mt-2">
                   <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="official-response-section">Official Response</h2>
-                  {scammer?.official_response ? <div className="bg-gray-50 p-4 rounded-md border-l-4 border-icc-blue">
-                      <h3 className="font-medium text-icc-blue mb-2">Official Statement:</h3>
-                      <p className="text-icc-gray whitespace-pre-line">{scammer.official_response}</p>
-                    </div> : <p className="text-icc-gray">No official response has been issued yet.</p>}
+                  {scammer?.official_response ? <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                      <p className="text-icc-gray whitespace-pre-wrap">{scammer.official_response}</p>
+                    </div> : <p className="text-icc-gray">No official response yet.</p>}
                 </TabsContent>
               </Tabs>
+              
+              {isMobile && <BountyForm scammerId={scammer.id} scammerName={scammer.name} developerWalletAddress={developerWalletAddress} />}
             </div>
-            
-            <div className="md:col-span-1">
-              <div className="bg-gray-50 rounded-lg p-4 shadow-sm sticky top-4 dark:bg-[#1A1F2C] dark:text-white">
-                <h3 className="text-xl font-bold text-icc-blue mb-4">Report Information</h3>
-                
-                <div className="space-y-4 mb-6">
-                  <div className="flex items-center">
-                    <Calendar className="h-5 w-5 text-icc-blue mr-2 dark:text-white" aria-hidden="true" />
-                    <div>
-                      <div className="text-sm text-gray-500 dark:text-gray-300">Reported on</div>
-                      <div className="font-medium">{formatDate(scammer.date_added)}</div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center">
-                    <Eye className="h-5 w-5 text-icc-blue mr-2 dark:text-white" aria-hidden="true" />
-                    <div>
-                      <div className="text-sm text-gray-500 dark:text-gray-300">Views</div>
-                      <div className="font-medium">{scammer.views?.toLocaleString() || 0}</div>
-                    </div>
-                  </div>
-                  
-                  {creatorProfile && <div className="flex items-center">
-                      <User className="h-5 w-5 text-icc-blue mr-2 dark:text-white" aria-hidden="true" />
+
+            <div>
+              <Card className="mb-6 bg-gray-50 dark:bg-icc-blue-dark dark:text-white">
+                <CardHeader>
+                  <h3 className="text-lg font-semibold text-icc-blue dark:text-white mb-3">Reported By</h3>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  {creatorProfile ? <Link to={`/profile/${creatorProfile.username || creatorProfile.wallet_address}`} className="flex items-center space-x-3 group hover:bg-gray-100 dark:hover:bg-icc-blue p-2 rounded-md transition-colors py-0 px-0 -mt-2">
+                      <Avatar className="group-hover:ring-2 group-hover:ring-icc-gold transition-all">
+                        <AvatarImage src={creatorProfile.profile_pic_url} alt={`${creatorProfile.display_name}'s profile`} />
+                        <AvatarFallback>{creatorProfile.display_name.substring(0, 2)}</AvatarFallback>
+                      </Avatar>
                       <div>
-                        <div className="text-sm text-gray-500 dark:text-gray-300">Reported by</div>
-                        <Link to={`/profile/${creatorProfile.wallet_address}`} className="font-medium text-icc-blue hover:underline">
+                        <div className="text-sm font-medium font-bold text-icc-blue dark:text-white leading-none group-hover:text-icc-gold transition-colors">
                           {creatorProfile.display_name}
-                        </Link>
+                        </div>
+                        <p className="text-sm text-gray-500 dark:text-gray-300">@{creatorProfile.username}</p>
                       </div>
-                    </div>}
+                    </Link> : <p className="text-sm text-gray-500 dark:text-gray-300">Anonymous</p>}
+                  <Separator className="my-4 dark:bg-gray-700" />
+                  <div className="flex justify-between items-center mb-3">
+                    <div className="text-sm text-gray-500 dark:text-gray-300 flex items-center">
+                      <Calendar className="h-4 w-4 mr-1" aria-hidden="true" />
+                      Added on {formatDate(scammer.date_added)}
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center mb-3">
+                    <div className="text-sm text-gray-500 dark:text-gray-300 flex items-center">
+                      <Eye className="h-4 w-4 mr-1" aria-hidden="true" />
+                      {scammer.views} Views
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="text-sm text-gray-500 dark:text-gray-300 flex items-center">
+                      <Link2 className="h-4 w-4 mr-1" aria-hidden="true" />
+                      <button onClick={handleShare} className="hover:underline">
+                        Share
+                      </button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold text-icc-blue dark:text-white mb-3">Take Action</h3>
+                
+                <div className="flex space-x-2 mb-4">
+                  <Button 
+                    variant={isLiked ? "gold" : "outline"} 
+                    size="sm" 
+                    className={`flex-1 ${isLiked ? 'hover:bg-icc-gold-dark' : ''}`} 
+                    onClick={handleLike} 
+                    disabled={isLoading} 
+                    aria-pressed={isLiked} 
+                    aria-label="Like this report"
+                  >
+                    <ThumbsUp className="h-4 w-4 mr-1" aria-hidden="true" />
+                    <span>{likes}</span>
+                  </Button>
+                  <Button 
+                    variant={isDisliked ? "gold" : "outline"} 
+                    size="sm" 
+                    className={`flex-1 ${isDisliked ? 'hover:bg-icc-gold-dark' : ''}`} 
+                    onClick={handleDislike} 
+                    disabled={isLoading} 
+                    aria-pressed={isDisliked} 
+                    aria-label="Dislike this report"
+                  >
+                    <ThumbsDown className="h-4 w-4 mr-1" aria-hidden="true" />
+                    <span>{dislikes}</span>
+                  </Button>
                 </div>
                 
-                {/* Desktop Take Action Section */}
-                <div className="hidden md:block mb-6">
-                  
-                  
-                  <div className="flex space-x-2 mb-4">
-                    <Button variant={isLiked ? "gold" : "outline"} size="sm" className={`flex-1 ${isLiked ? 'hover:bg-icc-gold-dark' : ''}`} onClick={handleLike} disabled={isLoading} aria-pressed={isLiked} aria-label="Like this report">
-                      <ThumbsUp className="h-4 w-4 mr-1" aria-hidden="true" />
-                      <span>{likes}</span>
-                    </Button>
-                    <Button variant={isDisliked ? "gold" : "outline"} size="sm" className={`flex-1 ${isDisliked ? 'hover:bg-icc-gold-dark' : ''}`} onClick={handleDislike} disabled={isLoading} aria-pressed={isDisliked} aria-label="Dislike this report">
-                      <ThumbsDown className="h-4 w-4 mr-1" aria-hidden="true" />
-                      <span>{dislikes}</span>
-                    </Button>
-                  </div>
-                  
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="mb-3">
-                          <div className="flex justify-between text-sm text-icc-gray mb-1">
-                            <span>Community Consensus</span>
-                            <span>{agreePercentage}% Agree</span>
-                          </div>
-                          <Progress value={agreePercentage} className="h-2 bg-red-100" aria-valuemin={0} aria-valuemax={100} aria-valuenow={agreePercentage} aria-label={`${agreePercentage}% agreement rate`} />
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="mb-3">
+                        <div className="flex justify-between text-sm text-icc-gray mb-1">
+                          <span>Community Consensus</span>
+                          <span>{agreePercentage}% Agree</span>
                         </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Based on {likes + dislikes} community votes</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-icc-blue mb-3">Contribute to Bounty</h3>
-                  
-                  <div className="mb-3">
-                    <label htmlFor="amount" className="block text-sm text-gray-500 mb-1">Amount in SEC</label>
-                    <div className="relative">
-                      <Input id="amount" type="number" min="0" step="0.01" value={contributionAmount} onChange={e => setContributionAmount(e.target.value)} className="pl-7" aria-label="Bounty amount in SEC" />
-                      <CurrencyIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-                    </div>
-                  </div>
-                  
-                  <div className="mb-3">
-                    <label htmlFor="comment" className="block text-sm text-gray-500 mb-1">Comment (Optional)</label>
-                    <Textarea id="comment" value={bountyComment} onChange={e => setBountyComment(e.target.value)} className="h-24 resize-none" placeholder="Add a comment with your contribution..." aria-label="Bounty comment" />
-                  </div>
-                  
-                  <Button onClick={handleAddBounty} className="w-full" disabled={isLoading} aria-label="Add bounty contribution">
-                    <DollarSign className="h-4 w-4 mr-1" aria-hidden="true" />
-                    {isLoading ? 'Processing...' : 'Contribute to Bounty'}
-                  </Button>
-                  
-                  {userContributionAmount > 0}
-                </div>
-
-                {bountyContributions.length > 0 && <>
-                    {isCreator && scammer.bounty_amount > 0 && <div className="mt-4 mb-4">
-                        <BountyTransferDialog scammerId={scammer.id} scammerName={scammer.name} bountyAmount={scammer.bounty_amount} onTransferComplete={handleTransferComplete} />
-                      </div>}
-
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        {totalContributions > contributionsPerPage}
+                        <Progress value={agreePercentage} className="h-2 bg-red-100" aria-valuemin={0} aria-valuemax={100} aria-valuenow={agreePercentage} aria-label={`${agreePercentage}% agreement rate`}>
+                          <div className="h-full bg-green-500 transition-all" style={{
+                          width: `${agreePercentage}%`
+                        }} />
+                        </Progress>
                       </div>
-                      
-                      <BountyContributionList contributions={bountyContributions.slice(0, visibleContributions)} totalCount={totalContributions} currentPage={contributionsPage} itemsPerPage={contributionsPerPage} onPageChange={handlePageChange} isLoading={isLoadingBountyContributions} userContributionAmount={userContributionAmount} />
-                      
-                      {bountyContributions.length > visibleContributions && <Button variant="outline" className="w-full mt-4" onClick={() => setVisibleContributions(prev => prev + 5)}>
-                          Load More Contributions
-                        </Button>}
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Based on {likes + dislikes} community votes</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                
+                {!isMobile && (
+                  <div className="mt-6">
+                    <BountyForm scammerId={scammer.id} scammerName={scammer.name} developerWalletAddress={developerWalletAddress} />
+                    
+                    <div className="mt-6">
+                      <BountyContributionList 
+                        contributions={bountyContributions} 
+                        isLoading={isLoadingBountyContributions} 
+                        totalCount={totalContributions} 
+                        onPageChange={handlePageChange} 
+                        currentPage={contributionsPage} 
+                        itemsPerPage={contributionsPerPage} 
+                        userContributionAmount={userContributionAmount}
+                      />
                     </div>
-                  </>}
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
       </section>
-      
+
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Archive this report?</AlertDialogTitle>
+            <AlertDialogTitle>Archive this scammer report?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will hide the report from the Most Wanted list and search results. You can unarchive it later.
+              This will hide the report from public view, but any bounty contributions will remain active and transferrable.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>Archive Report</AlertDialogAction>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+              {deleteScammerMutation.isPending ? "Archiving..." : "Archive Report"}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -889,17 +895,21 @@ const ScammerDetailPage = () => {
       <AlertDialog open={showUnarchiveDialog} onOpenChange={setShowUnarchiveDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Unarchive this report?</AlertDialogTitle>
+            <AlertDialogTitle>Unarchive this scammer report?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will make the report visible again in the Most Wanted list and search results.
+              This will make the report visible in public searches and in the Most Wanted list again.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmUnarchive}>Unarchive Report</AlertDialogAction>
+            <AlertDialogAction onClick={confirmUnarchive} className="bg-green-600 hover:bg-green-700">
+              {unarchiveScammerMutation.isPending ? "Unarchiving..." : "Unarchive Report"}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>;
+    </div>
+  );
 };
+
 export default ScammerDetailPage;

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -20,17 +19,13 @@ import { Textarea } from '@/components/ui/textarea';
 
 interface BountyTransferDialogProps {
   scammerId: string;
-  scammerName?: string;
-  creatorWallet?: string;
-  bountyAmount?: number; // Made optional
+  scammerName: string;
   onTransferComplete?: () => void;
 }
 
 const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
   scammerId,
   scammerName,
-  creatorWallet,
-  bountyAmount = 0, // Provide default value
   onTransferComplete
 }) => {
   const { toast } = useToast();
@@ -43,24 +38,6 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
   const [selectedContribution, setSelectedContribution] = useState<BountyContribution | null>(null);
   const [maxTransferAmount, setMaxTransferAmount] = useState<number>(0);
   const [transferComment, setTransferComment] = useState('');
-  const [scammerData, setScammerData] = useState<Scammer | null>(null);
-
-  useEffect(() => {
-    const fetchScammerData = async () => {
-      if (!scammerName && scammerId) {
-        try {
-          const data = await getScammerById(scammerId);
-          setScammerData(data);
-        } catch (error) {
-          console.error('Error fetching scammer data:', error);
-        }
-      }
-    };
-    
-    fetchScammerData();
-  }, [scammerId, scammerName]);
-
-  const effectiveScammerName = scammerName || scammerData?.name || 'this scammer';
 
   useEffect(() => {
     const fetchTransferableContributions = async () => {
@@ -168,7 +145,7 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
       
       toast({
         title: "Success",
-        description: `Successfully transferred ${transferAmount} $SEC to ${effectiveScammerName}`
+        description: `Successfully transferred ${transferAmount} $SEC to ${scammerName}`
       });
       
       setSelectedContribution(null);
@@ -203,7 +180,7 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
         </DialogTrigger>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Transfer Bounty to {effectiveScammerName}</DialogTitle>
+            <DialogTitle>Transfer Bounty to {scammerName}</DialogTitle>
             <DialogDescription>
               Transfer funds from one of your existing bounty contributions to this scammer.
               Note: At least 10% of the original contribution must remain with the original scammer.
@@ -333,7 +310,7 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
             <AlertDialogTitle>Confirm Bounty Transfer</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to transfer {formatCurrency(parseFloat(transferAmount))} <CurrencyIcon size="sm" /> from 
-              {selectedContribution?.scammers?.name ? ` ${selectedContribution.scammers.name}` : ' the original scammer'} to {effectiveScammerName}?
+              {selectedContribution?.scammers?.name ? ` ${selectedContribution.scammers.name}` : ' the original scammer'} to {scammerName}?
               {transferComment && (
                 <div className="mt-2">
                   <strong>Comment:</strong> {transferComment}

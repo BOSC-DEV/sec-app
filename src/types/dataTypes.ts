@@ -17,7 +17,6 @@ export interface Scammer {
   shares: number;
   comments: string[];
   deleted_at: string | null;
-  evidence?: string;
 }
 
 export interface Profile {
@@ -71,6 +70,7 @@ export interface BountyContribution {
   transferred_to_id?: string;
 }
 
+// Community feature types
 export interface Announcement {
   id: string;
   content: string;
