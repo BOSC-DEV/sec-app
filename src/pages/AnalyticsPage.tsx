@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BarChart, Users, Globe, TrendingUp, Shield, UserCheck, Coins, Receipt } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,40 +7,34 @@ import { supabase } from '@/integrations/supabase/client';
 import { formatCurrency } from '@/lib/utils';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
 import { getStatistics } from '@/services/statisticsService';
-
 interface DailyVisitorData {
   day: string;
   unique_visitors: number;
   total_visits: number;
 }
-
 interface CountryStatsData {
   country_code: string;
   country_name: string;
   visitor_count: number;
   visit_count: number;
 }
-
 interface TopScammerData {
   name: string;
   views: number;
   total_bounty: number;
   report_count: number;
 }
-
 interface ReportStatsData {
   day: string;
   report_count: number;
   unique_reporters: number;
 }
-
 interface BountyStatsData {
   total_bounties: number;
   active_bounties: number;
   avg_bounty: number;
   total_contributors: number;
 }
-
 interface AnalyticsData {
   dailyVisitors: DailyVisitorData[];
   countryStats: CountryStatsData[];
@@ -49,129 +42,125 @@ interface AnalyticsData {
   reportStats: ReportStatsData[];
   bountyStats: BountyStatsData;
 }
-
 interface HomepageStatistics {
   totalBounty: number;
   scammersCount: number;
   reportersCount: number;
   usersCount: number;
 }
-
 const fetchAnalyticsData = async (): Promise<AnalyticsData> => {
   try {
     // Get the homepage statistics to ensure consistent data
     const homepageStats = await getStatistics();
-    
+
     // Fetch daily visitors data directly from the analytics_pageviews table
-    const { data: rawVisitorData, error: dailyError } = await supabase
-      .from('analytics_pageviews')
-      .select('visited_at, visitor_id')
-      .order('visited_at', { ascending: false })
-      .limit(30);
-    
+    const {
+      data: rawVisitorData,
+      error: dailyError
+    } = await supabase.from('analytics_pageviews').select('visited_at, visitor_id').order('visited_at', {
+      ascending: false
+    }).limit(30);
     if (dailyError) console.error('Error fetching daily visitors:', dailyError);
-    
+
     // Process visitor data by day
-    const visitorsByDay = new Map<string, { unique: Set<string>, total: number }>();
+    const visitorsByDay = new Map<string, {
+      unique: Set<string>;
+      total: number;
+    }>();
     if (rawVisitorData) {
       rawVisitorData.forEach(record => {
         const day = new Date(record.visited_at).toISOString().split('T')[0];
         if (!visitorsByDay.has(day)) {
-          visitorsByDay.set(day, { unique: new Set(), total: 0 });
+          visitorsByDay.set(day, {
+            unique: new Set(),
+            total: 0
+          });
         }
-        
         const dayData = visitorsByDay.get(day)!;
         dayData.unique.add(record.visitor_id);
         dayData.total += 1;
       });
     }
-    
+
     // Convert to array format
-    const dailyVisitors: DailyVisitorData[] = Array.from(visitorsByDay.entries())
-      .map(([day, data]) => ({
-        day,
-        unique_visitors: data.unique.size,
-        total_visits: data.total
-      }))
-      .sort((a, b) => b.day.localeCompare(a.day));
+    const dailyVisitors: DailyVisitorData[] = Array.from(visitorsByDay.entries()).map(([day, data]) => ({
+      day,
+      unique_visitors: data.unique.size,
+      total_visits: data.total
+    })).sort((a, b) => b.day.localeCompare(a.day));
 
     // Fetch country stats directly from analytics_visitors table
-    const { data: rawCountryData, error: countryError } = await supabase
-      .from('analytics_visitors')
-      .select('country_code, country_name, visitor_id')
-      .not('country_code', 'is', null)
-      .limit(50);
-    
+    const {
+      data: rawCountryData,
+      error: countryError
+    } = await supabase.from('analytics_visitors').select('country_code, country_name, visitor_id').not('country_code', 'is', null).limit(50);
     if (countryError) console.error('Error fetching country stats:', countryError);
-    
+
     // Process country data
-    const countryMap = new Map<string, { 
-      country_name: string, 
-      visitors: Set<string>,
-      visits: number 
+    const countryMap = new Map<string, {
+      country_name: string;
+      visitors: Set<string>;
+      visits: number;
     }>();
-    
     if (rawCountryData) {
       rawCountryData.forEach(record => {
         if (!record.country_code) return;
-        
         if (!countryMap.has(record.country_code)) {
-          countryMap.set(record.country_code, { 
-            country_name: record.country_name || record.country_code, 
+          countryMap.set(record.country_code, {
+            country_name: record.country_name || record.country_code,
             visitors: new Set(),
             visits: 0
           });
         }
-        
         const countryData = countryMap.get(record.country_code)!;
         countryData.visitors.add(record.visitor_id);
         countryData.visits += 1;
       });
     }
-    
+
     // Convert to array format
-    const countryStats: CountryStatsData[] = Array.from(countryMap.entries())
-      .map(([country_code, data]) => ({
-        country_code,
-        country_name: data.country_name,
-        visitor_count: data.visitors.size,
-        visit_count: data.visits
-      }))
-      .sort((a, b) => b.visit_count - a.visit_count);
+    const countryStats: CountryStatsData[] = Array.from(countryMap.entries()).map(([country_code, data]) => ({
+      country_code,
+      country_name: data.country_name,
+      visitor_count: data.visitors.size,
+      visit_count: data.visits
+    })).sort((a, b) => b.visit_count - a.visit_count);
 
     // Fetch top scammers
-    const { data: topScammers, error: scammersError } = await supabase
-      .from('scammers')
-      .select('name, views, bounty_amount, id')
-      .order('views', { ascending: false })
-      .limit(10);
+    const {
+      data: topScammers,
+      error: scammersError
+    } = await supabase.from('scammers').select('name, views, bounty_amount, id').order('views', {
+      ascending: false
+    }).limit(10);
     if (scammersError) console.error('Error fetching top scammers:', scammersError);
-    
+
     // Process report stats from report_submissions table
-    const { data: reportStatsRaw, error: reportError } = await supabase
-      .from('report_submissions')
-      .select('created_at, user_id')
-      .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
-    
+    const {
+      data: reportStatsRaw,
+      error: reportError
+    } = await supabase.from('report_submissions').select('created_at, user_id').gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
     if (reportError) console.error('Error fetching report stats:', reportError);
-    
     const reportStats: ReportStatsData[] = [];
     if (reportStatsRaw) {
-      const reportsByDay = new Map<string, { reports: number, uniqueUsers: Set<string> }>();
-      
+      const reportsByDay = new Map<string, {
+        reports: number;
+        uniqueUsers: Set<string>;
+      }>();
       reportStatsRaw.forEach(report => {
         const day = new Date(report.created_at).toISOString().split('T')[0];
         if (!reportsByDay.has(day)) {
-          reportsByDay.set(day, { reports: 0, uniqueUsers: new Set() });
+          reportsByDay.set(day, {
+            reports: 0,
+            uniqueUsers: new Set()
+          });
         }
-        
         const dayData = reportsByDay.get(day)!;
         dayData.reports += 1;
         if (report.user_id) {
           dayData.uniqueUsers.add(report.user_id);
         }
       });
-      
       reportsByDay.forEach((value, key) => {
         reportStats.push({
           day: key,
@@ -179,44 +168,37 @@ const fetchAnalyticsData = async (): Promise<AnalyticsData> => {
           unique_reporters: value.uniqueUsers.size
         });
       });
-      
       reportStats.sort((a, b) => b.day.localeCompare(a.day));
     }
-    
+
     // Calculate bounty stats
-    const { data: bountyContributions, error: bountyError } = await supabase
-      .from('bounty_contributions')
-      .select('amount, scammer_id, contributor_id, is_active')
-      .eq('is_active', true);
-    
+    const {
+      data: bountyContributions,
+      error: bountyError
+    } = await supabase.from('bounty_contributions').select('amount, scammer_id, contributor_id, is_active').eq('is_active', true);
     if (bountyError) console.error('Error fetching bounty stats:', bountyError);
-    
     const bountyStats: BountyStatsData = {
-      total_bounties: homepageStats.totalBounty, // Use homepage stats for total bounties
+      total_bounties: homepageStats.totalBounty,
+      // Use homepage stats for total bounties
       active_bounties: 0,
       avg_bounty: 0,
       total_contributors: 0
     };
-    
     if (bountyContributions && bountyContributions.length > 0) {
       const uniqueScammers = new Set(bountyContributions.map(contribution => contribution.scammer_id));
       const uniqueContributors = new Set(bountyContributions.map(contribution => contribution.contributor_id));
-      
       bountyStats.active_bounties = uniqueScammers.size;
       bountyStats.avg_bounty = bountyStats.total_bounties / bountyContributions.length;
       bountyStats.total_contributors = uniqueContributors.size;
     }
-    
-    // Format top scammers with additional data
-    const processedTopScammers: TopScammerData[] = topScammers 
-      ? topScammers.map(scammer => ({
-          name: scammer.name,
-          views: scammer.views || 0,
-          total_bounty: scammer.bounty_amount || 0,
-          report_count: 0
-        }))
-      : [];
 
+    // Format top scammers with additional data
+    const processedTopScammers: TopScammerData[] = topScammers ? topScammers.map(scammer => ({
+      name: scammer.name,
+      views: scammer.views || 0,
+      total_bounty: scammer.bounty_amount || 0,
+      report_count: 0
+    })) : [];
     return {
       dailyVisitors,
       countryStats,
@@ -240,30 +222,32 @@ const fetchAnalyticsData = async (): Promise<AnalyticsData> => {
     };
   }
 };
-
 const AnalyticsPage: React.FC = () => {
   // Fetch analytics data 
-  const { data, isLoading, error } = useQuery({
+  const {
+    data,
+    isLoading,
+    error
+  } = useQuery({
     queryKey: ['analyticsData'],
     queryFn: fetchAnalyticsData,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 5
   });
 
   // Fetch homepage statistics to ensure consistent reporting
-  const { data: homepageStats } = useQuery({
+  const {
+    data: homepageStats
+  } = useQuery({
     queryKey: ['statistics'],
     queryFn: getStatistics,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 5
   });
-
   if (isLoading) return <div>Loading analytics...</div>;
   if (error) return <div>Error loading analytics</div>;
 
   // Use homepage statistics for reports count
   const totalReports = homepageStats?.scammersCount || 0;
-
-  return (
-    <div className="container mx-auto p-6">
+  return <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Analytics Dashboard</h1>
       
       <Tabs defaultValue="overview" className="space-y-4">
@@ -279,7 +263,7 @@ const AnalyticsPage: React.FC = () => {
           <div className="grid gap-4 md:grid-cols-5">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Visitors</CardTitle>
+                <CardTitle className="text-sm font-medium">Total Visits</CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -348,13 +332,11 @@ const AnalyticsPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {data?.dailyVisitors.map((day, index) => (
-                    <tr key={index} className="border-b">
+                  {data?.dailyVisitors.map((day, index) => <tr key={index} className="border-b">
                       <td>{new Date(day.day).toLocaleDateString()}</td>
                       <td className="text-right">{day.unique_visitors}</td>
                       <td className="text-right">{day.total_visits}</td>
-                    </tr>
-                  ))}
+                    </tr>)}
                 </tbody>
               </table>
             </CardContent>
@@ -376,13 +358,11 @@ const AnalyticsPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {data?.countryStats.map((country, index) => (
-                    <tr key={index} className="border-b">
+                  {data?.countryStats.map((country, index) => <tr key={index} className="border-b">
                       <td>{country.country_name}</td>
                       <td className="text-right">{country.visitor_count}</td>
                       <td className="text-right">{country.visit_count}</td>
-                    </tr>
-                  ))}
+                    </tr>)}
                 </tbody>
               </table>
             </CardContent>
@@ -404,13 +384,11 @@ const AnalyticsPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {data?.reportStats.map((day, index) => (
-                    <tr key={index} className="border-b">
+                  {data?.reportStats.map((day, index) => <tr key={index} className="border-b">
                       <td>{new Date(day.day).toLocaleDateString()}</td>
                       <td className="text-right">{day.report_count}</td>
                       <td className="text-right">{day.unique_reporters}</td>
-                    </tr>
-                  ))}
+                    </tr>)}
                 </tbody>
               </table>
             </CardContent>
@@ -456,14 +434,12 @@ const AnalyticsPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {data?.topScammers.map((scammer, index) => (
-                      <tr key={index} className="border-b">
+                    {data?.topScammers.map((scammer, index) => <tr key={index} className="border-b">
                         <td>{scammer.name}</td>
                         <td className="text-right">{scammer.views}</td>
                         <td className="text-right">{formatCurrency(scammer.total_bounty)}</td>
                         <td className="text-right">{scammer.report_count}</td>
-                      </tr>
-                    ))}
+                      </tr>)}
                   </tbody>
                 </table>
               </CardContent>
@@ -471,8 +447,6 @@ const AnalyticsPage: React.FC = () => {
           </div>
         </TabsContent>
       </Tabs>
-    </div>
-  );
+    </div>;
 };
-
 export default AnalyticsPage;
