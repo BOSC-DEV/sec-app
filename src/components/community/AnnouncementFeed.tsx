@@ -45,7 +45,6 @@ import { isAdmin } from '@/utils/adminUtils';
 import { BadgeTier } from '@/utils/badgeUtils';
 import { supabase } from '@/integrations/supabase/client';
 
-// Function to notify all users about a new announcement
 const notifyAllUsersAboutAnnouncement = async (
   announcementId: string,
   content: string,
@@ -55,8 +54,6 @@ const notifyAllUsersAboutAnnouncement = async (
   authorProfilePic?: string
 ): Promise<void> => {
   try {
-    // In a real implementation, this would notify all users
-    // For now, we'll just log it
     console.log('Notifying users about new announcement:', {
       announcementId,
       content,
@@ -65,9 +62,6 @@ const notifyAllUsersAboutAnnouncement = async (
       authorUsername,
       authorProfilePic
     });
-    
-    // Future implementation could use Supabase to insert notifications for each user
-    // or broadcast a message to a realtime channel
   } catch (error) {
     console.error('Error notifying users about announcement:', error);
   }
@@ -109,13 +103,11 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
       console.log("Checking admin status for:", profile.username);
       
       try {
-        // First check hardcoded list
         const adminStatus = await isAdmin(profile.username);
         console.log(`Admin check result for ${profile.username}:`, adminStatus);
         
         setIsUserAdmin(adminStatus);
         
-        // Also check if user is a whale (for creating permissions)
         const isWhale = badgeInfo?.tier === BadgeTier.Whale;
         console.log(`Whale badge status: ${isWhale}, Badge tier: ${badgeInfo?.tier}`);
         
@@ -648,20 +640,6 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         </Card>
       )}
       
-      {/* Debug info - visible in development */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="bg-yellow-50 border border-yellow-200 p-3 rounded text-sm">
-          <p>Debug Info:</p>
-          <ul className="list-disc ml-4">
-            <li>Username: {profile?.username || 'Not logged in'}</li>
-            <li>Is Admin: {isUserAdminState ? 'Yes' : 'No'}</li>
-            <li>Admin Check Complete: {adminCheckComplete ? 'Yes' : 'No'}</li>
-            <li>Can Create: {canCreateAnnouncements ? 'Yes' : 'No'}</li>
-            <li>Badge Tier: {badgeInfo?.tier || 'None'}</li>
-          </ul>
-        </div>
-      )}
-      
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
@@ -685,22 +663,20 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
       )}
       
       {useCarousel ? (
-        <>
-          <Carousel className="w-full">
-            <CarouselContent>
-              {filteredAnnouncements.map((announcement) => (
-                <CarouselItem key={announcement.id}>
-                  {renderAnnouncementCard(announcement)}
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="left-2" />
-            <CarouselNext className="right-2" />
-          </Carousel>
-          <div className="text-center text-muted-foreground text-sm">
-            {currentIndex + 1} of {filteredAnnouncements.length} announcements
-          </div>
-        </>
+        <Carousel className="w-full">
+          <CarouselContent>
+            {filteredAnnouncements.map((announcement) => (
+              <CarouselItem key={announcement.id}>
+                {renderAnnouncementCard(announcement)}
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="left-2" />
+          <CarouselNext className="right-2" />
+        </Carousel>
+        <div className="text-center text-muted-foreground text-sm">
+          {currentIndex + 1} of {filteredAnnouncements.length} announcements
+        </div>
       ) : (
         <div className="space-y-4">
           {filteredAnnouncements.map(renderAnnouncementCard)}
