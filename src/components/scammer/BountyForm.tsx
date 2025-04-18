@@ -9,6 +9,8 @@ import DeveloperWalletDisplay from './DeveloperWalletDisplay';
 import ContributionForm from './ContributionForm';
 import BountyTransferDialog from './BountyTransferDialog';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 interface BountyFormProps {
   scammerId: string;
@@ -27,6 +29,8 @@ const BountyForm: React.FC<BountyFormProps> = ({
   const [contributionAmount, setContributionAmount] = useState('0.00');
   const [bountyComment, setBountyComment] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showContributionOptions, setShowContributionOptions] = useState(false);
+  const [showNewBountyForm, setShowNewBountyForm] = useState(false);
   
   const addBountyContributionMutation = useMutation({
     mutationFn: (contribution: {
@@ -152,19 +156,68 @@ const BountyForm: React.FC<BountyFormProps> = ({
       </p>
       
       <DeveloperWalletDisplay developerWalletAddress={developerWalletAddress} />
-      
-      <ContributionForm
-        contributionAmount={contributionAmount}
-        setContributionAmount={setContributionAmount}
-        bountyComment={bountyComment}
-        setBountyComment={setBountyComment}
-        handleAddBounty={handleAddBounty}
-        isProcessing={isProcessing}
-        addBountyContributionMutation={addBountyContributionMutation}
-        profile={profile}
-        buttonText="Add Bounty"
-      />
-      
+
+      <Dialog open={showContributionOptions} onOpenChange={setShowContributionOptions}>
+        <DialogTrigger asChild>
+          <Button 
+            variant="gold"
+            className="w-full bg-icc-gold hover:bg-icc-gold-dark text-icc-blue-dark dark:text-white dark:bg-icc-gold-dark dark:hover:bg-icc-gold/80 border-icc-gold-dark font-medium mb-4"
+          >
+            Contribute to Bounty
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Choose Contribution Method</DialogTitle>
+            <DialogDescription>
+              Select how you would like to contribute to this bounty
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 mt-4">
+            <Button
+              variant="gold"
+              onClick={() => {
+                setShowContributionOptions(false);
+                setShowNewBountyForm(true);
+              }}
+            >
+              Pay New Bounty
+            </Button>
+            <Button
+              variant="outline"
+              className="border-icc-gold"
+              onClick={() => {
+                setShowContributionOptions(false);
+              }}
+            >
+              Transfer from Another Bounty
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showNewBountyForm} onOpenChange={setShowNewBountyForm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Bounty</DialogTitle>
+            <DialogDescription>
+              Enter the amount you wish to contribute
+            </DialogDescription>
+          </DialogHeader>
+          <ContributionForm
+            contributionAmount={contributionAmount}
+            setContributionAmount={setContributionAmount}
+            bountyComment={bountyComment}
+            setBountyComment={setBountyComment}
+            handleAddBounty={handleAddBounty}
+            isProcessing={isProcessing}
+            addBountyContributionMutation={addBountyContributionMutation}
+            profile={profile}
+            buttonText="Add Bounty"
+          />
+        </DialogContent>
+      </Dialog>
+
       <div className="mt-4 mb-4">
         <BountyTransferDialog 
           scammerId={scammerId} 
