@@ -25,6 +25,7 @@ import log from "./services/loggingService";
 import { handleError, ErrorSeverity } from "./utils/errorHandling";
 import environmentUtils from "./utils/environmentUtils";
 import { HelmetProvider } from "react-helmet-async";
+import { supabase } from "./integrations/supabase/client";
 
 // Initialize analytics service
 analyticsService.initAnalytics();
@@ -67,15 +68,50 @@ log.info('Application starting', 'app_initialization', {
   buildTime: process.env.BUILD_TIME || new Date().toISOString()
 });
 
-// Analytics tracker component
+// Analytics tracker component - enhanced with visitor tracking
 const AnalyticsTracker = () => {
   const location = useLocation();
   const { profile } = useProfile();
   
-  // Track page views
+  // Track page views and visitor data
   useEffect(() => {
-    analyticsService.trackPageView();
-    log.info(`Page view: ${location.pathname}`, 'page_navigation');
+    const trackVisit = async () => {
+      try {
+        const visitorId = localStorage.getItem('visitor_id') || crypto.randomUUID();
+        localStorage.setItem('visitor_id', visitorId);
+        
+        // Get visitor's IP and location data
+        const response = await fetch('https://api.ipapi.com/check?format=json');
+        const geoData = await response.json();
+        
+        await supabase.rpc('track_visitor', {
+          p_visitor_id: visitorId,
+          p_ip_address: geoData.ip || null,
+          p_user_agent: navigator.userAgent,
+          p_country_code: geoData.country_code || null,
+          p_country_name: geoData.country_name || null,
+          p_city: geoData.city || null,
+          p_referrer: document.referrer || null
+        });
+
+        // Track page view
+        const title = document.title;
+        await supabase.rpc('track_pageview', {
+          p_visitor_id: visitorId,
+          p_page_path: location.pathname,
+          p_page_title: title || null,
+          p_session_id: localStorage.getItem('session_id') || null
+        });
+
+        analyticsService.trackPageView();
+        log.info(`Page view: ${location.pathname}`, 'page_navigation');
+      } catch (error) {
+        // Log error but don't throw - we don't want to break the app if analytics fails
+        log.error('Analytics tracking failed:', error);
+      }
+    };
+
+    trackVisit();
   }, [location.pathname]);
   
   // Identify user when profile changes

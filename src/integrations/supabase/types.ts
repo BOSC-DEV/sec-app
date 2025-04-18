@@ -9,6 +9,81 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      analytics_pageviews: {
+        Row: {
+          id: string
+          is_bounce: boolean | null
+          page_path: string
+          page_title: string | null
+          session_id: string | null
+          time_on_page: number | null
+          visited_at: string
+          visitor_id: string
+        }
+        Insert: {
+          id?: string
+          is_bounce?: boolean | null
+          page_path: string
+          page_title?: string | null
+          session_id?: string | null
+          time_on_page?: number | null
+          visited_at?: string
+          visitor_id: string
+        }
+        Update: {
+          id?: string
+          is_bounce?: boolean | null
+          page_path?: string
+          page_title?: string | null
+          session_id?: string | null
+          time_on_page?: number | null
+          visited_at?: string
+          visitor_id?: string
+        }
+        Relationships: []
+      }
+      analytics_visitors: {
+        Row: {
+          city: string | null
+          country_code: string | null
+          country_name: string | null
+          first_visit_at: string
+          id: string
+          ip_address: string | null
+          last_visit_at: string
+          referrer: string | null
+          user_agent: string | null
+          visit_count: number
+          visitor_id: string
+        }
+        Insert: {
+          city?: string | null
+          country_code?: string | null
+          country_name?: string | null
+          first_visit_at?: string
+          id?: string
+          ip_address?: string | null
+          last_visit_at?: string
+          referrer?: string | null
+          user_agent?: string | null
+          visit_count?: number
+          visitor_id: string
+        }
+        Update: {
+          city?: string | null
+          country_code?: string | null
+          country_name?: string | null
+          first_visit_at?: string
+          id?: string
+          ip_address?: string | null
+          last_visit_at?: string
+          referrer?: string | null
+          user_agent?: string | null
+          visit_count?: number
+          visitor_id?: string
+        }
+        Relationships: []
+      }
       announcement_reactions: {
         Row: {
           announcement_id: string
@@ -446,6 +521,7 @@ export type Database = {
           delegation_limit: number | null
           display_name: string
           id: string
+          is_admin: boolean | null
           points: number | null
           profile_pic_url: string | null
           sec_balance: number | null
@@ -460,6 +536,7 @@ export type Database = {
           delegation_limit?: number | null
           display_name: string
           id: string
+          is_admin?: boolean | null
           points?: number | null
           profile_pic_url?: string | null
           sec_balance?: number | null
@@ -474,6 +551,7 @@ export type Database = {
           delegation_limit?: number | null
           display_name?: string
           id?: string
+          is_admin?: boolean | null
           points?: number | null
           profile_pic_url?: string | null
           sec_balance?: number | null
@@ -732,7 +810,23 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      analytics_country_stats: {
+        Row: {
+          country_code: string | null
+          country_name: string | null
+          visit_count: number | null
+          visitor_count: number | null
+        }
+        Relationships: []
+      }
+      analytics_daily_visitors: {
+        Row: {
+          day: string | null
+          total_visits: number | null
+          unique_visitors: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       check_report_rate_limits: {
@@ -756,6 +850,18 @@ export type Database = {
       }
       record_report_submission: {
         Args: { p_user_id: string; p_ip_hash: string }
+        Returns: string
+      }
+      track_visitor: {
+        Args: {
+          p_visitor_id: string
+          p_ip_address: string
+          p_user_agent: string
+          p_country_code?: string
+          p_country_name?: string
+          p_city?: string
+          p_referrer?: string
+        }
         Returns: string
       }
       upsert_profile: {
