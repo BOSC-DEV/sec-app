@@ -1,12 +1,10 @@
-
 import React from 'react';
-import { BarChart, Users, Globe, TrendingUp, Shield, DollarSign } from 'lucide-react';
+import { BarChart, Users, Globe, TrendingUp, Shield, DollarSign, Receipt } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-// Define types for all the stats
 interface DailyVisitorData {
   day: string;
   unique_visitors: number;
@@ -40,6 +38,11 @@ interface BountyStatsData {
   total_contributors: number;
 }
 
+interface RevenueData {
+  totalRevenue: number;
+  totalBountiesPaid: number;
+}
+
 interface AnalyticsData {
   dailyVisitors: DailyVisitorData[];
   countryStats: CountryStatsData[];
@@ -48,17 +51,14 @@ interface AnalyticsData {
   bountyStats: BountyStatsData;
 }
 
-const fetchAnalyticsData = async (): Promise<AnalyticsData> => {
+const fetchAnalyticsData = async (): Promise<AnalyticsData & { revenue: RevenueData }> => {
   try {
-    // Fetch daily visitors data
     const { data: dailyVisitors, error: dailyError } = await supabase.rpc('get_daily_visitors');
     if (dailyError) console.error('Error fetching daily visitors:', dailyError);
 
-    // Fetch country stats data
     const { data: countryStats, error: countryError } = await supabase.rpc('get_country_stats');
     if (countryError) console.error('Error fetching country stats:', countryError);
 
-    // For new functions, use direct SQL queries instead of rpc
     const { data: topScammers, error: scammersError } = await supabase
       .from('scammers')
       .select('name, views, bounty_amount, id')
@@ -66,14 +66,12 @@ const fetchAnalyticsData = async (): Promise<AnalyticsData> => {
       .limit(10);
     if (scammersError) console.error('Error fetching top scammers:', scammersError);
     
-    // For report stats, query the report_submissions table directly
     const { data: reportStatsRaw, error: reportError } = await supabase
       .from('report_submissions')
       .select('created_at, user_id')
       .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
     if (reportError) console.error('Error fetching report stats:', reportError);
     
-    // Process report stats data
     const reportStats: ReportStatsData[] = [];
     if (reportStatsRaw) {
       const reportsByDay = new Map<string, { reports: number, uniqueUsers: Set<string> }>();
@@ -91,7 +89,6 @@ const fetchAnalyticsData = async (): Promise<AnalyticsData> => {
         }
       });
       
-      // Convert to array format
       reportsByDay.forEach((value, key) => {
         reportStats.push({
           day: key,
@@ -100,18 +97,15 @@ const fetchAnalyticsData = async (): Promise<AnalyticsData> => {
         });
       });
       
-      // Sort by date descending
       reportStats.sort((a, b) => b.day.localeCompare(a.day));
     }
     
-    // For bounty stats, query the bounty_contributions table directly
     const { data: bountyContributions, error: bountyError } = await supabase
       .from('bounty_contributions')
       .select('amount, scammer_id, contributor_id, is_active')
       .eq('is_active', true);
     if (bountyError) console.error('Error fetching bounty stats:', bountyError);
     
-    // Process bounty stats data
     const bountyStats: BountyStatsData = {
       total_bounties: 0,
       active_bounties: 0,
@@ -130,22 +124,38 @@ const fetchAnalyticsData = async (): Promise<AnalyticsData> => {
       bountyStats.total_contributors = uniqueContributors.size;
     }
     
-    // Transform top scammers data format
     const processedTopScammers: TopScammerData[] = topScammers 
       ? topScammers.map(scammer => ({
           name: scammer.name,
           views: scammer.views || 0,
           total_bounty: scammer.bounty_amount || 0,
-          report_count: 0 // We don't have this data directly, would need another query
+          report_count: 0
         }))
       : [];
+
+    const { data: bountiesData, error: bountiesError } = await supabase
+      .from('bounty_contributions')
+      .select('amount')
+      .eq('is_active', true)
+      .not('transferred_from_id', 'is', null);
+
+    if (bountiesError) {
+      console.error('Error fetching bounties for revenue:', bountiesError);
+    }
+
+    const totalBountiesPaid = bountiesData?.reduce((sum, bounty) => sum + Number(bounty.amount), 0) || 0;
+    const revenue = {
+      totalBountiesPaid,
+      totalRevenue: totalBountiesPaid * 0.10
+    };
 
     return {
       dailyVisitors: dailyVisitors || [],
       countryStats: countryStats || [],
       topScammers: processedTopScammers,
       reportStats: reportStats,
-      bountyStats: bountyStats
+      bountyStats: bountyStats,
+      revenue
     };
   } catch (error) {
     console.error('Error in fetchAnalyticsData:', error);
@@ -159,6 +169,10 @@ const fetchAnalyticsData = async (): Promise<AnalyticsData> => {
         active_bounties: 0,
         avg_bounty: 0,
         total_contributors: 0
+      },
+      revenue: {
+        totalBountiesPaid: 0,
+        totalRevenue: 0
       }
     };
   }
@@ -168,7 +182,7 @@ const AnalyticsPage: React.FC = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ['analyticsData'],
     queryFn: fetchAnalyticsData,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 
   if (isLoading) return <div>Loading analytics...</div>;
@@ -179,12 +193,13 @@ const AnalyticsPage: React.FC = () => {
       <h1 className="text-3xl font-bold mb-6">Analytics Dashboard</h1>
       
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="visitors">Visitors</TabsTrigger>
           <TabsTrigger value="countries">Countries</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
           <TabsTrigger value="bounties">Bounties</TabsTrigger>
+          <TabsTrigger value="revenue">Revenue</TabsTrigger>
         </TabsList>
         
         <TabsContent value="overview">
@@ -360,6 +375,32 @@ const AnalyticsPage: React.FC = () => {
                 </table>
               </CardContent>
             </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="revenue">
+          <div className="grid gap-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Revenue (10%)</CardTitle>
+                  <Receipt className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">${data?.revenue?.totalRevenue.toFixed(2) || '0.00'}</div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Bounties Paid</CardTitle>
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">${data?.revenue?.totalBountiesPaid.toFixed(2) || '0.00'}</div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </TabsContent>
       </Tabs>
