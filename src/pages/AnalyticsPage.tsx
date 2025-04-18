@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BarChart, Users, Globe, TrendingUp, Shield, UserCheck, Coins, Receipt, UserRound, MessagesSquare } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -278,7 +279,7 @@ const AnalyticsPage: React.FC = () => {
         </TabsList>
         
         <TabsContent value="overview">
-          <div className="grid gap-4 md:grid-cols-6">
+          <div className="grid gap-4 md:grid-cols-7">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Visits</CardTitle>
@@ -334,6 +335,16 @@ const AnalyticsPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{formatCurrency(data?.bountyStats?.total_bounties || 0)}</div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Average Bounty</CardTitle>
+                <CurrencyIcon size="md" className="text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{formatCurrency(data?.bountyStats?.avg_bounty || 0)}</div>
               </CardContent>
             </Card>
 
@@ -449,16 +460,6 @@ const AnalyticsPage: React.FC = () => {
                   <div className="text-2xl font-bold">{data?.bountyStats?.active_bounties || 0}</div>
                 </CardContent>
               </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Average Bounty</CardTitle>
-                  <CurrencyIcon size="md" className="text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{formatCurrency(data?.bountyStats?.avg_bounty || 0)}</div>
-                </CardContent>
-              </Card>
             </div>
 
             <Card>
@@ -476,12 +477,14 @@ const AnalyticsPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {data?.topScammers.map((scammer, index) => <tr key={index} className="border-b">
+                    {data?.topScammers.map((scammer, index) => (
+                      <tr key={index} className="border-b">
                         <td>{scammer.name}</td>
                         <td className="text-right">{scammer.views}</td>
                         <td className="text-right">{formatCurrency(scammer.total_bounty)}</td>
                         <td className="text-right">{scammer.report_count}</td>
-                      </tr>)}
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </CardContent>
