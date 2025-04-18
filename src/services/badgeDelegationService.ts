@@ -85,15 +85,36 @@ export const addBadgeDelegation = async (delegatedWallet: string, delegatorWalle
       throw new Error(`You have reached your delegation limit of ${delegatorProfile.delegation_limit}`);
     }
 
-    const { error } = await supabase
+    // Check if there was a previous delegation that's now inactive
+    const { data: existingInactiveDelegation, error: inactiveCheckError } = await supabase
       .from('delegated_badges')
-      .insert([{
-        delegator_wallet: delegatorWallet,
-        delegated_wallet: delegatedWallet,
-        active: true
-      }]);
+      .select('id')
+      .eq('delegator_wallet', delegatorWallet)
+      .eq('delegated_wallet', delegatedWallet)
+      .eq('active', false);
+      
+    if (inactiveCheckError) throw inactiveCheckError;
+    
+    // If there's an existing inactive delegation, reactivate it instead of creating a new one
+    if (existingInactiveDelegation && existingInactiveDelegation.length > 0) {
+      const { error: reactivateError } = await supabase
+        .from('delegated_badges')
+        .update({ active: true })
+        .eq('id', existingInactiveDelegation[0].id);
+        
+      if (reactivateError) throw reactivateError;
+    } else {
+      // Create a new delegation
+      const { error } = await supabase
+        .from('delegated_badges')
+        .insert([{
+          delegator_wallet: delegatorWallet,
+          delegated_wallet: delegatedWallet,
+          active: true
+        }]);
 
-    if (error) throw error;
+      if (error) throw error;
+    }
 
   } catch (error: any) {
     console.error('Error adding badge delegation:', error);
@@ -103,9 +124,9 @@ export const addBadgeDelegation = async (delegatedWallet: string, delegatorWalle
 
 export const removeBadgeDelegation = async (delegatedWallet: string, delegatorWallet: string): Promise<void> => {
   try {
-    console.log(`Attempting to remove delegation from ${delegatorWallet} to ${delegatedWallet}`);
+    console.log(`Attempting to deactivate delegation from ${delegatorWallet} to ${delegatedWallet}`);
     
-    // Get the delegation ID first to ensure we're deleting the right record
+    // Find the delegation to deactivate
     const { data: delegations, error: findError } = await supabase
       .from('delegated_badges')
       .select('id')
@@ -119,36 +140,37 @@ export const removeBadgeDelegation = async (delegatedWallet: string, delegatorWa
     }
     
     if (!delegations || delegations.length === 0) {
-      console.log('No matching delegation found to remove');
+      console.log('No matching active delegation found to deactivate');
       return; // No delegation found, just return
     }
     
-    // Perform the actual delete operation using the ID
+    // Instead of deleting, update the active flag to false
     const delegationId = delegations[0].id;
-    console.log(`Found delegation ID ${delegationId} to remove`);
+    console.log(`Found delegation ID ${delegationId} to deactivate`);
     
-    const { error: deleteError } = await supabase
+    const { error: updateError } = await supabase
       .from('delegated_badges')
-      .delete()
+      .update({ active: false })
       .eq('id', delegationId);
     
-    if (deleteError) {
-      console.error('Error deleting badge delegation:', deleteError);
-      throw deleteError;
+    if (updateError) {
+      console.error('Error deactivating badge delegation:', updateError);
+      throw updateError;
     }
     
-    console.log(`Successfully deleted delegation with ID ${delegationId}`);
+    console.log(`Successfully deactivated delegation with ID ${delegationId}`);
     
-    // Force a refresh by calling the Supabase API again to verify deletion
-    const { data: checkDeletion } = await supabase
+    // Force a refresh by calling the Supabase API again to verify update
+    const { data: checkDelegation } = await supabase
       .from('delegated_badges')
       .select('*')
-      .eq('id', delegationId);
+      .eq('id', delegationId)
+      .single();
     
-    if (!checkDeletion || checkDeletion.length === 0) {
-      console.log('Verified deletion: delegation no longer exists in database');
+    if (checkDelegation && checkDelegation.active === false) {
+      console.log('Verified deactivation: delegation is now inactive in database');
     } else {
-      console.warn('Deletion verification failed: delegation still exists in database');
+      console.warn('Deactivation verification failed: delegation still appears active in database');
     }
     
   } catch (error) {

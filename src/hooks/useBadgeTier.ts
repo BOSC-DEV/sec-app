@@ -6,6 +6,7 @@ import { getProfileByWallet } from '@/services/profileService';
 
 export const useBadgeTier = (walletAddressOrBalance: string | number | null): BadgeInfo | null => {
   const [badgeInfo, setBadgeInfo] = useState<BadgeInfo | null>(null);
+  const [forceRefresh, setForceRefresh] = useState(0); // Add a counter to force refresh
   
   useEffect(() => {
     let isMounted = true; // Flag to prevent state updates after unmount
@@ -31,6 +32,9 @@ export const useBadgeTier = (walletAddressOrBalance: string | number | null): Ba
 
       // If a string is passed, treat it as wallet address
       try {
+        // Add the forceRefresh counter to the log to confirm we're getting fresh data
+        console.log(`Fetching badge tier for wallet ${walletAddressOrBalance} (refresh #${forceRefresh})`);
+        
         // First check the wallet's own SEC balance
         const profile = await getProfileByWallet(walletAddressOrBalance);
         let ownBadgeInfo: BadgeInfo | null = null;
@@ -84,13 +88,17 @@ export const useBadgeTier = (walletAddressOrBalance: string | number | null): Ba
     fetchBadgeInfo();
     
     // Set up a polling interval to check for updated delegation status
-    const intervalId = setInterval(fetchBadgeInfo, 5000); // Check every 5 seconds
+    const intervalId = setInterval(() => {
+      // Increment the force refresh counter to ensure we're not getting cached data
+      setForceRefresh(prev => prev + 1);
+      fetchBadgeInfo();
+    }, 3000); // Check every 3 seconds
     
     return () => {
       isMounted = false;
       clearInterval(intervalId);
     };
-  }, [walletAddressOrBalance]);
+  }, [walletAddressOrBalance, forceRefresh]);
   
   return badgeInfo;
 };

@@ -30,6 +30,7 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
     display_name?: string;
   } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [forceRefresh, setForceRefresh] = useState(0); // Add a counter to force refresh
 
   useEffect(() => {
     const loadDelegationInfo = async () => {
@@ -40,6 +41,9 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
       
       setIsLoading(true);
       try {
+        // Add the forceRefresh counter to the log to confirm we're getting fresh data
+        console.log(`Loading delegation info for ${walletAddress} (refresh #${forceRefresh})`);
+        
         // Force fresh data every time
         const delegations = await getDelegatedBadges(walletAddress);
         
@@ -69,13 +73,17 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
     
     loadDelegationInfo();
     
-    // Set up a refresh interval to check for delegation changes more frequently
-    const intervalId = setInterval(loadDelegationInfo, 3000); // Check every 3 seconds
+    // Set up a refresh interval to check for delegation changes very frequently
+    const intervalId = setInterval(() => {
+      // Increment the force refresh counter to ensure we're not getting cached data
+      setForceRefresh(prev => prev + 1);
+      loadDelegationInfo();
+    }, 2000); // Check every 2 seconds
     
     return () => {
       clearInterval(intervalId); // Clean up the interval when the component unmounts
     };
-  }, [walletAddress]);
+  }, [walletAddress, forceRefresh]);
 
   const copyWalletAddress = () => {
     if (walletAddress) {
