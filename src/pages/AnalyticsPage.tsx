@@ -367,7 +367,7 @@ const AnalyticsPage: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    ${data?.bountyStats?.avg_bounty.toFixed(2) || '0.00'}
+                    {formatCurrency(data?.bountyStats?.avg_bounty || 0)}
                   </div>
                 </CardContent>
               </Card>
