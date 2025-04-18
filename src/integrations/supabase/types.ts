@@ -301,6 +301,30 @@ export type Database = {
           },
         ]
       }
+      delegated_badges: {
+        Row: {
+          active: boolean
+          created_at: string
+          delegated_wallet: string
+          delegator_wallet: string
+          id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          delegated_wallet: string
+          delegator_wallet: string
+          id?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          delegated_wallet?: string
+          delegator_wallet?: string
+          id?: string
+        }
+        Relationships: []
+      }
       key_updates: {
         Row: {
           category: string
@@ -416,6 +440,7 @@ export type Database = {
         Row: {
           bio: string | null
           created_at: string
+          delegation_limit: number | null
           display_name: string
           id: string
           points: number | null
@@ -429,6 +454,7 @@ export type Database = {
         Insert: {
           bio?: string | null
           created_at?: string
+          delegation_limit?: number | null
           display_name: string
           id: string
           points?: number | null
@@ -442,6 +468,7 @@ export type Database = {
         Update: {
           bio?: string | null
           created_at?: string
+          delegation_limit?: number | null
           display_name?: string
           id?: string
           points?: number | null
