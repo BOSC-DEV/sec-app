@@ -17,6 +17,7 @@ import PublicProfilePage from "./pages/PublicProfilePage";
 import LegalPages from "./pages/LegalPages";
 import NotFound from "./pages/NotFound";
 import NotificationsPage from "./pages/NotificationsPage";
+import AnalyticsPage from "./pages/AnalyticsPage";  // Add this import
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ProfileProvider, useProfile } from "./contexts/ProfileContext";
 import EnhancedErrorBoundary from "./components/common/EnhancedErrorBoundary";

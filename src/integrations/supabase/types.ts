@@ -836,6 +836,23 @@ export type Database = {
           message: string
         }[]
       }
+      get_country_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          country_code: string
+          country_name: string
+          visitor_count: number
+          visit_count: number
+        }[]
+      }
+      get_daily_visitors: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          day: string
+          unique_visitors: number
+          total_visits: number
+        }[]
+      }
       increment_announcement_views: {
         Args: { p_announcement_id: string }
         Returns: undefined

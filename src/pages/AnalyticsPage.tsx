@@ -6,23 +6,40 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-const fetchVisitorStats = async () => {
+// Define types for the returned data
+interface DailyVisitorData {
+  day: string;
+  unique_visitors: number;
+  total_visits: number;
+}
+
+interface CountryStatsData {
+  country_code: string;
+  country_name: string;
+  visitor_count: number;
+  visit_count: number;
+}
+
+interface VisitorStats {
+  dailyVisitors: DailyVisitorData[];
+  countryStats: CountryStatsData[];
+}
+
+const fetchVisitorStats = async (): Promise<VisitorStats> => {
   // Fetch daily visitors
-  const { data: dailyVisitors, error: dailyError } = await supabase
-    .rpc('get_daily_visitors', {});
+  const { data: dailyVisitors, error: dailyError } = await supabase.rpc('get_daily_visitors');
 
   if (dailyError) {
     console.error('Error fetching daily visitors:', dailyError);
-    return null;
+    return { dailyVisitors: [], countryStats: [] };
   }
 
   // Fetch country statistics
-  const { data: countryStats, error: countryError } = await supabase
-    .rpc('get_country_stats', {});
+  const { data: countryStats, error: countryError } = await supabase.rpc('get_country_stats');
 
   if (countryError) {
     console.error('Error fetching country stats:', countryError);
-    return null;
+    return { dailyVisitors, countryStats: [] };
   }
 
   return { dailyVisitors, countryStats };
@@ -104,7 +121,7 @@ const AnalyticsPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {data?.dailyVisitors?.map((day, index) => (
+                  {data?.dailyVisitors.map((day, index) => (
                     <tr key={index} className="border-b">
                       <td>{new Date(day.day).toLocaleDateString()}</td>
                       <td className="text-right">{day.unique_visitors}</td>
@@ -132,7 +149,7 @@ const AnalyticsPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {data?.countryStats?.map((country, index) => (
+                  {data?.countryStats.map((country, index) => (
                     <tr key={index} className="border-b">
                       <td>{country.country_name}</td>
                       <td className="text-right">{country.visitor_count}</td>
@@ -150,4 +167,3 @@ const AnalyticsPage: React.FC = () => {
 };
 
 export default AnalyticsPage;
-
