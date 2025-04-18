@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
@@ -254,7 +253,7 @@ const BadgeDelegation: React.FC = () => {
         <CardHeader>
           <CardTitle>Badge Delegation</CardTitle>
           <CardDescription>
-            Allow other users to display your {currentBadge?.tier} badge
+            Allow other accounts to display your {currentBadge?.tier} badge
             {(delegationLimit > 0 || profile?.sec_balance === null) && (
               <div className="mt-1 text-sm text-muted-foreground">
                 Delegation limit: {currentDelegations} / {profile?.sec_balance === null ? 0 : delegationLimit}
