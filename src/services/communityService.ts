@@ -31,7 +31,7 @@ export const getAnnouncements = async (): Promise<Announcement[]> => {
 
 export const isUserAdmin = async (username: string): Promise<boolean> => {
   // First check the hardcoded admin list for performance
-  if (isAdmin(username)) {
+  if (await isAdmin(username)) {
     return true;
   }
   
@@ -302,7 +302,6 @@ export const getUserSurveyVote = async (
   }
 };
 
-// Announcement-reply related functions
 export const getAnnouncementReplies = async (announcementId: string): Promise<AnnouncementReply[]> => {
   try {
     const { data, error } = await supabase
@@ -377,7 +376,6 @@ export const editAnnouncementReply = async (replyId: string, content: string): P
   }
 };
 
-// Like/dislike functions for announcements
 export const likeAnnouncement = async (announcementId: string, userId: string): Promise<any> => {
   try {
     const { data: existingReaction } = await supabase
@@ -576,7 +574,6 @@ export const dislikeAnnouncement = async (announcementId: string, userId: string
   }
 };
 
-// Like/dislike functions for replies
 export const likeReply = async (replyId: string, userId: string): Promise<any> => {
   try {
     const { data: existingReaction } = await supabase
@@ -775,7 +772,6 @@ export const dislikeReply = async (replyId: string, userId: string): Promise<any
   }
 };
 
-// Functions for chat messages
 export const likeChatMessage = async (messageId: string, userId: string): Promise<any> => {
   try {
     const { data: existingReaction } = await supabase
@@ -974,7 +970,6 @@ export const dislikeChatMessage = async (messageId: string, userId: string): Pro
   }
 };
 
-// Functions for getting user interaction status
 export const getUserAnnouncementInteraction = async (announcementId: string, userId: string): Promise<{liked: boolean, disliked: boolean}> => {
   try {
     const { data, error } = await supabase

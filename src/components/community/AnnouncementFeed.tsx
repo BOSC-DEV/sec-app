@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -44,6 +45,28 @@ import { useBadgeTier } from '@/hooks/useBadgeTier';
 import { isAdmin } from '@/utils/adminUtils';
 import { BadgeTier } from '@/utils/badgeUtils';
 
+const notifyAllUsersAboutAnnouncement = async (
+  announcementId: string,
+  content: string,
+  authorId: string,
+  authorName: string,
+  authorUsername?: string,
+  authorProfilePic?: string
+): Promise<void> => {
+  try {
+    console.log('Notifying users about new announcement:', {
+      announcementId,
+      content,
+      authorId,
+      authorName,
+      authorUsername,
+      authorProfilePic
+    });
+  } catch (error) {
+    console.error('Error notifying users about announcement:', error);
+  }
+};
+
 const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false }) => {
   const { profile, isConnected } = useProfile();
   const [newAnnouncement, setNewAnnouncement] = useState('');
@@ -72,18 +95,14 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
       let adminStatus = false;
       
       if (profile?.username) {
-        adminStatus = isAdmin(profile.username);
-        console.log(`Admin check from hardcoded list for ${profile.username}: ${adminStatus}`);
-        
-        if (!adminStatus) {
-          try {
-            const serverAdminStatus = await isUserAdmin(profile.username);
-            console.log(`Server admin check for ${profile.username}: ${serverAdminStatus}`);
-            adminStatus = serverAdminStatus;
-          } catch (error) {
-            console.error('Error checking admin status:', error);
-          }
+        try {
+          adminStatus = await isAdmin(profile.username);
+          console.log(`Admin check result for ${profile.username}:`, adminStatus);
+        } catch (error) {
+          console.error('Error checking admin status:', error);
         }
+      } else {
+        console.log('No profile username available for admin check');
       }
       
       console.log(`Final admin status for ${profile?.username}: ${adminStatus}`);
