@@ -69,37 +69,53 @@ export const getReceivedBadges = async (walletAddress: string) => {
 };
 
 export const getDelegationInfo = async (walletAddress: string) => {
-  // Get the user's profile to get delegation_limit
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('delegation_limit')
-    .eq('wallet_address', walletAddress)
-    .single();
-  
-  if (profileError) {
-    console.error('Error fetching delegation limit:', profileError);
-    throw profileError;
+  try {
+    // Get the user's profile to get delegation_limit
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('delegation_limit')
+      .eq('wallet_address', walletAddress)
+      .single();
+    
+    if (profileError) {
+      console.error('Error fetching delegation limit:', profileError);
+      throw profileError;
+    }
+    
+    // Get already delegated badges to calculate remaining
+    const { data: delegatedBadges, error: badgesError } = await supabase
+      .from('delegated_badges')
+      .select('*')
+      .eq('delegator_wallet', walletAddress)
+      .eq('active', true);
+    
+    if (badgesError) {
+      console.error('Error fetching delegated badges:', badgesError);
+      throw badgesError;
+    }
+    
+    const delegationLimit = profile?.delegation_limit || 1;
+    const usedDelegations = delegatedBadges?.length || 0;
+    
+    console.log('Delegation info:', {
+      delegationLimit,
+      usedDelegations,
+      walletAddress,
+      activeBadges: delegatedBadges
+    });
+    
+    return {
+      delegationLimit,
+      usedDelegations,
+      remainingDelegations: delegationLimit - usedDelegations
+    };
+  } catch (error) {
+    console.error('Error in getDelegationInfo:', error);
+    // Return default values in case of error
+    return {
+      delegationLimit: 1,
+      usedDelegations: 0,
+      remainingDelegations: 1
+    };
   }
-  
-  // Get already delegated badges to calculate remaining
-  const { data: delegatedBadges, error: badgesError } = await supabase
-    .from('delegated_badges')
-    .select('*')
-    .eq('delegator_wallet', walletAddress)
-    .eq('active', true);
-  
-  if (badgesError) {
-    console.error('Error fetching delegated badges:', badgesError);
-    throw badgesError;
-  }
-  
-  const delegationLimit = profile?.delegation_limit || 1;
-  const usedDelegations = delegatedBadges?.length || 0;
-  const remainingDelegations = delegationLimit - usedDelegations;
-  
-  return {
-    delegationLimit,
-    usedDelegations,
-    remainingDelegations
-  };
 };

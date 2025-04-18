@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -34,6 +34,15 @@ const BadgeGifting: React.FC<BadgeGiftingProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Debug log to check delegation info
+  useEffect(() => {
+    console.log('Badge gifting props:', {
+      delegationLimit,
+      remainingDelegations,
+      walletAddress
+    });
+  }, [delegationLimit, remainingDelegations, walletAddress]);
 
   const debouncedSearch = useCallback(
     debounce(async (term: string) => {
