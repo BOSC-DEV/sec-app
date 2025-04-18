@@ -30,7 +30,6 @@ const LiveChat = () => {
     checkAdminStatus();
   }, [profile?.username]);
 
-  // Add the rest of the component code here
   return (
     <Card className="flex-1 overflow-hidden">
       <CardHeader className="pb-3">

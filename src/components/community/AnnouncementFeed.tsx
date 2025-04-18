@@ -663,20 +663,22 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
       )}
       
       {useCarousel ? (
-        <Carousel className="w-full">
-          <CarouselContent>
-            {filteredAnnouncements.map((announcement) => (
-              <CarouselItem key={announcement.id}>
-                {renderAnnouncementCard(announcement)}
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious className="left-2" />
-          <CarouselNext className="right-2" />
-        </Carousel>
-        <div className="text-center text-muted-foreground text-sm">
-          {currentIndex + 1} of {filteredAnnouncements.length} announcements
-        </div>
+        <React.Fragment>
+          <Carousel className="w-full">
+            <CarouselContent>
+              {filteredAnnouncements.map((announcement) => (
+                <CarouselItem key={announcement.id}>
+                  {renderAnnouncementCard(announcement)}
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="left-2" />
+            <CarouselNext className="right-2" />
+          </Carousel>
+          <div className="text-center text-muted-foreground text-sm">
+            {currentIndex + 1} of {filteredAnnouncements.length} announcements
+          </div>
+        </React.Fragment>
       ) : (
         <div className="space-y-4">
           {filteredAnnouncements.map(renderAnnouncementCard)}
