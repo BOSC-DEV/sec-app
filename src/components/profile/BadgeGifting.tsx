@@ -98,6 +98,8 @@ const BadgeGifting: React.FC<BadgeGiftingProps> = ({
         });
         setRecipientWallet('');
         setSearchTerm('');
+        // Force a refresh to update the remaining delegations
+        window.location.reload();
       } else {
         throw new Error(error);
       }

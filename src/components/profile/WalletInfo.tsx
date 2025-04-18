@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Button } from '@/components/ui/button';
@@ -7,26 +8,49 @@ import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import BadgeGifting from './BadgeGifting';
 import { useBadgeTier } from '@/hooks/useBadgeTier';
+import { getDelegationInfo } from '@/services/badgeService';
 
 interface WalletInfoProps {
   walletAddress?: string | null;
   isOwnProfile?: boolean;
   secBalance?: number | null;
-  delegationLimit?: number;
-  remainingDelegations?: number;
 }
 
 const WalletInfo: React.FC<WalletInfoProps> = ({
   walletAddress,
   isOwnProfile = false,
   secBalance = null,
-  delegationLimit = 1,
-  remainingDelegations = 0
 }) => {
   const {
     disconnectWallet
   } = useProfile();
   const navigate = useNavigate();
+  const [delegationInfo, setDelegationInfo] = useState({
+    delegationLimit: 1,
+    remainingDelegations: 0
+  });
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchDelegationInfo = async () => {
+      if (walletAddress && isOwnProfile) {
+        setIsLoading(true);
+        try {
+          const info = await getDelegationInfo(walletAddress);
+          setDelegationInfo({
+            delegationLimit: info.delegationLimit,
+            remainingDelegations: info.remainingDelegations
+          });
+        } catch (error) {
+          console.error('Error fetching delegation info:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchDelegationInfo();
+  }, [walletAddress, isOwnProfile]);
 
   const copyWalletAddress = () => {
     if (walletAddress) {
@@ -82,12 +106,18 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
                   </Button>
                 </div>
 
-                <BadgeGifting
-                  walletAddress={walletAddress}
-                  badgeInfo={badgeInfo}
-                  delegationLimit={delegationLimit}
-                  remainingDelegations={remainingDelegations}
-                />
+                {isLoading ? (
+                  <div className="mt-4 flex justify-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-icc-gold"></div>
+                  </div>
+                ) : (
+                  <BadgeGifting
+                    walletAddress={walletAddress}
+                    badgeInfo={badgeInfo}
+                    delegationLimit={delegationInfo.delegationLimit}
+                    remainingDelegations={delegationInfo.remainingDelegations}
+                  />
+                )}
               </>
             )}
           </div>

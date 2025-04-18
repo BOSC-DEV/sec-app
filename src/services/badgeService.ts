@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { MIN_SEC_FOR_BADGE } from '@/utils/badgeUtils';
 
@@ -65,4 +66,40 @@ export const getReceivedBadges = async (walletAddress: string) => {
 
   if (error) throw error;
   return data || [];
+};
+
+export const getDelegationInfo = async (walletAddress: string) => {
+  // Get the user's profile to get delegation_limit
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('delegation_limit')
+    .eq('wallet_address', walletAddress)
+    .single();
+  
+  if (profileError) {
+    console.error('Error fetching delegation limit:', profileError);
+    throw profileError;
+  }
+  
+  // Get already delegated badges to calculate remaining
+  const { data: delegatedBadges, error: badgesError } = await supabase
+    .from('delegated_badges')
+    .select('*')
+    .eq('delegator_wallet', walletAddress)
+    .eq('active', true);
+  
+  if (badgesError) {
+    console.error('Error fetching delegated badges:', badgesError);
+    throw badgesError;
+  }
+  
+  const delegationLimit = profile?.delegation_limit || 1;
+  const usedDelegations = delegatedBadges?.length || 0;
+  const remainingDelegations = delegationLimit - usedDelegations;
+  
+  return {
+    delegationLimit,
+    usedDelegations,
+    remainingDelegations
+  };
 };
