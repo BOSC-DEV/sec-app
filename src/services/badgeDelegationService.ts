@@ -96,36 +96,42 @@ export const addBadgeDelegation = async (delegatedWallet: string, delegatorWalle
 };
 
 export const removeBadgeDelegation = async (delegatedWallet: string, delegatorWallet: string): Promise<void> => {
-  console.log(`Removing delegation: delegated=${delegatedWallet}, delegator=${delegatorWallet}`);
-  
   try {
-    // Force hard delete instead of soft delete to ensure the delegation is removed
-    const { error } = await supabase
+    // Get the delegation ID first to ensure we're deleting the right record
+    const { data: delegations, error: findError } = await supabase
+      .from('delegated_badges')
+      .select('id')
+      .eq('delegator_wallet', delegatorWallet)
+      .eq('delegated_wallet', delegatedWallet)
+      .eq('active', true);
+    
+    if (findError) {
+      console.error('Error finding badge delegation:', findError);
+      throw findError;
+    }
+    
+    if (!delegations || delegations.length === 0) {
+      console.log('No matching delegation found to remove');
+      return; // No delegation found, just return
+    }
+    
+    // Perform the actual delete operation using the ID
+    const delegationId = delegations[0].id;
+    console.log(`Found delegation ID ${delegationId} to remove`);
+    
+    const { error: deleteError } = await supabase
       .from('delegated_badges')
       .delete()
-      .eq('delegator_wallet', delegatorWallet)
-      .eq('delegated_wallet', delegatedWallet);
-
-    if (error) {
-      console.error('Error removing badge delegation:', error);
-      throw error;
+      .eq('id', delegationId);
+    
+    if (deleteError) {
+      console.error('Error deleting badge delegation:', deleteError);
+      throw deleteError;
     }
     
-    console.log('Delegation successfully removed');
-    
-    // Verify the delegation was actually deleted
-    const { data: checkData } = await supabase
-      .from('delegated_badges')
-      .select('*')
-      .eq('delegator_wallet', delegatorWallet)
-      .eq('delegated_wallet', delegatedWallet);
-    
-    if (checkData && checkData.length > 0) {
-      console.error('Delegation still exists after deletion:', checkData);
-      throw new Error('Failed to delete delegation from database');
-    }
-    
+    console.log(`Successfully deleted delegation with ID ${delegationId}`);
   } catch (error) {
+    console.error('Error in removeBadgeDelegation:', error);
     handleError(error, {
       fallbackMessage: 'Failed to remove badge delegation',
       severity: ErrorSeverity.MEDIUM,
