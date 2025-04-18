@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { 
@@ -13,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { ChevronDown, ChevronUp, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { formatDistanceToNow } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 import CommunityInteractionButtons from './CommunityInteractionButtons';
 import AdminContextMenu from './AdminContextMenu';
@@ -21,15 +21,12 @@ import ReplyForm from './ReplyForm';
 import RichTextEditor from './RichTextEditor';
 import { formatTimeAgo } from '@/utils/formatTime';
 import { banUser } from '@/utils/adminUtils';
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 
 interface AnnouncementRepliesProps {
   announcementId: string;
   isAdmin: boolean;
   refetch: () => void;
 }
-
-const REPLIES_PER_PAGE = 5;
 
 const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementId, isAdmin, refetch }) => {
   const { profile, isConnected } = useProfile();
@@ -39,17 +36,13 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editContent, setEditContent] = useState('');
   const [editingReplyId, setEditingReplyId] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalReplies, setTotalReplies] = useState(0);
   
   useEffect(() => {
     const fetchReplies = async () => {
       setIsLoading(true);
       try {
-        const startIndex = (currentPage - 1) * REPLIES_PER_PAGE;
         const data = await getAnnouncementReplies(announcementId);
-        setTotalReplies(data?.length || 0);
-        setReplies(data?.slice(startIndex, startIndex + REPLIES_PER_PAGE) || []);
+        setReplies(data || []);
       } catch (error) {
         console.error('Error fetching replies:', error);
       } finally {
@@ -60,7 +53,7 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
     if (showReplies) {
       fetchReplies();
     }
-  }, [announcementId, showReplies, currentPage]);
+  }, [announcementId, showReplies]);
   
   const handleAddReply = async (content: string) => {
     if (!isConnected) {
@@ -193,14 +186,7 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
     return distance;
   };
   
-  const repliesCount = totalReplies;
-  const totalPages = Math.ceil(repliesCount / REPLIES_PER_PAGE);
-  
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
+  const repliesCount = replies.length;
   
   return (
     <div className="w-full mt-2">
@@ -309,42 +295,6 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
               ) : (
                 <div className="text-center text-sm text-muted-foreground my-2">
                   No replies yet. Be the first to reply!
-                </div>
-              )}
-              
-              {totalPages > 1 && (
-                <div className="flex justify-center mt-4">
-                  <Pagination>
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious 
-                          onClick={() => currentPage > 1 ? handlePageChange(currentPage - 1) : undefined} 
-                          className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-                          aria-label="Go to previous page" 
-                        />
-                      </PaginationItem>
-                      
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                        <PaginationItem key={page}>
-                          <PaginationLink 
-                            onClick={() => handlePageChange(page)}
-                            isActive={currentPage === page}
-                            aria-label={`Go to page ${page}`}
-                          >
-                            {page}
-                          </PaginationLink>
-                        </PaginationItem>
-                      ))}
-                      
-                      <PaginationItem>
-                        <PaginationNext 
-                          onClick={() => currentPage < totalPages ? handlePageChange(currentPage + 1) : undefined} 
-                          className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
-                          aria-label="Go to next page" 
-                        />
-                      </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
                 </div>
               )}
               
