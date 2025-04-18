@@ -220,6 +220,7 @@ export type Database = {
           author_id: string
           author_name: string
           author_profile_pic: string | null
+          author_sec_balance: number | null
           author_username: string | null
           content: string
           created_at: string
@@ -232,6 +233,7 @@ export type Database = {
           author_id: string
           author_name: string
           author_profile_pic?: string | null
+          author_sec_balance?: number | null
           author_username?: string | null
           content: string
           created_at?: string
@@ -244,6 +246,7 @@ export type Database = {
           author_id?: string
           author_name?: string
           author_profile_pic?: string | null
+          author_sec_balance?: number | null
           author_username?: string | null
           content?: string
           created_at?: string

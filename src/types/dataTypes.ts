@@ -127,6 +127,7 @@ export interface ChatMessage {
   created_at: string;
   likes: number;
   dislikes: number;
+  author_sec_balance?: number;
 }
 
 export enum NotificationType {
