@@ -21,6 +21,7 @@ const LiveChat = () => {
   const [message, setMessage] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [initialScrollDone, setInitialScrollDone] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -49,11 +50,21 @@ const LiveChat = () => {
     checkAdminStatus();
   }, [profile?.username]);
 
+  // Scroll to bottom on initial load and new messages
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    // Only scroll if there are messages and initial load is complete
+    if (messages.length > 0 && messagesEndRef.current) {
+      // For initial load
+      if (!initialScrollDone) {
+        messagesEndRef.current.scrollIntoView({ behavior: 'auto' });
+        setInitialScrollDone(true);
+      } 
+      // For new messages, use smooth scrolling
+      else {
+        messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
     }
-  }, [messages]);
+  }, [messages, initialScrollDone]);
 
   useEffect(() => {
     if (!hasMore || isLoading || !loadMoreRef.current) return;
