@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { isAdmin } from '@/utils/adminUtils';
@@ -8,13 +9,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Send, Trash2, Image, Clock, X, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { formatTimeAgo } from '@/utils/formatTime';
-import ReactionButton from './ReactionButton';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useChatMessages } from '@/hooks/useChatMessages';
-import BadgeTier from '../profile/BadgeTier';
-import { useBadgeTier } from '@/hooks/useBadgeTier';
 import { ChatMessage } from '@/types/dataTypes';
+import ChatMessageComponent from './ChatMessage';
 
 const LiveChat = () => {
   const { profile } = useProfile();
@@ -161,105 +160,6 @@ const LiveChat = () => {
     await deleteChatMessage(messageId);
   };
 
-  const renderMessage = (msg: ChatMessage) => {
-    const badgeInfo = useBadgeTier(msg.author_sec_balance || 0);
-    const isOwnMessage = msg.author_id === profile?.wallet_address;
-
-    return (
-      <div 
-        key={msg.id} 
-        className={`flex items-start gap-3 ${isOwnMessage ? 'flex-row-reverse' : ''}`}
-      >
-        <Avatar className="h-8 w-8 border border-blue-400/30 flex-shrink-0">
-          {msg.author_profile_pic ? (
-            <AvatarImage 
-              src={msg.author_profile_pic} 
-              alt={msg.author_name} 
-            />
-          ) : (
-            <AvatarFallback className="bg-blue-700 text-blue-100">
-              {msg.author_name?.charAt(0) || '?'}
-            </AvatarFallback>
-          )}
-        </Avatar>
-        
-        <div 
-          className={`
-            max-w-[75%] p-3 rounded-lg relative
-            ${isOwnMessage 
-              ? 'bg-blue-700/80 text-blue-50 rounded-tr-none' 
-              : 'bg-blue-800/40 text-blue-50 rounded-tl-none border border-blue-700/30'
-            }
-          `}
-        >
-          <div className="flex items-center gap-2 mb-1 text-xs">
-            <span className="font-semibold flex items-center gap-1">
-              {msg.author_name}
-              {msg.author_username && (
-                <span className="text-blue-300/70">@{msg.author_username}</span>
-              )}
-              {badgeInfo && (
-                <BadgeTier 
-                  badgeInfo={badgeInfo} 
-                  size="sm"
-                  context="chat"
-                />
-              )}
-            </span>
-            <span className="opacity-70 flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {formatTimeAgo(msg.created_at)}
-            </span>
-          </div>
-          
-          {msg.content && (
-            <p className="text-sm break-words whitespace-pre-wrap">{msg.content}</p>
-          )}
-          
-          {msg.image_url && (
-            <a 
-              href={msg.image_url} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="block mt-2"
-            >
-              <img 
-                src={msg.image_url} 
-                alt="Attachment" 
-                className="max-w-full max-h-64 rounded object-contain bg-black/20"
-                onError={(e) => {
-                  e.currentTarget.src = '/placeholder.svg';
-                  e.currentTarget.alt = 'Image failed to load';
-                }}
-              />
-            </a>
-          )}
-          
-          <div className="mt-2 flex items-center justify-end gap-2">
-            <ReactionButton
-              itemId={msg.id}
-              itemType="message"
-              size="xs"
-              iconOnly
-              variant="ghost"
-            />
-            
-            {(isUserAdmin || isOwnMessage) && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-6 w-6 opacity-70 hover:opacity-100 hover:bg-red-900/30 hover:text-red-400" 
-                onClick={() => handleDeleteMessage(msg.id)}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <Card className="flex-1 overflow-hidden h-[600px] flex flex-col bg-gradient-to-b from-blue-950/20 to-blue-900/5 border-blue-800/30">
       <CardHeader className="pb-3 border-b border-blue-800/30">
@@ -299,7 +199,15 @@ const LiveChat = () => {
               <p>No messages yet. Be the first to say hello!</p>
             </div>
           ) : (
-            messages.map(renderMessage)
+            messages.map(msg => (
+              <ChatMessageComponent 
+                key={msg.id}
+                message={msg}
+                isUserAdmin={isUserAdmin}
+                currentUserWalletAddress={profile?.wallet_address}
+                onDeleteMessage={handleDeleteMessage}
+              />
+            ))
           )}
           
           <div ref={messagesEndRef} />
