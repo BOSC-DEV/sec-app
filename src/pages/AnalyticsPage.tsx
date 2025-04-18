@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart, Users, Globe, TrendingUp, Shield, Coins, Receipt } from 'lucide-react';
+import { BarChart, Users, Globe, TrendingUp, Shield, UserCheck, Coins, Receipt } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
@@ -51,6 +51,7 @@ interface AnalyticsData {
   topScammers: TopScammerData[];
   reportStats: ReportStatsData[];
   bountyStats: BountyStatsData;
+  revenue: RevenueData;
 }
 
 const fetchAnalyticsData = async (): Promise<AnalyticsData & { revenue: RevenueData }> => {
@@ -207,7 +208,7 @@ const AnalyticsPage: React.FC = () => {
         </TabsList>
         
         <TabsContent value="overview">
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-5">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Visitors</CardTitle>
@@ -237,6 +238,26 @@ const AnalyticsPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">${data?.bountyStats?.total_bounties.toFixed(2) || '0.00'}</div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{data?.bountyStats?.total_contributors || 0}</div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Active Hunters</CardTitle>
+                <UserCheck className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{data?.reportStats?.reduce((sum, day) => sum + day.unique_reporters, 0) || 0}</div>
               </CardContent>
             </Card>
           </div>
