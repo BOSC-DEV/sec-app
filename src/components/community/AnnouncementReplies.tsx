@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { 
@@ -317,8 +318,8 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
                     <PaginationContent>
                       <PaginationItem>
                         <PaginationPrevious 
-                          onClick={() => handlePageChange(currentPage - 1)} 
-                          disabled={currentPage === 1}
+                          onClick={() => currentPage > 1 ? handlePageChange(currentPage - 1) : undefined} 
+                          className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
                           aria-label="Go to previous page" 
                         />
                       </PaginationItem>
@@ -337,8 +338,8 @@ const AnnouncementReplies: React.FC<AnnouncementRepliesProps> = ({ announcementI
                       
                       <PaginationItem>
                         <PaginationNext 
-                          onClick={() => handlePageChange(currentPage + 1)} 
-                          disabled={currentPage === totalPages}
+                          onClick={() => currentPage < totalPages ? handlePageChange(currentPage + 1) : undefined} 
+                          className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
                           aria-label="Go to next page" 
                         />
                       </PaginationItem>
