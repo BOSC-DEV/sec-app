@@ -534,7 +534,8 @@ const ScammerDetailPage = () => {
   const developerWallet = `${developerWalletAddress.substring(0, 4)}...${developerWalletAddress.substring(developerWalletAddress.length - 4)}`;
 
   if (isLoadingScammer) {
-    return <div>
+    return (
+      <div>
         <CompactHero title="Loading..." />
         <section className="icc-section bg-white">
           <div className="icc-container">
@@ -544,11 +545,13 @@ const ScammerDetailPage = () => {
             <Skeleton className="h-6 w-1/2 mt-2" />
           </div>
         </section>
-      </div>;
+      </div>
+    );
   }
 
   if (errorScammer || !scammer) {
-    return <div>
+    return (
+      <div>
         <CompactHero title="Error" />
         <section className="icc-section bg-white">
           <div className="icc-container">
@@ -561,7 +564,8 @@ const ScammerDetailPage = () => {
             </p>
           </div>
         </section>
-      </div>;
+      </div>
+    );
   }
 
   return (
@@ -682,17 +686,25 @@ const ScammerDetailPage = () => {
                     </Button>
                   </div>
 
-                  {isLoadingComments ? <div className="space-y-4" aria-live="polite" aria-busy="true">
-                      {[1, 2, 3].map(index => <div key={index} className="flex items-start space-x-4">
+                  {isLoadingComments ? (
+                    <div className="space-y-4" aria-live="polite" aria-busy="true">
+                      {[1, 2, 3].map(index => (
+                        <div key={index} className="flex items-start space-x-4">
                           <Skeleton className="h-10 w-10 rounded-full" />
                           <div>
                             <Skeleton className="h-4 w-32 mb-1" />
                             <Skeleton className="h-4 w-64" />
                           </div>
-                        </div>)}
+                        </div>
+                      ))}
                       <span className="sr-only">Loading comments...</span>
-                    </div> : errorComments ? <div className="text-red-500">Error loading comments.</div> : comments && comments.length > 0 ? <div aria-label="Comments section">
-                        {comments.map(comment => <div key={comment.id} className="flex items-start space-x-4 py-4 border-b">
+                    </div>
+                  ) : errorComments ? (
+                    <div className="text-red-500">Error loading comments.</div>
+                  ) : comments && comments.length > 0 ? (
+                    <div aria-label="Comments section">
+                      {comments.map(comment => (
+                        <div key={comment.id} className="flex items-start space-x-4 py-4 border-b">
                           <Avatar>
                             <AvatarImage src={comment.author_profile_pic || '/placeholder.svg'} alt={`${comment.author_name}'s profile`} />
                             <AvatarFallback>{comment.author_name.substring(0, 2)}</AvatarFallback>
@@ -702,33 +714,55 @@ const ScammerDetailPage = () => {
                             <div className="text-sm text-gray-500">{formatDate(comment.created_at)}</div>
                             <p className="mt-1">{comment.content}</p>
                           </div>
-                        </div>)}
-                      </div> : <div aria-live="polite">No comments yet. Be the first to comment!</div>}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div aria-live="polite">No comments yet. Be the first to comment!</div>
+                  )}
                 </TabsContent>
                 
                 <TabsContent value="links" className="mt-2">
                   <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="links-section">Links</h2>
-                  {scammer?.links && scammer.links.length > 0 ? <ul className="list-disc pl-5 space-y-2">
-                      {scammer.links.map((link, index) => <li key={index} className="text-icc-gray">
+                  {scammer?.links && scammer.links.length > 0 ? (
+                    <ul className="list-disc pl-5 space-y-2">
+                      {scammer.links.map((link, index) => (
+                        <li key={index} className="text-icc-gray">
                           <a href={link.startsWith('http') ? link : `https://${link}`} target="_blank" rel="noopener noreferrer" className="text-icc-blue hover:underline">
                             {link}
                           </a>
-                        </li>)}
-                    </ul> : <p className="text-icc-gray">No links provided.</p>}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-icc-gray">No links provided.</p>
+                  )}
                 </TabsContent>
                 
                 <TabsContent value="aliases" className="mt-2">
                   <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="aliases-section">Aliases</h2>
-                  {scammer?.aliases && scammer.aliases.length > 0 ? <div className="flex flex-wrap gap-2">
-                      {scammer.aliases.map((alias, index) => <Badge key={index} className="bg-icc-blue text-white py-2 px-4">{alias}</Badge>)}
-                    </div> : <p className="text-icc-gray">No aliases provided.</p>}
+                  {scammer?.aliases && scammer.aliases.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {scammer.aliases.map((alias, index) => (
+                        <Badge key={index} className="bg-icc-blue text-white py-2 px-4">{alias}</Badge>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-icc-gray">No aliases provided.</p>
+                  )}
                 </TabsContent>
                 
                 <TabsContent value="accomplices" className="mt-2">
                   <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="accomplices-section">Known Accomplices</h2>
-                  {scammer?.accomplices && scammer.accomplices.length > 0 ? <div className="flex flex-wrap gap-2">
-                      {scammer.accomplices.map((accomplice, index) => <Badge key={index} className="bg-icc-blue text-white py-2 px-4">{accomplice}</Badge>)}
-                    </div> : <p className="text-icc-gray">No accomplices listed.</p>}
+                  {scammer?.accomplices && scammer.accomplices.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {scammer.accomplices.map((accomplice, index) => (
+                        <Badge key={index} className="bg-icc-blue text-white py-2 px-4">{accomplice}</Badge>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-icc-gray">No accomplices listed.</p>
+                  )}
                 </TabsContent>
                 
                 <TabsContent value="evidence" className="mt-2">
@@ -738,28 +772,27 @@ const ScammerDetailPage = () => {
                 
                 <TabsContent value="wallet-addresses" className="mt-2">
                   <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="wallets-section">Wallet Addresses</h2>
-                  {scammer?.wallet_addresses && scammer.wallet_addresses.length > 0 ? <ul className="list-disc pl-5 space-y-2 text-icc-gray">
-                      {scammer.wallet_addresses.map((address, index) => <li key={index} className="flex items-center">
+                  {scammer?.wallet_addresses && scammer.wallet_addresses.length > 0 ? (
+                    <ul className="list-disc pl-5 space-y-2 text-icc-gray">
+                      {scammer.wallet_addresses.map((address, index) => (
+                        <li key={index} className="flex items-center">
                           <span className="font-mono mr-2">{address}</span>
                           <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => copyToClipboard(address)} aria-label={`Copy wallet address ${address}`}>
                             <Copy className="h-3.5 w-3.5 text-icc-blue" aria-hidden="true" />
                           </Button>
-                        </li>)}
-                    </ul> : <p className="text-icc-gray">No wallet addresses provided.</p>}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-icc-gray">No wallet addresses provided.</p>
+                  )}
                 </TabsContent>
                 
                 <TabsContent value="official" className="mt-2">
                   <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="official-response-section">Official Response</h2>
-                  {scammer?.official_response ? <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  {scammer?.official_response ? (
+                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                       <p className="text-icc-gray whitespace-pre-wrap">{scammer.official_response}</p>
-                    </div> : <p className="text-icc-gray">No official response yet.</p>}
-                </TabsContent>
-              </Tabs>
-              
-              {isMobile && <BountyForm scammerId={scammer.id} scammerName={scammer.name} developerWalletAddress={developerWalletAddress} />}
-            </div>
-
-            <div>
-              <Card className="mb-6 bg-gray-50 dark:bg-icc-blue-dark dark:text-white">
-                <CardHeader>
-                  <h3 className="text-lg font
+                    </div>
+                  ) : (
+                    <p
