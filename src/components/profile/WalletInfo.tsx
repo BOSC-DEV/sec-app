@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { ExternalLink, Copy, LogOut } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import BadgeGifting from './BadgeGifting';
 
 interface WalletInfoProps {
   walletAddress?: string | null;
@@ -48,8 +47,6 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
   return <Card className="w-full dark:border-gray-700">
       <CardContent>
         {walletAddress ? <div className="space-y-4">
-            {isOwnProfile && <BadgeGifting userSecBalance={secBalance || 0} />}
-            
             <div>
               <div className="text-sm font-medium mb-1 text-gray-500 dark:text-gray-400 px-0 mt-[20px]">Address</div>
               <div className="flex items-center gap-2">

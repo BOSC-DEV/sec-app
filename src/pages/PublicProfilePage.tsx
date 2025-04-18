@@ -23,7 +23,6 @@ import { useBadgeTier } from '@/hooks/useBadgeTier';
 import BadgeTier from '@/components/profile/BadgeTier';
 import { useIsMobile } from '@/hooks/use-mobile';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
-import BadgeGifting from '@/components/profile/BadgeGifting';
 
 const PublicProfilePage = () => {
   const {

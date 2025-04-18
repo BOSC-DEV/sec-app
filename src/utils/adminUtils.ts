@@ -1,6 +1,5 @@
 
 import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 
 export const ADMIN_USERNAMES = ['sec', 'thesec'];
 
@@ -10,40 +9,10 @@ export const getAdminList = (): string[] => {
   return [...ADMIN_USERNAMES];
 };
 
-export const isAdmin = async (username: string): Promise<boolean> => {
-  if (!username) {
-    console.log('No username provided to isAdmin check');
-    return false;
-  }
-
-  // First check hardcoded admin list (case-insensitive)
-  const isHardcodedAdmin = ADMIN_USERNAMES.some(admin => 
-    admin.toLowerCase() === username.toLowerCase()
-  );
-  
-  console.log(`Checking if ${username} is an admin. Hardcoded admin status:`, isHardcodedAdmin);
-  
-  if (isHardcodedAdmin) {
-    return true;
-  }
-
-  // If not in hardcoded list, check database
-  try {
-    // Use a direct function call that returns boolean
-    const { data, error } = await supabase
-      .rpc('is_admin', { username_param: username.toLowerCase() });
-    
-    if (error) {
-      console.error('Error checking admin status in database:', error);
-      return false;
-    }
-
-    console.log(`Database admin check for ${username}:`, data);
-    return !!data;
-  } catch (error) {
-    console.error('Error in isAdmin check:', error);
-    return false;
-  }
+export const isAdmin = (username: string): boolean => {
+  if (!username) return false;
+  console.log(`Checking if ${username} is an admin`);
+  return ADMIN_USERNAMES.some(admin => admin.toLowerCase() === username.toLowerCase());
 };
 
 export const isBanned = (username: string): boolean => {

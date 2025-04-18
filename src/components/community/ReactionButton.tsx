@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -15,13 +16,6 @@ interface ReactionButtonProps {
   itemType: ItemType;
   size?: 'xs' | 'sm' | 'md';
   iconOnly?: boolean;
-  variant?: "ghost" | "default" | "destructive" | "outline" | "secondary" | "link" | "iccblue" | "gold" | "danger" | "neutral";
-}
-
-interface ReactionCount {
-  reaction_type: string;
-  count: number;
-  has_reacted: boolean;
 }
 
 const getReactionIcon = (type: ReactionType, active: boolean, size: 'xs' | 'sm' | 'md') => {
@@ -42,13 +36,13 @@ const getReactionIcon = (type: ReactionType, active: boolean, size: 'xs' | 'sm' 
   }
 };
 
-const ReactionButton = ({ 
-  itemId, 
-  itemType, 
-  size = 'sm', 
-  iconOnly = false, 
-  variant = "ghost" 
-}: ReactionButtonProps) => {
+interface ReactionCount {
+  reaction_type: string;
+  count: number;
+  has_reacted: boolean;
+}
+
+const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: ReactionButtonProps) => {
   const { profile, isConnected } = useProfile();
   const [reactions, setReactions] = useState<ReactionCount[]>([]);
   const [showEmojis, setShowEmojis] = useState(false);
@@ -69,6 +63,7 @@ const ReactionButton = ({
       let success = false;
       
       if (itemType === 'announcement') {
+        // Handle announcement reactions
         const { data: existing } = await supabase
           .from('announcement_reactions')
           .select('id')
@@ -78,6 +73,7 @@ const ReactionButton = ({
           .maybeSingle();
           
         if (existing) {
+          // Remove reaction if it exists
           const { error: deleteError } = await supabase
             .from('announcement_reactions')
             .delete()
@@ -86,6 +82,7 @@ const ReactionButton = ({
           if (deleteError) throw deleteError;
           success = true;
         } else {
+          // Add new announcement reaction
           const { error: insertError } = await supabase
             .from('announcement_reactions')
             .insert({
@@ -98,6 +95,7 @@ const ReactionButton = ({
           success = true;
         }
       } else if (itemType === 'message') {
+        // Handle message reactions
         const { data: existing } = await supabase
           .from('chat_message_reactions')
           .select('id')
@@ -107,6 +105,7 @@ const ReactionButton = ({
           .maybeSingle();
           
         if (existing) {
+          // Remove reaction if it exists
           const { error: deleteError } = await supabase
             .from('chat_message_reactions')
             .delete()
@@ -115,6 +114,7 @@ const ReactionButton = ({
           if (deleteError) throw deleteError;
           success = true;
         } else {
+          // Add new message reaction
           const { error: insertError } = await supabase
             .from('chat_message_reactions')
             .insert({
@@ -127,6 +127,7 @@ const ReactionButton = ({
           success = true;
         }
       } else {
+        // Handle reply reactions
         const { data: existing } = await supabase
           .from('reply_reactions')
           .select('id')
@@ -136,6 +137,7 @@ const ReactionButton = ({
           .maybeSingle();
           
         if (existing) {
+          // Remove reaction if it exists
           const { error: deleteError } = await supabase
             .from('reply_reactions')
             .delete()
@@ -144,6 +146,7 @@ const ReactionButton = ({
           if (deleteError) throw deleteError;
           success = true;
         } else {
+          // Add new reply reaction
           const { error: insertError } = await supabase
             .from('reply_reactions')
             .insert({
@@ -167,6 +170,7 @@ const ReactionButton = ({
   
   const fetchReactions = async () => {
     try {
+      // Using explicit typing to avoid excessive type instantiation
       type ReactionRow = {
         reaction_type: string;
         user_id: string;
@@ -174,6 +178,7 @@ const ReactionButton = ({
       
       let reactionData: ReactionRow[] = [];
       
+      // Direct table queries based on item type
       if (itemType === 'announcement') {
         const { data, error } = await supabase
           .from('announcement_reactions')
@@ -239,8 +244,10 @@ const ReactionButton = ({
   useEffect(() => {
     fetchReactions();
     
+    // Create a unique channel name to avoid collisions
     const channelName = `reactions_${itemType}_${itemId}`;
     
+    // Set up channel subscription based on itemType
     const channel = supabase.channel(channelName);
     
     if (itemType === 'announcement') {
@@ -286,7 +293,7 @@ const ReactionButton = ({
   if (reactions.length === 0 && iconOnly) {
     return (
       <Button 
-        variant="ghost"
+        variant="ghost" 
         size="icon" 
         className={cn(
           'h-auto w-auto p-1 rounded-full hover:bg-muted/30', 

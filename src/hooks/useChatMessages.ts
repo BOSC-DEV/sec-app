@@ -2,21 +2,16 @@
 import { useState, useEffect } from 'react';
 import { ChatMessage } from '@/types/dataTypes';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
-import { handleError } from '@/utils/errorHandling';
 
-const MESSAGES_PER_PAGE = 20;
+const MESSAGES_PER_PAGE = 50;
 
 export const useChatMessages = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  
-  // Fetch initial messages
+
   const fetchMessages = async (startIndex: number = 0) => {
     try {
-      setIsLoading(true);
       const { data, error } = await supabase
         .from('chat_messages')
         .select('*')
@@ -31,7 +26,7 @@ export const useChatMessages = () => {
       if (startIndex === 0) {
         setMessages(newMessages.reverse());
       } else {
-        setMessages(prev => [...prev, ...newMessages.reverse()]);
+        setMessages(prev => [...newMessages.reverse(), ...prev]);
       }
     } catch (error) {
       console.error('Error fetching chat messages:', error);
@@ -52,7 +47,7 @@ export const useChatMessages = () => {
     try {
       let imageUrl = null;
       
-      // Handle image upload if present
+      // If there's an image file, upload it first
       if (messageData.image_file) {
         const fileExt = messageData.image_file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
@@ -70,9 +65,9 @@ export const useChatMessages = () => {
           
         imageUrl = data.publicUrl;
       }
-
-      // Insert new message
-      const { error } = await supabase
+      
+      // Now insert the chat message with the image URL if available
+      const { data, error } = await supabase
         .from('chat_messages')
         .insert({
           content: messageData.content,
@@ -81,20 +76,19 @@ export const useChatMessages = () => {
           author_username: messageData.author_username,
           author_profile_pic: messageData.author_profile_pic,
           author_sec_balance: messageData.author_sec_balance,
-          image_url: imageUrl
-        });
-
+          image_url: imageUrl,
+          likes: 0,
+          dislikes: 0
+        })
+        .select()
+        .single();
+        
       if (error) throw error;
-
-      toast({
-        title: 'Message sent',
-        description: 'Your message has been sent successfully'
-      });
       
-      return true;
+      return data as ChatMessage;
     } catch (error) {
-      handleError(error, 'Failed to send message');
-      return false;
+      console.error('Error sending chat message:', error);
+      throw error;
     }
   };
 
@@ -104,71 +98,46 @@ export const useChatMessages = () => {
         .from('chat_messages')
         .delete()
         .eq('id', messageId);
-
+        
       if (error) throw error;
-      
-      toast({
-        title: 'Message deleted',
-        description: 'Message deleted successfully'
-      });
       
       return true;
     } catch (error) {
-      handleError(error, 'Failed to delete message');
+      console.error('Error deleting chat message:', error);
       return false;
     }
   };
 
-  // Set up real-time subscription for messages
-  useEffect(() => {
-    fetchMessages();
-
-    // Subscribe to channel only if not already subscribed
-    if (!isSubscribed) {
-      const channel = supabase
-        .channel('chat-updates')
-        .on('postgres_changes', {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'chat_messages'
-        }, payload => {
-          const newMessage = payload.new as ChatMessage;
-          console.log('New message received:', newMessage);
-          
-          setMessages(prev => [...prev, newMessage]);
-        })
-        .on('postgres_changes', {
-          event: 'DELETE',
-          schema: 'public',
-          table: 'chat_messages'
-        }, payload => {
-          console.log('Message deleted:', payload.old);
-          
-          setMessages(prev => prev.filter(msg => msg.id !== payload.old.id));
-        })
-        .subscribe();
-
-      setIsSubscribed(true);
-      console.log('Supabase realtime subscription set up');
-
-      return () => {
-        supabase.removeChannel(channel);
-        setIsSubscribed(false);
-      };
-    }
-  }, [isSubscribed]);
-
-  // Function to load older messages when scrolling up
-  const loadOlderMessages = () => {
+  const loadMore = () => {
     if (!hasMore || isLoading) return;
     fetchMessages(messages.length);
   };
+
+  useEffect(() => {
+    fetchMessages();
+
+    // Set up real-time subscription for new messages
+    const channel = supabase
+      .channel('public:chat_messages')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'chat_messages'
+      }, payload => {
+        setMessages(prev => [...prev, payload.new as ChatMessage]);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   return {
     messages,
     isLoading,
     hasMore,
-    loadOlderMessages,
+    loadMore,
     sendChatMessage,
     deleteChatMessage
   };
