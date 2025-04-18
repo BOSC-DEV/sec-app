@@ -15,7 +15,7 @@ interface ReactionButtonProps {
   itemType: ItemType;
   size?: 'xs' | 'sm' | 'md';
   iconOnly?: boolean;
-  variant?: string;
+  variant?: "ghost" | "default" | "destructive" | "outline" | "secondary" | "link" | "iccblue" | "gold" | "danger" | "neutral";
 }
 
 interface ReactionCount {
@@ -42,7 +42,13 @@ const getReactionIcon = (type: ReactionType, active: boolean, size: 'xs' | 'sm' 
   }
 };
 
-const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false, variant = 'ghost' }: ReactionButtonProps) => {
+const ReactionButton = ({ 
+  itemId, 
+  itemType, 
+  size = 'sm', 
+  iconOnly = false, 
+  variant = "ghost" 
+}: ReactionButtonProps) => {
   const { profile, isConnected } = useProfile();
   const [reactions, setReactions] = useState<ReactionCount[]>([]);
   const [showEmojis, setShowEmojis] = useState(false);
@@ -280,7 +286,7 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false, varia
   if (reactions.length === 0 && iconOnly) {
     return (
       <Button 
-        variant={variant} 
+        variant="ghost"
         size="icon" 
         className={cn(
           'h-auto w-auto p-1 rounded-full hover:bg-muted/30', 
@@ -303,7 +309,7 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false, varia
           reaction.count > 0 && (
             <Button
               key={reaction.reaction_type}
-              variant={variant}
+              variant="ghost"
               size="icon"
               className={cn(
                 'h-auto w-auto p-0.5 rounded-full',
@@ -328,7 +334,7 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false, varia
               reaction.count > 0 && (
                 <Button
                   key={reaction.reaction_type}
-                  variant={variant}
+                  variant="ghost"
                   size="sm"
                   className={cn(
                     'h-7 px-2 mr-1 mb-1 rounded-full',
@@ -345,14 +351,14 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false, varia
             ))}
             
             <DropdownMenuTrigger asChild>
-              <Button variant={variant} size="sm" className="h-7 px-2 rounded-full">
+              <Button variant="ghost" size="sm" className="h-7 px-2 rounded-full">
                 <MessagesSquare className={size === 'xs' ? 'h-3.5 w-3.5' : size === 'sm' ? 'h-4 w-4' : 'h-5 w-5'} />
               </Button>
             </DropdownMenuTrigger>
           </>
         ) : (
           <DropdownMenuTrigger asChild>
-            <Button variant={variant} size="sm" className="h-7 px-3 rounded-full">
+            <Button variant="ghost" size="sm" className="h-7 px-3 rounded-full">
               <Heart className={size === 'xs' ? 'h-3.5 w-3.5' : size === 'sm' ? 'h-4 w-4' : 'h-5 w-5'} />
               <span className="ml-1 text-sm">React</span>
             </Button>

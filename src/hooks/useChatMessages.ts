@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { ChatMessage } from '@/types/dataTypes';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -84,12 +84,8 @@ export const useChatMessages = () => {
           image_url: imageUrl
         });
 
-      if (error) {
-        console.error('Error details:', error);
-        throw error;
-      }
+      if (error) throw error;
 
-      // We don't need to update local state as the subscription will handle it
       toast({
         title: 'Message sent',
         description: 'Your message has been sent successfully'
@@ -111,7 +107,6 @@ export const useChatMessages = () => {
 
       if (error) throw error;
       
-      // Subscription will handle the state update
       toast({
         title: 'Message deleted',
         description: 'Message deleted successfully'
@@ -140,7 +135,6 @@ export const useChatMessages = () => {
           const newMessage = payload.new as ChatMessage;
           console.log('New message received:', newMessage);
           
-          // Add the new message to the end of the list
           setMessages(prev => [...prev, newMessage]);
         })
         .on('postgres_changes', {
@@ -150,7 +144,6 @@ export const useChatMessages = () => {
         }, payload => {
           console.log('Message deleted:', payload.old);
           
-          // Remove the deleted message from the list
           setMessages(prev => prev.filter(msg => msg.id !== payload.old.id));
         })
         .subscribe();
