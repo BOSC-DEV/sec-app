@@ -746,10 +746,6 @@ export type Database = {
         Args: { p_announcement_id: string }
         Returns: undefined
       }
-      is_admin: {
-        Args: { username_param: string }
-        Returns: boolean
-      }
       is_duplicate_view: {
         Args: { p_scammer_id: string; p_ip_hash: string }
         Returns: boolean

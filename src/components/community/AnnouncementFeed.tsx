@@ -43,29 +43,6 @@ import { formatTimeAgo } from '@/utils/formatTime';
 import { useBadgeTier } from '@/hooks/useBadgeTier';
 import { isAdmin } from '@/utils/adminUtils';
 import { BadgeTier } from '@/utils/badgeUtils';
-import { supabase } from '@/integrations/supabase/client';
-
-const notifyAllUsersAboutAnnouncement = async (
-  announcementId: string,
-  content: string,
-  authorId: string,
-  authorName: string,
-  authorUsername?: string,
-  authorProfilePic?: string
-): Promise<void> => {
-  try {
-    console.log('Notifying users about new announcement:', {
-      announcementId,
-      content,
-      authorId,
-      authorName,
-      authorUsername,
-      authorProfilePic
-    });
-  } catch (error) {
-    console.error('Error notifying users about announcement:', error);
-  }
-};
 
 const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false }) => {
   const { profile, isConnected } = useProfile();
@@ -85,41 +62,39 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editContent, setEditContent] = useState('');
   const [editingAnnouncementId, setEditingAnnouncementId] = useState<string | null>(null);
-  const [adminCheckComplete, setAdminCheckComplete] = useState(false);
 
   console.log("AnnouncementFeed rendering. Profile username:", profile?.username);
   console.log("Announcement Tab state:", announcementTab);
-  console.log("Admin state:", isUserAdminState);
   
   useEffect(() => {
     const checkAdminStatus = async () => {
-      if (!profile?.username) {
-        console.log('No profile username available for admin check');
-        setIsUserAdmin(false);
-        setAdminCheckComplete(true);
-        return;
+      console.log("Checking admin status for:", profile?.username);
+      let adminStatus = false;
+      
+      if (profile?.username) {
+        adminStatus = isAdmin(profile.username);
+        console.log(`Admin check from hardcoded list for ${profile.username}: ${adminStatus}`);
+        
+        if (!adminStatus) {
+          try {
+            const serverAdminStatus = await isUserAdmin(profile.username);
+            console.log(`Server admin check for ${profile.username}: ${serverAdminStatus}`);
+            adminStatus = serverAdminStatus;
+          } catch (error) {
+            console.error('Error checking admin status:', error);
+          }
+        }
       }
       
-      console.log("Checking admin status for:", profile.username);
+      console.log(`Final admin status for ${profile?.username}: ${adminStatus}`);
+      setIsUserAdmin(adminStatus);
       
-      try {
-        const adminStatus = await isAdmin(profile.username);
-        console.log(`Admin check result for ${profile.username}:`, adminStatus);
-        
-        setIsUserAdmin(adminStatus);
-        
-        const isWhale = badgeInfo?.tier === BadgeTier.Whale;
-        console.log(`Whale badge status: ${isWhale}, Badge tier: ${badgeInfo?.tier}`);
-        
-        const hasCreatePermission = adminStatus || isWhale;
-        console.log(`Setting can create announcements to: ${hasCreatePermission}`);
-        setCanCreateAnnouncements(hasCreatePermission);
-      } catch (error) {
-        console.error('Error checking admin status:', error);
-        setIsUserAdmin(false);
-      } finally {
-        setAdminCheckComplete(true);
-      }
+      const isWhale = badgeInfo?.tier === BadgeTier.Whale;
+      console.log(`Whale badge status: ${isWhale}, Badge tier: ${badgeInfo?.tier}`);
+      
+      const hasCreatePermission = adminStatus || isWhale;
+      console.log(`Setting can create announcements to: ${hasCreatePermission}`);
+      setCanCreateAnnouncements(hasCreatePermission);
     };
     
     checkAdminStatus();
@@ -206,7 +181,6 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
     e.preventDefault();
     
     console.log("Submit button clicked. Can create:", canCreateAnnouncements);
-    console.log("Admin status:", isUserAdminState);
     
     if (!canCreateAnnouncements) {
       toast({
@@ -477,6 +451,62 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
     };
   }, [filteredAnnouncements, viewedAnnouncements]);
   
+  useEffect(() => {
+    if (!profile?.username) {
+      console.log('No profile username available for admin check');
+      setIsUserAdmin(false);
+      return;
+    }
+
+    const checkAdminStatus = async () => {
+      try {
+        const adminStatus = await isAdmin(profile.username);
+        console.log(`Admin status check for ${profile.username}:`, adminStatus);
+        setIsUserAdmin(adminStatus);
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        setIsUserAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [profile?.username]);
+
+  // Log whenever admin tools visibility should change
+  useEffect(() => {
+    console.log('Admin tools visibility state:', {
+      isUserAdmin: isUserAdminState,
+      username: profile?.username,
+      isConnected: profile !== null
+    });
+  }, [isUserAdminState, profile]);
+  
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-12">
+        <div className="animate-pulse flex flex-col space-y-4 w-full max-w-3xl">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-muted rounded-md h-40 w-full"></div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  
+  if (announcements.length === 0) {
+    return (
+      <Card className="bg-muted/50">
+        <CardContent className="flex flex-col items-center justify-center py-12">
+          <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
+          <h3 className="text-xl font-medium text-center">No Announcements Yet</h3>
+          <p className="text-muted-foreground text-center mt-1">
+            Check back later for updates from the team
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+  
   const renderAnnouncementCard = (announcement: Announcement) => {
     const time = formatTimeAgo(announcement.created_at);
     
@@ -583,7 +613,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   
   return (
     <div className="space-y-6">
-      {isUserAdminState && adminCheckComplete && (
+      {isUserAdminState && (
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center">
@@ -663,7 +693,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
       )}
       
       {useCarousel ? (
-        <React.Fragment>
+        <>
           <Carousel className="w-full">
             <CarouselContent>
               {filteredAnnouncements.map((announcement) => (
@@ -678,7 +708,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
           <div className="text-center text-muted-foreground text-sm">
             {currentIndex + 1} of {filteredAnnouncements.length} announcements
           </div>
-        </React.Fragment>
+        </>
       ) : (
         <div className="space-y-4">
           {filteredAnnouncements.map(renderAnnouncementCard)}
@@ -703,28 +733,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
             >
               Cancel
             </Button>
-            <Button onClick={() => {
-              if (editingAnnouncementId) {
-                editAnnouncement(editingAnnouncementId, editContent).then((success) => {
-                  if (success) {
-                    toast({
-                      title: "Announcement updated",
-                      description: "The announcement has been updated successfully",
-                      variant: "default",
-                    });
-                    setEditDialogOpen(false);
-                    refetch();
-                  }
-                }).catch(error => {
-                  console.error('Error updating announcement:', error);
-                  toast({
-                    title: "Error",
-                    description: "Failed to update announcement. Please try again.",
-                    variant: "destructive",
-                  });
-                });
-              }
-            }}>Save Changes</Button>
+            <Button onClick={handleEditAnnouncement}>Save Changes</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

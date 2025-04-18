@@ -1,4 +1,3 @@
-
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -29,17 +28,17 @@ export const isAdmin = async (username: string): Promise<boolean> => {
 
   // If not in hardcoded list, check database
   try {
-    // Use a direct function call that returns boolean
-    const { data, error } = await supabase
-      .rpc('is_admin', { username_param: username.toLowerCase() });
-    
+    const { data: isDbAdmin, error } = await supabase
+      .rpc('is_admin', { username_param: username.toLowerCase() })
+      .single();
+
     if (error) {
       console.error('Error checking admin status in database:', error);
       return false;
     }
 
-    console.log(`Database admin check for ${username}:`, data);
-    return !!data;
+    console.log(`Database admin check for ${username}:`, isDbAdmin);
+    return isDbAdmin || false;
   } catch (error) {
     console.error('Error in isAdmin check:', error);
     return false;
