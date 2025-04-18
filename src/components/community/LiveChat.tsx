@@ -122,6 +122,7 @@ const LiveChat = () => {
         author_name: profile?.display_name || '',
         author_username: profile?.username || '',
         author_profile_pic: profile?.profile_pic_url || '',
+        author_sec_balance: profile?.sec_balance || 0,
         image_file: imageFile
       });
       setNewMessage('');
@@ -209,9 +210,12 @@ const LiveChat = () => {
   };
 
   const renderMessage = (message: any, index: number) => {
+    console.log("Rendering message:", message);
     // Get badge info based on SEC balance
     const userBadge = message.author_sec_balance !== undefined ? 
       calculateBadgeTier(message.author_sec_balance) : null;
+    
+    console.log("User badge for message:", userBadge, "SEC balance:", message.author_sec_balance);
     
     const isCurrentUser = message.author_id === profile?.wallet_address;
     const time = formatTimeAgo(message.created_at);
@@ -360,4 +364,3 @@ const LiveChat = () => {
 };
 
 export default LiveChat;
-
