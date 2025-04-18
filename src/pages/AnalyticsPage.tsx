@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BarChart, Users, Globe, TrendingUp, Shield, UserCheck, Coins, Receipt, UserRound, MessagesSquare } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { formatCurrency } from '@/lib/utils';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
 import { getStatistics } from '@/services/statisticsService';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 interface BountyStatsData {
   total_bounties: number;
@@ -88,7 +88,12 @@ const AnalyticsPage: React.FC = () => {
     };
   }, []);
 
-  if (isLoading) return <div>Loading analytics...</div>;
+  if (isLoading) return (
+    <div className="flex justify-center items-center h-screen">
+      <LoadingSpinner size="lg" />
+    </div>
+  );
+  
   if (error) return <div>Error loading analytics</div>;
 
   return (
