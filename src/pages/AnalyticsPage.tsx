@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { formatCurrency } from '@/utils/formatCurrency';
+import { formatCurrency } from '@/lib/utils';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
 
 interface DailyVisitorData {
@@ -366,9 +366,7 @@ const AnalyticsPage: React.FC = () => {
                   <CurrencyIcon size="md" className="text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
-                    {formatCurrency(data?.bountyStats?.avg_bounty || 0)}
-                  </div>
+                  <div className="text-2xl font-bold">{formatCurrency(data?.bountyStats?.avg_bounty || 0)}</div>
                 </CardContent>
               </Card>
             </div>
