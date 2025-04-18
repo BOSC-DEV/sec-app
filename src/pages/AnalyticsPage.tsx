@@ -237,7 +237,7 @@ const AnalyticsPage: React.FC = () => {
                 <CurrencyIcon size="md" className="text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">${data?.bountyStats?.total_bounties.toFixed(2) || '0.00'}</div>
+                <div className="text-2xl font-bold">{formatCurrency(data?.bountyStats?.total_bounties || 0)}</div>
               </CardContent>
             </Card>
 
@@ -392,7 +392,7 @@ const AnalyticsPage: React.FC = () => {
                       <tr key={index} className="border-b">
                         <td>{scammer.name}</td>
                         <td className="text-right">{scammer.views}</td>
-                        <td className="text-right">${scammer.total_bounty.toFixed(2)}</td>
+                        <td className="text-right">{formatCurrency(scammer.total_bounty)}</td>
                         <td className="text-right">{scammer.report_count}</td>
                       </tr>
                     ))}
