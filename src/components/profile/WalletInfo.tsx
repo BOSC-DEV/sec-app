@@ -45,9 +45,14 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
             delegator_username: delegation.delegator_username,
             display_name: delegation.display_name
           });
+        } else {
+          // Clear delegation info if no active delegation is found
+          setDelegationInfo(null);
         }
       } catch (error) {
         console.error('Error loading delegation info:', error);
+        // On error, clear delegation info to avoid showing stale data
+        setDelegationInfo(null);
       }
     };
     
