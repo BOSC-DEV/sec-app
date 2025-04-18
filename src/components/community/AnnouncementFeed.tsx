@@ -12,7 +12,6 @@ import {
   voteSurvey,
   getUserSurveyVote
 } from '@/services/communityService';
-import { notifyAllUsersAboutAnnouncement } from '@/services/notificationService';
 import { Announcement } from '@/types/dataTypes';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -452,6 +451,36 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
     };
   }, [filteredAnnouncements, viewedAnnouncements]);
   
+  useEffect(() => {
+    if (!profile?.username) {
+      console.log('No profile username available for admin check');
+      setIsUserAdmin(false);
+      return;
+    }
+
+    const checkAdminStatus = async () => {
+      try {
+        const adminStatus = await isAdmin(profile.username);
+        console.log(`Admin status check for ${profile.username}:`, adminStatus);
+        setIsUserAdmin(adminStatus);
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        setIsUserAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [profile?.username]);
+
+  // Log whenever admin tools visibility should change
+  useEffect(() => {
+    console.log('Admin tools visibility state:', {
+      isUserAdmin: isUserAdminState,
+      username: profile?.username,
+      isConnected: profile !== null
+    });
+  }, [isUserAdminState, profile]);
+  
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
@@ -584,14 +613,12 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   
   return (
     <div className="space-y-6">
-      {(isUserAdminState || badgeInfo?.tier === BadgeTier.Whale) && (
+      {isUserAdminState && (
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center">
               <Megaphone className="h-5 w-5 mr-2 text-icc-gold" />
-              <h3 className="text-lg font-medium">
-                {isUserAdminState ? "Admin Tools" : "Whale Badge Privileges"}
-              </h3>
+              <h3 className="text-lg font-medium">Admin Tools</h3>
             </div>
             <Tabs 
               defaultValue="post" 
