@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { isAdmin } from '@/utils/adminUtils';
@@ -7,14 +6,19 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useChatMessages } from '@/hooks/useChatMessages';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Send, Trash2 } from 'lucide-react';
+import { Send, Trash2, ThumbsUp, ThumbsDown, Image, Clock } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { formatTimeAgo } from '@/utils/formatTime';
+import ReactionButton from './ReactionButton';
+import { Badge } from '@/components/ui/badge';
 
 const LiveChat = () => {
   const { profile } = useProfile();
   const [isUserAdmin, setIsUserAdmin] = useState(false);
   const [message, setMessage] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const {
     messages,
@@ -45,31 +49,28 @@ const LiveChat = () => {
     }
   }, [messages]);
 
-  useEffect(() => {
-    // Set up realtime subscription for new chat messages
-    const channel = supabase
-      .channel('chat-updates')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'chat_messages'
-        },
-        (payload) => {
-          console.log('New chat message received:', payload);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast({
+          title: "Error",
+          description: "Image size must be less than 5MB",
+          variant: "destructive"
+        });
+        return;
+      }
+      setImageFile(file);
+      toast({
+        title: "Image attached",
+        description: "Image will be sent with your message"
+      });
+    }
+  };
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!profile || !message.trim()) return;
+    if (!profile || (!message.trim() && !imageFile)) return;
 
     try {
       await sendChatMessage({
@@ -78,9 +79,14 @@ const LiveChat = () => {
         author_name: profile.display_name,
         author_username: profile.username,
         author_profile_pic: profile.profile_pic_url,
-        author_sec_balance: profile.sec_balance
+        author_sec_balance: profile.sec_balance,
+        image_file: imageFile
       });
       setMessage('');
+      setImageFile(null);
+      if (imageInputRef.current) {
+        imageInputRef.current.value = '';
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
@@ -109,9 +115,14 @@ const LiveChat = () => {
   };
 
   return (
-    <Card className="flex-1 overflow-hidden h-[600px] flex flex-col">
-      <CardHeader className="pb-3">
-        <h3 className="text-lg font-semibold">Live Chat</h3>
+    <Card className="flex-1 overflow-hidden h-[600px] flex flex-col bg-blue-950/10 border-blue-900/20">
+      <CardHeader className="pb-3 border-b border-blue-900/20">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100">Live Chat</h3>
+          <Badge variant="secondary" className="bg-blue-100 text-blue-900">
+            {messages.length} messages
+          </Badge>
+        </div>
       </CardHeader>
       <CardContent className="p-0 flex-1 flex flex-col">
         <ScrollArea className="flex-1" ref={scrollRef}>
@@ -144,15 +155,21 @@ const LiveChat = () => {
                   className={`
                     flex-1 p-3 rounded-lg 
                     ${msg.author_id === profile?.id 
-                      ? 'bg-primary text-primary-foreground ml-12' 
-                      : 'bg-muted mr-12'
+                      ? 'bg-blue-900 text-white ml-12' 
+                      : 'bg-blue-50 dark:bg-blue-900/30 mr-12'
                     }
                   `}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-semibold text-sm">
-                      {msg.author_name}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-sm">
+                        {msg.author_name}
+                      </span>
+                      <span className="text-xs opacity-70 flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {formatTimeAgo(msg.created_at)}
+                      </span>
+                    </div>
                     {(isUserAdmin || msg.author_id === profile?.id) && (
                       <Button 
                         variant="ghost" 
@@ -172,25 +189,55 @@ const LiveChat = () => {
                       className="mt-2 max-w-full rounded"
                     />
                   )}
+                  <div className="mt-2 flex items-center gap-2">
+                    <ReactionButton
+                      itemId={msg.id}
+                      itemType="message"
+                      size="xs"
+                      iconOnly
+                    />
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         </ScrollArea>
         {profile ? (
-          <form onSubmit={handleSendMessage} className="p-4 flex gap-2 border-t">
-            <Input
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Type your message..."
-              className="flex-1"
-            />
-            <Button type="submit" disabled={!message.trim()}>
+          <form onSubmit={handleSendMessage} className="p-4 flex gap-2 border-t border-blue-900/20">
+            <div className="flex-1 flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="shrink-0"
+                onClick={() => imageInputRef.current?.click()}
+              >
+                <Image className="h-4 w-4" />
+                <input
+                  type="file"
+                  ref={imageInputRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                />
+              </Button>
+              <Input
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Type your message..."
+                className="flex-1"
+              />
+            </div>
+            <Button 
+              type="submit" 
+              disabled={!message.trim() && !imageFile}
+              className="bg-blue-900 hover:bg-blue-800"
+            >
               <Send className="h-4 w-4" />
             </Button>
           </form>
         ) : (
-          <div className="p-4 text-center text-muted-foreground border-t">
+          <div className="p-4 text-center text-muted-foreground border-t border-blue-900/20">
             Please sign in to participate in the chat
           </div>
         )}
