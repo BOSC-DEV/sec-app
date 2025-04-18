@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart, Users, Globe, TrendingUp, Shield, UserCheck, Coins, Receipt, UserRound } from 'lucide-react';
+import { BarChart, Users, Globe, TrendingUp, Shield, UserCheck, Coins, Receipt, UserRound, MessagesSquare } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
@@ -54,6 +54,8 @@ interface HomepageStatistics {
   scammersCount: number;
   reportersCount: number;
   usersCount: number;
+  totalMessages: number;
+  uniqueVisitors: number;
 }
 
 const fetchAnalyticsData = async (): Promise<AnalyticsData> => {
@@ -237,17 +239,46 @@ const AnalyticsPage: React.FC = () => {
     queryFn: getStatistics,
     staleTime: 1000 * 60 * 5
   });
+  
+  React.useEffect(() => {
+    const channel = supabase
+      .channel('public:chat_messages')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'chat_messages'
+      }, () => {
+        const queryClient = (window as any).__REACT_QUERY_DEVTOOLS_GLOBAL_HOOK__?.getQueryClient();
+        if (queryClient) {
+          queryClient.invalidateQueries({ queryKey: ['statistics'] });
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   if (isLoading) return <div>Loading analytics...</div>;
   if (error) return <div>Error loading analytics</div>;
 
-  const totalVisits = homepageStats?.scammersCount ? 661 : 0;
+  const totalVisits = data?.dailyVisitors.reduce((sum, day) => sum + day.total_visits, 0) || 0;
 
   return <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Analytics Dashboard</h1>
       
       <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="visitors">Visitors</TabsTrigger>
+          <TabsTrigger value="countries">Countries</TabsTrigger>
+          <TabsTrigger value="reports">Reports</TabsTrigger>
+          <TabsTrigger value="bounties">Bounties</TabsTrigger>
+        </TabsList>
+        
         <TabsContent value="overview">
-          <div className="grid gap-4 md:grid-cols-5">
+          <div className="grid gap-4 md:grid-cols-6">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Visits</CardTitle>
@@ -267,7 +298,19 @@ const AnalyticsPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  101
+                  {homepageStats?.uniqueVisitors || 0}
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Chat Messages</CardTitle>
+                <MessagesSquare className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {homepageStats?.totalMessages || 0}
                 </div>
               </CardContent>
             </Card>
