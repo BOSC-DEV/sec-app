@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { formatCurrency } from '@/lib/utils';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
+import { getStatistics } from '@/services/statisticsService';
 
 interface DailyVisitorData {
   day: string;
@@ -49,8 +50,18 @@ interface AnalyticsData {
   bountyStats: BountyStatsData;
 }
 
+interface HomepageStatistics {
+  totalBounty: number;
+  scammersCount: number;
+  reportersCount: number;
+  usersCount: number;
+}
+
 const fetchAnalyticsData = async (): Promise<AnalyticsData> => {
   try {
+    // Get the homepage statistics to ensure consistent data
+    const homepageStats = await getStatistics();
+    
     // Fetch daily visitors data directly from the analytics_pageviews table
     const { data: rawVisitorData, error: dailyError } = await supabase
       .from('analytics_pageviews')
@@ -181,20 +192,18 @@ const fetchAnalyticsData = async (): Promise<AnalyticsData> => {
     if (bountyError) console.error('Error fetching bounty stats:', bountyError);
     
     const bountyStats: BountyStatsData = {
-      total_bounties: 0,
+      total_bounties: homepageStats.totalBounty, // Use homepage stats for total bounties
       active_bounties: 0,
       avg_bounty: 0,
       total_contributors: 0
     };
     
     if (bountyContributions && bountyContributions.length > 0) {
-      const totalAmount = bountyContributions.reduce((sum, contribution) => sum + Number(contribution.amount), 0);
       const uniqueScammers = new Set(bountyContributions.map(contribution => contribution.scammer_id));
       const uniqueContributors = new Set(bountyContributions.map(contribution => contribution.contributor_id));
       
-      bountyStats.total_bounties = totalAmount;
       bountyStats.active_bounties = uniqueScammers.size;
-      bountyStats.avg_bounty = totalAmount / bountyContributions.length;
+      bountyStats.avg_bounty = bountyStats.total_bounties / bountyContributions.length;
       bountyStats.total_contributors = uniqueContributors.size;
     }
     
@@ -233,14 +242,25 @@ const fetchAnalyticsData = async (): Promise<AnalyticsData> => {
 };
 
 const AnalyticsPage: React.FC = () => {
+  // Fetch analytics data 
   const { data, isLoading, error } = useQuery({
     queryKey: ['analyticsData'],
     queryFn: fetchAnalyticsData,
     staleTime: 1000 * 60 * 5,
   });
 
+  // Fetch homepage statistics to ensure consistent reporting
+  const { data: homepageStats } = useQuery({
+    queryKey: ['statistics'],
+    queryFn: getStatistics,
+    staleTime: 1000 * 60 * 5,
+  });
+
   if (isLoading) return <div>Loading analytics...</div>;
   if (error) return <div>Error loading analytics</div>;
+
+  // Use homepage statistics for reports count
+  const totalReports = homepageStats?.scammersCount || 0;
 
   return (
     <div className="container mx-auto p-6">
@@ -276,7 +296,7 @@ const AnalyticsPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {data?.reportStats?.reduce((sum, day) => sum + day.report_count, 0) || 0}
+                  {totalReports}
                 </div>
               </CardContent>
             </Card>
@@ -307,7 +327,7 @@ const AnalyticsPage: React.FC = () => {
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{data?.bountyStats?.total_contributors || 0}</div>
+                <div className="text-2xl font-bold">{homepageStats?.usersCount || data?.bountyStats?.total_contributors || 0}</div>
               </CardContent>
             </Card>
           </div>
