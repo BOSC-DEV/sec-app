@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { formatCurrency } from '@/utils/formatCurrency';
 
 interface DailyVisitorData {
   day: string;
@@ -53,10 +54,12 @@ interface AnalyticsData {
 
 const fetchAnalyticsData = async (): Promise<AnalyticsData & { revenue: RevenueData }> => {
   try {
-    const { data: dailyVisitors, error: dailyError } = await supabase.rpc('get_daily_visitors');
+    const { data: dailyVisitors, error: dailyError } = await supabase
+      .rpc('get_daily_visitors');
     if (dailyError) console.error('Error fetching daily visitors:', dailyError);
 
-    const { data: countryStats, error: countryError } = await supabase.rpc('get_country_stats');
+    const { data: countryStats, error: countryError } = await supabase
+      .rpc('get_country_stats');
     if (countryError) console.error('Error fetching country stats:', countryError);
 
     const { data: topScammers, error: scammersError } = await supabase
