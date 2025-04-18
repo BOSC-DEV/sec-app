@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { toast } from '@/hooks/use-toast';
@@ -164,7 +163,7 @@ const BountyForm: React.FC<BountyFormProps> = ({
         buttonText="Add Bounty"
       />
 
-      <div className="mt-2">
+      <div className="mt-2 mb-4">
         <BountyTransferDialog 
           scammerId={scammerId} 
           scammerName={scammerName}
@@ -172,9 +171,16 @@ const BountyForm: React.FC<BountyFormProps> = ({
           bountyAmount={0}
         />
       </div>
+
+      {profile && profile.wallet_address && (
+        <div className="mt-2 bg-green-50 dark:bg-green-900/20 p-3 rounded-md text-center">
+          <p className="text-green-800 dark:text-green-200 flex items-center justify-center">
+            You've contributed 99 <CurrencyIcon className="mx-1" /> to this bounty
+          </p>
+        </div>
+      )}
     </div>
   );
 };
 
 export default BountyForm;
-
