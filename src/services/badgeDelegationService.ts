@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { handleError, ErrorSeverity } from '@/utils/errorHandling';
@@ -20,8 +19,7 @@ export const getDelegatedBadges = async (walletAddress: string): Promise<Delegat
   const { data, error } = await supabase
     .from('delegated_badges')
     .select('*')
-    .or(`delegator_wallet.eq.${walletAddress},delegated_wallet.eq.${walletAddress}`)
-    .eq('active', true);
+    .or(`delegator_wallet.eq.${walletAddress},delegated_wallet.eq.${walletAddress}`);
 
   if (error) {
     console.error('Error fetching delegated badges:', error);

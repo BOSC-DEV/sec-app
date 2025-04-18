@@ -47,8 +47,8 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
         // Force fresh data every time
         const delegations = await getDelegatedBadges(walletAddress);
         
-        // Find if this wallet is delegated a badge from someone
-        const delegation = delegations.find(d => d.delegated_wallet === walletAddress && d.active);
+        // Find if this wallet is delegated a badge from someone - only active delegations
+        const delegation = delegations.find(d => d.delegated_wallet === walletAddress && d.active === true);
         
         if (delegation) {
           console.log('Found active delegation:', delegation);
@@ -78,7 +78,7 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
       // Increment the force refresh counter to ensure we're not getting cached data
       setForceRefresh(prev => prev + 1);
       loadDelegationInfo();
-    }, 2000); // Check every 2 seconds
+    }, 1000); // Check every 1 second for more immediate updates
     
     return () => {
       clearInterval(intervalId); // Clean up the interval when the component unmounts
