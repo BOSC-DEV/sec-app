@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -6,17 +5,23 @@ import { Button } from '@/components/ui/button';
 import { ExternalLink, Copy, LogOut } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import BadgeGifting from './BadgeGifting';
+import { useBadgeTier } from '@/hooks/useBadgeTier';
 
 interface WalletInfoProps {
   walletAddress?: string | null;
   isOwnProfile?: boolean;
   secBalance?: number | null;
+  delegationLimit?: number;
+  remainingDelegations?: number;
 }
 
 const WalletInfo: React.FC<WalletInfoProps> = ({
   walletAddress,
   isOwnProfile = false,
-  secBalance = null
+  secBalance = null,
+  delegationLimit = 1,
+  remainingDelegations = 0
 }) => {
   const {
     disconnectWallet
@@ -44,9 +49,12 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
     navigate('/');
   };
 
+  const badgeInfo = useBadgeTier(secBalance);
+
   return <Card className="w-full dark:border-gray-700">
       <CardContent>
-        {walletAddress ? <div className="space-y-4">
+        {walletAddress ? (
+          <div className="space-y-4">
             <div>
               <div className="text-sm font-medium mb-1 text-gray-500 dark:text-gray-400 px-0 mt-[20px]">Address</div>
               <div className="flex items-center gap-2">
@@ -62,14 +70,32 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
               </div>
             </div>
 
-            {isOwnProfile && <div className="pt-4">
-                <Button variant="outline" className="w-full border-icc-red text-icc-red hover:bg-icc-red-light/10 hover:text-icc-red dark:border-red-700 dark:text-red-500 dark:hover:bg-red-900/20 flex items-center justify-center gap-2" onClick={handleDisconnect}>
-                  <LogOut className="h-4 w-4" /> Disconnect Wallet
-                </Button>
-              </div>}
-          </div> : <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+            {isOwnProfile && (
+              <>
+                <div className="pt-4">
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-icc-red text-icc-red hover:bg-icc-red-light/10 hover:text-icc-red dark:border-red-700 dark:text-red-500 dark:hover:bg-red-900/20 flex items-center justify-center gap-2" 
+                    onClick={handleDisconnect}
+                  >
+                    <LogOut className="h-4 w-4" /> Disconnect Wallet
+                  </Button>
+                </div>
+
+                <BadgeGifting
+                  walletAddress={walletAddress}
+                  badgeInfo={badgeInfo}
+                  delegationLimit={delegationLimit}
+                  remainingDelegations={remainingDelegations}
+                />
+              </>
+            )}
+          </div>
+        ) : (
+          <div className="text-center py-6 text-gray-500 dark:text-gray-400">
             No wallet connected
-          </div>}
+          </div>
+        )}
       </CardContent>
     </Card>;
 };
