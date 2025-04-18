@@ -21,6 +21,7 @@ const BountyForm: React.FC<BountyFormProps> = ({
   scammerName,
   developerWalletAddress
 }) => {
+  
   const { profile, connectWallet } = useProfile();
   const queryClient = useQueryClient();
   const [contributionAmount, setContributionAmount] = useState('0.00');
@@ -64,6 +65,7 @@ const BountyForm: React.FC<BountyFormProps> = ({
   });
   
   const handleAddBounty = async () => {
+    
     if (!profile) {
       await connectWallet();
       if (!profile) {
@@ -162,7 +164,7 @@ const BountyForm: React.FC<BountyFormProps> = ({
         profile={profile}
         buttonText="Add Bounty"
       />
-
+      
       <div className="mt-2 mb-4">
         <BountyTransferDialog 
           scammerId={scammerId} 
