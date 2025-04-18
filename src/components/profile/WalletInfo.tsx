@@ -32,7 +32,10 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
 
   useEffect(() => {
     const loadDelegationInfo = async () => {
-      if (!walletAddress) return;
+      if (!walletAddress) {
+        setDelegationInfo(null);
+        return;
+      }
       
       try {
         const delegations = await getDelegatedBadges(walletAddress);
@@ -40,6 +43,7 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
         const delegation = delegations.find(d => d.delegated_wallet === walletAddress && d.active);
         
         if (delegation) {
+          console.log('Found active delegation:', delegation);
           setDelegationInfo({
             delegator_wallet: delegation.delegator_wallet,
             delegator_username: delegation.delegator_username,
@@ -47,6 +51,7 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
           });
         } else {
           // Clear delegation info if no active delegation is found
+          console.log('No active delegation found for wallet:', walletAddress);
           setDelegationInfo(null);
         }
       } catch (error) {
@@ -57,6 +62,13 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
     };
     
     loadDelegationInfo();
+    
+    // Set up a refresh interval to check for delegation changes
+    const intervalId = setInterval(loadDelegationInfo, 10000); // Check every 10 seconds
+    
+    return () => {
+      clearInterval(intervalId); // Clean up the interval when the component unmounts
+    };
   }, [walletAddress]);
 
   const copyWalletAddress = () => {

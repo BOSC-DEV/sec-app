@@ -97,6 +97,8 @@ export const addBadgeDelegation = async (delegatedWallet: string, delegatorWalle
 
 export const removeBadgeDelegation = async (delegatedWallet: string, delegatorWallet: string): Promise<void> => {
   try {
+    console.log(`Attempting to remove delegation from ${delegatorWallet} to ${delegatedWallet}`);
+    
     // Get the delegation ID first to ensure we're deleting the right record
     const { data: delegations, error: findError } = await supabase
       .from('delegated_badges')
@@ -130,6 +132,19 @@ export const removeBadgeDelegation = async (delegatedWallet: string, delegatorWa
     }
     
     console.log(`Successfully deleted delegation with ID ${delegationId}`);
+    
+    // Force a refresh by calling the Supabase API again to verify deletion
+    const { data: checkDeletion } = await supabase
+      .from('delegated_badges')
+      .select('*')
+      .eq('id', delegationId);
+    
+    if (!checkDeletion || checkDeletion.length === 0) {
+      console.log('Verified deletion: delegation no longer exists in database');
+    } else {
+      console.warn('Deletion verification failed: delegation still exists in database');
+    }
+    
   } catch (error) {
     console.error('Error in removeBadgeDelegation:', error);
     handleError(error, {

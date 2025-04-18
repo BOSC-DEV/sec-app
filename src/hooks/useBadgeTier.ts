@@ -8,22 +8,24 @@ export const useBadgeTier = (walletAddressOrBalance: string | number | null): Ba
   const [badgeInfo, setBadgeInfo] = useState<BadgeInfo | null>(null);
   
   useEffect(() => {
+    let isMounted = true; // Flag to prevent state updates after unmount
+    
     const fetchBadgeInfo = async () => {
       // If null is passed, reset badge info
       if (walletAddressOrBalance === null) {
-        setBadgeInfo(null);
+        if (isMounted) setBadgeInfo(null);
         return;
       }
 
       // If a number is passed, treat it as direct SEC balance
       if (typeof walletAddressOrBalance === 'number') {
         if (walletAddressOrBalance < MIN_SEC_FOR_BADGE) {
-          setBadgeInfo(null);
+          if (isMounted) setBadgeInfo(null);
           return;
         }
         
         const calculatedBadgeInfo = calculateBadgeTier(walletAddressOrBalance);
-        setBadgeInfo(calculatedBadgeInfo);
+        if (isMounted) setBadgeInfo(calculatedBadgeInfo);
         return;
       }
 
@@ -39,11 +41,13 @@ export const useBadgeTier = (walletAddressOrBalance: string | number | null): Ba
         
         // Check if this wallet has any delegated badges
         const delegations = await getDelegatedBadges(walletAddressOrBalance);
+        console.log('Checking delegations for wallet:', walletAddressOrBalance, delegations);
         
         // Find a delegation where this wallet is the delegated wallet and the delegation is active
         const delegation = delegations.find(d => d.delegated_wallet === walletAddressOrBalance && d.active);
         
         if (delegation) {
+          console.log('Found active delegation:', delegation);
           // Get the delegator's profile to use their SEC balance
           const delegatorProfile = await getProfileByWallet(delegation.delegator_wallet);
           if (delegatorProfile?.sec_balance && delegatorProfile.sec_balance >= MIN_SEC_FOR_BADGE) {
@@ -52,30 +56,40 @@ export const useBadgeTier = (walletAddressOrBalance: string | number | null): Ba
             // If the user has their own badge, compare the tiers
             if (ownBadgeInfo) {
               // Get tier indices for comparison (higher index = higher tier)
-              const ownTierIndex = Object.values(ownBadgeInfo.tier).indexOf(ownBadgeInfo.tier);
+              const ownTierIndex = Object.values(delegatedBadgeInfo.tier).indexOf(ownBadgeInfo.tier);
               const delegatedTierIndex = Object.values(delegatedBadgeInfo.tier).indexOf(delegatedBadgeInfo.tier);
               
               // Use the higher tier badge
-              setBadgeInfo(ownTierIndex >= delegatedTierIndex ? ownBadgeInfo : delegatedBadgeInfo);
+              if (isMounted) setBadgeInfo(ownTierIndex >= delegatedTierIndex ? ownBadgeInfo : delegatedBadgeInfo);
               return;
             } else {
               // If user has no own badge, use the delegated one
-              setBadgeInfo(delegatedBadgeInfo);
+              if (isMounted) setBadgeInfo(delegatedBadgeInfo);
               return;
             }
           }
+        } else {
+          console.log('No active delegation found for wallet:', walletAddressOrBalance);
         }
 
         // If we got here, either there's no valid delegation or the user's own badge is higher
         // Fall back to the wallet's own SEC balance if available
-        setBadgeInfo(ownBadgeInfo);
+        if (isMounted) setBadgeInfo(ownBadgeInfo);
       } catch (error) {
         console.error("Error calculating badge tier:", error);
-        setBadgeInfo(null);
+        if (isMounted) setBadgeInfo(null);
       }
     };
 
     fetchBadgeInfo();
+    
+    // Set up a polling interval to check for updated delegation status
+    const intervalId = setInterval(fetchBadgeInfo, 10000); // Check every 10 seconds
+    
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
   }, [walletAddressOrBalance]);
   
   return badgeInfo;
