@@ -12,6 +12,7 @@ export const useChatMessages = () => {
 
   const fetchMessages = async (startIndex: number = 0) => {
     try {
+      setIsLoading(true);
       const { data, error } = await supabase
         .from('chat_messages')
         .select('*')
@@ -81,7 +82,10 @@ export const useChatMessages = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error details:', error);
+        throw error;
+      }
 
       return data as ChatMessage;
     } catch (error) {
@@ -120,9 +124,20 @@ export const useChatMessages = () => {
         table: 'chat_messages'
       }, payload => {
         const newMessage = payload.new as ChatMessage;
+        console.log('New message received:', newMessage);
         setMessages(prev => [...prev, newMessage]);
       })
+      .on('postgres_changes', {
+        event: 'DELETE',
+        schema: 'public',
+        table: 'chat_messages'
+      }, payload => {
+        console.log('Message deleted:', payload.old);
+        setMessages(prev => prev.filter(msg => msg.id !== payload.old.id));
+      })
       .subscribe();
+
+    console.log('Supabase realtime subscription set up');
 
     return () => {
       supabase.removeChannel(channel);
