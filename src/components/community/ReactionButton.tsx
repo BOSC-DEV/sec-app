@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -16,6 +15,13 @@ interface ReactionButtonProps {
   itemType: ItemType;
   size?: 'xs' | 'sm' | 'md';
   iconOnly?: boolean;
+  variant?: string;
+}
+
+interface ReactionCount {
+  reaction_type: string;
+  count: number;
+  has_reacted: boolean;
 }
 
 const getReactionIcon = (type: ReactionType, active: boolean, size: 'xs' | 'sm' | 'md') => {
@@ -36,13 +42,7 @@ const getReactionIcon = (type: ReactionType, active: boolean, size: 'xs' | 'sm' 
   }
 };
 
-interface ReactionCount {
-  reaction_type: string;
-  count: number;
-  has_reacted: boolean;
-}
-
-const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: ReactionButtonProps) => {
+const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false, variant = 'ghost' }: ReactionButtonProps) => {
   const { profile, isConnected } = useProfile();
   const [reactions, setReactions] = useState<ReactionCount[]>([]);
   const [showEmojis, setShowEmojis] = useState(false);
@@ -63,7 +63,6 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
       let success = false;
       
       if (itemType === 'announcement') {
-        // Handle announcement reactions
         const { data: existing } = await supabase
           .from('announcement_reactions')
           .select('id')
@@ -73,7 +72,6 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
           .maybeSingle();
           
         if (existing) {
-          // Remove reaction if it exists
           const { error: deleteError } = await supabase
             .from('announcement_reactions')
             .delete()
@@ -82,7 +80,6 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
           if (deleteError) throw deleteError;
           success = true;
         } else {
-          // Add new announcement reaction
           const { error: insertError } = await supabase
             .from('announcement_reactions')
             .insert({
@@ -95,7 +92,6 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
           success = true;
         }
       } else if (itemType === 'message') {
-        // Handle message reactions
         const { data: existing } = await supabase
           .from('chat_message_reactions')
           .select('id')
@@ -105,7 +101,6 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
           .maybeSingle();
           
         if (existing) {
-          // Remove reaction if it exists
           const { error: deleteError } = await supabase
             .from('chat_message_reactions')
             .delete()
@@ -114,7 +109,6 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
           if (deleteError) throw deleteError;
           success = true;
         } else {
-          // Add new message reaction
           const { error: insertError } = await supabase
             .from('chat_message_reactions')
             .insert({
@@ -127,7 +121,6 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
           success = true;
         }
       } else {
-        // Handle reply reactions
         const { data: existing } = await supabase
           .from('reply_reactions')
           .select('id')
@@ -137,7 +130,6 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
           .maybeSingle();
           
         if (existing) {
-          // Remove reaction if it exists
           const { error: deleteError } = await supabase
             .from('reply_reactions')
             .delete()
@@ -146,7 +138,6 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
           if (deleteError) throw deleteError;
           success = true;
         } else {
-          // Add new reply reaction
           const { error: insertError } = await supabase
             .from('reply_reactions')
             .insert({
@@ -170,7 +161,6 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
   
   const fetchReactions = async () => {
     try {
-      // Using explicit typing to avoid excessive type instantiation
       type ReactionRow = {
         reaction_type: string;
         user_id: string;
@@ -178,7 +168,6 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
       
       let reactionData: ReactionRow[] = [];
       
-      // Direct table queries based on item type
       if (itemType === 'announcement') {
         const { data, error } = await supabase
           .from('announcement_reactions')
@@ -244,10 +233,8 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
   useEffect(() => {
     fetchReactions();
     
-    // Create a unique channel name to avoid collisions
     const channelName = `reactions_${itemType}_${itemId}`;
     
-    // Set up channel subscription based on itemType
     const channel = supabase.channel(channelName);
     
     if (itemType === 'announcement') {
@@ -293,7 +280,7 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
   if (reactions.length === 0 && iconOnly) {
     return (
       <Button 
-        variant="ghost" 
+        variant={variant} 
         size="icon" 
         className={cn(
           'h-auto w-auto p-1 rounded-full hover:bg-muted/30', 
@@ -316,7 +303,7 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
           reaction.count > 0 && (
             <Button
               key={reaction.reaction_type}
-              variant="ghost"
+              variant={variant}
               size="icon"
               className={cn(
                 'h-auto w-auto p-0.5 rounded-full',
@@ -341,7 +328,7 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
               reaction.count > 0 && (
                 <Button
                   key={reaction.reaction_type}
-                  variant="ghost"
+                  variant={variant}
                   size="sm"
                   className={cn(
                     'h-7 px-2 mr-1 mb-1 rounded-full',
@@ -358,14 +345,14 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
             ))}
             
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-7 px-2 rounded-full">
+              <Button variant={variant} size="sm" className="h-7 px-2 rounded-full">
                 <MessagesSquare className={size === 'xs' ? 'h-3.5 w-3.5' : size === 'sm' ? 'h-4 w-4' : 'h-5 w-5'} />
               </Button>
             </DropdownMenuTrigger>
           </>
         ) : (
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-7 px-3 rounded-full">
+            <Button variant={variant} size="sm" className="h-7 px-3 rounded-full">
               <Heart className={size === 'xs' ? 'h-3.5 w-3.5' : size === 'sm' ? 'h-4 w-4' : 'h-5 w-5'} />
               <span className="ml-1 text-sm">React</span>
             </Button>
