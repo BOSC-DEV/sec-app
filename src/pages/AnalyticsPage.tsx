@@ -251,13 +251,7 @@ const AnalyticsPage: React.FC = () => {
       <h1 className="text-3xl font-bold mb-6">Analytics Dashboard</h1>
       
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          
-          
-          
-          <TabsTrigger value="bounties">Bounties</TabsTrigger>
-        </TabsList>
+        
         
         <TabsContent value="overview">
           <div className="grid gap-4 md:grid-cols-5">
