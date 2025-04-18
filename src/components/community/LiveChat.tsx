@@ -21,6 +21,7 @@ const LiveChat = () => {
   const [message, setMessage] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [initialScrollComplete, setInitialScrollComplete] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -49,11 +50,35 @@ const LiveChat = () => {
     checkAdminStatus();
   }, [profile?.username]);
 
+  // Only scroll to bottom on initial render and when sending a new message
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    // Skip if no messages or no ref
+    if (!messagesEndRef.current || messages.length === 0) {
+      return;
     }
-  }, [messages]);
+    
+    // For initial load, use a delay to ensure DOM is fully rendered
+    if (!initialScrollComplete) {
+      // Don't scroll if we're loading older messages
+      if (!isLoading) {
+        // Use timeout to ensure content is rendered
+        setTimeout(() => {
+          if (messagesContainerRef.current) {
+            messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+            setInitialScrollComplete(true);
+          }
+        }, 100);
+      }
+    } else if (isSending) {
+      // If user just sent a message, scroll to bottom
+      setTimeout(() => {
+        if (messagesContainerRef.current) {
+          messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+        }
+      }, 100);
+    }
+    // We don't include messages in dependencies to prevent scrolling on every message update
+  }, [initialScrollComplete, isLoading, isSending]);
 
   useEffect(() => {
     if (!hasMore || isLoading || !loadMoreRef.current) return;
