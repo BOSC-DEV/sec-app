@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
 import { useQuery } from '@tanstack/react-query';
-import { formatCurrency } from '@/utils/formatCurrency';
+import { formatCurrency } from '@/lib/utils';
 
 interface LeaderboardUser {
   username: string;
