@@ -198,13 +198,12 @@ const AnalyticsPage: React.FC = () => {
       <h1 className="text-3xl font-bold mb-6">Analytics Dashboard</h1>
       
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="visitors">Visitors</TabsTrigger>
           <TabsTrigger value="countries">Countries</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
           <TabsTrigger value="bounties">Bounties</TabsTrigger>
-          <TabsTrigger value="revenue">Revenue</TabsTrigger>
         </TabsList>
         
         <TabsContent value="overview">
@@ -243,21 +242,21 @@ const AnalyticsPage: React.FC = () => {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium">Revenue (10%)</CardTitle>
+                <CurrencyIcon size="md" className="text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{data?.bountyStats?.total_contributors || 0}</div>
+                <div className="text-2xl font-bold">{formatCurrency((data?.bountyStats?.total_bounties || 0) * 0.1)}</div>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Hunters</CardTitle>
-                <UserCheck className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{data?.reportStats?.reduce((sum, day) => sum + day.unique_reporters, 0) || 0}</div>
+                <div className="text-2xl font-bold">{data?.bountyStats?.total_contributors || 0}</div>
               </CardContent>
             </Card>
           </div>
@@ -398,32 +397,6 @@ const AnalyticsPage: React.FC = () => {
                 </table>
               </CardContent>
             </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="revenue">
-          <div className="grid gap-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Revenue (10%)</CardTitle>
-                  <CurrencyIcon size="md" className="text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{formatCurrency(data?.revenue?.totalRevenue || 0)}</div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Bounties Paid</CardTitle>
-                  <CurrencyIcon size="md" className="text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{formatCurrency(data?.revenue?.totalBountiesPaid || 0)}</div>
-                </CardContent>
-              </Card>
-            </div>
           </div>
         </TabsContent>
       </Tabs>
