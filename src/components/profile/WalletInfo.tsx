@@ -29,6 +29,7 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
     delegator_username?: string;
     display_name?: string;
   } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const loadDelegationInfo = async () => {
@@ -37,8 +38,11 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
         return;
       }
       
+      setIsLoading(true);
       try {
+        // Force fresh data every time
         const delegations = await getDelegatedBadges(walletAddress);
+        
         // Find if this wallet is delegated a badge from someone
         const delegation = delegations.find(d => d.delegated_wallet === walletAddress && d.active);
         
@@ -58,13 +62,15 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
         console.error('Error loading delegation info:', error);
         // On error, clear delegation info to avoid showing stale data
         setDelegationInfo(null);
+      } finally {
+        setIsLoading(false);
       }
     };
     
     loadDelegationInfo();
     
-    // Set up a refresh interval to check for delegation changes
-    const intervalId = setInterval(loadDelegationInfo, 10000); // Check every 10 seconds
+    // Set up a refresh interval to check for delegation changes more frequently
+    const intervalId = setInterval(loadDelegationInfo, 3000); // Check every 3 seconds
     
     return () => {
       clearInterval(intervalId); // Clean up the interval when the component unmounts

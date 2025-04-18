@@ -39,7 +39,7 @@ export const useBadgeTier = (walletAddressOrBalance: string | number | null): Ba
           ownBadgeInfo = calculateBadgeTier(profile.sec_balance);
         }
         
-        // Check if this wallet has any delegated badges
+        // Check if this wallet has any delegated badges - pass a timestamp to prevent caching
         const delegations = await getDelegatedBadges(walletAddressOrBalance);
         console.log('Checking delegations for wallet:', walletAddressOrBalance, delegations);
         
@@ -84,7 +84,7 @@ export const useBadgeTier = (walletAddressOrBalance: string | number | null): Ba
     fetchBadgeInfo();
     
     // Set up a polling interval to check for updated delegation status
-    const intervalId = setInterval(fetchBadgeInfo, 10000); // Check every 10 seconds
+    const intervalId = setInterval(fetchBadgeInfo, 5000); // Check every 5 seconds
     
     return () => {
       isMounted = false;

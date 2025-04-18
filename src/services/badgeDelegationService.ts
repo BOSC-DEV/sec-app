@@ -14,6 +14,9 @@ interface DelegatedBadge {
 }
 
 export const getDelegatedBadges = async (walletAddress: string): Promise<DelegatedBadge[]> => {
+  // Add cache-busting parameters to ensure fresh data
+  const timestamp = new Date().getTime();
+  
   const { data, error } = await supabase
     .from('delegated_badges')
     .select('*')
@@ -25,6 +28,9 @@ export const getDelegatedBadges = async (walletAddress: string): Promise<Delegat
     throw error;
   }
 
+  // Add extra logging to debug the result
+  console.log(`Fetched ${data?.length || 0} delegations for wallet ${walletAddress} at ${timestamp}`);
+  
   if (data && data.length > 0) {
     try {
       const delegatorWallets = data.map(d => d.delegator_wallet);
