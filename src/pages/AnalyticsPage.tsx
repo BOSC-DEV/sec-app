@@ -253,9 +253,9 @@ const AnalyticsPage: React.FC = () => {
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="visitors">Visitors</TabsTrigger>
-          <TabsTrigger value="countries">Countries</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
+          
+          
+          
           <TabsTrigger value="bounties">Bounties</TabsTrigger>
         </TabsList>
         
