@@ -26,7 +26,7 @@ export const useChatMessages = () => {
       if (startIndex === 0) {
         setMessages(newMessages.reverse());
       } else {
-        setMessages(prev => [...prev, ...newMessages]);
+        setMessages(prev => [...newMessages.reverse(), ...prev]);
       }
     } catch (error) {
       console.error('Error fetching chat messages:', error);
@@ -41,6 +41,7 @@ export const useChatMessages = () => {
     author_name: string;
     author_username?: string;
     author_profile_pic?: string;
+    author_sec_balance?: number;
     image_file?: File | null;
   }) => {
     try {
@@ -74,6 +75,7 @@ export const useChatMessages = () => {
           author_name: messageData.author_name,
           author_username: messageData.author_username,
           author_profile_pic: messageData.author_profile_pic,
+          author_sec_balance: messageData.author_sec_balance,
           image_url: imageUrl,
           likes: 0,
           dislikes: 0

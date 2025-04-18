@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -209,8 +210,8 @@ const LiveChat = () => {
 
   const renderMessage = (message: any, index: number) => {
     // Get badge info based on SEC balance
-    const userBadge = message.author_id && profile?.sec_balance !== undefined ? 
-      calculateBadgeTier(profile.sec_balance) : null;
+    const userBadge = message.author_sec_balance !== undefined ? 
+      calculateBadgeTier(message.author_sec_balance) : null;
     
     const isCurrentUser = message.author_id === profile?.wallet_address;
     const time = formatTimeAgo(message.created_at);
@@ -313,7 +314,7 @@ const LiveChat = () => {
       <CardFooter className={`border-t ${isMobile ? 'p-2' : 'p-4'} mt-auto`}>
         {!isConnected ? (
           <div className="w-full flex justify-center">
-            <Button variant="gold" className="w-48" onClick={connectWallet}>
+            <Button variant="gold" className="w-full" onClick={connectWallet}>
               Connect Wallet to Chat
             </Button>
           </div>
@@ -359,3 +360,4 @@ const LiveChat = () => {
 };
 
 export default LiveChat;
+
