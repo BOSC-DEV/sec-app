@@ -1,34 +1,19 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Search, UserPlus, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { addBadgeDelegation, getDelegatedBadges, removeBadgeDelegation } from '@/services/badgeDelegationService';
 import { useProfile } from '@/contexts/ProfileContext';
 import BadgeTier from './BadgeTier';
 import { calculateBadgeTier } from '@/utils/badgeUtils';
 import { getProfilesByDisplayName } from '@/services/profileService';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Check, ChevronsUpDown, UserPlus, X } from "lucide-react";
-import { cn } from "@/lib/utils";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 import { supabase } from '@/integrations/supabase/client';
 
 const BadgeDelegation: React.FC = () => {
   const { profile } = useProfile();
-  const [open, setOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string>('');
   const [selectedUserName, setSelectedUserName] = useState<string>('');
   const [delegations, setDelegations] = useState<{ delegated_wallet: string; display_name?: string }[]>([]);
@@ -38,6 +23,7 @@ const BadgeDelegation: React.FC = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [delegationLimit, setDelegationLimit] = useState<number>(0);
   const [currentDelegations, setCurrentDelegations] = useState<number>(0);
+  const [showResults, setShowResults] = useState(false);
 
   const loadDelegations = useCallback(async () => {
     if (!profile?.wallet_address) return;
@@ -99,24 +85,26 @@ const BadgeDelegation: React.FC = () => {
       if (!searchQuery || searchQuery.length < 2) {
         setAvailableUsers([]);
         setIsSearching(false);
+        setShowResults(false);
         return;
       }
       
       setIsSearching(true);
+      setShowResults(true);
       
       try {
         const users = await getProfilesByDisplayName(searchQuery);
-        const filteredUsers = users.filter(async user => {
-          if (user.wallet_address === profile?.wallet_address) return false;
-          if (delegations.some(d => d.delegated_wallet === user.wallet_address)) return false;
-          if (user.sec_balance && user.sec_balance > 0) return false;
+        // Filter out users who:
+        // 1. Are the current user
+        // 2. Already have a badge (SEC balance > 0)
+        // 3. Already have an active delegation
+        // 4. Are already in the current delegations list
+        const filteredUsers = users.filter(user => {
+          const hasBalance = user.sec_balance && user.sec_balance > 0;
+          const isCurrentUser = user.wallet_address === profile?.wallet_address;
+          const isAlreadyDelegated = delegations.some(d => d.delegated_wallet === user.wallet_address);
           
-          const userDelegations = await getDelegatedBadges(user.wallet_address);
-          return !userDelegations.some(d => 
-            d.delegated_wallet === user.wallet_address && 
-            d.active && 
-            d.delegator_wallet !== profile?.wallet_address
-          );
+          return !hasBalance && !isCurrentUser && !isAlreadyDelegated;
         });
         
         setAvailableUsers(filteredUsers);
@@ -242,14 +230,6 @@ const BadgeDelegation: React.FC = () => {
 
   const currentBadge = profile?.sec_balance ? calculateBadgeTier(profile.sec_balance) : null;
 
-  const handleOpenChange = (newOpen: boolean) => {
-    setOpen(newOpen);
-    if (!newOpen) {
-      setSearchQuery('');
-      setAvailableUsers([]);
-    }
-  };
-
   const getBadgeTierRank = (tier: string) => {
     const tiers = [
       'Shrimp', 'Frog', 'Bull', 'Lion', 'King Cobra',
@@ -274,83 +254,51 @@ const BadgeDelegation: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="flex flex-col space-y-2">
-              <label className="text-sm font-medium">Your Current Badge</label>
-              <div className="flex items-center space-x-2">
-                <BadgeTier badgeInfo={currentBadge} showTooltip={true} />
-                <span className="text-sm text-muted-foreground">
-                  This badge will be shared with delegated users
-                </span>
+            <div className="relative">
+              <div className="relative">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search for users to delegate your badge..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
               </div>
-            </div>
-
-            <div className="flex space-x-2">
-              <Popover open={open} onOpenChange={handleOpenChange}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={open}
-                    className="justify-between w-full"
-                    disabled={isLoading}
-                  >
-                    {selectedUserName ? selectedUserName : "Search for a user..."}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="p-0 w-[400px]">
-                  <Command>
-                    <CommandInput 
-                      placeholder="Search by username or display name..." 
-                      value={searchQuery}
-                      onValueChange={setSearchQuery}
-                    />
-                    <CommandList>
-                      {isSearching && (
-                        <div className="py-6 text-center text-sm">Searching...</div>
-                      )}
-                      {!isSearching && (
-                        <>
-                          <CommandEmpty>
-                            {searchQuery.length < 2 
-                              ? "Type at least 2 characters to search" 
-                              : "No users found"}
-                          </CommandEmpty>
-                          <CommandGroup>
-                            {availableUsers && availableUsers.map((user) => (
-                              <CommandItem
-                                key={user.wallet_address}
-                                value={user.wallet_address}
-                                onSelect={() => {
-                                  setSelectedUser(user.wallet_address);
-                                  setSelectedUserName(user.display_name);
-                                  setOpen(false);
-                                  setSearchQuery('');
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    selectedUser === user.wallet_address ? "opacity-100" : "opacity-0"
-                                  )}
-                                />
-                                {user.display_name} {user.username ? `(@${user.username})` : ""}
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </>
-                      )}
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <Button 
-                onClick={handleAddDelegation} 
-                disabled={isLoading || !selectedUser}
-              >
-                <UserPlus className="mr-2 h-4 w-4" />
-                Add
-              </Button>
+              
+              {showResults && (searchQuery.length >= 2) && (
+                <div className="absolute z-10 w-full mt-1 bg-background border rounded-md shadow-lg">
+                  {isSearching ? (
+                    <div className="p-4 text-center text-sm text-muted-foreground">
+                      Searching...
+                    </div>
+                  ) : availableUsers.length === 0 ? (
+                    <div className="p-4 text-center text-sm text-muted-foreground">
+                      {searchQuery.length < 2 
+                        ? "Type at least 2 characters to search" 
+                        : "No eligible users found"}
+                    </div>
+                  ) : (
+                    <div className="max-h-[200px] overflow-y-auto">
+                      {availableUsers.map((user) => (
+                        <div
+                          key={user.wallet_address}
+                          className="flex items-center justify-between p-3 hover:bg-accent cursor-pointer"
+                          onClick={() => {
+                            setSelectedUser(user.wallet_address);
+                            setSelectedUserName(user.display_name);
+                            setSearchQuery('');
+                            setShowResults(false);
+                            handleAddDelegation();
+                          }}
+                        >
+                          <span>{user.display_name} {user.username ? `(@${user.username})` : ""}</span>
+                          <UserPlus className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
