@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart, Users, Globe, TrendingUp, Shield, UserCheck, Coins, Receipt } from 'lucide-react';
+import { BarChart, Users, Globe, TrendingUp, Shield, UserCheck, Coins, Receipt, UserRound } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
@@ -256,6 +256,18 @@ const AnalyticsPage: React.FC = () => {
               <CardContent>
                 <div className="text-2xl font-bold">
                   {totalVisits}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Unique Visitors</CardTitle>
+                <UserRound className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  101
                 </div>
               </CardContent>
             </Card>
