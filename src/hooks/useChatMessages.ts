@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ChatMessage } from '@/types/dataTypes';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -10,8 +10,9 @@ export const useChatMessages = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
 
-  const fetchMessages = async (startIndex: number = 0) => {
+  const fetchMessages = useCallback(async (startIndex: number = 0) => {
     try {
+      setIsLoading(true);
       const { data, error } = await supabase
         .from('chat_messages')
         .select('*')
@@ -33,9 +34,9 @@ export const useChatMessages = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const sendChatMessage = async (messageData: {
+  const sendChatMessage = useCallback(async (messageData: {
     content: string;
     author_id: string;
     author_name: string;
@@ -90,9 +91,9 @@ export const useChatMessages = () => {
       console.error('Error sending chat message:', error);
       throw error;
     }
-  };
+  }, []);
 
-  const deleteChatMessage = async (messageId: string) => {
+  const deleteChatMessage = useCallback(async (messageId: string) => {
     try {
       const { error } = await supabase
         .from('chat_messages')
@@ -106,12 +107,12 @@ export const useChatMessages = () => {
       console.error('Error deleting chat message:', error);
       return false;
     }
-  };
+  }, []);
 
-  const loadMore = () => {
+  const loadMore = useCallback(() => {
     if (!hasMore || isLoading) return;
     fetchMessages(messages.length);
-  };
+  }, [fetchMessages, hasMore, isLoading, messages.length]);
 
   useEffect(() => {
     fetchMessages();
@@ -131,7 +132,7 @@ export const useChatMessages = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [fetchMessages]);
 
   return {
     messages,
