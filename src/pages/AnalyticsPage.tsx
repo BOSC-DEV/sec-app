@@ -49,38 +49,119 @@ interface AnalyticsData {
 }
 
 const fetchAnalyticsData = async (): Promise<AnalyticsData> => {
-  const [
-    { data: dailyVisitors, error: dailyError },
-    { data: countryStats, error: countryError },
-    { data: topScammers, error: scammersError },
-    { data: reportStats, error: reportError },
-    { data: bountyStats, error: bountyError }
-  ] = await Promise.all([
-    supabase.rpc('get_daily_visitors'),
-    supabase.rpc('get_country_stats'),
-    supabase.rpc('get_top_scammers'),
-    supabase.rpc('get_report_stats'),
-    supabase.rpc('get_bounty_stats')
-  ]);
+  try {
+    // Fetch daily visitors data
+    const { data: dailyVisitors, error: dailyError } = await supabase.rpc('get_daily_visitors');
+    if (dailyError) console.error('Error fetching daily visitors:', dailyError);
 
-  if (dailyError) console.error('Error fetching daily visitors:', dailyError);
-  if (countryError) console.error('Error fetching country stats:', countryError);
-  if (scammersError) console.error('Error fetching top scammers:', scammersError);
-  if (reportError) console.error('Error fetching report stats:', reportError);
-  if (bountyError) console.error('Error fetching bounty stats:', bountyError);
+    // Fetch country stats data
+    const { data: countryStats, error: countryError } = await supabase.rpc('get_country_stats');
+    if (countryError) console.error('Error fetching country stats:', countryError);
 
-  return {
-    dailyVisitors: dailyVisitors || [],
-    countryStats: countryStats || [],
-    topScammers: topScammers || [],
-    reportStats: reportStats || [],
-    bountyStats: bountyStats?.[0] || {
+    // For new functions, use direct SQL queries instead of rpc
+    const { data: topScammers, error: scammersError } = await supabase
+      .from('scammers')
+      .select('name, views, bounty_amount, id')
+      .order('views', { ascending: false })
+      .limit(10);
+    if (scammersError) console.error('Error fetching top scammers:', scammersError);
+    
+    // For report stats, query the report_submissions table directly
+    const { data: reportStatsRaw, error: reportError } = await supabase
+      .from('report_submissions')
+      .select('created_at, user_id')
+      .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+    if (reportError) console.error('Error fetching report stats:', reportError);
+    
+    // Process report stats data
+    const reportStats: ReportStatsData[] = [];
+    if (reportStatsRaw) {
+      const reportsByDay = new Map<string, { reports: number, uniqueUsers: Set<string> }>();
+      
+      reportStatsRaw.forEach(report => {
+        const day = new Date(report.created_at).toISOString().split('T')[0];
+        if (!reportsByDay.has(day)) {
+          reportsByDay.set(day, { reports: 0, uniqueUsers: new Set() });
+        }
+        
+        const dayData = reportsByDay.get(day)!;
+        dayData.reports += 1;
+        if (report.user_id) {
+          dayData.uniqueUsers.add(report.user_id);
+        }
+      });
+      
+      // Convert to array format
+      reportsByDay.forEach((value, key) => {
+        reportStats.push({
+          day: key,
+          report_count: value.reports,
+          unique_reporters: value.uniqueUsers.size
+        });
+      });
+      
+      // Sort by date descending
+      reportStats.sort((a, b) => b.day.localeCompare(a.day));
+    }
+    
+    // For bounty stats, query the bounty_contributions table directly
+    const { data: bountyContributions, error: bountyError } = await supabase
+      .from('bounty_contributions')
+      .select('amount, scammer_id, contributor_id, is_active')
+      .eq('is_active', true);
+    if (bountyError) console.error('Error fetching bounty stats:', bountyError);
+    
+    // Process bounty stats data
+    const bountyStats: BountyStatsData = {
       total_bounties: 0,
       active_bounties: 0,
       avg_bounty: 0,
       total_contributors: 0
+    };
+    
+    if (bountyContributions && bountyContributions.length > 0) {
+      const totalAmount = bountyContributions.reduce((sum, contribution) => sum + Number(contribution.amount), 0);
+      const uniqueScammers = new Set(bountyContributions.map(contribution => contribution.scammer_id));
+      const uniqueContributors = new Set(bountyContributions.map(contribution => contribution.contributor_id));
+      
+      bountyStats.total_bounties = totalAmount;
+      bountyStats.active_bounties = uniqueScammers.size;
+      bountyStats.avg_bounty = totalAmount / bountyContributions.length;
+      bountyStats.total_contributors = uniqueContributors.size;
     }
-  };
+    
+    // Transform top scammers data format
+    const processedTopScammers: TopScammerData[] = topScammers 
+      ? topScammers.map(scammer => ({
+          name: scammer.name,
+          views: scammer.views || 0,
+          total_bounty: scammer.bounty_amount || 0,
+          report_count: 0 // We don't have this data directly, would need another query
+        }))
+      : [];
+
+    return {
+      dailyVisitors: dailyVisitors || [],
+      countryStats: countryStats || [],
+      topScammers: processedTopScammers,
+      reportStats: reportStats,
+      bountyStats: bountyStats
+    };
+  } catch (error) {
+    console.error('Error in fetchAnalyticsData:', error);
+    return {
+      dailyVisitors: [],
+      countryStats: [],
+      topScammers: [],
+      reportStats: [],
+      bountyStats: {
+        total_bounties: 0,
+        active_bounties: 0,
+        avg_bounty: 0,
+        total_contributors: 0
+      }
+    };
+  }
 };
 
 const AnalyticsPage: React.FC = () => {
