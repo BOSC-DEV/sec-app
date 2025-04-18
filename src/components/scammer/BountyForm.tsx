@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { toast } from '@/hooks/use-toast';
@@ -163,12 +162,13 @@ const BountyForm: React.FC<BountyFormProps> = ({
         profile={profile}
         buttonText="Add Bounty"
       />
-      
-      <div className="mt-4 border-t pt-4 border-gray-200 dark:border-gray-700">
+
+      <div className="mt-2">
         <BountyTransferDialog 
           scammerId={scammerId} 
           scammerName={scammerName}
           onTransferComplete={handleTransferComplete} 
+          bountyAmount={0}
         />
       </div>
     </div>
