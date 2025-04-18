@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Copy } from 'lucide-react';
+import { Copy, BarChart } from 'lucide-react';
 import ICCLogo from '../common/ICCLogo';
 import TermsDialog from '../common/TermsDialog';
 import PrivacyDialog from '../common/PrivacyDialog';
@@ -118,6 +118,11 @@ const Footer = () => {
               <li>
                 <Link to="/community" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
                   Community
+                </Link>
+              </li>
+              <li>
+                <Link to="/analytics" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
+                  Analytics
                 </Link>
               </li>
               <li>

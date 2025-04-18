@@ -1,3 +1,4 @@
+import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -213,6 +214,12 @@ const App = () => (
                     <Route path="/faq" element={<LegalPages />} />
                     <Route path="/about" element={<LegalPages />} />
                     <Route path="/contact" element={<LegalPages />} />
+                    
+                    <Route path="/analytics" element={
+                      <ProtectedRoute>
+                        <AnalyticsPage />
+                      </ProtectedRoute>
+                    } />
                     
                     <Route path="*" element={<NotFound />} />
                   </Routes>
