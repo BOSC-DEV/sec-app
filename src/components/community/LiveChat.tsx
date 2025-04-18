@@ -21,8 +21,6 @@ const LiveChat = () => {
   const [message, setMessage] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSending, setIsSending] = useState(false);
-  const [initialScrollDone, setInitialScrollDone] = useState(false);
-  const [shouldScrollToBottom, setShouldScrollToBottom] = useState(true);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -51,52 +49,11 @@ const LiveChat = () => {
     checkAdminStatus();
   }, [profile?.username]);
 
-  // Handle scroll position when new messages come in
   useEffect(() => {
-    // Only scroll if there are messages and we should scroll to bottom
-    if (messages.length > 0 && messagesEndRef.current && shouldScrollToBottom) {
-      // For initial load
-      if (!initialScrollDone) {
-        // Use timeout to ensure DOM is fully updated
-        setTimeout(() => {
-          if (messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({ behavior: 'auto' });
-            setInitialScrollDone(true);
-          }
-        }, 100);
-      } 
-      // For new messages, use smooth scrolling
-      else {
-        messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-      }
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages, initialScrollDone, shouldScrollToBottom]);
-
-  // Handle manual scrolling to detect when user scrolls up
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!messagesContainerRef.current) return;
-      
-      const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
-      const isAtBottom = scrollHeight - scrollTop - clientHeight < 100; // Within 100px of bottom
-      
-      // Only update if value is changing to avoid rerenders
-      if (isAtBottom !== shouldScrollToBottom) {
-        setShouldScrollToBottom(isAtBottom);
-      }
-    };
-    
-    const container = messagesContainerRef.current;
-    if (container) {
-      container.addEventListener('scroll', handleScroll);
-    }
-    
-    return () => {
-      if (container) {
-        container.removeEventListener('scroll', handleScroll);
-      }
-    };
-  }, [shouldScrollToBottom]);
+  }, [messages]);
 
   useEffect(() => {
     if (!hasMore || isLoading || !loadMoreRef.current) return;
@@ -169,7 +126,6 @@ const LiveChat = () => {
     
     try {
       setIsSending(true);
-      setShouldScrollToBottom(true); // Force scroll to bottom on send
       
       const success = await sendChatMessage({
         content: message.trim(),
