@@ -1,14 +1,14 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Search, Gift } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { BadgeTier } from '@/utils/badgeUtils';
 import { calculateBadgeTier } from '@/utils/badgeUtils';
+import { supabase } from '@/integrations/supabase/client';
 
 interface User {
   username: string;
@@ -36,29 +36,31 @@ const BadgeGifting: React.FC<{ userSecBalance?: number }> = ({ userSecBalance })
   const [searchResults, setSearchResults] = useState<User[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const currentBadgeInfo = calculateBadgeTier(userSecBalance || 0);
   const giftLimit = currentBadgeInfo ? giftLimits[currentBadgeInfo.tier] : 0;
 
   const handleSearch = async (value: string) => {
-    // Simulated search results for users with no badges
     if (value.length >= 3) {
-      // This would be replaced with actual API call
-      const mockResults: User[] = [
-        {
-          username: 'newuser1',
-          display_name: 'New User 1',
-          profile_pic_url: '',
-          sec_balance: 0
-        },
-        {
-          username: 'newuser2',
-          display_name: 'New User 2',
-          profile_pic_url: '',
-          sec_balance: 0
-        }
-      ];
-      setSearchResults(mockResults);
+      setIsLoading(true);
+      try {
+        // Search for users with zero SEC balance (unbadged users)
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('username, display_name, profile_pic_url, sec_balance')
+          .eq('sec_balance', 0)
+          .ilike('display_name', `%${value}%`)
+          .limit(5);
+
+        if (error) throw error;
+        setSearchResults(data || []);
+      } catch (error) {
+        console.error('Error searching users:', error);
+        setSearchResults([]);
+      } finally {
+        setIsLoading(false);
+      }
     } else {
       setSearchResults([]);
     }
@@ -74,8 +76,8 @@ const BadgeGifting: React.FC<{ userSecBalance?: number }> = ({ userSecBalance })
   };
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="border-0 shadow-none bg-transparent">
+      <CardHeader className="px-0">
         <CardTitle className="flex items-center gap-2">
           <Gift className="h-5 w-5" />
           Gift Badges
@@ -84,7 +86,7 @@ const BadgeGifting: React.FC<{ userSecBalance?: number }> = ({ userSecBalance })
           You can gift up to {giftLimit} badges with your current tier
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-0">
         <div className="space-y-4">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -98,6 +100,12 @@ const BadgeGifting: React.FC<{ userSecBalance?: number }> = ({ userSecBalance })
               className="pl-10"
             />
           </div>
+
+          {isLoading && (
+            <div className="text-center text-sm text-muted-foreground">
+              Searching...
+            </div>
+          )}
 
           <div className="space-y-2">
             {searchResults.map((user) => (
