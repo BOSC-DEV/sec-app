@@ -1,13 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Copy, LogOut, Medal } from 'lucide-react';
+import { ExternalLink, Copy, LogOut } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { getDelegatedBadges } from '@/services/badgeDelegationService';
-import { Link } from 'react-router-dom';
 
 interface WalletInfoProps {
   walletAddress?: string | null;
@@ -24,35 +22,6 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
     disconnectWallet
   } = useProfile();
   const navigate = useNavigate();
-  const [delegationInfo, setDelegationInfo] = useState<{
-    delegator_wallet: string; 
-    delegator_username?: string;
-    display_name?: string;
-  } | null>(null);
-
-  useEffect(() => {
-    const loadDelegationInfo = async () => {
-      if (!walletAddress) return;
-      
-      try {
-        const delegations = await getDelegatedBadges(walletAddress);
-        // Find if this wallet is delegated a badge from someone
-        const delegation = delegations.find(d => d.delegated_wallet === walletAddress && d.active);
-        
-        if (delegation) {
-          setDelegationInfo({
-            delegator_wallet: delegation.delegator_wallet,
-            delegator_username: delegation.delegator_username,
-            display_name: delegation.display_name
-          });
-        }
-      } catch (error) {
-        console.error('Error loading delegation info:', error);
-      }
-    };
-    
-    loadDelegationInfo();
-  }, [walletAddress]);
 
   const copyWalletAddress = () => {
     if (walletAddress) {
@@ -92,27 +61,6 @@ const WalletInfo: React.FC<WalletInfoProps> = ({
                 </Button>
               </div>
             </div>
-
-            {delegationInfo && (
-              <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700">
-                <div className="flex items-center gap-2 text-sm">
-                  <Medal className="h-4 w-4 text-icc-gold" />
-                  <span className="text-gray-600 dark:text-gray-300">
-                    Badge delegated by{' '}
-                    {delegationInfo.delegator_username ? (
-                      <Link 
-                        to={`/${delegationInfo.delegator_username}`} 
-                        className="font-medium text-icc-blue hover:text-icc-blue-light dark:text-icc-gold dark:hover:text-icc-gold-light"
-                      >
-                        {delegationInfo.display_name || delegationInfo.delegator_username}
-                      </Link>
-                    ) : (
-                      <span className="font-medium">{delegationInfo.delegator_wallet.substring(0, 6)}...{delegationInfo.delegator_wallet.substring(delegationInfo.delegator_wallet.length - 4)}</span>
-                    )}
-                  </span>
-                </div>
-              </div>
-            )}
 
             {isOwnProfile && <div className="pt-4">
                 <Button variant="outline" className="w-full border-icc-red text-icc-red hover:bg-icc-red-light/10 hover:text-icc-red dark:border-red-700 dark:text-red-500 dark:hover:bg-red-900/20 flex items-center justify-center gap-2" onClick={handleDisconnect}>

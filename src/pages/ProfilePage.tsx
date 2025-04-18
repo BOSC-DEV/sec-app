@@ -7,12 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from '@/components/ui/form';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useForm } from 'react-hook-form';
 import { toast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import BadgeDelegation from '@/components/profile/BadgeDelegation';
+import OptimizedImage from '@/components/common/OptimizedImage';
+
 interface ProfileFormValues {
   display_name: string;
   username: string;
@@ -20,6 +20,7 @@ interface ProfileFormValues {
   x_link: string;
   website_link: string;
 }
+
 const ProfilePage = () => {
   const {
     isConnected,
@@ -36,6 +37,7 @@ const ProfilePage = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarKey, setAvatarKey] = useState(Date.now());
   const fileInputRef = useRef<HTMLInputElement>(null);
+
   const form = useForm<ProfileFormValues>({
     defaultValues: {
       display_name: '',
@@ -45,11 +47,13 @@ const ProfilePage = () => {
       website_link: ''
     }
   });
+
   useEffect(() => {
     if (!isConnected && !isLoading) {
       navigate('/');
     }
   }, [isConnected, isLoading, navigate]);
+
   useEffect(() => {
     if (profile) {
       setAvatarUrl(profile.profile_pic_url || null);
@@ -62,9 +66,11 @@ const ProfilePage = () => {
       });
     }
   }, [profile, form]);
+
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
   };
+
   const handleDisconnect = () => {
     disconnectWallet();
     navigate('/');
@@ -73,6 +79,7 @@ const ProfilePage = () => {
       description: 'Your wallet has been disconnected'
     });
   };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -107,6 +114,7 @@ const ProfilePage = () => {
       });
     }
   };
+
   const onSubmit = async (data: ProfileFormValues) => {
     if (!walletAddress || !profile) return;
     try {
@@ -134,6 +142,7 @@ const ProfilePage = () => {
       setIsSaving(false);
     }
   };
+
   if (isLoading) {
     return <div className="container py-10">
         <Card>
@@ -148,10 +157,12 @@ const ProfilePage = () => {
         </Card>
       </div>;
   }
+
   const isNewProfile = !profile;
   const getInitials = (name: string) => {
     return name?.substring(0, 2).toUpperCase() || '👤';
   };
+
   return <div className="container py-10">
       <Card className="max-w-3xl mx-auto">
         <CardHeader>
@@ -172,103 +183,91 @@ const ProfilePage = () => {
             </div>}
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="profile">Profile</TabsTrigger>
-              <TabsTrigger value="delegation">Badge Delegation</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="profile">
-              <div className="flex justify-center mb-6 py-[50px]">
-                <div className="relative group">
-                  <Avatar className="h-24 w-24 cursor-pointer" key={avatarKey}>
-                    {avatarUrl ? <AvatarImage src={`${avatarUrl}${avatarUrl.includes('?') ? '&' : '?'}v=${avatarKey}`} alt="Profile" /> : <AvatarFallback className="bg-icc-blue text-white text-xl">
-                        {getInitials(form.getValues().display_name)}
-                      </AvatarFallback>}
-                  </Avatar>
-                  <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onClick={handleAvatarClick}>
-                    <Camera className="h-8 w-8 text-white" />
-                  </div>
-                  <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
-                </div>
+          <div className="flex justify-center mb-6">
+            <div className="relative group">
+              <Avatar className="h-24 w-24 cursor-pointer" key={avatarKey}>
+                {avatarUrl ? <AvatarImage src={`${avatarUrl}${avatarUrl.includes('?') ? '&' : '?'}v=${avatarKey}`} alt="Profile" /> : <AvatarFallback className="bg-icc-blue text-white text-xl">
+                    {getInitials(form.getValues().display_name)}
+                  </AvatarFallback>}
+              </Avatar>
+              <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onClick={handleAvatarClick}>
+                <Camera className="h-8 w-8 text-white" />
               </div>
+              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
+            </div>
+          </div>
 
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <FormField control={form.control} name="display_name" render={({
-                  field
-                }) => <FormItem>
-                        <FormLabel>Display Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter your display name" {...field} />
-                        </FormControl>
-                      </FormItem>} />
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField control={form.control} name="display_name" render={({
+              field
+            }) => <FormItem>
+                    <FormLabel>Display Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter your display name" {...field} />
+                    </FormControl>
+                  </FormItem>} />
               
-                  <FormField control={form.control} name="username" render={({
-                  field
-                }) => <FormItem>
-                        <FormLabel>Username</FormLabel>
-                        <FormControl>
-                          <Input placeholder="your_username" {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          Your profile will be accessible at sec.digital/
-                        </FormDescription>
-                      </FormItem>} />
+              <FormField control={form.control} name="username" render={({
+              field
+            }) => <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input placeholder="your_username" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      Your profile will be accessible at sec.digital/
+                    </FormDescription>
+                  </FormItem>} />
               
-                  <FormField control={form.control} name="bio" render={({
-                  field
-                }) => <FormItem>
-                        <FormLabel>Bio</FormLabel>
-                        <FormControl>
-                          <Textarea placeholder="Tell us about yourself" className="min-h-[120px]" {...field} />
-                        </FormControl>
-                      </FormItem>} />
+              <FormField control={form.control} name="bio" render={({
+              field
+            }) => <FormItem>
+                    <FormLabel>Bio</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Tell us about yourself" className="min-h-[120px]" {...field} />
+                    </FormControl>
+                  </FormItem>} />
               
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-medium">Social Links</h3>
-                    
-                    <FormField control={form.control} name="x_link" render={({
-                    field
-                  }) => <FormItem>
-                          <div className="flex items-center">
-                            <Twitter className="mr-2 h-5 w-5 text-muted-foreground" />
-                            <FormControl>
-                              <Input placeholder="X (Twitter) URL" {...field} />
-                            </FormControl>
-                          </div>
-                        </FormItem>} />
-                    
-                    <FormField control={form.control} name="website_link" render={({
-                    field
-                  }) => <FormItem>
-                          <div className="flex items-center">
-                            <Globe className="mr-2 h-5 w-5 text-muted-foreground" />
-                            <FormControl>
-                              <Input placeholder="Website URL" {...field} />
-                            </FormControl>
-                          </div>
-                        </FormItem>} />
-                  </div>
-                  
-                  <CardFooter className="flex justify-between px-0 pt-6">
-                    <Button type="button" variant="outline" onClick={() => navigate('/')}>
-                      Cancel
-                    </Button>
-                    <Button type="submit" className="bg-icc-gold hover:bg-icc-gold-light text-icc-blue" disabled={isSaving}>
-                      {isSaving ? 'Saving...' : isNewProfile ? 'Create Profile' : 'Save Changes'}
-                    </Button>
-                  </CardFooter>
-                </form>
-              </Form>
-            </TabsContent>
-            
-            <TabsContent value="delegation">
-              <BadgeDelegation />
-            </TabsContent>
-          </Tabs>
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Social Links</h3>
+                
+                <FormField control={form.control} name="x_link" render={({
+                field
+              }) => <FormItem>
+                      <div className="flex items-center">
+                        <Twitter className="mr-2 h-5 w-5 text-muted-foreground" />
+                        <FormControl>
+                          <Input placeholder="X (Twitter) URL" {...field} />
+                        </FormControl>
+                      </div>
+                    </FormItem>} />
+                
+                <FormField control={form.control} name="website_link" render={({
+                field
+              }) => <FormItem>
+                      <div className="flex items-center">
+                        <Globe className="mr-2 h-5 w-5 text-muted-foreground" />
+                        <FormControl>
+                          <Input placeholder="Website URL" {...field} />
+                        </FormControl>
+                      </div>
+                    </FormItem>} />
+              </div>
+              
+              <CardFooter className="flex justify-between px-0 pt-6">
+                <Button type="button" variant="outline" onClick={() => navigate('/')}>
+                  Cancel
+                </Button>
+                <Button type="submit" className="bg-icc-gold hover:bg-icc-gold-light text-icc-blue" disabled={isSaving}>
+                  {isSaving ? 'Saving...' : isNewProfile ? 'Create Profile' : 'Save Changes'}
+                </Button>
+              </CardFooter>
+            </form>
+          </Form>
         </CardContent>
       </Card>
     </div>;
 };
+
 export default ProfilePage;

@@ -53,10 +53,7 @@ const SurveyDisplay: React.FC<SurveyProps> = ({
   } = useProfile();
   const [selectedOption, setSelectedOption] = useState<number | undefined>(survey.userVote);
   const [isVoting, setIsVoting] = useState(false);
-  
-  // Pass the SEC balance directly, which is now valid with our updated hook
   const badgeInfo = useBadgeTier(profile?.sec_balance || 0);
-  
   const [showResults, setShowResults] = useState(Boolean(survey.userVote !== undefined));
 
   useEffect(() => {

@@ -1,21 +1,27 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { MessageSquare, Image as ImageIcon, Send, Smile, AlertCircle, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { MessageSquare, Image as ImageIcon, Send, Smile, AlertCircle, Download, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { formatTimeAgo } from '@/utils/formatTime';
 import { CircleDot } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import EmojiPicker from '@/components/community/EmojiPicker';
+import CommunityInteractionButtons from './CommunityInteractionButtons';
+import AdminContextMenu from './AdminContextMenu';
+import BadgeTier from '@/components/profile/BadgeTier';
+import { calculateBadgeTier } from '@/utils/badgeUtils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useChatMessages } from '@/hooks/useChatMessages';
 import { useOnlineUsers } from '@/hooks/useOnlineUsers';
 import { isBanned, isAdmin } from '@/utils/adminUtils';
-import ChatMessage from './ChatMessage';
 
 const LiveChat = () => {
   const {
@@ -201,6 +207,59 @@ const LiveChat = () => {
     }
   };
 
+  const renderMessage = (message: any, index: number) => {
+    // Get badge info based on SEC balance
+    const userBadge = message.author_id && profile?.sec_balance !== undefined ? 
+      calculateBadgeTier(profile.sec_balance) : null;
+    
+    const isCurrentUser = message.author_id === profile?.wallet_address;
+    const time = formatTimeAgo(message.created_at);
+    const messageContent = <div key={message.id} className="flex my-6">
+        <div className={`flex ${isCurrentUser ? 'flex-row-reverse self-end ml-auto' : 'flex-row'} space-x-2 ${isCurrentUser ? 'space-x-reverse' : ''}`}>
+          <div className="flex-shrink-0">
+            <Link to={message.author_username ? `/profile/${message.author_username}` : '#'}>
+              <Avatar className={`h-10 w-10 cursor-pointer border-2 border-background ${isCurrentUser ? 'order-last' : ''}`}>
+                <AvatarImage src={message.author_profile_pic} alt={message.author_name} />
+                <AvatarFallback className="text-xs">{message.author_name.substring(0, 2).toUpperCase()}</AvatarFallback>
+              </Avatar>
+            </Link>
+          </div>
+          
+          <div className={`min-w-[180px] max-w-[75%] md:max-w-[60%] rounded-lg px-3 py-2 ${isCurrentUser ? 'bg-icc-blue-light text-white rounded-tr-none self-end' : 'bg-card rounded-tl-none'}`}>
+            <div className="flex items-center gap-1 mb-1 flex-wrap">
+              <span className={`font-semibold text-sm ${isCurrentUser ? 'text-icc-gold' : 'text-icc-gold'}`}>
+                {message.author_name}
+              </span>
+              {userBadge && <BadgeTier badgeInfo={userBadge} size="sm" showTooltip={true} context="chat" />}
+              {isUserAdmin && message.author_username === 'sec' && <span className="text-xs bg-icc-gold/20 text-icc-gold px-1 rounded ml-1">admin</span>}
+            </div>
+            
+            <div className="text-sm break-words">
+              {message.content}
+            </div>
+            
+            {message.image_url && <div className="mt-2 relative group">
+                <img src={message.image_url} alt="Chat attachment" className="max-h-40 rounded-md object-contain bg-muted/20" />
+                <a href={message.image_url} target="_blank" rel="noopener noreferrer" className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity 
+                  bg-background/80 rounded-full p-1" title="View full image">
+                  <Download className="h-4 w-4" />
+                </a>
+              </div>}
+            
+            <div className="flex justify-between items-center mt-1">
+              <CommunityInteractionButtons itemId={message.id} itemType="message" initialLikes={message.likes} initialDislikes={message.dislikes} />
+              <span className="text-xs text-muted-foreground">
+                {time}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>;
+    return isUserAdmin ? <AdminContextMenu key={message.id} onDelete={() => handleDeleteMessage(message.id)} onBanUser={() => handleBanUser(message.author_username)}>
+        {messageContent}
+      </AdminContextMenu> : messageContent;
+  };
+
   if (isLoading) {
     return <div className="flex justify-center py-12">
         <div className="animate-pulse flex flex-col space-y-4 w-full">
@@ -244,16 +303,7 @@ const LiveChat = () => {
                 </p>
               </div>
             ) : (
-              messages.map((message, index) => (
-                <ChatMessage 
-                  key={message.id}
-                  message={message}
-                  isCurrentUser={message.author_id === profile?.wallet_address}
-                  isUserAdmin={isUserAdmin}
-                  onDelete={handleDeleteMessage}
-                  onBanUser={handleBanUser}
-                />
-              ))
+              messages.map((message, index) => renderMessage(message, index))
             )}
             <div ref={messagesEndRef} />
           </div>

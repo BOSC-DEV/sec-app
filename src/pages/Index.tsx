@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Hero from '@/components/common/Hero';
 import ScammerCard from '@/components/common/ScammerCard';
@@ -114,6 +115,24 @@ const Index = () => {
         </div>
       </section>
 
+      <section className="bg-icc-red dark:bg-icc-red-dark text-white py-10">
+        <div className="icc-container">
+          <div className="flex flex-col md:flex-row items-center justify-between">
+            <div className="flex items-start md:items-center mb-4 md:mb-0">
+              <AlertTriangle className="h-10 w-10 mr-4 flex-shrink-0" />
+              <div>
+                <h3 className="text-xl font-serif font-bold text-white">Responsible Reporting</h3>
+                <p className="text-gray-100 max-w-2xl">This platform is for informational purposes only. Always verify and follow all legal channels for reporting crimes.</p>
+              </div>
+            </div>
+            <Button variant="outline" onClick={() => setDisclaimerOpen(true)} className="border-white text-white hover:text-white dark:border-gray-300 dark:text-gray-200 bg-slate-900 hover:bg-slate-800">
+              Read Disclaimer
+              <ExternalLink className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </section>
+
       <section className="icc-section bg-white dark:bg-gray-900">
         <div className="icc-container">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -158,24 +177,6 @@ const Index = () => {
                   <div className="text-sm text-icc-gray dark:text-gray-400">Total Users</div>
                 </div>
               </>}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-icc-red dark:bg-icc-red-dark text-white py-10">
-        <div className="icc-container">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <div className="flex items-start md:items-center mb-4 md:mb-0">
-              <AlertTriangle className="h-10 w-10 mr-4 flex-shrink-0" />
-              <div>
-                <h3 className="text-xl font-serif font-bold text-white">Responsible Reporting</h3>
-                <p className="text-gray-100 max-w-2xl">This platform is for informational purposes only. Always verify and follow all legal channels for reporting crimes.</p>
-              </div>
-            </div>
-            <Button variant="outline" onClick={() => setDisclaimerOpen(true)} className="border-white text-white hover:text-white dark:border-gray-300 dark:text-gray-200 bg-slate-900 hover:bg-slate-800">
-              Read Disclaimer
-              <ExternalLink className="ml-2 h-4 w-4" />
-            </Button>
           </div>
         </div>
       </section>

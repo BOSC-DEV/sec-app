@@ -25,7 +25,6 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
   const [secBalance, setSecBalance] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   
-  // Now passing secBalance directly as a number, which is valid with our updated hook
   const badgeInfo = useBadgeTier(secBalance);
 
   const fetchSolBalance = async (address: string) => {
