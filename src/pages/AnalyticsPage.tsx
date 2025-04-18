@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { formatCurrency } from '@/utils/formatCurrency';
+import CurrencyIcon from '@/components/common/CurrencyIcon';  // Import the CurrencyIcon
 
 interface DailyVisitorData {
   day: string;
@@ -387,20 +388,20 @@ const AnalyticsPage: React.FC = () => {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total Revenue (10%)</CardTitle>
-                  <Receipt className="h-4 w-4 text-muted-foreground" />
+                  <CurrencyIcon size="md" className="text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">${data?.revenue?.totalRevenue.toFixed(2) || '0.00'}</div>
+                  <div className="text-2xl font-bold">{formatCurrency(data?.revenue?.totalRevenue || 0)}</div>
                 </CardContent>
               </Card>
               
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total Bounties Paid</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <CurrencyIcon size="md" className="text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">${data?.revenue?.totalBountiesPaid.toFixed(2) || '0.00'}</div>
+                  <div className="text-2xl font-bold">{formatCurrency(data?.revenue?.totalBountiesPaid || 0)}</div>
                 </CardContent>
               </Card>
             </div>
