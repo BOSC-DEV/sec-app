@@ -47,7 +47,7 @@ export const useChatMessages = () => {
     try {
       let imageUrl = null;
       
-      // If there's an image file, upload it first
+      // Handle image upload if present
       if (messageData.image_file) {
         const fileExt = messageData.image_file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
@@ -65,8 +65,8 @@ export const useChatMessages = () => {
           
         imageUrl = data.publicUrl;
       }
-      
-      // Now insert the chat message with the image URL if available
+
+      // Insert new message
       const { data, error } = await supabase
         .from('chat_messages')
         .insert({
@@ -76,15 +76,13 @@ export const useChatMessages = () => {
           author_username: messageData.author_username,
           author_profile_pic: messageData.author_profile_pic,
           author_sec_balance: messageData.author_sec_balance,
-          image_url: imageUrl,
-          likes: 0,
-          dislikes: 0
+          image_url: imageUrl
         })
         .select()
         .single();
-        
+
       if (error) throw error;
-      
+
       return data as ChatMessage;
     } catch (error) {
       console.error('Error sending chat message:', error);
@@ -98,9 +96,11 @@ export const useChatMessages = () => {
         .from('chat_messages')
         .delete()
         .eq('id', messageId);
-        
+
       if (error) throw error;
-      
+
+      // Update local state
+      setMessages(prevMessages => prevMessages.filter(msg => msg.id !== messageId));
       return true;
     } catch (error) {
       console.error('Error deleting chat message:', error);
@@ -108,23 +108,19 @@ export const useChatMessages = () => {
     }
   };
 
-  const loadMore = () => {
-    if (!hasMore || isLoading) return;
-    fetchMessages(messages.length);
-  };
-
   useEffect(() => {
     fetchMessages();
 
     // Set up real-time subscription for new messages
     const channel = supabase
-      .channel('public:chat_messages')
+      .channel('chat-updates')
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
         table: 'chat_messages'
       }, payload => {
-        setMessages(prev => [...prev, payload.new as ChatMessage]);
+        const newMessage = payload.new as ChatMessage;
+        setMessages(prev => [...prev, newMessage]);
       })
       .subscribe();
 
@@ -132,6 +128,11 @@ export const useChatMessages = () => {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  const loadMore = () => {
+    if (!hasMore || isLoading) return;
+    fetchMessages(messages.length);
+  };
 
   return {
     messages,
