@@ -1,5 +1,27 @@
-
 import { supabase } from '@/integrations/supabase/client';
+import { MIN_SEC_FOR_BADGE } from '@/utils/badgeUtils';
+
+export const searchEligibleRecipients = async (searchTerm: string) => {
+  // Search for profiles that:
+  // 1. Match the search term (username or display name)
+  // 2. Do not have a badge (SEC balance below MIN_SEC_FOR_BADGE)
+  // 3. Are registered users
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('wallet_address, username, display_name, profile_pic_url')
+    .or(
+      `username.ilike.%${searchTerm}%,display_name.ilike.%${searchTerm}%`
+    )
+    .lt('sec_balance', MIN_SEC_FOR_BADGE)
+    .limit(10);
+
+  if (error) {
+    console.error('Error searching for recipients:', error);
+    throw error;
+  }
+
+  return data || [];
+};
 
 export const giftBadge = async (delegatorWallet: string, delegatedWallet: string): Promise<{ success: boolean; error?: string }> => {
   try {
