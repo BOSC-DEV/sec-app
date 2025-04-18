@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BarChart, Users, Globe, TrendingUp, Shield, UserCheck, Coins, Receipt } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,30 +41,94 @@ interface BountyStatsData {
   total_contributors: number;
 }
 
-interface RevenueData {
-  totalRevenue: number;
-  totalBountiesPaid: number;
-}
-
 interface AnalyticsData {
   dailyVisitors: DailyVisitorData[];
   countryStats: CountryStatsData[];
   topScammers: TopScammerData[];
   reportStats: ReportStatsData[];
   bountyStats: BountyStatsData;
-  revenue: RevenueData;
 }
 
-const fetchAnalyticsData = async (): Promise<AnalyticsData & { revenue: RevenueData }> => {
+const fetchAnalyticsData = async (): Promise<AnalyticsData> => {
   try {
-    const { data: dailyVisitors, error: dailyError } = await supabase
-      .rpc('get_daily_visitors');
+    // Fetch daily visitors data directly from the analytics_pageviews table
+    const { data: rawVisitorData, error: dailyError } = await supabase
+      .from('analytics_pageviews')
+      .select('visited_at, visitor_id')
+      .order('visited_at', { ascending: false })
+      .limit(30);
+    
     if (dailyError) console.error('Error fetching daily visitors:', dailyError);
+    
+    // Process visitor data by day
+    const visitorsByDay = new Map<string, { unique: Set<string>, total: number }>();
+    if (rawVisitorData) {
+      rawVisitorData.forEach(record => {
+        const day = new Date(record.visited_at).toISOString().split('T')[0];
+        if (!visitorsByDay.has(day)) {
+          visitorsByDay.set(day, { unique: new Set(), total: 0 });
+        }
+        
+        const dayData = visitorsByDay.get(day)!;
+        dayData.unique.add(record.visitor_id);
+        dayData.total += 1;
+      });
+    }
+    
+    // Convert to array format
+    const dailyVisitors: DailyVisitorData[] = Array.from(visitorsByDay.entries())
+      .map(([day, data]) => ({
+        day,
+        unique_visitors: data.unique.size,
+        total_visits: data.total
+      }))
+      .sort((a, b) => b.day.localeCompare(a.day));
 
-    const { data: countryStats, error: countryError } = await supabase
-      .rpc('get_country_stats');
+    // Fetch country stats directly from analytics_visitors table
+    const { data: rawCountryData, error: countryError } = await supabase
+      .from('analytics_visitors')
+      .select('country_code, country_name, visitor_id')
+      .not('country_code', 'is', null)
+      .limit(50);
+    
     if (countryError) console.error('Error fetching country stats:', countryError);
+    
+    // Process country data
+    const countryMap = new Map<string, { 
+      country_name: string, 
+      visitors: Set<string>,
+      visits: number 
+    }>();
+    
+    if (rawCountryData) {
+      rawCountryData.forEach(record => {
+        if (!record.country_code) return;
+        
+        if (!countryMap.has(record.country_code)) {
+          countryMap.set(record.country_code, { 
+            country_name: record.country_name || record.country_code, 
+            visitors: new Set(),
+            visits: 0
+          });
+        }
+        
+        const countryData = countryMap.get(record.country_code)!;
+        countryData.visitors.add(record.visitor_id);
+        countryData.visits += 1;
+      });
+    }
+    
+    // Convert to array format
+    const countryStats: CountryStatsData[] = Array.from(countryMap.entries())
+      .map(([country_code, data]) => ({
+        country_code,
+        country_name: data.country_name,
+        visitor_count: data.visitors.size,
+        visit_count: data.visits
+      }))
+      .sort((a, b) => b.visit_count - a.visit_count);
 
+    // Fetch top scammers
     const { data: topScammers, error: scammersError } = await supabase
       .from('scammers')
       .select('name, views, bounty_amount, id')
@@ -71,10 +136,12 @@ const fetchAnalyticsData = async (): Promise<AnalyticsData & { revenue: RevenueD
       .limit(10);
     if (scammersError) console.error('Error fetching top scammers:', scammersError);
     
+    // Process report stats from report_submissions table
     const { data: reportStatsRaw, error: reportError } = await supabase
       .from('report_submissions')
       .select('created_at, user_id')
       .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+    
     if (reportError) console.error('Error fetching report stats:', reportError);
     
     const reportStats: ReportStatsData[] = [];
@@ -105,10 +172,12 @@ const fetchAnalyticsData = async (): Promise<AnalyticsData & { revenue: RevenueD
       reportStats.sort((a, b) => b.day.localeCompare(a.day));
     }
     
+    // Calculate bounty stats
     const { data: bountyContributions, error: bountyError } = await supabase
       .from('bounty_contributions')
       .select('amount, scammer_id, contributor_id, is_active')
       .eq('is_active', true);
+    
     if (bountyError) console.error('Error fetching bounty stats:', bountyError);
     
     const bountyStats: BountyStatsData = {
@@ -129,6 +198,7 @@ const fetchAnalyticsData = async (): Promise<AnalyticsData & { revenue: RevenueD
       bountyStats.total_contributors = uniqueContributors.size;
     }
     
+    // Format top scammers with additional data
     const processedTopScammers: TopScammerData[] = topScammers 
       ? topScammers.map(scammer => ({
           name: scammer.name,
@@ -138,29 +208,12 @@ const fetchAnalyticsData = async (): Promise<AnalyticsData & { revenue: RevenueD
         }))
       : [];
 
-    const { data: bountiesData, error: bountiesError } = await supabase
-      .from('bounty_contributions')
-      .select('amount')
-      .eq('is_active', true)
-      .not('transferred_from_id', 'is', null);
-
-    if (bountiesError) {
-      console.error('Error fetching bounties for revenue:', bountiesError);
-    }
-
-    const totalBountiesPaid = bountiesData?.reduce((sum, bounty) => sum + Number(bounty.amount), 0) || 0;
-    const revenue = {
-      totalBountiesPaid,
-      totalRevenue: totalBountiesPaid * 0.10
-    };
-
     return {
-      dailyVisitors: dailyVisitors || [],
-      countryStats: countryStats || [],
+      dailyVisitors,
+      countryStats,
       topScammers: processedTopScammers,
-      reportStats: reportStats,
-      bountyStats: bountyStats,
-      revenue
+      reportStats,
+      bountyStats
     };
   } catch (error) {
     console.error('Error in fetchAnalyticsData:', error);
@@ -174,10 +227,6 @@ const fetchAnalyticsData = async (): Promise<AnalyticsData & { revenue: RevenueD
         active_bounties: 0,
         avg_bounty: 0,
         total_contributors: 0
-      },
-      revenue: {
-        totalBountiesPaid: 0,
-        totalRevenue: 0
       }
     };
   }
@@ -214,7 +263,9 @@ const AnalyticsPage: React.FC = () => {
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{data?.dailyVisitors?.[0]?.unique_visitors || 0}</div>
+                <div className="text-2xl font-bold">
+                  {data?.dailyVisitors.reduce((sum, day) => sum + day.unique_visitors, 0) || 0}
+                </div>
               </CardContent>
             </Card>
             
