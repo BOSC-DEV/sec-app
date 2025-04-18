@@ -852,6 +852,15 @@ export type Database = {
         Args: { p_user_id: string; p_ip_hash: string }
         Returns: string
       }
+      track_pageview: {
+        Args: {
+          p_visitor_id: string
+          p_page_path: string
+          p_page_title?: string
+          p_session_id?: string
+        }
+        Returns: string
+      }
       track_visitor: {
         Args: {
           p_visitor_id: string

@@ -84,6 +84,7 @@ const AnalyticsTracker = () => {
         const response = await fetch('https://api.ipapi.com/check?format=json');
         const geoData = await response.json();
         
+        // First track the visitor
         await supabase.rpc('track_visitor', {
           p_visitor_id: visitorId,
           p_ip_address: geoData.ip || null,
@@ -94,12 +95,12 @@ const AnalyticsTracker = () => {
           p_referrer: document.referrer || null
         });
 
-        // Track page view
+        // Then track the pageview
         const title = document.title;
         await supabase.rpc('track_pageview', {
           p_visitor_id: visitorId,
           p_page_path: location.pathname,
-          p_page_title: title || null,
+          p_page_title: title,
           p_session_id: localStorage.getItem('session_id') || null
         });
 
