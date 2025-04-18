@@ -165,12 +165,14 @@ const BountyForm: React.FC<BountyFormProps> = ({
         buttonText="Add Bounty"
       />
       
-      <BountyTransferDialog 
-        scammerId={scammerId} 
-        scammerName={scammerName}
-        onTransferComplete={handleTransferComplete}
-        bountyAmount={0}
-      />
+      <div className="mt-4 mb-4">
+        <BountyTransferDialog 
+          scammerId={scammerId} 
+          scammerName={scammerName}
+          onTransferComplete={handleTransferComplete}
+          bountyAmount={0}
+        />
+      </div>
 
       {profile && profile.wallet_address && (
         <div className="mt-4 bg-green-50 dark:bg-green-900/20 p-3 rounded-md text-center">
