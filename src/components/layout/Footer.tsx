@@ -12,7 +12,6 @@ import FAQDialog from '../common/FAQDialog';
 import AboutDialog from '../common/AboutDialog';
 import ContactDialog from '../common/ContactDialog';
 import { toast } from '@/hooks/use-toast';
-
 const Footer = () => {
   const [termsOpen, setTermsOpen] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
@@ -22,25 +21,22 @@ const Footer = () => {
   const [faqOpen, setFaqOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
-  
   const copyToClipboard = async () => {
     const contractAddress = "HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump";
-    
     try {
       await navigator.clipboard.writeText(contractAddress);
       toast({
         title: "Copied CA",
-        variant: "default",
+        variant: "default"
       });
     } catch (err) {
       toast({
         title: "Copy failed",
-        variant: "destructive",
+        variant: "destructive"
       });
       console.error("Failed to copy: ", err);
     }
   };
-  
   return <footer className="icc-footer">
       <div className="icc-container">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -55,26 +51,10 @@ const Footer = () => {
               A decentralized crime registry bringing accountability and self governance to the new digital world.
             </p>
             <div className="flex justify-center md:justify-start items-center space-x-4 mt-6">
-              <Button 
-                variant="ghost" 
-                size="icon"
-                className="text-white hover:bg-white/10 p-1"
-                onClick={() => window.open("https://x.com/sandecommission", "_blank")}
-                aria-label="SEC on X"
-              >
-                <img 
-                  src="/lovable-uploads/91abf77b-554f-410f-85a0-15dfdfcc77e4.png" 
-                  alt="X (Twitter)" 
-                  className="h-5 w-5" 
-                />
+              <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 p-1" onClick={() => window.open("https://x.com/sandecommission", "_blank")} aria-label="SEC on X">
+                <img src="/lovable-uploads/91abf77b-554f-410f-85a0-15dfdfcc77e4.png" alt="X (Twitter)" className="h-5 w-5" />
               </Button>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                className="text-white hover:bg-white/10 p-1"
-                onClick={copyToClipboard}
-                aria-label="Copy Contract Address"
-              >
+              <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 p-1" onClick={copyToClipboard} aria-label="Copy Contract Address">
                 <Copy className="h-5 w-5 text-white" />
               </Button>
             </div>
@@ -121,17 +101,10 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/analytics" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
-                  Analytics
-                </Link>
+                
               </li>
               <li>
-                <a 
-                  href="https://solscan.io/token/HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump"
-                  target="_blank"
-                  rel="noopener noreferrer" 
-                  className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors"
-                >
+                <a href="https://solscan.io/token/HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump" target="_blank" rel="noopener noreferrer" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
                   SEC Token
                 </a>
               </li>
