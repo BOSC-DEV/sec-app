@@ -1,17 +1,19 @@
 import React from 'react';
-import { BarChart, Users, Globe, TrendingUp, Shield, UserCheck, Coins, Receipt, UserRound, MessagesSquare } from 'lucide-react';
+import { MessagesSquare, Shield, CurrencyIcon, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { formatCurrency } from '@/lib/utils';
-import CurrencyIcon from '@/components/common/CurrencyIcon';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { getStatistics } from '@/services/statisticsService';
+
 interface BountyStatsData {
   total_bounties: number;
   active_bounties: number;
   avg_bounty: number;
   total_contributors: number;
 }
+
 const fetchAnalyticsData = async (): Promise<{
   bountyStats: BountyStatsData;
 }> => {
@@ -50,6 +52,7 @@ const fetchAnalyticsData = async (): Promise<{
     };
   }
 };
+
 const AnalyticsPage: React.FC = () => {
   const {
     data,
@@ -60,6 +63,7 @@ const AnalyticsPage: React.FC = () => {
     queryFn: fetchAnalyticsData,
     staleTime: 1000 * 60 * 5
   });
+
   const {
     data: homepageStats
   } = useQuery({
@@ -67,6 +71,7 @@ const AnalyticsPage: React.FC = () => {
     queryFn: getStatistics,
     staleTime: 1000 * 60 * 5
   });
+
   React.useEffect(() => {
     const channel = supabase.channel('public:chat_messages').on('postgres_changes', {
       event: 'INSERT',
@@ -84,13 +89,33 @@ const AnalyticsPage: React.FC = () => {
       supabase.removeChannel(channel);
     };
   }, []);
-  if (isLoading) return <div>Loading analytics...</div>;
+
+  if (isLoading) return <div className="flex justify-center items-center h-96"><LoadingSpinner size="lg" /></div>;
   if (error) return <div>Error loading analytics</div>;
+
   return <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Analytics Dashboard</h1>
       
       <div className="grid gap-4 md:grid-cols-7">
-        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Bounties</CardTitle>
+            <CurrencyIcon size="md" className="text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(data?.bountyStats?.total_bounties || 0)}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Revenue (10%)</CardTitle>
+            <CurrencyIcon size="md" className="text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency((data?.bountyStats?.total_bounties || 0) * 0.1)}</div>
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -118,16 +143,6 @@ const AnalyticsPage: React.FC = () => {
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Bounties</CardTitle>
-            <CurrencyIcon size="md" className="text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(data?.bountyStats?.total_bounties || 0)}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Average Bounty</CardTitle>
             <CurrencyIcon size="md" className="text-muted-foreground" />
           </CardHeader>
@@ -138,11 +153,11 @@ const AnalyticsPage: React.FC = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Revenue (10%)</CardTitle>
-            <CurrencyIcon size="md" className="text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Active Hunters</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency((data?.bountyStats?.total_bounties || 0) * 0.1)}</div>
+            <div className="text-2xl font-bold">{homepageStats?.reportersCount || 0}</div>
           </CardContent>
         </Card>
 
@@ -158,4 +173,5 @@ const AnalyticsPage: React.FC = () => {
       </div>
     </div>;
 };
+
 export default AnalyticsPage;
