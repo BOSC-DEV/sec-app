@@ -6,8 +6,6 @@ interface Statistics {
   scammersCount: number;
   reportersCount: number;
   usersCount: number;
-  totalMessages: number;
-  uniqueVisitors: number;
 }
 
 export const getStatistics = async (): Promise<Statistics> => {
@@ -49,27 +47,11 @@ export const getStatistics = async (): Promise<Statistics> => {
     
     if (usersError) throw usersError;
     
-    // Get total messages count
-    const { count: totalMessages, error: messagesError } = await supabase
-      .from('chat_messages')
-      .select('*', { count: 'exact', head: true });
-    
-    if (messagesError) throw messagesError;
-    
-    // Get unique visitors count
-    const { count: uniqueVisitors, error: visitorsError } = await supabase
-      .from('analytics_visitors')
-      .select('*', { count: 'exact', head: true });
-    
-    if (visitorsError) throw visitorsError;
-    
     return {
       totalBounty,
       scammersCount: scammersCount || 0,
       reportersCount,
-      usersCount: usersCount || 0,
-      totalMessages: totalMessages || 0,
-      uniqueVisitors: uniqueVisitors || 0
+      usersCount: usersCount || 0
     };
   } catch (error) {
     console.error('Error fetching statistics:', error);
@@ -78,9 +60,7 @@ export const getStatistics = async (): Promise<Statistics> => {
       totalBounty: 0,
       scammersCount: 0,
       reportersCount: 0,
-      usersCount: 0,
-      totalMessages: 0,
-      uniqueVisitors: 0
+      usersCount: 0
     };
   }
 };
