@@ -4,6 +4,9 @@ import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 import { getConnection } from '@/utils/phantomWallet';
 import { Profile } from '@/types/dataTypes';
 import { supabase } from '@/integrations/supabase/client';
+import { handleError } from '@/utils/errorHandling';
+import { sanitizeInput, sanitizeUrl } from '@/utils/securityUtils';
+import { ErrorSeverity } from '@/utils/errorSeverity';
 
 // SEC token mint address
 const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump');
@@ -11,15 +14,33 @@ const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpu
 // Function to upload profile picture
 export const uploadProfilePicture = async (walletAddress: string, file: File): Promise<string | null> => {
   try {
+    if (!walletAddress || !file) {
+      throw new Error('Missing required parameters for profile picture upload');
+    }
+    
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!validTypes.includes(file.type)) {
+      throw new Error('Invalid file type. Only JPEG, PNG, WEBP and GIF are allowed');
+    }
+    
+    // Validate file size (5MB max)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      throw new Error('File size exceeds 5MB limit');
+    }
+    
+    const sanitizedWallet = sanitizeInput(walletAddress);
     const fileExt = file.name.split('.').pop();
-    const fileName = `${walletAddress}-${Date.now()}.${fileExt}`;
+    const fileName = `${sanitizedWallet}-${Date.now()}.${fileExt}`;
     const filePath = `profile-pics/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
       .from('profiles')
       .upload(filePath, file, {
         cacheControl: '3600',
-        upsert: true
+        upsert: true,
+        contentType: file.type
       });
 
     if (uploadError) throw uploadError;
@@ -30,7 +51,11 @@ export const uploadProfilePicture = async (walletAddress: string, file: File): P
 
     return data.publicUrl;
   } catch (error) {
-    console.error('Error uploading profile picture:', error);
+    handleError(error, {
+      fallbackMessage: 'Error uploading profile picture',
+      severity: ErrorSeverity.MEDIUM,
+      context: 'uploadProfilePicture'
+    });
     return null;
   }
 };
@@ -38,16 +63,26 @@ export const uploadProfilePicture = async (walletAddress: string, file: File): P
 // Get profile by username
 export const getProfileByUsername = async (username: string): Promise<Profile | null> => {
   try {
+    if (!username) {
+      throw new Error('No username provided');
+    }
+    
+    const sanitizedUsername = sanitizeInput(username);
+    
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('username', username)
+      .eq('username', sanitizedUsername)
       .maybeSingle();
 
     if (error) throw error;
     return data;
   } catch (error) {
-    console.error('Error fetching profile by username:', error);
+    handleError(error, {
+      fallbackMessage: 'Error fetching profile by username',
+      severity: ErrorSeverity.MEDIUM,
+      context: 'getProfileByUsername'
+    });
     return null;
   }
 };
@@ -55,15 +90,25 @@ export const getProfileByUsername = async (username: string): Promise<Profile | 
 // Get profiles by display name - used in bounty components
 export const getProfilesByDisplayName = async (displayName: string): Promise<Profile[]> => {
   try {
+    if (!displayName) {
+      throw new Error('No display name provided');
+    }
+    
+    const sanitizedDisplayName = sanitizeInput(displayName);
+    
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('display_name', displayName);
+      .eq('display_name', sanitizedDisplayName);
 
     if (error) throw error;
     return data || [];
   } catch (error) {
-    console.error('Error fetching profiles by display name:', error);
+    handleError(error, {
+      fallbackMessage: 'Error fetching profiles by display name',
+      severity: ErrorSeverity.MEDIUM,
+      context: 'getProfilesByDisplayName'
+    });
     return [];
   }
 };
@@ -71,7 +116,31 @@ export const getProfilesByDisplayName = async (displayName: string): Promise<Pro
 // Extend existing saveProfile function to fetch and update SEC balance
 export const saveProfile = async (profile: Profile): Promise<Profile | null> => {
   try {
+    if (!profile) {
+      throw new Error('No profile data provided');
+    }
+    
     let updatedProfile = { ...profile };
+
+    // Sanitize profile data
+    if (updatedProfile.username) {
+      updatedProfile.username = sanitizeInput(updatedProfile.username);
+    }
+    if (updatedProfile.display_name) {
+      updatedProfile.display_name = sanitizeInput(updatedProfile.display_name);
+    }
+    if (updatedProfile.bio) {
+      updatedProfile.bio = sanitizeInput(updatedProfile.bio);
+    }
+    if (updatedProfile.x_link) {
+      updatedProfile.x_link = sanitizeUrl(updatedProfile.x_link);
+    }
+    if (updatedProfile.website_link) {
+      updatedProfile.website_link = sanitizeUrl(updatedProfile.website_link);
+    }
+    if (updatedProfile.profile_pic_url) {
+      updatedProfile.profile_pic_url = sanitizeUrl(updatedProfile.profile_pic_url);
+    }
 
     // If wallet address is present, fetch SEC balance
     if (profile.wallet_address) {
@@ -117,7 +186,11 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
     
     return data;
   } catch (error) {
-    console.error('Error saving profile with SEC balance:', error);
+    handleError(error, {
+      fallbackMessage: 'Error saving profile with SEC balance',
+      severity: ErrorSeverity.MEDIUM,
+      context: 'saveProfile'
+    });
     return null;
   }
 };
@@ -125,10 +198,16 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
 // Modify getProfileByWallet to use the same balance fetching logic
 export const getProfileByWallet = async (walletAddress: string): Promise<Profile | null> => {
   try {
+    if (!walletAddress) {
+      throw new Error('No wallet address provided');
+    }
+    
+    const sanitizedWallet = sanitizeInput(walletAddress);
+    
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('wallet_address', walletAddress)
+      .eq('wallet_address', sanitizedWallet)
       .maybeSingle();
 
     if (error) throw error;
@@ -140,7 +219,11 @@ export const getProfileByWallet = async (walletAddress: string): Promise<Profile
 
     return data;
   } catch (error) {
-    console.error('Error fetching profile by wallet:', error);
+    handleError(error, {
+      fallbackMessage: 'Error fetching profile by wallet',
+      severity: ErrorSeverity.MEDIUM,
+      context: 'getProfileByWallet'
+    });
     return null;
   }
 };

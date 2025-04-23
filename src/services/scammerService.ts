@@ -2,6 +2,8 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Scammer } from '@/types/dataTypes';
 import { handleError } from '@/utils/errorHandling';
+import { sanitizeInput } from '@/utils/securityUtils';
+import { ErrorSeverity } from '@/utils/errorSeverity';
 
 // Generate a sequential ID for a new scammer
 export const generateScammerId = async (): Promise<string> => {
@@ -39,114 +41,167 @@ export const generateScammerId = async (): Promise<string> => {
 };
 
 export const getScammers = async (): Promise<Scammer[]> => {
-  const { data, error } = await supabase
-    .from('scammers')
-    .select('*')
-    .is('deleted_at', null);
-  
-  if (error) {
-    console.error('Error fetching scammers:', error);
-    throw error;
+  try {
+    const { data, error } = await supabase
+      .from('scammers')
+      .select('*')
+      .is('deleted_at', null);
+    
+    if (error) {
+      console.error('Error fetching scammers:', error);
+      throw error;
+    }
+    
+    return data || [];
+  } catch (error) {
+    handleError(error, {
+      fallbackMessage: 'Failed to fetch scammers',
+      severity: ErrorSeverity.MEDIUM,
+      context: 'getScammers'
+    });
+    return [];
   }
-  
-  return data || [];
 };
 
 export const getScammerById = async (id: string): Promise<Scammer | null> => {
-  const { data, error } = await supabase
-    .from('scammers')
-    .select('*')
-    .eq('id', id)
-    .single();
-  
-  if (error) {
-    if (error.code === 'PGRST116') {
-      // Record not found
-      return null;
+  try {
+    // Validate and sanitize input
+    if (!id || typeof id !== 'string') {
+      throw new Error('Invalid scammer ID provided');
     }
-    console.error('Error fetching scammer by ID:', error);
-    throw error;
-  }
-  
-  if (data) {
-    try {
-      // Generate a unique IP hash based on timestamp to avoid constraint violations
-      // In a production environment, you would use a real IP address hash
-      const ipHash = `anonymous-${new Date().getTime()}`;
-      
-      // Check if this view is a duplicate using our new database function
-      const { data: isDuplicate } = await supabase
-        .rpc('is_duplicate_view', { 
-          p_scammer_id: id, 
-          p_ip_hash: ipHash 
-        });
-      
-      // Only insert view record if it's not a duplicate
-      if (!isDuplicate) {
-        // Insert view record - this will trigger our increment_scammer_views function
-        const { error: viewError } = await supabase
-          .from('scammer_views')
-          .insert({ scammer_id: id, ip_hash: ipHash });
-          
-        if (viewError) {
-          console.error('Error logging scammer view:', viewError);
-        }
+    
+    const sanitizedId = sanitizeInput(id);
+    
+    const { data, error } = await supabase
+      .from('scammers')
+      .select('*')
+      .eq('id', sanitizedId)
+      .single();
+    
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // Record not found
+        return null;
       }
-    } catch (e) {
-      // Silently fail on view tracking errors to not disrupt user experience
-      console.error('Failed to track view:', e);
+      console.error('Error fetching scammer by ID:', error);
+      throw error;
     }
+    
+    if (data) {
+      try {
+        // Generate a unique IP hash based on timestamp to avoid constraint violations
+        // In a production environment, you would use a real IP address hash
+        const ipHash = `anonymous-${new Date().getTime()}`;
+        
+        // Check if this view is a duplicate using our new database function
+        const { data: isDuplicate } = await supabase
+          .rpc('is_duplicate_view', { 
+            p_scammer_id: sanitizedId, 
+            p_ip_hash: ipHash 
+          });
+        
+        // Only insert view record if it's not a duplicate
+        if (!isDuplicate) {
+          // Insert view record - this will trigger our increment_scammer_views function
+          const { error: viewError } = await supabase
+            .from('scammer_views')
+            .insert({ scammer_id: sanitizedId, ip_hash: ipHash });
+            
+          if (viewError) {
+            console.error('Error logging scammer view:', viewError);
+          }
+        }
+      } catch (e) {
+        // Silently fail on view tracking errors to not disrupt user experience
+        console.error('Failed to track view:', e);
+      }
+    }
+    
+    return data;
+  } catch (error) {
+    handleError(error, {
+      fallbackMessage: 'Failed to fetch scammer details',
+      severity: ErrorSeverity.MEDIUM,
+      context: 'getScammerById'
+    });
+    return null;
   }
-  
-  return data;
 };
 
 export const getTopScammers = async (limit: number = 3): Promise<Scammer[]> => {
-  const { data, error } = await supabase
-    .from('scammers')
-    .select('*')
-    .is('deleted_at', null)
-    .order('bounty_amount', { ascending: false })
-    .limit(limit);
-  
-  if (error) {
-    console.error('Error fetching top scammers:', error);
-    throw error;
+  try {
+    // Validate input
+    const sanitizedLimit = Math.min(Math.max(1, limit), 50); // Between 1 and 50
+    
+    const { data, error } = await supabase
+      .from('scammers')
+      .select('*')
+      .is('deleted_at', null)
+      .order('bounty_amount', { ascending: false })
+      .limit(sanitizedLimit);
+    
+    if (error) {
+      console.error('Error fetching top scammers:', error);
+      throw error;
+    }
+    
+    return data || [];
+  } catch (error) {
+    handleError(error, {
+      fallbackMessage: 'Failed to fetch top scammers',
+      severity: ErrorSeverity.MEDIUM,
+      context: 'getTopScammers'
+    });
+    return [];
   }
-  
-  return data || [];
 };
 
 export const getScammersByReporter = async (walletAddress: string): Promise<Scammer[]> => {
-  const { data, error } = await supabase
-    .from('scammers')
-    .select('*')
-    .eq('added_by', walletAddress)
-    .order('date_added', { ascending: false });
-  
-  if (error) {
-    console.error('Error fetching scammers by reporter:', error);
-    throw error;
+  try {
+    // Validate input
+    if (!walletAddress || typeof walletAddress !== 'string') {
+      throw new Error('Invalid wallet address provided');
+    }
+    
+    const sanitizedWallet = sanitizeInput(walletAddress);
+    
+    const { data, error } = await supabase
+      .from('scammers')
+      .select('*')
+      .eq('added_by', sanitizedWallet)
+      .order('date_added', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching scammers by reporter:', error);
+      throw error;
+    }
+    
+    return data || [];
+  } catch (error) {
+    handleError(error, {
+      fallbackMessage: 'Failed to fetch reported scammers',
+      severity: ErrorSeverity.MEDIUM,
+      context: 'getScammersByReporter'
+    });
+    return [];
   }
-  
-  return data || [];
 };
 
 // Get scammers liked by a user
 export const getLikedScammersByUser = async (walletAddress: string): Promise<Scammer[]> => {
-  console.log(`Fetching liked scammers for user: ${walletAddress}`);
-  
-  if (!walletAddress) {
-    console.error('No wallet address provided to getLikedScammersByUser');
-    return [];
-  }
-  
   try {
+    if (!walletAddress) {
+      console.error('No wallet address provided to getLikedScammersByUser');
+      return [];
+    }
+    
+    const sanitizedWallet = sanitizeInput(walletAddress);
+    
     // Get all the scammer IDs that this user has liked
     const { data: interactions, error: interactionsError } = await supabase
       .from('user_scammer_interactions')
       .select('scammer_id')
-      .eq('user_id', walletAddress)
+      .eq('user_id', sanitizedWallet)
       .eq('liked', true);
     
     if (interactionsError) {
@@ -155,7 +210,7 @@ export const getLikedScammersByUser = async (walletAddress: string): Promise<Sca
     }
     
     if (!interactions || interactions.length === 0) {
-      console.log(`No liked scammers found for user: ${walletAddress}`);
+      console.log(`No liked scammers found for user: ${sanitizedWallet}`);
       return [];
     }
     
@@ -177,7 +232,11 @@ export const getLikedScammersByUser = async (walletAddress: string): Promise<Sca
     console.log(`Successfully fetched ${scammers?.length || 0} liked scammers`);
     return scammers || [];
   } catch (error) {
-    console.error('Error in getLikedScammersByUser:', error);
+    handleError(error, {
+      fallbackMessage: 'Failed to fetch liked scammers',
+      severity: ErrorSeverity.MEDIUM,
+      context: 'getLikedScammersByUser'
+    });
     return [];
   }
 };
@@ -188,23 +247,33 @@ export const getLikedScammersByUser = async (walletAddress: string): Promise<Sca
  */
 export const deleteScammer = async (id: string): Promise<boolean> => {
   try {
-    console.log(`Archiving scammer report: ${id}`);
+    if (!id) {
+      throw new Error('Invalid scammer ID provided');
+    }
+    
+    const sanitizedId = sanitizeInput(id);
+    
+    console.log(`Archiving scammer report: ${sanitizedId}`);
     
     const { error } = await supabase
       .from('scammers')
       .update({ deleted_at: new Date().toISOString() })
-      .eq('id', id);
+      .eq('id', sanitizedId);
     
     if (error) {
       console.error('Error archiving scammer:', error);
       throw error;
     }
     
-    console.log(`Successfully archived scammer report: ${id}`);
+    console.log(`Successfully archived scammer report: ${sanitizedId}`);
     return true;
   } catch (error) {
-    console.error('Exception archiving scammer:', error);
-    throw error;
+    handleError(error, {
+      fallbackMessage: 'Failed to archive scammer report',
+      severity: ErrorSeverity.MEDIUM,
+      context: 'deleteScammer'
+    });
+    return false;
   }
 };
 
@@ -214,23 +283,33 @@ export const deleteScammer = async (id: string): Promise<boolean> => {
  */
 export const unarchiveScammer = async (id: string): Promise<boolean> => {
   try {
-    console.log(`Unarchiving scammer report: ${id}`);
+    if (!id) {
+      throw new Error('Invalid scammer ID provided');
+    }
+    
+    const sanitizedId = sanitizeInput(id);
+    
+    console.log(`Unarchiving scammer report: ${sanitizedId}`);
     
     const { error } = await supabase
       .from('scammers')
       .update({ deleted_at: null })
-      .eq('id', id);
+      .eq('id', sanitizedId);
     
     if (error) {
       console.error('Error unarchiving scammer:', error);
       throw error;
     }
     
-    console.log(`Successfully unarchived scammer report: ${id}`);
+    console.log(`Successfully unarchived scammer report: ${sanitizedId}`);
     return true;
   } catch (error) {
-    console.error('Exception unarchiving scammer:', error);
-    throw error;
+    handleError(error, {
+      fallbackMessage: 'Failed to unarchive scammer report',
+      severity: ErrorSeverity.MEDIUM,
+      context: 'unarchiveScammer'
+    });
+    return false;
   }
 };
 
@@ -239,10 +318,16 @@ export const unarchiveScammer = async (id: string): Promise<boolean> => {
  */
 export const scammerExists = async (id: string): Promise<boolean> => {
   try {
+    if (!id) {
+      throw new Error('Invalid scammer ID provided');
+    }
+    
+    const sanitizedId = sanitizeInput(id);
+    
     const { data, error } = await supabase
       .from('scammers')
       .select('id')
-      .eq('id', id)
+      .eq('id', sanitizedId)
       .maybeSingle();
     
     if (error) {
@@ -252,7 +337,11 @@ export const scammerExists = async (id: string): Promise<boolean> => {
     
     return !!data;
   } catch (error) {
-    console.error('Exception checking if scammer exists:', error);
+    handleError(error, {
+      fallbackMessage: 'Failed to check if scammer exists',
+      severity: ErrorSeverity.LOW,
+      context: 'scammerExists'
+    });
     return false;
   }
 };

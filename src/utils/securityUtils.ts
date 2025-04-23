@@ -25,7 +25,9 @@ export const sanitizeHtml = (input: string): string => {
   sanitized = sanitized
     .replace(/javascript:/gi, '')
     .replace(/on\w+=/gi, '')
-    .replace(/data:/gi, '');
+    .replace(/data:/gi, '')
+    .replace(/blob:/gi, '') // Adding blob: protocol prevention
+    .replace(/vbscript:/gi, ''); // Adding vbscript: protocol prevention
     
   return sanitized;
 };
@@ -44,6 +46,12 @@ export const sanitizeUrl = (url: string): string => {
     
     // Only allow certain protocols
     if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+      return '';
+    }
+    
+    // Additional safety checks for URL
+    const dangerousDomains = ['evil.com', 'attacker.net', 'malware.org'];
+    if (dangerousDomains.some(domain => parsedUrl.hostname.includes(domain))) {
       return '';
     }
     
@@ -77,7 +85,10 @@ export const sanitizeInput = (input: string): string => {
   // Replace SQL injection patterns
   return input
     .replace(/'/g, "''")  // Escape single quotes
-    .replace(/;/g, '');   // Remove semicolons
+    .replace(/;/g, '')    // Remove semicolons
+    .replace(/--/g, '')   // Remove comment markers
+    .replace(/\/\*/g, '') // Remove block comment start
+    .replace(/\*\//g, ''); // Remove block comment end
 };
 
 /**
@@ -94,7 +105,7 @@ export const isAllowedResource = (url: string, type: 'image' | 'script' | 'style
     
     // Define allowed domains for different resource types
     const allowedDomains: Record<string, string[]> = {
-      image: ['localhost', 'lovable.app', 'yscammm.io'],
+      image: ['localhost', 'lovable.app', 'yscammm.io', 'github.com', 'githubusercontent.com'],
       script: ['localhost', 'lovable.app', 'yscammm.io'],
       style: ['localhost', 'lovable.app', 'yscammm.io'],
       frame: ['localhost', 'lovable.app', 'yscammm.io'],
@@ -106,4 +117,55 @@ export const isAllowedResource = (url: string, type: 'image' | 'script' | 'style
   } catch (e) {
     return false;
   }
+};
+
+/**
+ * Validates and sanitizes JSON strings
+ * @param input - The JSON string to sanitize
+ * @returns Sanitized JSON string
+ */
+export const sanitizeJson = (input: string): string => {
+  if (!input) return '';
+  
+  try {
+    // Parse and re-stringify to ensure it's valid JSON
+    const parsed = JSON.parse(input);
+    return JSON.stringify(parsed);
+  } catch (e) {
+    // Return empty object if invalid JSON
+    return '{}';
+  }
+};
+
+/**
+ * Generates a secure hash for sensitive data
+ * @param data - The data to hash
+ * @returns A hash string
+ */
+export const generateHash = (data: string): string => {
+  // This is a simple hash for demonstration. In production,
+  // use a proper crypto library with a secure algorithm
+  let hash = 0;
+  if (data.length === 0) return hash.toString();
+  
+  for (let i = 0; i < data.length; i++) {
+    const char = data.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  
+  return Math.abs(hash).toString(36);
+};
+
+/**
+ * Validates a wallet address format
+ * @param address - The wallet address to validate
+ * @returns Boolean indicating if address format is valid
+ */
+export const isValidWalletAddress = (address: string): boolean => {
+  if (!address) return false;
+  
+  // Basic check for Solana addresses (44 characters starting with a number or letter)
+  const solanaRegex = /^[A-Za-z0-9]{43,44}$/;
+  return solanaRegex.test(address);
 };

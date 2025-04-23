@@ -1,5 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { handleError } from '@/utils/errorHandling';
+import { ErrorSeverity } from '@/utils/errorSeverity';
 
 interface Statistics {
   totalBounty: number;
@@ -54,7 +56,11 @@ export const getStatistics = async (): Promise<Statistics> => {
       usersCount: usersCount || 0
     };
   } catch (error) {
-    console.error('Error fetching statistics:', error);
+    handleError(error, {
+      fallbackMessage: 'Error fetching statistics',
+      severity: ErrorSeverity.MEDIUM,
+      context: 'getStatistics'
+    });
     // Return default values in case of error
     return {
       totalBounty: 0,
@@ -153,7 +159,11 @@ export const getProfileStatistics = async (): Promise<any[]> => {
       };
     });
   } catch (error) {
-    console.error('Error fetching profile statistics:', error);
+    handleError(error, {
+      fallbackMessage: 'Failed to fetch profile statistics',
+      severity: ErrorSeverity.MEDIUM,
+      context: 'getProfileStatistics'
+    });
     return [];
   }
 };

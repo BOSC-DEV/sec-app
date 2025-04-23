@@ -3,6 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { ReportFormValues } from '@/hooks/useReportForm';
 import { Profile } from '@/types/dataTypes';
+import { sanitizeInput } from '@/utils/securityUtils';
+import { handleError } from '@/utils/errorHandling';
+import { ErrorSeverity } from '@/utils/errorSeverity';
 
 /**
  * Uploads a scammer photo to storage
@@ -13,13 +16,34 @@ export const uploadScammerPhoto = async (
   file: File
 ): Promise<string | null> => {
   try {
-    const fileName = `scammer_photos/${Date.now()}_${file.name}`;
+    if (!file) {
+      throw new Error('No file provided for upload');
+    }
     
-    console.log("Uploading file to bucket 'media':", fileName);
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!validTypes.includes(file.type)) {
+      throw new Error('Invalid file type. Only JPEG, PNG, WEBP and GIF are allowed');
+    }
+    
+    // Validate file size (5MB max)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      throw new Error('File size exceeds 5MB limit');
+    }
+    
+    // Create a safe filename
+    const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
+    const safeFileName = `scammer_photos/${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExtension}`;
+    
+    console.log("Uploading file to bucket 'media':", safeFileName);
     
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('media')
-      .upload(fileName, file);
+      .upload(safeFileName, file, {
+        cacheControl: '3600',
+        contentType: file.type
+      });
       
     if (uploadError) {
       console.error("Photo upload error:", uploadError);
@@ -30,12 +54,16 @@ export const uploadScammerPhoto = async (
     
     const { data: publicUrlData } = supabase.storage
       .from('media')
-      .getPublicUrl(fileName);
+      .getPublicUrl(safeFileName);
       
     return publicUrlData.publicUrl;
   } catch (error) {
-    console.error("Error uploading photo:", error);
-    throw error;
+    handleError(error, {
+      fallbackMessage: 'Failed to upload scammer photo',
+      severity: ErrorSeverity.MEDIUM,
+      context: 'uploadScammerPhoto'
+    });
+    return null;
   }
 };
 
@@ -43,29 +71,43 @@ export const uploadScammerPhoto = async (
  * Fetches a scammer by ID
  */
 export const fetchScammerById = async (id: string) => {
-  if (!id) return null;
-  
-  const { data, error } = await supabase
-    .from('scammers')
-    .select('*')
-    .eq('id', id)
-    .single();
+  try {
+    if (!id) return null;
     
-  if (error) throw error;
-  return data;
+    const sanitizedId = sanitizeInput(id);
+    
+    const { data, error } = await supabase
+      .from('scammers')
+      .select('*')
+      .eq('id', sanitizedId)
+      .single();
+      
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    handleError(error, {
+      fallbackMessage: 'Failed to fetch scammer details',
+      severity: ErrorSeverity.MEDIUM,
+      context: 'fetchScammerById'
+    });
+    return null;
+  }
 };
 
 /**
  * Checks if the current user is the creator of a scammer report
  */
 export const isScammerCreator = async (scammerId: string, walletAddress: string): Promise<boolean> => {
-  if (!scammerId || !walletAddress) return false;
-  
   try {
+    if (!scammerId || !walletAddress) return false;
+    
+    const sanitizedId = sanitizeInput(scammerId);
+    const sanitizedWallet = sanitizeInput(walletAddress);
+    
     const { data, error } = await supabase
       .from('scammers')
       .select('added_by')
-      .eq('id', scammerId)
+      .eq('id', sanitizedId)
       .single();
       
     if (error) {
@@ -73,9 +115,14 @@ export const isScammerCreator = async (scammerId: string, walletAddress: string)
       return false;
     }
     
-    return data.added_by === walletAddress;
+    return data.added_by === sanitizedWallet;
   } catch (error) {
-    console.error("Error checking scammer creator:", error);
+    handleError(error, {
+      fallbackMessage: 'Failed to verify scammer creator',
+      severity: ErrorSeverity.LOW,
+      context: 'isScammerCreator',
+      silent: true
+    });
     return false;
   }
 };
@@ -88,30 +135,51 @@ export const updateScammerReport = async (
   data: ReportFormValues,
   photoUrl: string | null
 ) => {
-  const aliases = data.aliases?.filter(item => item !== '') || [];
-  const links = data.links?.filter(item => item !== '') || [];
-  const accomplices = data.accomplices?.filter(item => item !== '') || [];
-  const wallet_addresses = data.wallet_addresses?.filter(item => item !== '') || [];
-  
-  console.log("Updating existing scammer:", id);
-  
-  const { error } = await supabase
-    .from('scammers')
-    .update({
-      name: data.name,
-      accused_of: data.accused_of,
-      wallet_addresses,
-      photo_url: photoUrl,
-      aliases,
-      links,
-      accomplices,
-      official_response: data.official_response,
-    })
-    .eq('id', id);
+  try {
+    if (!id) {
+      throw new Error('No scammer ID provided for update');
+    }
     
-  if (error) throw error;
-  
-  return id;
+    const sanitizedId = sanitizeInput(id);
+    
+    // Filter out empty values and sanitize arrays
+    const aliases = data.aliases?.filter(item => item !== '').map(sanitizeInput) || [];
+    const links = data.links?.filter(item => item !== '').map(sanitizeInput) || [];
+    const accomplices = data.accomplices?.filter(item => item !== '').map(sanitizeInput) || [];
+    const wallet_addresses = data.wallet_addresses?.filter(item => item !== '').map(sanitizeInput) || [];
+    
+    // Sanitize other fields
+    const sanitizedName = sanitizeInput(data.name);
+    const sanitizedAccusedOf = sanitizeInput(data.accused_of);
+    const sanitizedResponse = data.official_response ? sanitizeInput(data.official_response) : null;
+    
+    console.log("Updating existing scammer:", sanitizedId);
+    
+    const { error } = await supabase
+      .from('scammers')
+      .update({
+        name: sanitizedName,
+        accused_of: sanitizedAccusedOf,
+        wallet_addresses,
+        photo_url: photoUrl,
+        aliases,
+        links,
+        accomplices,
+        official_response: sanitizedResponse,
+      })
+      .eq('id', sanitizedId);
+      
+    if (error) throw error;
+    
+    return sanitizedId;
+  } catch (error) {
+    handleError(error, {
+      fallbackMessage: 'Failed to update scammer report',
+      severity: ErrorSeverity.MEDIUM,
+      context: 'updateScammerReport'
+    });
+    throw error; // Rethrow to allow calling functions to handle the error
+  }
 };
 
 /**
@@ -122,16 +190,26 @@ export const createScammerReport = async (
   photoUrl: string | null,
   profile: Profile
 ) => {
-  console.log("Creating new scammer report");
-  
   try {
+    if (!profile || !profile.wallet_address) {
+      throw new Error('User profile information is missing');
+    }
+    
+    console.log("Creating new scammer report");
+    
     const newId = await generateScammerId();
     console.log("Generated new scammer ID:", newId);
     
-    const aliases = data.aliases?.filter(item => item !== '') || [];
-    const links = data.links?.filter(item => item !== '') || [];
-    const accomplices = data.accomplices?.filter(item => item !== '') || [];
-    const wallet_addresses = data.wallet_addresses?.filter(item => item !== '') || [];
+    // Filter out empty values and sanitize arrays
+    const aliases = data.aliases?.filter(item => item !== '').map(sanitizeInput) || [];
+    const links = data.links?.filter(item => item !== '').map(sanitizeInput) || [];
+    const accomplices = data.accomplices?.filter(item => item !== '').map(sanitizeInput) || [];
+    const wallet_addresses = data.wallet_addresses?.filter(item => item !== '').map(sanitizeInput) || [];
+    
+    // Sanitize other fields
+    const sanitizedName = sanitizeInput(data.name);
+    const sanitizedAccusedOf = sanitizeInput(data.accused_of);
+    const sanitizedResponse = data.official_response ? sanitizeInput(data.official_response) : null;
     
     // Convert the numeric ID to a string before inserting
     const newIdString = newId.toString();
@@ -140,8 +218,8 @@ export const createScammerReport = async (
       .from('scammers')
       .insert({
         id: newIdString,
-        name: data.name,
-        accused_of: data.accused_of,
+        name: sanitizedName,
+        accused_of: sanitizedAccusedOf,
         wallet_addresses,
         photo_url: photoUrl,
         aliases,
@@ -154,7 +232,7 @@ export const createScammerReport = async (
         dislikes: 0,
         shares: 0,
         bounty_amount: 0,
-        official_response: data.official_response,
+        official_response: sanitizedResponse,
       });
       
     if (error) {
@@ -169,8 +247,12 @@ export const createScammerReport = async (
     
     return newIdString;
   } catch (error) {
-    console.error("Error creating scammer report:", error);
-    throw error;
+    handleError(error, {
+      fallbackMessage: 'Failed to create scammer report',
+      severity: ErrorSeverity.MEDIUM,
+      context: 'createScammerReport'
+    });
+    throw error; // Rethrow to allow calling functions to handle the error
   }
 };
 
