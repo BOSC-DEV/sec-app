@@ -19,15 +19,21 @@ export const sanitizeHtml = (input: string): string => {
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
     .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
     .replace(/<img[^>]*>/gi, '')
-    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+    .replace(/<link\b[^<]*(?:(?!<\/link>)<[^<]*)*<\/link>/gi, '')
+    .replace(/<meta\b[^<]*(?:(?!<\/meta>)<[^<]*)*<\/meta>/gi, '');
   
   // Replace potentially dangerous attributes
   sanitized = sanitized
     .replace(/javascript:/gi, '')
-    .replace(/on\w+=/gi, '')
+    .replace(/\bon\w+\s*=/gi, '') // More robust way to catch all event handlers
     .replace(/data:/gi, '')
-    .replace(/blob:/gi, '') // Adding blob: protocol prevention
-    .replace(/vbscript:/gi, ''); // Adding vbscript: protocol prevention
+    .replace(/blob:/gi, '')
+    .replace(/vbscript:/gi, '')
+    .replace(/livescript:/gi, '')
+    .replace(/mocha:/gi, '')
+    .replace(/eval\s*\(/gi, '')
+    .replace(/expression\s*\(/gi, '');
     
   return sanitized;
 };
@@ -41,6 +47,9 @@ export const sanitizeUrl = (url: string): string => {
   if (!url) return '';
   
   try {
+    // Remove any leading/trailing whitespace
+    url = url.trim();
+    
     // Check if URL is valid
     const parsedUrl = new URL(url);
     
@@ -50,8 +59,21 @@ export const sanitizeUrl = (url: string): string => {
     }
     
     // Additional safety checks for URL
-    const dangerousDomains = ['evil.com', 'attacker.net', 'malware.org'];
-    if (dangerousDomains.some(domain => parsedUrl.hostname.includes(domain))) {
+    const dangerousDomains = [
+      'evil.com', 'attacker.net', 'malware.org',
+      'phishing', 'malicious', 'xss', 'csrf',
+      'hack', 'exploit', 'attack'
+    ];
+    
+    if (dangerousDomains.some(domain => parsedUrl.hostname.toLowerCase().includes(domain))) {
+      return '';
+    }
+    
+    // Check for IP addresses in hostname (potential for bypassing domain blocks)
+    const ipAddressPattern = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
+    if (ipAddressPattern.test(parsedUrl.hostname)) {
+      // Further validate legitimate IP usage if needed
+      // For now, we'll block direct IP navigation as it's often used to bypass security
       return '';
     }
     
@@ -70,7 +92,12 @@ export const sanitizeUrl = (url: string): string => {
 export const isValidEmail = (email: string): boolean => {
   if (!email) return false;
   
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  // More comprehensive email regex
+  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+  
+  // Check length constraints
+  if (email.length > 320) return false; // Max email length
+  
   return emailRegex.test(email);
 };
 
@@ -88,7 +115,10 @@ export const sanitizeInput = (input: string): string => {
     .replace(/;/g, '')    // Remove semicolons
     .replace(/--/g, '')   // Remove comment markers
     .replace(/\/\*/g, '') // Remove block comment start
-    .replace(/\*\//g, ''); // Remove block comment end
+    .replace(/\*\//g, '') // Remove block comment end
+    .replace(/xp_/gi, '') // SQL Server extended stored procedures
+    .replace(/exec\s+/gi, '') // Remove exec command
+    .replace(/union\s+select/gi, ''); // Remove UNION SELECT pattern
 };
 
 /**
@@ -105,7 +135,7 @@ export const isAllowedResource = (url: string, type: 'image' | 'script' | 'style
     
     // Define allowed domains for different resource types
     const allowedDomains: Record<string, string[]> = {
-      image: ['localhost', 'lovable.app', 'yscammm.io', 'github.com', 'githubusercontent.com'],
+      image: ['localhost', 'lovable.app', 'yscammm.io', 'github.com', 'githubusercontent.com', 'mfirlsuuxpvgwaxymjor.supabase.co'],
       script: ['localhost', 'lovable.app', 'yscammm.io'],
       style: ['localhost', 'lovable.app', 'yscammm.io'],
       frame: ['localhost', 'lovable.app', 'yscammm.io'],
@@ -130,7 +160,32 @@ export const sanitizeJson = (input: string): string => {
   try {
     // Parse and re-stringify to ensure it's valid JSON
     const parsed = JSON.parse(input);
-    return JSON.stringify(parsed);
+    
+    // Recursively sanitize string values in the JSON object
+    const sanitizeObject = (obj: any): any => {
+      if (typeof obj !== 'object' || obj === null) {
+        return obj;
+      }
+      
+      if (Array.isArray(obj)) {
+        return obj.map(item => sanitizeObject(item));
+      }
+      
+      const result: Record<string, any> = {};
+      for (const [key, value] of Object.entries(obj)) {
+        if (typeof value === 'string') {
+          result[key] = sanitizeHtml(value);
+        } else if (typeof value === 'object' && value !== null) {
+          result[key] = sanitizeObject(value);
+        } else {
+          result[key] = value;
+        }
+      }
+      
+      return result;
+    };
+    
+    return JSON.stringify(sanitizeObject(parsed));
   } catch (e) {
     // Return empty object if invalid JSON
     return '{}';
@@ -167,5 +222,67 @@ export const isValidWalletAddress = (address: string): boolean => {
   
   // Basic check for Solana addresses (44 characters starting with a number or letter)
   const solanaRegex = /^[A-Za-z0-9]{43,44}$/;
-  return solanaRegex.test(address);
+  
+  // Additional security check - ensure address doesn't contain suspicious patterns
+  const containsSuspiciousPattern = /script|javascript|eval|function/i.test(address);
+  
+  return solanaRegex.test(address) && !containsSuspiciousPattern;
+};
+
+/**
+ * Creates secure content security policy headers
+ * @returns CSP header string
+ */
+export const getContentSecurityPolicy = (): string => {
+  return [
+    "default-src 'self'",
+    "script-src 'self'",
+    "style-src 'self' 'unsafe-inline'", // Allow inline styles for now
+    "img-src 'self' data: https://mfirlsuuxpvgwaxymjor.supabase.co",
+    "font-src 'self'",
+    "connect-src 'self' https://mfirlsuuxpvgwaxymjor.supabase.co",
+    "frame-src 'self'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join('; ');
+};
+
+/**
+ * Creates security headers for responses
+ * @returns Record of security headers
+ */
+export const getSecurityHeaders = (): Record<string, string> => {
+  return {
+    'Content-Security-Policy': getContentSecurityPolicy(),
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'X-XSS-Protection': '1; mode=block',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()'
+  };
+};
+
+/**
+ * Detects potentially malicious input patterns
+ * @param input - The string to check
+ * @returns Boolean indicating if the input seems malicious
+ */
+export const detectMaliciousPattern = (input: string): boolean => {
+  if (!input || typeof input !== 'string') return false;
+  
+  const maliciousPatterns = [
+    /<script/i,
+    /javascript:/i,
+    /onerror=/i,
+    /onload=/i,
+    /eval\(/i,
+    /document\.cookie/i,
+    /localStorage/i,
+    /sessionStorage/i,
+    /fetch\(/i,
+    /XMLHttpRequest/i
+  ];
+  
+  return maliciousPatterns.some(pattern => pattern.test(input));
 };

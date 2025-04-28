@@ -2,6 +2,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ChatMessage } from '@/types/dataTypes';
 import { supabase } from '@/integrations/supabase/client';
+import { sanitizeHtml, sanitizeInput, detectMaliciousPattern } from '@/utils/securityUtils';
+import { toast } from '@/hooks/use-toast';
 
 const MESSAGES_PER_PAGE = 50;
 
@@ -9,10 +11,13 @@ export const useChatMessages = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchMessages = useCallback(async (startIndex: number = 0) => {
     try {
       setIsLoading(true);
+      setError(null);
+      
       const { data, error } = await supabase
         .from('chat_messages')
         .select('*')
@@ -24,13 +29,20 @@ export const useChatMessages = () => {
       const newMessages = data as ChatMessage[];
       setHasMore(newMessages.length === MESSAGES_PER_PAGE);
       
+      // Sanitize message content before setting
+      const sanitizedMessages = newMessages.map(msg => ({
+        ...msg,
+        content: sanitizeHtml(msg.content)
+      }));
+      
       if (startIndex === 0) {
-        setMessages(newMessages.reverse());
+        setMessages(sanitizedMessages.reverse());
       } else {
-        setMessages(prev => [...newMessages.reverse(), ...prev]);
+        setMessages(prev => [...sanitizedMessages.reverse(), ...prev]);
       }
     } catch (error) {
       console.error('Error fetching chat messages:', error);
+      setError('Failed to load messages. Please try again later.');
     } finally {
       setIsLoading(false);
     }
@@ -46,10 +58,42 @@ export const useChatMessages = () => {
     image_file?: File | null;
   }) => {
     try {
+      // Security checks
+      if (detectMaliciousPattern(messageData.content)) {
+        toast({
+          title: "Security Warning",
+          description: "Potentially malicious content detected. Message not sent.",
+          variant: "destructive"
+        });
+        return null;
+      }
+      
+      // Sanitize content
+      const sanitizedContent = sanitizeHtml(messageData.content);
+      
       let imageUrl = null;
       
       // If there's an image file, upload it first
       if (messageData.image_file) {
+        // Validate file size and type
+        if (messageData.image_file.size > 5 * 1024 * 1024) { // 5MB limit
+          toast({
+            title: "Error",
+            description: "Image file is too large. Maximum size is 5MB.",
+            variant: "destructive"
+          });
+          return null;
+        }
+        
+        if (!messageData.image_file.type.startsWith('image/')) {
+          toast({
+            title: "Error",
+            description: "Only image files are allowed.",
+            variant: "destructive"
+          });
+          return null;
+        }
+        
         const fileExt = messageData.image_file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
         const filePath = `chat-images/${fileName}`;
@@ -71,10 +115,10 @@ export const useChatMessages = () => {
       const { data, error } = await supabase
         .from('chat_messages')
         .insert({
-          content: messageData.content,
+          content: sanitizedContent,
           author_id: messageData.author_id,
-          author_name: messageData.author_name,
-          author_username: messageData.author_username,
+          author_name: sanitizeInput(messageData.author_name),
+          author_username: messageData.author_username ? sanitizeInput(messageData.author_username) : null,
           author_profile_pic: messageData.author_profile_pic,
           author_sec_balance: messageData.author_sec_balance,
           image_url: imageUrl,
@@ -84,11 +128,32 @@ export const useChatMessages = () => {
         .select()
         .single();
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error inserting chat message:', error);
+        throw error;
+      }
       
       return data as ChatMessage;
     } catch (error) {
       console.error('Error sending chat message:', error);
+      
+      // Provide more specific error message based on error type
+      if (error instanceof Error) {
+        if (error.message.includes('new row violates row-level security policy')) {
+          toast({
+            title: "Authentication Error",
+            description: "You need to be logged in to send messages.",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to send your message. Please try again.",
+            variant: "destructive"
+          });
+        }
+      }
+      
       throw error;
     }
   }, []);
@@ -101,6 +166,9 @@ export const useChatMessages = () => {
         .eq('id', messageId);
         
       if (error) throw error;
+      
+      // Update local state to reflect deletion
+      setMessages(prev => prev.filter(msg => msg.id !== messageId));
       
       return true;
     } catch (error) {
@@ -125,7 +193,10 @@ export const useChatMessages = () => {
         schema: 'public',
         table: 'chat_messages'
       }, payload => {
-        setMessages(prev => [...prev, payload.new as ChatMessage]);
+        // Sanitize incoming message content
+        const newMessage = payload.new as ChatMessage;
+        newMessage.content = sanitizeHtml(newMessage.content);
+        setMessages(prev => [...prev, newMessage]);
       })
       .subscribe();
 
@@ -138,6 +209,7 @@ export const useChatMessages = () => {
     messages,
     isLoading,
     hasMore,
+    error,
     loadMore,
     sendChatMessage,
     deleteChatMessage
