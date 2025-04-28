@@ -286,3 +286,26 @@ export const detectMaliciousPattern = (input: string): boolean => {
   
   return maliciousPatterns.some(pattern => pattern.test(input));
 };
+
+/**
+ * Validates and sanitizes form inputs
+ * @param formData - The object containing form data
+ * @returns Sanitized form data object
+ */
+export const sanitizeFormData = (formData: Record<string, any>): Record<string, any> => {
+  const result: Record<string, any> = {};
+  
+  Object.keys(formData).forEach(key => {
+    const value = formData[key];
+    
+    if (typeof value === 'string') {
+      result[key] = sanitizeInput(value);
+    } else if (typeof value === 'object' && value !== null) {
+      result[key] = sanitizeFormData(value);
+    } else {
+      result[key] = value;
+    }
+  });
+  
+  return result;
+};

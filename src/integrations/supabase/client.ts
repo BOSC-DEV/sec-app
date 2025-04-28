@@ -46,8 +46,32 @@ export const secureFetch = async (url: string, options: RequestInit = {}) => {
       'Content-Security-Policy': "default-src 'self'",
       'X-Content-Type-Options': 'nosniff',
       'X-Frame-Options': 'DENY',
+      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+      'Referrer-Policy': 'strict-origin-when-cross-origin'
     },
   };
   
   return fetch(sanitizedUrl, secureOptions);
+};
+
+// Helper function to safely insert data with RLS validation
+export const safeInsert = async <T>(
+  table: string, 
+  data: any, 
+  options?: { returning?: 'minimal' | 'representation' }
+) => {
+  // Clone data to avoid modifying original
+  const sanitizedData = { ...data };
+  
+  // Sanitize all string fields to prevent XSS and SQL injection
+  Object.keys(sanitizedData).forEach(key => {
+    if (typeof sanitizedData[key] === 'string') {
+      sanitizedData[key] = sanitizeInput(sanitizedData[key]);
+    }
+  });
+  
+  // Insert the data with returning option
+  return supabase
+    .from(table)
+    .insert(sanitizedData, options);
 };

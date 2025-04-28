@@ -1,8 +1,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { ChatMessage } from '@/types/dataTypes';
-import { supabase } from '@/integrations/supabase/client';
-import { sanitizeHtml, sanitizeInput, detectMaliciousPattern } from '@/utils/securityUtils';
+import { supabase, safeInsert } from '@/integrations/supabase/client';
+import { sanitizeHtml, sanitizeInput, detectMaliciousPattern, sanitizeFormData } from '@/utils/securityUtils';
 import { toast } from '@/hooks/use-toast';
 
 const MESSAGES_PER_PAGE = 50;
@@ -68,8 +68,15 @@ export const useChatMessages = () => {
         return null;
       }
       
-      // Sanitize content
-      const sanitizedContent = sanitizeHtml(messageData.content);
+      // Sanitize all input data
+      const sanitizedData = sanitizeFormData({
+        content: messageData.content,
+        author_id: messageData.author_id,
+        author_name: messageData.author_name,
+        author_username: messageData.author_username,
+        author_profile_pic: messageData.author_profile_pic,
+        author_sec_balance: messageData.author_sec_balance
+      });
       
       let imageUrl = null;
       
@@ -94,13 +101,17 @@ export const useChatMessages = () => {
           return null;
         }
         
+        // Use more secure file naming to avoid path traversal issues
         const fileExt = messageData.image_file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-        const filePath = `chat-images/${fileName}`;
+        const filePath = `chat-images/${sanitizeInput(fileName)}`;
         
         const { error: uploadError } = await supabase.storage
           .from('community')
-          .upload(filePath, messageData.image_file);
+          .upload(filePath, messageData.image_file, {
+            cacheControl: '3600',
+            contentType: messageData.image_file.type
+          });
           
         if (uploadError) throw uploadError;
         
@@ -111,29 +122,20 @@ export const useChatMessages = () => {
         imageUrl = data.publicUrl;
       }
       
-      // Now insert the chat message with the image URL if available
-      const { data, error } = await supabase
-        .from('chat_messages')
-        .insert({
-          content: sanitizedContent,
-          author_id: messageData.author_id,
-          author_name: sanitizeInput(messageData.author_name),
-          author_username: messageData.author_username ? sanitizeInput(messageData.author_username) : null,
-          author_profile_pic: messageData.author_profile_pic,
-          author_sec_balance: messageData.author_sec_balance,
-          image_url: imageUrl,
-          likes: 0,
-          dislikes: 0
-        })
-        .select()
-        .single();
+      // Use the new safeInsert function to insert the chat message
+      const { data, error } = await safeInsert('chat_messages', {
+        ...sanitizedData,
+        image_url: imageUrl,
+        likes: 0,
+        dislikes: 0
+      }, { returning: 'representation' });
         
       if (error) {
         console.error('Error inserting chat message:', error);
         throw error;
       }
       
-      return data as ChatMessage;
+      return data?.[0] as ChatMessage;
     } catch (error) {
       console.error('Error sending chat message:', error);
       
