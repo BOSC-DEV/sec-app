@@ -123,19 +123,24 @@ export const useChatMessages = () => {
       }
       
       // Use the new safeInsert function to insert the chat message
-      const { data, error } = await safeInsert('chat_messages', {
+      const result = await safeInsert('chat_messages', {
         ...sanitizedData,
         image_url: imageUrl,
         likes: 0,
         dislikes: 0
       }, { returning: 'representation' });
         
-      if (error) {
-        console.error('Error inserting chat message:', error);
-        throw error;
+      if (result.error) {
+        console.error('Error inserting chat message:', result.error);
+        throw result.error;
       }
       
-      return data?.[0] as ChatMessage;
+      const insertedData = result.data;
+      if (insertedData && insertedData.length > 0) {
+        return insertedData[0] as ChatMessage;
+      }
+      
+      return null;
     } catch (error) {
       console.error('Error sending chat message:', error);
       

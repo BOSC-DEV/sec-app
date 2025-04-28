@@ -56,8 +56,8 @@ export const secureFetch = async (url: string, options: RequestInit = {}) => {
 
 // Helper function to safely insert data with RLS validation
 export const safeInsert = async <T>(
-  table: string, 
-  data: any, 
+  table: keyof Database['public']['Tables'],
+  data: any,
   options?: { returning?: 'minimal' | 'representation' }
 ) => {
   // Clone data to avoid modifying original
@@ -71,7 +71,13 @@ export const safeInsert = async <T>(
   });
   
   // Insert the data with returning option
-  return supabase
+  const result = supabase
     .from(table)
-    .insert(sanitizedData, options);
+    .insert(sanitizedData);
+    
+  if (options?.returning) {
+    return result.select();
+  }
+  
+  return result;
 };
