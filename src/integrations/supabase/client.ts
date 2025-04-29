@@ -66,16 +66,34 @@ export const authenticateWallet = async (
   }
 
   try {
-    // Sign in with custom token from wallet auth
+    console.log("Authenticating wallet:", walletAddress);
+    
+    // First check if a user exists with this wallet address
+    const { data: existingUser, error: userCheckError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('wallet_address', walletAddress)
+      .maybeSingle();
+      
+    if (userCheckError) {
+      console.error("Error checking for existing user:", userCheckError);
+    }
+    
+    // Generate a consistent email format that will be used for auth
+    const walletEmail = `${walletAddress}@phantom.wallet`;
+    
+    // Try to sign in first
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: `${walletAddress}@phantom.wallet`,
+      email: walletEmail,
       password: signedMessage.slice(0, 20), // Using part of signature as password
     });
 
     if (error) {
-      // If sign in fails, try sign up first
+      console.log("Sign in failed, trying sign up:", error.message);
+      
+      // If sign in fails, try sign up
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: `${walletAddress}@phantom.wallet`,
+        email: walletEmail,
         password: signedMessage.slice(0, 20),
         options: {
           data: {
@@ -85,9 +103,33 @@ export const authenticateWallet = async (
       });
 
       if (signUpError) {
-        console.error("Error in wallet authentication:", signUpError);
+        console.error("Error in wallet signup:", signUpError);
         return false;
       }
+      
+      console.log("User signed up successfully");
+      
+      // If the user didn't exist in profiles, we need to create a profile
+      if (!existingUser) {
+        // Create a default profile for the new user
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: crypto.randomUUID(),
+            wallet_address: walletAddress,
+            display_name: `User ${walletAddress.substring(0, 6)}`,
+            username: `user_${Date.now().toString(36)}`,
+            created_at: new Date().toISOString()
+          });
+          
+        if (profileError) {
+          console.error("Error creating profile:", profileError);
+        } else {
+          console.log("Created new profile for wallet");
+        }
+      }
+    } else {
+      console.log("User signed in successfully");
     }
 
     return true;

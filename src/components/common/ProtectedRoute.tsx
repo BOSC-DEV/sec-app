@@ -22,16 +22,16 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     session
   } = useProfile();
   
-  const [showDialog, setShowDialog] = React.useState(!isConnected && !isLoading);
+  const [showDialog, setShowDialog] = React.useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
   // Effect to redirect if not authenticated
   useEffect(() => {
-    if (!isLoading && !isConnected && !showDialog) {
-      setShowDialog(true);
+    if (!isLoading) {
+      setShowDialog(!isConnected);
     }
-  }, [isConnected, isLoading, showDialog]);
+  }, [isConnected, isLoading]);
 
   // Show loading state while checking authentication
   if (isLoading) {

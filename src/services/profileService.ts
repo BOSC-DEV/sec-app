@@ -1,3 +1,4 @@
+
 import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 import { getConnection } from '@/utils/phantomWallet';
@@ -125,10 +126,13 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
       throw new Error('No profile data provided');
     }
     
+    console.log("Saving profile:", profile);
+    
     // Check authentication status
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       console.error('User not authenticated. Please login first.');
+      console.log("Session object:", session);
       throw new Error('Authentication required to update profile');
     }
     
@@ -183,6 +187,8 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
       }
     }
 
+    console.log("Upserting profile with data:", updatedProfile);
+
     // Call the existing upsert function in Supabase
     const { data, error } = await supabase
       .from('profiles')
@@ -199,6 +205,7 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
       throw error;
     }
     
+    console.log("Profile saved successfully:", data);
     return data;
   } catch (error) {
     handleError(error, {
@@ -210,15 +217,20 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
   }
 };
 
-// Modify getProfileByWallet to use the same balance fetching logic
+// Modify getProfileByWallet to use direct Supabase queries and better error handling
 export const getProfileByWallet = async (walletAddress: string): Promise<Profile | null> => {
   try {
     if (!walletAddress) {
       throw new Error('No wallet address provided');
     }
     
+    console.log("Getting profile by wallet address:", walletAddress);
     const sanitizedWallet = sanitizeInput(walletAddress);
     
+    // First try to get session to ensure authentication
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    // Directly query profiles table, don't use single() to avoid errors if no profile exists
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -232,11 +244,13 @@ export const getProfileByWallet = async (walletAddress: string): Promise<Profile
 
     // If profile exists, ensure SEC balance is up to date
     if (data) {
+      console.log("Found existing profile:", data);
       return await saveProfile(data);
     }
     
     // If no profile exists but we have a wallet address, create a default one
     if (!data && walletAddress) {
+      console.log("No profile found, creating one...");
       const defaultProfile: Profile = {
         id: crypto.randomUUID(),
         wallet_address: walletAddress,
@@ -250,6 +264,7 @@ export const getProfileByWallet = async (walletAddress: string): Promise<Profile
         points: 0
       };
       
+      console.log("Default profile created:", defaultProfile);
       return await saveProfile(defaultProfile);
     }
 

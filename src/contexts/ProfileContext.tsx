@@ -41,7 +41,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isPhantomAvailable, setIsPhantomAvailable] = useState<boolean>(false);
   const [session, setSession] = useState<Session | null>(null);
 
@@ -66,7 +66,11 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
           setWalletAddress(walletFromEmail);
           setIsConnected(true);
           localStorage.setItem('walletAddress', walletFromEmail);
-          fetchProfile(walletFromEmail);
+          
+          // Delay fetching the profile to avoid race conditions
+          setTimeout(() => {
+            fetchProfile(walletFromEmail);
+          }, 0);
         }
       } else if (event === 'SIGNED_OUT') {
         setProfile(null);
@@ -79,6 +83,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     // Check for existing session
     const checkExistingSession = async () => {
       try {
+        setIsLoading(true);
         const { data: { session: existingSession } } = await supabase.auth.getSession();
         if (existingSession) {
           setSession(existingSession);
@@ -91,19 +96,22 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
             setWalletAddress(walletFromEmail);
             setIsConnected(true);
             fetchProfile(walletFromEmail);
+          } else {
+            setIsLoading(false);
           }
         } else {
           // Try from localStorage as fallback
           const savedWallet = localStorage.getItem('walletAddress');
           if (savedWallet) {
-            setWalletAddress(savedWallet);
-            setIsConnected(true);
-            fetchProfile(savedWallet);
+            // If we have a wallet address but no session, we need to reconnect
+            console.log("Found saved wallet but no session, attempting to reconnect");
+            setIsLoading(false);
+          } else {
+            setIsLoading(false);
           }
         }
       } catch (error) {
         console.error('Error checking session:', error);
-      } finally {
         setIsLoading(false);
       }
     };
@@ -155,7 +163,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
               description: 'Failed to authenticate wallet signature',
               variant: 'destructive',
             });
-          } finally {
             setIsLoading(false);
           }
         }
@@ -174,9 +181,17 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchProfile = async (address: string) => {
     try {
+      console.log("Fetching profile for wallet:", address);
       setIsLoading(true);
       const fetchedProfile = await getProfileByWallet(address);
-      setProfile(fetchedProfile);
+      console.log("Fetched profile:", fetchedProfile);
+      
+      if (fetchedProfile) {
+        setProfile(fetchedProfile);
+      } else {
+        console.log("No profile found, creating default profile");
+        await createDefaultProfile(address);
+      }
     } catch (error) {
       console.error('Error fetching profile:', error);
       toast({
@@ -293,6 +308,11 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       
       if (publicKey) {
         // We'll handle authentication and profile fetching in the connect event handler
+        console.log("Wallet connected with public key:", publicKey);
+        
+        // Authentication will be handled in the connect event handler
+      } else {
+        setIsLoading(false);
       }
     } catch (error) {
       console.error('Error connecting wallet:', error);
@@ -301,7 +321,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         description: 'Could not connect to wallet',
         variant: 'destructive',
       });
-    } finally {
       setIsLoading(false);
     }
   };
