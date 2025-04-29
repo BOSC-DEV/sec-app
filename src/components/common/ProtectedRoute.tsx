@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -18,10 +18,20 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     isConnected,
     isLoading,
     connectWallet,
-    isPhantomAvailable
+    isPhantomAvailable,
+    session
   } = useProfile();
   
   const [showDialog, setShowDialog] = React.useState(!isConnected && !isLoading);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Effect to redirect if not authenticated
+  useEffect(() => {
+    if (!isLoading && !isConnected && !showDialog) {
+      setShowDialog(true);
+    }
+  }, [isConnected, isLoading, showDialog]);
 
   // Show loading state while checking authentication
   if (isLoading) {
@@ -39,7 +49,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             <DialogTitle>Wallet Connection Required</DialogTitle>
             <DialogDescription>
               {isPhantomAvailable 
-                ? "To report a scammer, you need to connect your wallet first."
+                ? "To access this content, you need to connect your wallet first."
                 : "Phantom wallet is required but not installed. Please install it to continue."}
             </DialogDescription>
           </DialogHeader>
@@ -66,7 +76,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
                 Install Phantom Wallet
               </Button>
             )}
-            <Button variant="outline" onClick={() => setShowDialog(false)}>
+            <Button variant="outline" onClick={() => {
+              setShowDialog(false);
+              navigate('/');
+            }}>
               Go Back
             </Button>
           </DialogFooter>

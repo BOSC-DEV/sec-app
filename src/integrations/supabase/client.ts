@@ -54,6 +54,49 @@ export const secureFetch = async (url: string, options: RequestInit = {}) => {
   return fetch(sanitizedUrl, secureOptions);
 };
 
+// Wallet authentication function for Supabase
+export const authenticateWallet = async (
+  walletAddress: string, 
+  signedMessage: string,
+  message: string
+): Promise<boolean> => {
+  if (!walletAddress || !signedMessage) {
+    console.error("Missing required parameters for wallet authentication");
+    return false;
+  }
+
+  try {
+    // Sign in with custom token from wallet auth
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: `${walletAddress}@phantom.wallet`,
+      password: signedMessage.slice(0, 20), // Using part of signature as password
+    });
+
+    if (error) {
+      // If sign in fails, try sign up first
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email: `${walletAddress}@phantom.wallet`,
+        password: signedMessage.slice(0, 20),
+        options: {
+          data: {
+            wallet_address: walletAddress,
+          }
+        }
+      });
+
+      if (signUpError) {
+        console.error("Error in wallet authentication:", signUpError);
+        return false;
+      }
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error in wallet authentication:", error);
+    return false;
+  }
+};
+
 // Helper function to safely insert data with RLS validation
 export const safeInsert = async <T>(
   table: keyof Database['public']['Tables'],

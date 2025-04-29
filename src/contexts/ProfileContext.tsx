@@ -8,8 +8,11 @@ import {
   disconnectPhantomWallet, 
   getPhantomProvider, 
   getWalletPublicKey, 
-  isPhantomInstalled 
+  isPhantomInstalled,
+  signMessageWithPhantom
 } from '@/utils/phantomWallet';
+import { supabase, authenticateWallet } from '@/integrations/supabase/client';
+import { Session } from '@supabase/supabase-js';
 
 export const PROFILE_UPDATED_EVENT = 'profile-updated';
 
@@ -29,6 +32,7 @@ interface ProfileContextType {
   uploadAvatar: (file: File) => Promise<string | null>;
   isPhantomAvailable: boolean;
   updateProfile: (updatedProfile: Profile) => Promise<Profile | null>;
+  session: Session | null;
 }
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
@@ -39,6 +43,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isPhantomAvailable, setIsPhantomAvailable] = useState<boolean>(false);
+  const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
     const checkPhantomAvailability = () => {
@@ -46,18 +51,70 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     };
 
     checkPhantomAvailability();
+    
+    // Setup auth state change listener for Supabase
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, sessionData) => {
+      console.log('Auth state changed:', event, sessionData?.user?.email);
+      setSession(sessionData);
+      
+      if (sessionData && sessionData.user) {
+        // Extract wallet address from user email or user metadata
+        const email = sessionData.user.email;
+        const walletFromEmail = email ? email.split('@')[0] : null;
+        
+        if (walletFromEmail && walletFromEmail !== 'null') {
+          setWalletAddress(walletFromEmail);
+          setIsConnected(true);
+          localStorage.setItem('walletAddress', walletFromEmail);
+          fetchProfile(walletFromEmail);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        setProfile(null);
+        setWalletAddress(null);
+        setIsConnected(false);
+        localStorage.removeItem('walletAddress');
+      }
+    });
+    
+    // Check for existing session
+    const checkExistingSession = async () => {
+      try {
+        const { data: { session: existingSession } } = await supabase.auth.getSession();
+        if (existingSession) {
+          setSession(existingSession);
+          
+          // Extract wallet address from session
+          const email = existingSession.user.email;
+          const walletFromEmail = email ? email.split('@')[0] : null;
+          
+          if (walletFromEmail && walletFromEmail !== 'null') {
+            setWalletAddress(walletFromEmail);
+            setIsConnected(true);
+            fetchProfile(walletFromEmail);
+          }
+        } else {
+          // Try from localStorage as fallback
+          const savedWallet = localStorage.getItem('walletAddress');
+          if (savedWallet) {
+            setWalletAddress(savedWallet);
+            setIsConnected(true);
+            fetchProfile(savedWallet);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    const savedWallet = localStorage.getItem('walletAddress');
-    if (savedWallet) {
-      setWalletAddress(savedWallet);
-      setIsConnected(true);
-      fetchProfile(savedWallet);
-    }
-
+    checkExistingSession();
+    
     window.addEventListener('DOMContentLoaded', checkPhantomAvailability);
     
     return () => {
       window.removeEventListener('DOMContentLoaded', checkPhantomAvailability);
+      subscription.unsubscribe();
     };
   }, []);
 
@@ -65,13 +122,42 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     const provider = getPhantomProvider();
     
     if (provider) {
-      provider.on('connect', () => {
+      provider.on('connect', async () => {
         const publicKey = getWalletPublicKey();
         if (publicKey) {
-          setWalletAddress(publicKey);
-          setIsConnected(true);
-          localStorage.setItem('walletAddress', publicKey);
-          fetchProfile(publicKey);
+          setIsLoading(true);
+          // Need to authenticate with Supabase after wallet connect
+          try {
+            const message = `Login to SEC Community with wallet ${publicKey} at ${Date.now()}`;
+            const signature = await signMessageWithPhantom(message);
+            
+            if (signature) {
+              const authenticated = await authenticateWallet(publicKey, signature, message);
+              
+              if (authenticated) {
+                setWalletAddress(publicKey);
+                setIsConnected(true);
+                localStorage.setItem('walletAddress', publicKey);
+                await fetchProfile(publicKey);
+              } else {
+                toast({
+                  title: 'Authentication Failed',
+                  description: 'Could not authenticate with your wallet',
+                  variant: 'destructive',
+                });
+                disconnectWallet();
+              }
+            }
+          } catch (error) {
+            console.error('Error during wallet authentication:', error);
+            toast({
+              title: 'Authentication Error',
+              description: 'Failed to authenticate wallet signature',
+              variant: 'destructive',
+            });
+          } finally {
+            setIsLoading(false);
+          }
         }
       });
       
@@ -80,6 +166,8 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         setIsConnected(false);
         setProfile(null);
         localStorage.removeItem('walletAddress');
+        // Also sign out from Supabase
+        supabase.auth.signOut();
       });
     }
   }, [isPhantomAvailable]);
@@ -204,17 +292,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       const publicKey = await connectPhantomWallet();
       
       if (publicKey) {
-        setWalletAddress(publicKey);
-        setIsConnected(true);
-        localStorage.setItem('walletAddress', publicKey);
-        
-        const existingProfile = await getProfileByWallet(publicKey);
-        
-        if (existingProfile) {
-          setProfile(existingProfile);
-        } else {
-          await createDefaultProfile(publicKey);
-        }
+        // We'll handle authentication and profile fetching in the connect event handler
       }
     } catch (error) {
       console.error('Error connecting wallet:', error);
@@ -237,6 +315,9 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     setWalletAddress(null);
     setIsConnected(false);
     setProfile(null);
+    
+    // Also sign out from Supabase
+    supabase.auth.signOut();
   };
 
   const refreshProfile = async () => {
@@ -285,7 +366,8 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     refreshProfile,
     uploadAvatar,
     isPhantomAvailable,
-    updateProfile
+    updateProfile,
+    session
   };
 
   return (

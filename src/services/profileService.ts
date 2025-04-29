@@ -1,4 +1,3 @@
-
 import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 import { getConnection } from '@/utils/phantomWallet';
@@ -34,6 +33,12 @@ export const uploadProfilePicture = async (walletAddress: string, file: File): P
     const fileExt = file.name.split('.').pop();
     const fileName = `${sanitizedWallet}-${Date.now()}.${fileExt}`;
     const filePath = `profile-pics/${fileName}`;
+
+    // Ensure user is authenticated
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      throw new Error('Authentication required to upload profile picture');
+    }
 
     const { error: uploadError } = await supabase.storage
       .from('profiles')
@@ -113,11 +118,18 @@ export const getProfilesByDisplayName = async (displayName: string): Promise<Pro
   }
 };
 
-// Extend existing saveProfile function to fetch and update SEC balance
+// Modified saveProfile function to work with Supabase auth
 export const saveProfile = async (profile: Profile): Promise<Profile | null> => {
   try {
     if (!profile) {
       throw new Error('No profile data provided');
+    }
+    
+    // Check authentication status
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      console.error('User not authenticated. Please login first.');
+      throw new Error('Authentication required to update profile');
     }
     
     let updatedProfile = { ...profile };
@@ -182,7 +194,10 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error saving profile:', error);
+      throw error;
+    }
     
     return data;
   } catch (error) {
@@ -210,14 +225,35 @@ export const getProfileByWallet = async (walletAddress: string): Promise<Profile
       .eq('wallet_address', sanitizedWallet)
       .maybeSingle();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching profile by wallet:', error);
+      throw error;
+    }
 
     // If profile exists, ensure SEC balance is up to date
     if (data) {
       return await saveProfile(data);
     }
+    
+    // If no profile exists but we have a wallet address, create a default one
+    if (!data && walletAddress) {
+      const defaultProfile: Profile = {
+        id: crypto.randomUUID(),
+        wallet_address: walletAddress,
+        display_name: `User ${walletAddress.substring(0, 6)}`,
+        username: `user_${Date.now().toString(36)}`,
+        profile_pic_url: '',
+        created_at: new Date().toISOString(),
+        x_link: '',
+        website_link: '',
+        bio: '',
+        points: 0
+      };
+      
+      return await saveProfile(defaultProfile);
+    }
 
-    return data;
+    return null;
   } catch (error) {
     handleError(error, {
       fallbackMessage: 'Error fetching profile by wallet',

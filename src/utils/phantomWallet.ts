@@ -21,6 +21,7 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID
 } from '@solana/spl-token';
 import { handleError, ErrorSeverity } from '@/utils/errorHandling';
+import { supabase } from '@/integrations/supabase/client';
 
 export type PhantomEvent = "connect" | "disconnect";
 
@@ -148,6 +149,9 @@ export const disconnectPhantomWallet = async (): Promise<void> => {
       await provider.disconnect();
       
       console.log("Phantom wallet disconnected successfully");
+      
+      // Also sign out from Supabase
+      await supabase.auth.signOut();
       
       toast({
         title: "Wallet disconnected",
