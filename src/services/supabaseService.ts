@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { Profile } from '@/types/dataTypes';
+import { getProfileByWallet } from '@/services/profile';
 
 // Generate a sequential ID for a new scammer
 export const generateScammerId = async (): Promise<string> => {
@@ -32,17 +33,6 @@ export const getProfiles = async (): Promise<Profile[]> => {
   return data || [];
 };
 
-export const getProfileByWallet = async (walletAddress: string): Promise<Profile | null> => {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('wallet_address', walletAddress)
-    .maybeSingle();
-  
-  if (error) {
-    console.error('Error fetching profile by wallet:', error);
-    throw error;
-  }
-  
-  return data;
-};
+// This function is now imported from @/services/profile
+// export const getProfileByWallet = async (walletAddress: string): Promise<Profile | null>
+
