@@ -1,4 +1,3 @@
-
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { Profile } from '@/types/dataTypes';
 import { 
@@ -199,9 +198,11 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         console.log("No profile found, creating default profile");
         // Creating a default profile requires authentication
         if (session) {
-          const defaultProfile = await createDefaultProfile(address);
-          if (defaultProfile) {
-            setProfile(defaultProfile);
+          await createDefaultProfile(address);
+          // Fetch the profile after creating it
+          const newProfile = await getProfileByWallet(address);
+          if (newProfile) {
+            setProfile(newProfile);
             toast({
               title: 'Profile Created',
               description: 'Default profile has been created. You can update it in your profile page.',
