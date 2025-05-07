@@ -79,9 +79,8 @@ export const authenticateWallet = async (
       console.error("Error checking for existing user:", userCheckError);
     }
     
-    // Generate a proper email format that will be used for auth
-    // Using a .wallet TLD to make it clear this is a special address
-    const walletEmail = `${walletAddress.toLowerCase()}@phantom.wallet`;
+    // Generate a consistent email format that will be used for auth
+    const walletEmail = `${walletAddress}@phantom.wallet`;
     
     // Try to sign in first
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -92,10 +91,10 @@ export const authenticateWallet = async (
     if (error) {
       console.log("Sign in failed, trying sign up:", error.message);
       
-      // If sign in fails, try sign up with email
+      // If sign in fails, try sign up
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: walletEmail,
-        password: signedMessage.slice(0, 20), // Using part of signature as password
+        password: signedMessage.slice(0, 20),
         options: {
           data: {
             wallet_address: walletAddress,
