@@ -79,19 +79,22 @@ export const authenticateWallet = async (
       console.error("Error checking for existing user:", userCheckError);
     }
     
-    // Instead of using email+password, use signInWithOtp with phone
-    // This bypasses email validation since we're using the phone field
-    // which doesn't validate the format like email does
-    const { data, error } = await supabase.auth.signInWithOtp({
-      phone: walletAddress,
+    // Generate a proper email format that will be used for auth
+    // Using a .wallet TLD to make it clear this is a special address
+    const walletEmail = `${walletAddress.toLowerCase()}@phantom.wallet`;
+    
+    // Try to sign in first
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: walletEmail,
+      password: signedMessage.slice(0, 20), // Using part of signature as password
     });
 
     if (error) {
       console.log("Sign in failed, trying sign up:", error.message);
       
-      // If sign in fails, try sign up with phone
+      // If sign in fails, try sign up with email
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        phone: walletAddress,
+        email: walletEmail,
         password: signedMessage.slice(0, 20), // Using part of signature as password
         options: {
           data: {
