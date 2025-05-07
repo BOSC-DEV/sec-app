@@ -1,7 +1,12 @@
 
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { Profile } from '@/types/dataTypes';
-import { getProfileByWallet, uploadProfilePicture, saveProfile } from '@/services/profileService';
+import { 
+  getProfileByWallet, 
+  uploadProfilePicture, 
+  saveProfile, 
+  createDefaultProfile 
+} from '@/services/profileService';
 import { toast } from '@/hooks/use-toast';
 import { 
   connectPhantomWallet, 
@@ -183,6 +188,8 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     try {
       console.log("Fetching profile for wallet:", address);
       setIsLoading(true);
+      
+      // Use getProfileByWallet which has been modified to work without authentication
       const fetchedProfile = await getProfileByWallet(address);
       console.log("Fetched profile:", fetchedProfile);
       
@@ -190,7 +197,17 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         setProfile(fetchedProfile);
       } else {
         console.log("No profile found, creating default profile");
-        await createDefaultProfile(address);
+        // Creating a default profile requires authentication
+        if (session) {
+          const defaultProfile = await createDefaultProfile(address);
+          if (defaultProfile) {
+            setProfile(defaultProfile);
+            toast({
+              title: 'Profile Created',
+              description: 'Default profile has been created. You can update it in your profile page.',
+            });
+          }
+        }
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -348,6 +365,17 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   const updateProfile = async (updatedProfile: Profile): Promise<Profile | null> => {
     try {
       setIsLoading(true);
+      
+      // Check if we're authenticated before trying to update
+      if (!session) {
+        toast({
+          title: 'Authentication Required',
+          description: 'Please connect your wallet to update your profile',
+          variant: 'destructive',
+        });
+        return null;
+      }
+      
       const savedProfile = await saveProfile(updatedProfile);
       
       if (savedProfile) {
