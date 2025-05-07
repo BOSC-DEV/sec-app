@@ -58,22 +58,21 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     
     // Setup auth state change listener for Supabase
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, sessionData) => {
-      console.log('Auth state changed:', event, sessionData?.user?.email);
+      console.log('Auth state changed:', event, sessionData?.user?.id);
       setSession(sessionData);
       
       if (sessionData && sessionData.user) {
-        // Extract wallet address from user email or user metadata
-        const email = sessionData.user.email;
-        const walletFromEmail = email ? email.split('@')[0] : null;
+        // Get wallet address from metadata
+        const walletAddress = sessionData.user.user_metadata?.wallet_address;
         
-        if (walletFromEmail && walletFromEmail !== 'null') {
-          setWalletAddress(walletFromEmail);
+        if (walletAddress) {
+          setWalletAddress(walletAddress);
           setIsConnected(true);
-          localStorage.setItem('walletAddress', walletFromEmail);
+          localStorage.setItem('walletAddress', walletAddress);
           
           // Delay fetching the profile to avoid race conditions
           setTimeout(() => {
-            fetchProfile(walletFromEmail);
+            fetchProfile(walletAddress);
           }, 0);
         }
       } else if (event === 'SIGNED_OUT') {
@@ -92,14 +91,13 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         if (existingSession) {
           setSession(existingSession);
           
-          // Extract wallet address from session
-          const email = existingSession.user.email;
-          const walletFromEmail = email ? email.split('@')[0] : null;
+          // Get wallet address from metadata
+          const walletAddress = existingSession.user.user_metadata?.wallet_address;
           
-          if (walletFromEmail && walletFromEmail !== 'null') {
-            setWalletAddress(walletFromEmail);
+          if (walletAddress) {
+            setWalletAddress(walletAddress);
             setIsConnected(true);
-            fetchProfile(walletFromEmail);
+            fetchProfile(walletAddress);
           } else {
             setIsLoading(false);
           }
