@@ -1,7 +1,7 @@
 
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { Profile } from '@/types/dataTypes';
-import { getProfileByWallet, uploadProfilePicture, saveProfile, createDefaultProfile } from '@/services/profile';
+import { getProfileByWallet, uploadProfilePicture, saveProfile } from '@/services/profileService';
 import { toast } from '@/hooks/use-toast';
 import { 
   connectPhantomWallet, 
