@@ -103,6 +103,9 @@ export const authenticateWallet = async (
     
     // Generate a consistent email format that will be used for auth
     const walletEmail = `${walletAddress}@phantom.wallet`;
+
+    console.log('walletEmail: ', walletEmail);
+    console.log('signedMessage.slice(0, 20): ', signedMessage.slice(0, 20));
     
     // Try to sign in first
     const { data, error } = await supabase.auth.signInWithPassword({
