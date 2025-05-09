@@ -68,16 +68,16 @@ export const authenticateWallet = async (
   try {
     console.log("Authenticating wallet:", walletAddress);
     
-    // First check if a user exists with this wallet address
-    const { data: existingUser, error: userCheckError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('wallet_address', walletAddress)
-      .maybeSingle();
+    // // First check if a user exists with this wallet address
+    // const { data: existingUser, error: userCheckError } = await supabase
+    //   .from('profiles')
+    //   .select('*')
+    //   .eq('wallet_address', walletAddress)
+    //   .maybeSingle();
       
-    if (userCheckError) {
-      console.error("Error checking for existing user:", userCheckError);
-    }
+    // if (userCheckError) {
+    //   console.error("Error checking for existing user:", userCheckError);
+    // }
     
     // Generate a consistent email format that will be used for auth
     const walletEmail = `${walletAddress}@phantom.wallet`;
