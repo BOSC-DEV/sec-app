@@ -74,6 +74,8 @@ export const authenticateWallet = async (
       .select('*')
       .eq('wallet_address', walletAddress)
       .maybeSingle();
+    console.log('existingUser: ', existingUser);
+    console.log('userCheckError: ', userCheckError);
       
     if (userCheckError) {
       console.error("Error checking for existing user:", userCheckError);
