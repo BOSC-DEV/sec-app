@@ -1,4 +1,3 @@
-
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { Profile } from '@/types/dataTypes';
 import { 
@@ -15,7 +14,7 @@ import {
   getWalletPublicKey, 
   isPhantomInstalled,
   signMessageWithPhantom
-} from '@/utils/phantom';
+} from '@/utils/phantomWallet';
 import { supabase, signInWithCustomToken } from '@/integrations/supabase/client';
 import { Session } from '@supabase/supabase-js';
 
