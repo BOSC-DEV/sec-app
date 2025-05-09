@@ -15,7 +15,7 @@ import {
   isPhantomInstalled,
   signMessageWithPhantom
 } from '@/utils/phantomWallet';
-import { supabase, authenticateWallet } from '@/integrations/supabase/client';
+import { supabase, signInWithCustomToken } from '@/integrations/supabase/client';
 import { Session } from '@supabase/supabase-js';
 
 export const PROFILE_UPDATED_EVENT = 'profile-updated';
@@ -144,7 +144,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
             const signature = await signMessageWithPhantom(message);
             
             if (signature) {
-              const authenticated = await authenticateWallet(publicKey, signature, message);
+              const authenticated = await signInWithCustomToken(publicKey, signature, message);
               
               if (authenticated) {
                 setWalletAddress(publicKey);

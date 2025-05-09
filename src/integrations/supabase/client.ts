@@ -104,6 +104,6 @@ export async function signInWithCustomToken(walletAddress: string, signedMessage
     return data;
   } catch (err) {
     console.error('Error in wallet authentication: ', err);
-    throw err;
+    return false;
   }
 }
