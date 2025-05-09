@@ -78,6 +78,26 @@ export const authenticateWallet = async (
     if (userCheckError) {
       console.error("Error checking for existing user:", userCheckError);
     }
+
+    // If the user didn't exist in profiles, we need to create a profile
+    if (!existingUser) {
+      // Create a default profile for the new user
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: crypto.randomUUID(),
+          wallet_address: walletAddress,
+          display_name: `User ${walletAddress.substring(0, 6)}`,
+          username: `user_${Date.now().toString(36)}`,
+          created_at: new Date().toISOString()
+        });
+        
+      if (profileError) {
+        console.error("Error creating profile:", profileError);
+      } else {
+        console.log("Created new profile for wallet");
+      }
+    }
     
     // Generate a consistent email format that will be used for auth
     const walletEmail = `${walletAddress}@phantom.wallet`;
@@ -109,25 +129,6 @@ export const authenticateWallet = async (
       
       console.log("User signed up successfully");
       
-      // If the user didn't exist in profiles, we need to create a profile
-      if (!existingUser) {
-        // Create a default profile for the new user
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: crypto.randomUUID(),
-            wallet_address: walletAddress,
-            display_name: `User ${walletAddress.substring(0, 6)}`,
-            username: `user_${Date.now().toString(36)}`,
-            created_at: new Date().toISOString()
-          });
-          
-        if (profileError) {
-          console.error("Error creating profile:", profileError);
-        } else {
-          console.log("Created new profile for wallet");
-        }
-      }
     } else {
       console.log("User signed in successfully");
     }
