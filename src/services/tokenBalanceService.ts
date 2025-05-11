@@ -11,28 +11,21 @@ export const getSECTokenBalance = async (walletAddress: string): Promise<number>
   try {
     if (!walletAddress) return 0;
     
-    console.log(`Fetching SEC token balance for ${walletAddress}`);
     const connection = getConnection();
     const publicKey = new PublicKey(walletAddress);
 
     // Get the associated token account address
-    const tokenAccountAddress = await getAssociatedTokenAddress(
-      SEC_TOKEN_MINT, 
-      publicKey,
-      false  // Set false as we only need to check if it exists, not create it
-    );
+    const tokenAccountAddress = await getAssociatedTokenAddress(SEC_TOKEN_MINT, publicKey);
     
     try {
       // Get the token account info
       const tokenAccount = await getAccount(connection, tokenAccountAddress);
-      const balanceAmount = Number(tokenAccount.amount);
-      const humanReadableBalance = balanceAmount / Math.pow(10, 6);
-      
-      console.log(`SEC balance for ${walletAddress}: ${humanReadableBalance} SEC tokens`);
-      return humanReadableBalance;
+
+      // Convert amount (BigInt) to human-readable format with 6 decimals
+      return Number(tokenAccount.amount) / Math.pow(10, 6);
     } catch (error) {
       // Token account might not exist yet or zero balance
-      console.log(`Token account not found for ${walletAddress}, setting balance to 0`);
+      console.log('Token account not found, setting balance to 0');
       return 0;
     }
   } catch (walletError) {
