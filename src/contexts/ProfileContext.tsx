@@ -1,4 +1,3 @@
-
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { Profile } from '@/types/dataTypes';
 import { 
@@ -141,7 +140,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       const fetchedProfile = await getProfileByWallet(address);
       console.log("Fetched profile:", fetchedProfile);
 
-      // Get SEC token balance
+      // Get SEC token balance - ensure this is being called
       const secBalance = await getSECTokenBalance(address);
       console.log("SEC Balance:", secBalance);
       
@@ -160,7 +159,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
           await saveProfile(updatedProfile);
         }
       } else {
-        console.log("No profile found, creating default profile");
         // Create default profile without requiring authentication
         const newProfile = await createDefaultProfile(address);
         
