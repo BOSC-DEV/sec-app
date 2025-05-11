@@ -95,6 +95,7 @@ export async function signInWithCustomToken(walletAddress: string, signedMessage
     });
 
     const result = await res.json();
+    console.log("signInWithCustomToken Result: ", result);
     if (!res.ok) throw new Error(result.error || 'Login failed');
 
     const { access_token, refresh_token } = result;
