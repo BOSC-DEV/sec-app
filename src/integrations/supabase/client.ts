@@ -80,15 +80,14 @@ export const signInWithCustomToken = async (
 // Helper function for safely inserting data into Supabase tables
 export const safeInsert = async <T extends keyof Database['public']['Tables']>(
   tableName: T,
-  data: Database['public']['Tables'][T]['Insert'],
-  options: { returning?: string } = {}
+  data: Database['public']['Tables'][T]['Insert']
 ) => {
   try {
     // Perform the insert operation with proper typing
     const result = await supabase
       .from(tableName)
       .insert(data)
-      .select(options.returning || '*');
+      .select('*');
       
     return result;
   } catch (error) {

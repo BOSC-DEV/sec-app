@@ -8,9 +8,8 @@ import { ProfileProvider } from '@/contexts/ProfileContext';
 import { HelmetProvider } from 'react-helmet-async';
 import { vi } from 'vitest';
 
-// Import screen and fireEvent directly from @testing-library/react
-import * as testingLibrary from '@testing-library/react';
-const { screen, fireEvent } = testingLibrary;
+// Import screen and fireEvent directly from testing-library/react
+import { screen, fireEvent } from '@testing-library/react';
 
 // Create a wrapper with all providers needed for testing
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
