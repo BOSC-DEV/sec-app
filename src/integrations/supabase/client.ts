@@ -82,20 +82,26 @@ export const safeInsert = async <T>(
   return result;
 };
 
-// Modified to handle authentication errors gracefully and skip authentication if it fails
+// Authenticate with wallet by verifying a signature via a secure backend or edge function,
+// and receiving a custom Supabase JWT token.
 export async function signInWithCustomToken(walletAddress: string, signedMessage: string, nonce: string) {
   try {
-    console.log("Attempting wallet authentication with address:", walletAddress);
-    
-    // Skip the authentication attempt altogether to avoid JSON parsing issues
-    // Instead, simulate a successful authentication
-    console.log("Bypassing auth and using direct wallet connection");
-    
-    // Store wallet address in localStorage for session persistence
-    localStorage.setItem('walletAddress', walletAddress);
-    
-    // Return a simplified result
-    return { user: { id: walletAddress, email: null } };
+    const res = await fetch('/functions/v1/login-wallet', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ walletAddress, signedMessage, nonce }),
+    });
+
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || 'Login failed');
+
+    const { access_token, refresh_token } = result;
+    const { data, error } = await supabase.auth.setSession({ access_token, refresh_token });
+
+    if (error) throw error;
+    return data;
   } catch (err) {
     console.error('Error in wallet authentication: ', err);
     return false;
