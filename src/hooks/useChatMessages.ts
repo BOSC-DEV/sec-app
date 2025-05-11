@@ -122,15 +122,22 @@ export const useChatMessages = () => {
         imageUrl = data.publicUrl;
       }
       
-      // Use the modified supabase.from().insert() directly since we've fixed the safeInsert function
+      // Construct a properly typed message object
+      const messageToInsert = {
+        author_id: sanitizedData.author_id,
+        author_name: sanitizedData.author_name,
+        content: sanitizedData.content,
+        author_username: sanitizedData.author_username,
+        author_profile_pic: sanitizedData.author_profile_pic,
+        author_sec_balance: sanitizedData.author_sec_balance,
+        image_url: imageUrl,
+        likes: 0,
+        dislikes: 0
+      };
+      
       const result = await supabase
         .from('chat_messages')
-        .insert({
-          ...sanitizedData,
-          image_url: imageUrl,
-          likes: 0,
-          dislikes: 0
-        })
+        .insert(messageToInsert)
         .select();
         
       if (result.error) {
