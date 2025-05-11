@@ -86,7 +86,7 @@ export const safeInsert = async <T>(
 // and receiving a custom Supabase JWT token.
 export async function signInWithCustomToken(walletAddress: string, signedMessage: string, nonce: string) {
   try {
-    const res = await fetch('/functions/v1/login-wallet', {
+    const res = await fetch('/api/login-wallet', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
