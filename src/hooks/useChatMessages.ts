@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { ChatMessage } from '@/types/dataTypes';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, safeInsert } from '@/integrations/supabase/client';
 import { sanitizeHtml, sanitizeInput, detectMaliciousPattern, sanitizeFormData } from '@/utils/securityUtils';
 import { toast } from '@/hooks/use-toast';
 
@@ -122,23 +122,13 @@ export const useChatMessages = () => {
         imageUrl = data.publicUrl;
       }
       
-      // Construct a properly typed message object
-      const messageToInsert = {
-        author_id: sanitizedData.author_id,
-        author_name: sanitizedData.author_name,
-        content: sanitizedData.content,
-        author_username: sanitizedData.author_username,
-        author_profile_pic: sanitizedData.author_profile_pic,
-        author_sec_balance: sanitizedData.author_sec_balance,
+      // Use the new safeInsert function to insert the chat message
+      const result = await safeInsert('chat_messages', {
+        ...sanitizedData,
         image_url: imageUrl,
         likes: 0,
         dislikes: 0
-      };
-      
-      const result = await supabase
-        .from('chat_messages')
-        .insert(messageToInsert)
-        .select();
+      }, { returning: 'representation' });
         
       if (result.error) {
         console.error('Error inserting chat message:', result.error);

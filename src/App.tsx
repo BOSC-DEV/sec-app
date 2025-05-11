@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import Layout from "./components/layout/Layout";
 import Index from "./pages/Index";
@@ -17,9 +17,9 @@ import PublicProfilePage from "./pages/PublicProfilePage";
 import LegalPages from "./pages/LegalPages";
 import NotFound from "./pages/NotFound";
 import NotificationsPage from "./pages/NotificationsPage";
-import AnalyticsPage from "./pages/AnalyticsPage";
+import AnalyticsPage from "./pages/AnalyticsPage";  // Add this import
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { ProfileProvider } from "./contexts/ProfileContext";
+import { ProfileProvider, useProfile } from "./contexts/ProfileContext";
 import EnhancedErrorBoundary from "./components/common/EnhancedErrorBoundary";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import analyticsService from "./services/analyticsService";
@@ -70,8 +70,64 @@ log.info('Application starting', 'app_initialization', {
   buildTime: process.env.BUILD_TIME || new Date().toISOString()
 });
 
-// Analytics tracker component moved into a separate file
-import { AnalyticsTracker } from './components/analytics/AnalyticsTracker';
+// Analytics tracker component - enhanced with visitor tracking
+const AnalyticsTracker = () => {
+  const location = useLocation();
+  const { profile } = useProfile();
+  
+  // Track page views and visitor data
+  useEffect(() => {
+    const trackVisit = async () => {
+      try {
+        const visitorId = localStorage.getItem('visitor_id') || crypto.randomUUID();
+        localStorage.setItem('visitor_id', visitorId);
+        
+        // Get visitor's IP and location data
+        const response = await fetch('https://api.ipapi.com/check?format=json');
+        const geoData = await response.json();
+        
+        // First track the visitor
+        await supabase.rpc('track_visitor', {
+          p_visitor_id: visitorId,
+          p_ip_address: geoData.ip || null,
+          p_user_agent: navigator.userAgent,
+          p_country_code: geoData.country_code || null,
+          p_country_name: geoData.country_name || null,
+          p_city: geoData.city || null,
+          p_referrer: document.referrer || null
+        });
+
+        // Then track the pageview
+        const title = document.title;
+        await supabase.rpc('track_pageview', {
+          p_visitor_id: visitorId,
+          p_page_path: location.pathname,
+          p_page_title: title,
+          p_session_id: localStorage.getItem('session_id') || null
+        });
+
+        analyticsService.trackPageView();
+        log.info(`Page view: ${location.pathname}`, 'page_navigation');
+      } catch (error) {
+        // Log error but don't throw - we don't want to break the app if analytics fails
+        log.error('Analytics tracking failed:', error);
+      }
+    };
+
+    trackVisit();
+  }, [location.pathname]);
+  
+  // Identify user when profile changes
+  useEffect(() => {
+    analyticsService.identifyUser(profile);
+    
+    if (profile) {
+      log.info(`User identified: ${profile.username || profile.wallet_address}`, 'user_authentication');
+    }
+  }, [profile]);
+  
+  return null;
+};
 
 // Performance monitoring component
 const PerformanceMonitor = () => {
@@ -111,11 +167,11 @@ const App = () => (
   <EnhancedErrorBoundary componentName="App">
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <HelmetProvider>
-          <BrowserRouter>
-            <ProfileProvider>
-              <Toaster />
-              <Sonner />
+        <ProfileProvider>
+          <HelmetProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
               <AnalyticsTracker />
               {environmentUtils.featureFlags.enablePerformanceMonitoring && <PerformanceMonitor />}
               <Layout>
@@ -170,9 +226,9 @@ const App = () => (
                   </Routes>
                 </EnhancedErrorBoundary>
               </Layout>
-            </ProfileProvider>
-          </BrowserRouter>
-        </HelmetProvider>
+            </BrowserRouter>
+          </HelmetProvider>
+        </ProfileProvider>
       </TooltipProvider>
       {environmentUtils.isDevelopment() && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>

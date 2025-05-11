@@ -15,7 +15,7 @@ import {
   isPhantomInstalled,
   signMessageWithPhantom
 } from '@/utils/phantomWallet';
-import { supabase, signInWithCustomToken } from '@/integrations/supabase/client';
+import { supabase, authenticateWallet } from '@/integrations/supabase/client';
 import { Session } from '@supabase/supabase-js';
 
 export const PROFILE_UPDATED_EVENT = 'profile-updated';
@@ -56,21 +56,75 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
 
     checkPhantomAvailability();
     
-    // Check for saved wallet address directly without relying on Supabase auth
-    const savedWallet = localStorage.getItem('walletAddress');
-    if (savedWallet) {
-      console.log("Found saved wallet address:", savedWallet);
-      setWalletAddress(savedWallet);
-      setIsConnected(true);
-      fetchProfile(savedWallet);
-    } else {
-      setIsLoading(false);
-    }
+    // Setup auth state change listener for Supabase
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, sessionData) => {
+      console.log('Auth state changed:', event, sessionData?.user?.id);
+      setSession(sessionData);
+      
+      if (sessionData && sessionData.user) {
+        // Get wallet address from metadata
+        const walletAddress = sessionData.user.user_metadata?.wallet_address;
+        
+        if (walletAddress) {
+          setWalletAddress(walletAddress);
+          setIsConnected(true);
+          localStorage.setItem('walletAddress', walletAddress);
+          
+          // Delay fetching the profile to avoid race conditions
+          setTimeout(() => {
+            fetchProfile(walletAddress);
+          }, 0);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        setProfile(null);
+        setWalletAddress(null);
+        setIsConnected(false);
+        localStorage.removeItem('walletAddress');
+      }
+    });
+    
+    // Check for existing session
+    const checkExistingSession = async () => {
+      try {
+        setIsLoading(true);
+        const { data: { session: existingSession } } = await supabase.auth.getSession();
+        if (existingSession) {
+          setSession(existingSession);
+          
+          // Get wallet address from metadata
+          const walletAddress = existingSession.user.user_metadata?.wallet_address;
+          
+          if (walletAddress) {
+            setWalletAddress(walletAddress);
+            setIsConnected(true);
+            fetchProfile(walletAddress);
+          } else {
+            setIsLoading(false);
+          }
+        } else {
+          // Try from localStorage as fallback
+          const savedWallet = localStorage.getItem('walletAddress');
+          if (savedWallet) {
+            // If we have a wallet address but no session, we need to reconnect
+            console.log("Found saved wallet but no session, attempting to reconnect");
+            setIsLoading(false);
+          } else {
+            setIsLoading(false);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
+        setIsLoading(false);
+      }
+    };
+
+    checkExistingSession();
     
     window.addEventListener('DOMContentLoaded', checkPhantomAvailability);
     
     return () => {
       window.removeEventListener('DOMContentLoaded', checkPhantomAvailability);
+      subscription.unsubscribe();
     };
   }, []);
 
@@ -82,24 +136,19 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         const publicKey = getWalletPublicKey();
         if (publicKey) {
           setIsLoading(true);
+          // Need to authenticate with Supabase after wallet connect
           try {
             const message = `Login to SEC Community with wallet ${publicKey} at ${Date.now()}`;
             const signature = await signMessageWithPhantom(message);
             
             if (signature) {
-              // Use our simplified auth that skips server-side validation
-              const result = await signInWithCustomToken(publicKey, signature, message);
+              const authenticated = await authenticateWallet(publicKey, signature, message);
               
-              if (result) {
+              if (authenticated) {
                 setWalletAddress(publicKey);
                 setIsConnected(true);
                 localStorage.setItem('walletAddress', publicKey);
                 await fetchProfile(publicKey);
-                
-                toast({
-                  title: 'Wallet Connected',
-                  description: 'Successfully connected to your wallet',
-                });
               } else {
                 toast({
                   title: 'Authentication Failed',
@@ -126,6 +175,8 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         setIsConnected(false);
         setProfile(null);
         localStorage.removeItem('walletAddress');
+        // Also sign out from Supabase
+        supabase.auth.signOut();
       });
     }
   }, [isPhantomAvailable]);
@@ -143,16 +194,18 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         setProfile(fetchedProfile);
       } else {
         console.log("No profile found, creating default profile");
-        // Create default profile without requiring authentication
-        await createDefaultProfile(address);
-        // Fetch the profile after creating it
-        const newProfile = await getProfileByWallet(address);
-        if (newProfile) {
-          setProfile(newProfile);
-          toast({
-            title: 'Profile Created',
-            description: 'Default profile has been created. You can update it in your profile page.',
-          });
+        // Creating a default profile requires authentication
+        if (session) {
+          await createDefaultProfile(address);
+          // Fetch the profile after creating it
+          const newProfile = await getProfileByWallet(address);
+          if (newProfile) {
+            setProfile(newProfile);
+            toast({
+              title: 'Profile Created',
+              description: 'Default profile has been created. You can update it in your profile page.',
+            });
+          }
         }
       }
     } catch (error) {
