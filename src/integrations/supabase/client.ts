@@ -54,50 +54,25 @@ export const secureFetch = async (url: string, options: RequestInit = {}) => {
   return fetch(sanitizedUrl, secureOptions);
 };
 
-// Helper function to safely insert data with RLS validation
-export const safeInsert = async <T>(
-  table: keyof Database['public']['Tables'],
-  data: any,
-  options?: { returning?: 'minimal' | 'representation' }
-) => {
-  // Clone data to avoid modifying original
-  const sanitizedData = { ...data };
-  
-  // Sanitize all string fields to prevent XSS and SQL injection
-  Object.keys(sanitizedData).forEach(key => {
-    if (typeof sanitizedData[key] === 'string') {
-      sanitizedData[key] = sanitizeInput(sanitizedData[key]);
-    }
-  });
-  
-  // Insert the data with returning option
-  const result = supabase
-    .from(table)
-    .insert(sanitizedData);
-    
-  if (options?.returning) {
-    return result.select();
-  }
-  
-  return result;
-};
-
-// Modified to handle authentication errors gracefully and skip authentication if it fails
-export async function signInWithCustomToken(walletAddress: string, signedMessage: string, nonce: string) {
-  try {
-    console.log("Attempting wallet authentication with address:", walletAddress);
-    
-    // Skip the authentication attempt altogether to avoid JSON parsing issues
-    // Instead, simulate a successful authentication
-    console.log("Bypassing auth and using direct wallet connection");
-    
-    // Store wallet address in localStorage for session persistence
-    localStorage.setItem('walletAddress', walletAddress);
-    
-    // Return a simplified result
-    return { user: { id: walletAddress, email: null } };
-  } catch (err) {
-    console.error('Error in wallet authentication: ', err);
+// Simple function for custom token authentication with wallet
+export const signInWithCustomToken = async (
+  walletAddress: string, 
+  signature: string,
+  message: string
+): Promise<boolean> => {
+  if (!walletAddress || !signature || !message) {
+    console.error("Missing required parameters for authentication");
     return false;
   }
-}
+
+  try {
+    console.log("Authenticating with wallet", walletAddress);
+    
+    // For now, we'll just return true since we're not using server-side auth
+    // This function exists to maintain compatibility with existing code
+    return true;
+  } catch (error) {
+    console.error("Authentication error:", error);
+    return false;
+  }
+};

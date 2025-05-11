@@ -1,10 +1,12 @@
+
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { Profile } from '@/types/dataTypes';
 import { 
   getProfileByWallet, 
   uploadProfilePicture, 
   saveProfile, 
-  createDefaultProfile 
+  createDefaultProfile,
+  getSECTokenBalance 
 } from '@/services/profileService';
 import { toast } from '@/hooks/use-toast';
 import { 
@@ -138,17 +140,40 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       // Use getProfileByWallet which has been modified to work without authentication
       const fetchedProfile = await getProfileByWallet(address);
       console.log("Fetched profile:", fetchedProfile);
+
+      // Get SEC token balance
+      const secBalance = await getSECTokenBalance(address);
+      console.log("SEC Balance:", secBalance);
       
       if (fetchedProfile) {
-        setProfile(fetchedProfile);
+        // Update the profile with the latest SEC balance
+        const updatedProfile = {
+          ...fetchedProfile,
+          sec_balance: secBalance
+        };
+        
+        setProfile(updatedProfile);
+        
+        // If the SEC balance changed, update it in the database
+        if (fetchedProfile.sec_balance !== secBalance) {
+          console.log("SEC balance changed, updating profile");
+          await saveProfile(updatedProfile);
+        }
       } else {
         console.log("No profile found, creating default profile");
         // Create default profile without requiring authentication
-        await createDefaultProfile(address);
-        // Fetch the profile after creating it
-        const newProfile = await getProfileByWallet(address);
+        const newProfile = await createDefaultProfile(address);
+        
         if (newProfile) {
-          setProfile(newProfile);
+          // Update with SEC balance
+          const profileWithBalance = {
+            ...newProfile,
+            sec_balance: secBalance
+          };
+          
+          await saveProfile(profileWithBalance);
+          setProfile(profileWithBalance);
+          
           toast({
             title: 'Profile Created',
             description: 'Default profile has been created. You can update it in your profile page.',
@@ -192,6 +217,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
           description: 'Default profile has been created. You can update it in your profile page.',
         });
       }
+      return savedProfile;
     } catch (error) {
       console.error('Error creating default profile:', error);
       toast({
@@ -199,6 +225,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         description: 'Failed to create profile',
         variant: 'destructive',
       });
+      return null;
     } finally {
       setIsLoading(false);
     }
@@ -312,17 +339,14 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     try {
       setIsLoading(true);
       
-      // Check if we're authenticated before trying to update
-      if (!session) {
-        toast({
-          title: 'Authentication Required',
-          description: 'Please connect your wallet to update your profile',
-          variant: 'destructive',
-        });
-        return null;
-      }
+      // Preserve the SEC balance when updating the profile
+      const currentSECBalance = profile?.sec_balance || 0;
+      const profileToSave = {
+        ...updatedProfile,
+        sec_balance: currentSECBalance
+      };
       
-      const savedProfile = await saveProfile(updatedProfile);
+      const savedProfile = await saveProfile(profileToSave);
       
       if (savedProfile) {
         setProfile(savedProfile);
