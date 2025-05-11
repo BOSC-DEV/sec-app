@@ -1,7 +1,7 @@
 
 import React, { ReactElement } from 'react';
 import { render as testingLibraryRender, RenderOptions } from '@testing-library/react';
-import { screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/dom';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -9,8 +9,8 @@ import { ProfileProvider } from '@/contexts/ProfileContext';
 import { HelmetProvider } from 'react-helmet-async';
 import { vi } from 'vitest';
 
-// Re-export testing utilities directly from testing-library/react
-export { screen, fireEvent } from '@testing-library/react';
+// Re-export testing utilities directly from testing-library/dom
+export { screen, fireEvent } from '@testing-library/dom';
 
 // Create a wrapper with all providers needed for testing
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
