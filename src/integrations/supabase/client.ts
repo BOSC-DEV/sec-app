@@ -76,3 +76,37 @@ export const signInWithCustomToken = async (
     return false;
   }
 };
+
+// Helper function for safely inserting data into Supabase tables
+export const safeInsert = async (
+  tableName: string,
+  data: Record<string, any>,
+  options: { returning?: string } = {}
+) => {
+  try {
+    // Sanitize table name to prevent SQL injection
+    const sanitizedTable = sanitizeInput(tableName);
+    
+    // Sanitize all keys in the data object
+    const sanitizedData: Record<string, any> = {};
+    Object.entries(data).forEach(([key, value]) => {
+      const sanitizedKey = sanitizeInput(key);
+      sanitizedData[sanitizedKey] = value;
+    });
+    
+    // Perform the insert operation
+    const result = await supabase
+      .from(sanitizedTable)
+      .insert(sanitizedData)
+      .select(options.returning || '*');
+      
+    return result;
+  } catch (error) {
+    console.error(`Error inserting data into ${tableName}:`, error);
+    return {
+      data: null,
+      error
+    };
+  }
+};
+
