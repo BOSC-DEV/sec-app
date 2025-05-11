@@ -1,4 +1,3 @@
-
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { Profile } from '@/types/dataTypes';
 import { 
@@ -142,13 +141,8 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       console.log("Fetched profile:", fetchedProfile);
 
       // Get SEC token balance - ensure this is being called
-      let secBalance = 0;
-      try {
-        secBalance = await getSECTokenBalance(address);
-        console.log("SEC Balance:", secBalance);
-      } catch (balanceError) {
-        console.error("Error fetching SEC token balance:", balanceError);
-      }
+      const secBalance = await getSECTokenBalance(address);
+      console.log("SEC Balance:", secBalance);
       
       if (fetchedProfile) {
         // Update the profile with the latest SEC balance
