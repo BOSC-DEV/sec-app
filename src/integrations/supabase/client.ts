@@ -90,6 +90,8 @@ export async function signInWithCustomToken(walletAddress: string, signedMessage
       method: 'POST',
       headers: {
         "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ walletAddress, signedMessage, nonce }),
