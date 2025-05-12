@@ -163,6 +163,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       provider.on('connect', async () => {
         const publicKey = getWalletPublicKey();
         if (publicKey) {
+          setIsLoading(true);
           try {
             // Check if we already have a valid session for this wallet
             const { data: { session: existingSession } } = await supabase.auth.getSession();
@@ -208,72 +209,39 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
               variant: 'destructive',
             });
             await disconnectWallet();
+          } finally {
+            setIsLoading(false);
           }
         }
       });
       
       provider.on('disconnect', async () => {
         console.log('Wallet disconnect event received');
-        setIsLoading(true);
-        try {
-          // Get current session before disconnecting
-          const { data: { session: currentSession } } = await supabase.auth.getSession();
-          
-          setWalletAddress(null);
-          setIsConnected(false);
-          setProfile(null);
-          localStorage.removeItem('walletAddress');
-          
-          // Only sign out if we have an active session
-          if (currentSession) {
-            console.log('Active session found, signing out from Supabase');
-            await supabase.auth.signOut();
-          }
-        } catch (error) {
-          console.error('Error during disconnect:', error);
-        } finally {
-          setIsLoading(false);
+        // Get current session before disconnecting
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        
+        setWalletAddress(null);
+        setIsConnected(false);
+        setProfile(null);
+        localStorage.removeItem('walletAddress');
+        
+        // Only sign out if we have an active session
+        if (currentSession) {
+          console.log('Active session found, signing out from Supabase');
+          await supabase.auth.signOut();
         }
       });
     }
   }, [isPhantomAvailable]);
 
-  // Add a cleanup effect for loading state
-  useEffect(() => {
-    let mounted = true;
-    
-    if (isLoading) {
-      // Set a maximum time for loading state
-      const timeoutId = setTimeout(() => {
-        if (mounted) {
-          console.log('Loading state timeout reached, clearing loading state');
-          setIsLoading(false);
-        }
-      }, 5000); // 5 seconds maximum loading time
-      
-      return () => {
-        mounted = false;
-        clearTimeout(timeoutId);
-      };
-    }
-    
-    return () => {
-      mounted = false;
-    };
-  }, [isLoading]);
-
   const fetchProfile = async (address: string) => {
-    let mounted = true;
-    setIsLoading(true);
-    
     try {
       console.log("Fetching profile for wallet:", address);
+      setIsLoading(true);
       
       // Use getProfileByWallet which has been modified to work without authentication
       const fetchedProfile = await getProfileByWallet(address);
       console.log("Fetched profile:", fetchedProfile);
-      
-      if (!mounted) return;
       
       if (fetchedProfile) {
         setProfile(fetchedProfile);
@@ -281,8 +249,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         console.log("No profile found, checking if we can create default profile");
         // Check if we have a valid session before attempting to create profile
         const { data: { session: currentSession } } = await supabase.auth.getSession();
-        
-        if (!mounted) return;
         
         if (currentSession) {
           console.log("Creating default profile");
@@ -302,8 +268,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
             
             const savedProfile = await saveProfile(defaultProfile);
             
-            if (!mounted) return;
-            
             if (savedProfile) {
               setProfile(savedProfile);
               toast({
@@ -312,7 +276,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
               });
             }
           } catch (error) {
-            if (!mounted) return;
             console.error('Error creating default profile:', error);
             toast({
               title: 'Error',
@@ -330,7 +293,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         }
       }
     } catch (error) {
-      if (!mounted) return;
       console.error('Error fetching profile:', error);
       toast({
         title: 'Error',
@@ -338,14 +300,8 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         variant: 'destructive',
       });
     } finally {
-      if (mounted) {
-        setIsLoading(false);
-      }
+      setIsLoading(false);
     }
-    
-    return () => {
-      mounted = false;
-    };
   };
 
   const uploadAvatar = async (file: File): Promise<string | null> => {
@@ -373,30 +329,12 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         if (savedProfile) {
           setProfile(savedProfile);
           emitProfileUpdatedEvent(savedProfile);
-          return publicUrl;
         }
-      } else if (publicUrl) {
-        // If we have a URL but no profile, create a default profile
-        const defaultProfile: Profile = {
-          id: crypto.randomUUID(),
-          wallet_address: walletAddress,
-          display_name: `User ${walletAddress.substring(0, 6)}`,
-          username: `user_${Date.now().toString(36)}`,
-          profile_pic_url: publicUrl,
-          created_at: new Date().toISOString(),
-          x_link: '',
-          website_link: '',
-          bio: '',
-          points: 0
-        };
         
-        const savedProfile = await saveProfile(defaultProfile);
-        
-        if (savedProfile) {
-          setProfile(savedProfile);
-          emitProfileUpdatedEvent(savedProfile);
-          return publicUrl;
-        }
+        toast({
+          title: 'Success',
+          description: 'Profile picture uploaded successfully',
+        });
       }
       
       return publicUrl;
@@ -475,9 +413,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(true);
       
       // Check if we're authenticated before trying to update
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
-      
-      if (!currentSession) {
+      if (!session) {
         toast({
           title: 'Authentication Required',
           description: 'Please connect your wallet to update your profile',
@@ -486,29 +422,15 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         return null;
       }
       
-      // Ensure we have all required fields
-      const profileData = {
-        ...updatedProfile,
-        id: updatedProfile.id || crypto.randomUUID(),
-        wallet_address: updatedProfile.wallet_address,
-        display_name: updatedProfile.display_name || `User ${updatedProfile.wallet_address.substring(0, 6)}`,
-        username: updatedProfile.username || `user_${Date.now().toString(36)}`,
-        profile_pic_url: updatedProfile.profile_pic_url || '',
-        created_at: updatedProfile.created_at || new Date().toISOString(),
-        x_link: updatedProfile.x_link || '',
-        website_link: updatedProfile.website_link || '',
-        bio: updatedProfile.bio || '',
-        points: updatedProfile.points || 0
-      };
-      
-      const savedProfile = await saveProfile(profileData);
+      const savedProfile = await saveProfile(updatedProfile);
       
       if (savedProfile) {
         setProfile(savedProfile);
+        
         emitProfileUpdatedEvent(savedProfile);
         
         toast({
-          title: 'Success',
+          title: 'Profile Updated',
           description: 'Your profile has been updated successfully',
         });
       }
