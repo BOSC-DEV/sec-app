@@ -87,6 +87,10 @@ export const safeInsert = async <T>(
 export async function signInWithCustomToken(walletAddress: string, signedMessage: string, nonce: string) {
   try {
     const res = await supabase.functions.invoke('login-wallet', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ walletAddress, signedMessage, nonce }),
     });
 
