@@ -55,37 +55,33 @@ export const secureFetch = async (url: string, options: RequestInit = {}) => {
 };
 
 // Helper function to safely insert data with RLS validation
-export const safeInsert = async <T>(
-  table: keyof Database['public']['Tables'],
-  data: any,
-  options?: { returning?: 'minimal' | 'representation' }
+export const safeInsert = async <T extends keyof Database['public']['Tables']>(
+  table: T,
+  data: Database['public']['Tables'][T]['Insert']
 ) => {
   // Clone data to avoid modifying original
   const sanitizedData = { ...data };
   
   // Sanitize all string fields to prevent XSS and SQL injection
   Object.keys(sanitizedData).forEach(key => {
-    if (typeof sanitizedData[key] === 'string') {
-      sanitizedData[key] = sanitizeInput(sanitizedData[key]);
+    if (typeof sanitizedData[key as keyof typeof sanitizedData] === 'string') {
+      sanitizedData[key as keyof typeof sanitizedData] = sanitizeInput(sanitizedData[key as keyof typeof sanitizedData] as string) as any;
     }
   });
   
   // Insert the data with returning option
-  const result = supabase
+  return supabase
     .from(table)
-    .insert(sanitizedData);
-    
-  if (options?.returning) {
-    return result.select();
-  }
-  
-  return result;
+    .insert(sanitizedData)
+    .select();
 };
 
 // Authenticate with wallet by verifying a signature via a secure backend or edge function,
 // and receiving a custom Supabase JWT token.
 export async function signInWithCustomToken(walletAddress: string, signedMessage: string, nonce: string) {
   try {
+    console.log('Starting wallet authentication process with address:', walletAddress);
+    
     const { data, error } = await supabase.functions.invoke('login-wallet', {
       body: JSON.stringify({ walletAddress, signedMessage, nonce }),
     });
@@ -102,6 +98,8 @@ export async function signInWithCustomToken(walletAddress: string, signedMessage
     
     const { access_token, refresh_token } = data;
     
+    console.log('Received auth tokens, setting Supabase session');
+    
     const { error: authError } = await supabase.auth.setSession({
       access_token,
       refresh_token,
@@ -113,6 +111,7 @@ export async function signInWithCustomToken(walletAddress: string, signedMessage
     }
     
     console.log('Wallet login successful');
+    return true;
   } catch (err) {
     console.error('Error in wallet authentication: ', err);
     return false;
