@@ -86,21 +86,33 @@ export const safeInsert = async <T>(
 // and receiving a custom Supabase JWT token.
 export async function signInWithCustomToken(walletAddress: string, signedMessage: string, nonce: string) {
   try {
-    const res = await supabase.functions.invoke('login-wallet', {
+    const { data, error } = await supabase.functions.invoke('login-wallet', {
       body: JSON.stringify({ walletAddress, signedMessage, nonce }),
     });
-
-    // const result = await res.json();
-    // console.log("signInWithCustomToken Result: ", result);
-    // if (!res.ok) throw new Error(result.error || 'Login failed');
-    console.log("res: ", res);
-
-    // const { access_token, refresh_token } = result;
-    const { access_token, refresh_token } = res;
-    const { data, error } = await supabase.auth.setSession({ access_token, refresh_token });
-
-    if (error) throw error;
-    return data;
+    
+    if (error) {
+      console.error('[Edge Function Error]', error);
+      throw new Error('Failed to call login-wallet function');
+    }
+    
+    if (data?.error_code || data?.msg) {
+      console.warn('[Wallet Auth Error]', data);
+      throw new Error(data.msg || 'Login failed');
+    }
+    
+    const { access_token, refresh_token } = data;
+    
+    const { error: authError } = await supabase.auth.setSession({
+      access_token,
+      refresh_token,
+    });
+    
+    if (authError) {
+      console.error('[Supabase Auth Error]', authError);
+      throw new Error('Failed to set Supabase session');
+    }
+    
+    console.log('Wallet login successful');
   } catch (err) {
     console.error('Error in wallet authentication: ', err);
     return false;
