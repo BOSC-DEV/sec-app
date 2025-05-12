@@ -55,9 +55,10 @@ export const secureFetch = async (url: string, options: RequestInit = {}) => {
 };
 
 // Helper function to safely insert data with RLS validation
-export const safeInsert = async <T extends keyof Database['public']['Tables']>(
-  table: T,
-  data: Database['public']['Tables'][T]['Insert'],
+export const safeInsert = async <T>(
+  table: keyof Database['public']['Tables'],
+  data: any,
+  options?: { returning?: 'minimal' | 'representation' }
 ) => {
   // Clone data to avoid modifying original
   const sanitizedData = { ...data };
@@ -69,28 +70,22 @@ export const safeInsert = async <T extends keyof Database['public']['Tables']>(
     }
   });
   
-  // Insert the data
-  return supabase
+  // Insert the data with returning option
+  const result = supabase
     .from(table)
     .insert(sanitizedData);
+    
+  if (options?.returning) {
+    return result.select();
+  }
+  
+  return result;
 };
 
 // Authenticate with wallet by verifying a signature via a secure backend or edge function,
 // and receiving a custom Supabase JWT token.
 export async function signInWithCustomToken(walletAddress: string, signedMessage: string, nonce: string) {
   try {
-    // First check if there's an existing session
-    const { data: { session: existingSession } } = await supabase.auth.getSession();
-    if (existingSession?.user?.email?.split('@')[0] === walletAddress) {
-      console.log('Already authenticated with this wallet');
-      return true;
-    }
-
-    // If there's a different session, sign out first
-    if (existingSession) {
-      await supabase.auth.signOut();
-    }
-
     const { data, error } = await supabase.functions.invoke('login-wallet', {
       body: JSON.stringify({ walletAddress, signedMessage, nonce }),
     });
@@ -107,35 +102,17 @@ export async function signInWithCustomToken(walletAddress: string, signedMessage
     
     const { access_token, refresh_token } = data;
     
-    // Try setting the session multiple times if needed
-    let retries = 3;
-    let success = false;
+    const { error: authError } = await supabase.auth.setSession({
+      access_token,
+      refresh_token,
+    });
     
-    while (retries > 0 && !success) {
-      const { error: authError } = await supabase.auth.setSession({
-        access_token,
-        refresh_token,
-      });
-      
-      if (!authError) {
-        success = true;
-        break;
-      }
-      
-      console.warn(`Failed to set session, retries left: ${retries - 1}`, authError);
-      retries--;
-      
-      if (retries > 0) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-    }
-    
-    if (!success) {
-      throw new Error('Failed to set Supabase session after multiple attempts');
+    if (authError) {
+      console.error('[Supabase Auth Error]', authError);
+      throw new Error('Failed to set Supabase session');
     }
     
     console.log('Wallet login successful');
-    return true;
   } catch (err) {
     console.error('Error in wallet authentication: ', err);
     return false;

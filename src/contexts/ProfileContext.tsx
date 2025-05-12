@@ -57,14 +57,17 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     checkPhantomAvailability();
     
     // Setup auth state change listener for Supabase
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, sessionData) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, sessionData) => {
       console.log('Auth state changed:', event, sessionData?.user?.email);
       
-      if (event === 'SIGNED_IN') {
+      // Only update session if the event is not a token refresh
+      if (event !== 'TOKEN_REFRESHED') {
         setSession(sessionData);
-        
+      }
+      
+      if (sessionData && sessionData.user) {
         // Extract wallet address from user email or user metadata
-        const email = sessionData?.user?.email;
+        const email = sessionData.user.email;
         const walletFromEmail = email ? email.split('@')[0] : null;
         
         if (walletFromEmail && walletFromEmail !== 'null') {
@@ -72,23 +75,22 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
           setIsConnected(true);
           localStorage.setItem('walletAddress', walletFromEmail);
           
-          // Delay fetching the profile to avoid race conditions
-          await new Promise(resolve => setTimeout(resolve, 500));
-          await fetchProfile(walletFromEmail);
+          // Only fetch profile if this is a new sign in
+          if (event === 'SIGNED_IN') {
+            // Delay fetching the profile to avoid race conditions
+            setTimeout(() => {
+              fetchProfile(walletFromEmail);
+            }, 0);
+          }
         }
       } else if (event === 'SIGNED_OUT') {
-        // Only clear state if we're actually signed out and there's no active session
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
-        if (!currentSession) {
-          setSession(null);
+        // Only clear state if we're actually signed out
+        if (!sessionData) {
           setProfile(null);
           setWalletAddress(null);
           setIsConnected(false);
           localStorage.removeItem('walletAddress');
         }
-      } else if (event === 'TOKEN_REFRESHED') {
-        // Just update the session without changing other state
-        setSession(sessionData);
       }
     });
     

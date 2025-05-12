@@ -1,3 +1,4 @@
+
 import { toast } from '@/hooks/use-toast';
 import { 
   Connection, 
@@ -145,25 +146,12 @@ export const disconnectPhantomWallet = async (): Promise<void> => {
   if (provider) {
     try {
       console.log("Disconnecting from Phantom wallet...");
-      
-      // First check if we're actually connected
-      if (!provider.isConnected) {
-        console.log("Wallet already disconnected");
-        return;
-      }
-      
-      // Get current session before disconnecting
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      // Disconnect from Phantom
       await provider.disconnect();
       
-      // If we had an active session, sign out from Supabase
-      if (session) {
-        await supabase.auth.signOut();
-      }
-      
       console.log("Phantom wallet disconnected successfully");
+      
+      // Also sign out from Supabase
+      await supabase.auth.signOut();
       
       toast({
         title: "Wallet disconnected",
@@ -171,14 +159,6 @@ export const disconnectPhantomWallet = async (): Promise<void> => {
       });
     } catch (error) {
       console.error("Error disconnecting from Phantom wallet:", error);
-      
-      // Try to force sign out from Supabase even if Phantom disconnect failed
-      try {
-        await supabase.auth.signOut();
-      } catch (signOutError) {
-        console.error("Error signing out from Supabase:", signOutError);
-      }
-      
       toast({
         title: "Disconnection error",
         description: "Failed to disconnect from Phantom wallet",
