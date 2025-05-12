@@ -87,8 +87,6 @@ export async function signInWithCustomToken(walletAddress: string, signedMessage
   try {
     // First check if there's an existing session
     const { data: { session: existingSession } } = await supabase.auth.getSession();
-    
-    // If we're already authenticated with this wallet, return success
     if (existingSession?.user?.email?.split('@')[0] === walletAddress) {
       console.log('Already authenticated with this wallet');
       return true;
@@ -96,14 +94,9 @@ export async function signInWithCustomToken(walletAddress: string, signedMessage
 
     // If there's a different session, sign out first
     if (existingSession) {
-      console.log('Signing out of existing session');
       await supabase.auth.signOut();
-      
-      // Wait a bit to ensure the signout is complete
-      await new Promise(resolve => setTimeout(resolve, 500));
     }
 
-    console.log('Calling login-wallet function');
     const { data, error } = await supabase.functions.invoke('login-wallet', {
       body: JSON.stringify({ walletAddress, signedMessage, nonce }),
     });
@@ -123,54 +116,34 @@ export async function signInWithCustomToken(walletAddress: string, signedMessage
     // Try setting the session multiple times if needed
     let retries = 3;
     let success = false;
-    let lastError = null;
     
     while (retries > 0 && !success) {
-      try {
-        console.log(`Setting session, attempt ${4 - retries}/3`);
-        const { error: authError } = await supabase.auth.setSession({
-          access_token,
-          refresh_token,
-        });
-        
-        if (!authError) {
-          success = true;
-          break;
-        }
-        
-        lastError = authError;
-        console.warn(`Failed to set session, retries left: ${retries - 1}`, authError);
-        retries--;
-        
-        if (retries > 0) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-      } catch (error) {
-        lastError = error;
-        console.error('Error setting session:', error);
-        retries--;
-        if (retries > 0) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
+      const { error: authError } = await supabase.auth.setSession({
+        access_token,
+        refresh_token,
+      });
+      
+      if (!authError) {
+        success = true;
+        break;
+      }
+      
+      console.warn(`Failed to set session, retries left: ${retries - 1}`, authError);
+      retries--;
+      
+      if (retries > 0) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
     
     if (!success) {
-      console.error('Failed to set session after all retries');
-      throw lastError || new Error('Failed to set Supabase session after multiple attempts');
-    }
-    
-    // Verify the session was set correctly
-    const { data: { session: newSession } } = await supabase.auth.getSession();
-    if (!newSession || newSession.user.email.split('@')[0] !== walletAddress) {
-      console.error('Session verification failed');
-      throw new Error('Session verification failed after setting');
+      throw new Error('Failed to set Supabase session after multiple attempts');
     }
     
     console.log('Wallet login successful');
     return true;
   } catch (err) {
-    console.error('Error in wallet authentication:', err);
+    console.error('Error in wallet authentication: ', err);
     return false;
   }
 }

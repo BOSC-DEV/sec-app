@@ -60,53 +60,35 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, sessionData) => {
       console.log('Auth state changed:', event, sessionData?.user?.email);
       
-      // Handle token refresh separately to avoid state changes
-      if (event === 'TOKEN_REFRESHED') {
-        console.log('Token refreshed, updating session');
-        setSession(sessionData);
-        return;
-      }
-
       if (event === 'SIGNED_IN') {
-        console.log('Sign in event received');
         setSession(sessionData);
         
-        if (sessionData?.user?.email) {
-          const walletFromEmail = sessionData.user.email.split('@')[0];
+        // Extract wallet address from user email or user metadata
+        const email = sessionData?.user?.email;
+        const walletFromEmail = email ? email.split('@')[0] : null;
+        
+        if (walletFromEmail && walletFromEmail !== 'null') {
+          setWalletAddress(walletFromEmail);
+          setIsConnected(true);
+          localStorage.setItem('walletAddress', walletFromEmail);
           
-          if (walletFromEmail && walletFromEmail !== 'null') {
-            setWalletAddress(walletFromEmail);
-            setIsConnected(true);
-            localStorage.setItem('walletAddress', walletFromEmail);
-            
-            try {
-              await fetchProfile(walletFromEmail);
-            } catch (error) {
-              console.error('Error in auth state change profile fetch:', error);
-              setIsLoading(false);
-            }
-          } else {
-            setIsLoading(false);
-          }
-        } else {
-          setIsLoading(false);
+          // Delay fetching the profile to avoid race conditions
+          await new Promise(resolve => setTimeout(resolve, 500));
+          await fetchProfile(walletFromEmail);
         }
       } else if (event === 'SIGNED_OUT') {
-        console.log('Sign out event received');
-        // Double check if we really should sign out
+        // Only clear state if we're actually signed out and there's no active session
         const { data: { session: currentSession } } = await supabase.auth.getSession();
-        
         if (!currentSession) {
-          console.log('No active session found, clearing state');
           setSession(null);
           setProfile(null);
           setWalletAddress(null);
           setIsConnected(false);
           localStorage.removeItem('walletAddress');
-        } else {
-          console.log('Active session still exists, ignoring sign out event');
         }
-        setIsLoading(false);
+      } else if (event === 'TOKEN_REFRESHED') {
+        // Just update the session without changing other state
+        setSession(sessionData);
       }
     });
     
@@ -163,24 +145,9 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       provider.on('connect', async () => {
         const publicKey = getWalletPublicKey();
         if (publicKey) {
+          setIsLoading(true);
+          // Need to authenticate with Supabase after wallet connect
           try {
-            // Check if we already have a valid session for this wallet
-            const { data: { session: existingSession } } = await supabase.auth.getSession();
-            if (existingSession?.user?.email?.split('@')[0] === publicKey) {
-              console.log('Already authenticated with this wallet');
-              setWalletAddress(publicKey);
-              setIsConnected(true);
-              localStorage.setItem('walletAddress', publicKey);
-              await fetchProfile(publicKey);
-              return;
-            }
-
-            // Sign out of any existing session before attempting new authentication
-            if (existingSession) {
-              console.log('Signing out of existing session before new authentication');
-              await supabase.auth.signOut();
-            }
-
             const message = `Login to SEC Community with wallet ${publicKey} at ${Date.now()}`;
             const signature = await signMessageWithPhantom(message);
             
@@ -188,16 +155,17 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
               const authenticated = await signInWithCustomToken(publicKey, signature, message);
               
               if (authenticated) {
-                console.log('Authentication successful');
-                // Let the auth state change listener handle the state updates
+                setWalletAddress(publicKey);
+                setIsConnected(true);
+                localStorage.setItem('walletAddress', publicKey);
+                await fetchProfile(publicKey);
               } else {
-                console.error('Authentication failed');
                 toast({
                   title: 'Authentication Failed',
                   description: 'Could not authenticate with your wallet',
                   variant: 'destructive',
                 });
-                await disconnectWallet();
+                disconnectWallet();
               }
             }
           } catch (error) {
@@ -207,130 +175,50 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
               description: 'Failed to authenticate wallet signature',
               variant: 'destructive',
             });
-            await disconnectWallet();
+            setIsLoading(false);
           }
         }
       });
       
-      provider.on('disconnect', async () => {
-        console.log('Wallet disconnect event received');
-        setIsLoading(true);
-        try {
-          // Get current session before disconnecting
-          const { data: { session: currentSession } } = await supabase.auth.getSession();
-          
-          setWalletAddress(null);
-          setIsConnected(false);
-          setProfile(null);
-          localStorage.removeItem('walletAddress');
-          
-          // Only sign out if we have an active session
-          if (currentSession) {
-            console.log('Active session found, signing out from Supabase');
-            await supabase.auth.signOut();
-          }
-        } catch (error) {
-          console.error('Error during disconnect:', error);
-        } finally {
-          setIsLoading(false);
-        }
+      provider.on('disconnect', () => {
+        setWalletAddress(null);
+        setIsConnected(false);
+        setProfile(null);
+        localStorage.removeItem('walletAddress');
+        // Also sign out from Supabase
+        supabase.auth.signOut();
       });
     }
   }, [isPhantomAvailable]);
 
-  // Add a cleanup effect for loading state
-  useEffect(() => {
-    let mounted = true;
-    
-    if (isLoading) {
-      // Set a maximum time for loading state
-      const timeoutId = setTimeout(() => {
-        if (mounted) {
-          console.log('Loading state timeout reached, clearing loading state');
-          setIsLoading(false);
-        }
-      }, 5000); // 5 seconds maximum loading time
-      
-      return () => {
-        mounted = false;
-        clearTimeout(timeoutId);
-      };
-    }
-    
-    return () => {
-      mounted = false;
-    };
-  }, [isLoading]);
-
   const fetchProfile = async (address: string) => {
-    let mounted = true;
-    setIsLoading(true);
-    
     try {
       console.log("Fetching profile for wallet:", address);
+      setIsLoading(true);
       
       // Use getProfileByWallet which has been modified to work without authentication
       const fetchedProfile = await getProfileByWallet(address);
       console.log("Fetched profile:", fetchedProfile);
       
-      if (!mounted) return;
-      
       if (fetchedProfile) {
         setProfile(fetchedProfile);
       } else {
-        console.log("No profile found, checking if we can create default profile");
-        // Check if we have a valid session before attempting to create profile
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
-        
-        if (!mounted) return;
-        
-        if (currentSession) {
-          console.log("Creating default profile");
-          try {
-            const defaultProfile: Profile = {
-              id: crypto.randomUUID(),
-              wallet_address: address,
-              display_name: `User ${address.substring(0, 6)}`,
-              username: `user_${Date.now().toString(36)}`,
-              profile_pic_url: '',
-              created_at: new Date().toISOString(),
-              x_link: '',
-              website_link: '',
-              bio: '',
-              points: 0
-            };
-            
-            const savedProfile = await saveProfile(defaultProfile);
-            
-            if (!mounted) return;
-            
-            if (savedProfile) {
-              setProfile(savedProfile);
-              toast({
-                title: 'Profile Created',
-                description: 'Default profile has been created. You can update it in your profile page.',
-              });
-            }
-          } catch (error) {
-            if (!mounted) return;
-            console.error('Error creating default profile:', error);
+        console.log("No profile found, creating default profile");
+        // Creating a default profile requires authentication
+        if (session) {
+          await createDefaultProfile(address);
+          // Fetch the profile after creating it
+          const newProfile = await getProfileByWallet(address);
+          if (newProfile) {
+            setProfile(newProfile);
             toast({
-              title: 'Error',
-              description: 'Failed to create profile',
-              variant: 'destructive',
+              title: 'Profile Created',
+              description: 'Default profile has been created. You can update it in your profile page.',
             });
           }
-        } else {
-          console.log("No session available, cannot create profile");
-          toast({
-            title: 'Authentication Required',
-            description: 'Please connect your wallet to create a profile',
-            variant: 'destructive',
-          });
         }
       }
     } catch (error) {
-      if (!mounted) return;
       console.error('Error fetching profile:', error);
       toast({
         title: 'Error',
@@ -338,14 +226,45 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         variant: 'destructive',
       });
     } finally {
-      if (mounted) {
-        setIsLoading(false);
-      }
+      setIsLoading(false);
     }
-    
-    return () => {
-      mounted = false;
-    };
+  };
+
+  const createDefaultProfile = async (address: string) => {
+    try {
+      setIsLoading(true);
+      const defaultProfile: Profile = {
+        id: crypto.randomUUID(),
+        wallet_address: address,
+        display_name: `User ${address.substring(0, 6)}`,
+        username: `user_${Date.now().toString(36)}`,
+        profile_pic_url: '',
+        created_at: new Date().toISOString(),
+        x_link: '',
+        website_link: '',
+        bio: '',
+        points: 0
+      };
+      
+      const savedProfile = await saveProfile(defaultProfile);
+      
+      if (savedProfile) {
+        setProfile(savedProfile);
+        toast({
+          title: 'Profile Created',
+          description: 'Default profile has been created. You can update it in your profile page.',
+        });
+      }
+    } catch (error) {
+      console.error('Error creating default profile:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to create profile',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const uploadAvatar = async (file: File): Promise<string | null> => {
