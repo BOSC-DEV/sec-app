@@ -1,3 +1,4 @@
+
 import { toast } from '@/hooks/use-toast';
 import { 
   Connection, 
@@ -28,7 +29,6 @@ export interface PhantomProvider {
   connect: ({ onlyIfTrusted }: { onlyIfTrusted: boolean }) => Promise<{ publicKey: { toString: () => string } }>;
   disconnect: () => Promise<void>;
   on: (event: PhantomEvent, callback: () => void) => void;
-  removeListener: (event: PhantomEvent, callback: () => void) => void;
   isPhantom: boolean;
   isConnected: boolean;
   publicKey: { toString: () => string } | null;
@@ -118,13 +118,6 @@ export const connectPhantomWallet = async (): Promise<string | null> => {
   
   try {
     console.log("Attempting to connect to Phantom wallet...");
-    
-    // If already connected, don't try to reconnect
-    if (provider.isConnected && provider.publicKey) {
-      console.log("Wallet already connected:", provider.publicKey.toString());
-      return provider.publicKey.toString();
-    }
-    
     const response = await provider.connect({ onlyIfTrusted: false });
     const publicKey = response.publicKey.toString();
     
@@ -153,13 +146,6 @@ export const disconnectPhantomWallet = async (): Promise<void> => {
   if (provider) {
     try {
       console.log("Disconnecting from Phantom wallet...");
-      
-      // Prevent disconnecting if not actually connected
-      if (!provider.isConnected) {
-        console.log("Wallet not connected, skipping disconnect");
-        return;
-      }
-      
       await provider.disconnect();
       
       console.log("Phantom wallet disconnected successfully");

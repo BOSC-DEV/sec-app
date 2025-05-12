@@ -1,4 +1,3 @@
-
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { Profile } from '@/types/dataTypes';
 import { 
@@ -49,7 +48,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isPhantomAvailable, setIsPhantomAvailable] = useState<boolean>(false);
   const [session, setSession] = useState<Session | null>(null);
-  const [isAuthInitialized, setIsAuthInitialized] = useState<boolean>(false);
 
   useEffect(() => {
     const checkPhantomAvailability = () => {
@@ -78,7 +76,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
           localStorage.setItem('walletAddress', walletFromEmail);
           
           // Only fetch profile if this is a new sign in
-          if (event === 'SIGNED_IN' && isAuthInitialized) {
+          if (event === 'SIGNED_IN') {
             // Delay fetching the profile to avoid race conditions
             setTimeout(() => {
               fetchProfile(walletFromEmail);
@@ -86,8 +84,8 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
           }
         }
       } else if (event === 'SIGNED_OUT') {
-        // Only clear state if we're actually signed out and initialization is complete
-        if (!sessionData && isAuthInitialized) {
+        // Only clear state if we're actually signed out
+        if (!sessionData) {
           setProfile(null);
           setWalletAddress(null);
           setIsConnected(false);
@@ -101,7 +99,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       try {
         setIsLoading(true);
         const { data: { session: existingSession } } = await supabase.auth.getSession();
-        
         if (existingSession) {
           setSession(existingSession);
           
@@ -127,13 +124,9 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
             setIsLoading(false);
           }
         }
-        
-        // Mark auth as initialized after initial check
-        setIsAuthInitialized(true);
       } catch (error) {
         console.error('Error checking session:', error);
         setIsLoading(false);
-        setIsAuthInitialized(true); // Still mark as initialized even if there was an error
       }
     };
 
@@ -151,8 +144,8 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     const provider = getPhantomProvider();
     
     if (provider) {
-      // Handler for wallet connection
-      const handleConnect = async (publicKey: string | null) => {
+      provider.on('connect', async () => {
+        const publicKey = getWalletPublicKey();
         if (publicKey) {
           setIsLoading(true);
           // Need to authenticate with Supabase after wallet connect
@@ -174,8 +167,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
                   description: 'Could not authenticate with your wallet',
                   variant: 'destructive',
                 });
-                // Handle failed authentication without disconnecting
-                setIsLoading(false);
+                disconnectWallet();
               }
             }
           } catch (error) {
@@ -188,37 +180,18 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
             setIsLoading(false);
           }
         }
-      };
-      
-      // Handler for wallet disconnection
-      const handleDisconnect = () => {
-        // Only process disconnect if we're currently connected
-        if (isConnected) {
-          setWalletAddress(null);
-          setIsConnected(false);
-          setProfile(null);
-          localStorage.removeItem('walletAddress');
-          // Also sign out from Supabase
-          supabase.auth.signOut();
-        }
-      };
-      
-      provider.on('connect', () => {
-        const publicKey = getWalletPublicKey();
-        handleConnect(publicKey);
       });
       
-      provider.on('disconnect', handleDisconnect);
-      
-      return () => {
-        provider.removeListener('connect', () => {
-          const publicKey = getWalletPublicKey();
-          handleConnect(publicKey);
-        });
-        provider.removeListener('disconnect', handleDisconnect);
-      };
+      provider.on('disconnect', () => {
+        setWalletAddress(null);
+        setIsConnected(false);
+        setProfile(null);
+        localStorage.removeItem('walletAddress');
+        // Also sign out from Supabase
+        supabase.auth.signOut();
+      });
     }
-  }, [isConnected, isPhantomAvailable, isAuthInitialized]);
+  }, [isPhantomAvailable]);
 
   const fetchProfile = async (address: string) => {
     try {
@@ -359,9 +332,16 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
       
-      await connectPhantomWallet();
-      // Connection will be handled in the connect event handler
+      const publicKey = await connectPhantomWallet();
       
+      if (publicKey) {
+        // We'll handle authentication and profile fetching in the connect event handler
+        console.log("Wallet connected with public key:", publicKey);
+        
+        // Authentication will be handled in the connect event handler
+      } else {
+        setIsLoading(false);
+      }
     } catch (error) {
       console.error('Error connecting wallet:', error);
       toast({
