@@ -5,12 +5,12 @@ import type { Database } from './types';
 import { sanitizeInput } from '@/utils/securityUtils';
 
 const SUPABASE_URL = "https://mfirlsuuxpvgwaxymjor.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1maXJsc3V1eHB2Z3dheHltam9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMyNDIyNjQsImV4cCI6MjA1ODgxODI2NH0.NCYmYYwlpwGieEd3VwrnWCKsva6Wl6Tw1ouTBmfSO-I";
+const SUPABASE_ANON_KEY = "6554f9de6352b35497b81e1d0eacd7aa982b3d7d43cc3bba44b5f4a11a8b6fe0";
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
@@ -86,16 +86,10 @@ export const safeInsert = async <T>(
 // and receiving a custom Supabase JWT token.
 export async function signInWithCustomToken(walletAddress: string, signedMessage: string, nonce: string) {
   try {
-    const res = await fetch('/functions/v1/login-wallet', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    const res = await supabase.functions.invoke('login-wallet', {
       body: JSON.stringify({ walletAddress, signedMessage, nonce }),
     });
-
     const result = await res.json();
-    console.log("signInWithCustomToken Result: ", result);
     if (!res.ok) throw new Error(result.error || 'Login failed');
 
     const { access_token, refresh_token } = result;
@@ -108,3 +102,4 @@ export async function signInWithCustomToken(walletAddress: string, signedMessage
     return false;
   }
 }
+
