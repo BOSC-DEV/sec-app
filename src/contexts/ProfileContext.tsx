@@ -373,30 +373,12 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         if (savedProfile) {
           setProfile(savedProfile);
           emitProfileUpdatedEvent(savedProfile);
-          return publicUrl;
         }
-      } else if (publicUrl) {
-        // If we have a URL but no profile, create a default profile
-        const defaultProfile: Profile = {
-          id: crypto.randomUUID(),
-          wallet_address: walletAddress,
-          display_name: `User ${walletAddress.substring(0, 6)}`,
-          username: `user_${Date.now().toString(36)}`,
-          profile_pic_url: publicUrl,
-          created_at: new Date().toISOString(),
-          x_link: '',
-          website_link: '',
-          bio: '',
-          points: 0
-        };
         
-        const savedProfile = await saveProfile(defaultProfile);
-        
-        if (savedProfile) {
-          setProfile(savedProfile);
-          emitProfileUpdatedEvent(savedProfile);
-          return publicUrl;
-        }
+        toast({
+          title: 'Success',
+          description: 'Profile picture uploaded successfully',
+        });
       }
       
       return publicUrl;
@@ -475,9 +457,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(true);
       
       // Check if we're authenticated before trying to update
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
-      
-      if (!currentSession) {
+      if (!session) {
         toast({
           title: 'Authentication Required',
           description: 'Please connect your wallet to update your profile',
@@ -486,29 +466,15 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         return null;
       }
       
-      // Ensure we have all required fields
-      const profileData = {
-        ...updatedProfile,
-        id: updatedProfile.id || crypto.randomUUID(),
-        wallet_address: updatedProfile.wallet_address,
-        display_name: updatedProfile.display_name || `User ${updatedProfile.wallet_address.substring(0, 6)}`,
-        username: updatedProfile.username || `user_${Date.now().toString(36)}`,
-        profile_pic_url: updatedProfile.profile_pic_url || '',
-        created_at: updatedProfile.created_at || new Date().toISOString(),
-        x_link: updatedProfile.x_link || '',
-        website_link: updatedProfile.website_link || '',
-        bio: updatedProfile.bio || '',
-        points: updatedProfile.points || 0
-      };
-      
-      const savedProfile = await saveProfile(profileData);
+      const savedProfile = await saveProfile(updatedProfile);
       
       if (savedProfile) {
         setProfile(savedProfile);
+        
         emitProfileUpdatedEvent(savedProfile);
         
         toast({
-          title: 'Success',
+          title: 'Profile Updated',
           description: 'Your profile has been updated successfully',
         });
       }
