@@ -150,6 +150,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
                 setWalletAddress(publicKey);
                 setIsConnected(true);
                 localStorage.setItem('walletAddress', publicKey);
+                console.log("Fetching profile for wallet:", publicKey);
                 await fetchProfile(publicKey);
               } else {
                 toast({
