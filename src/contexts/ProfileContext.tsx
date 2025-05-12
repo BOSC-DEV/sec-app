@@ -70,6 +70,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       if (event === 'SIGNED_IN') {
         console.log('Sign in event received');
         setSession(sessionData);
+        setIsLoading(true);  // Set loading state here
         
         if (sessionData?.user?.email) {
           const walletFromEmail = sessionData.user.email.split('@')[0];
@@ -79,10 +80,19 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
             setIsConnected(true);
             localStorage.setItem('walletAddress', walletFromEmail);
             
-            // Use a longer delay to ensure all auth state updates are complete
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            await fetchProfile(walletFromEmail);
+            try {
+              // Use a longer delay to ensure all auth state updates are complete
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              await fetchProfile(walletFromEmail);
+            } catch (error) {
+              console.error('Error in auth state change profile fetch:', error);
+              setIsLoading(false);
+            }
+          } else {
+            setIsLoading(false);
           }
+        } else {
+          setIsLoading(false);
         }
       } else if (event === 'SIGNED_OUT') {
         console.log('Sign out event received');
@@ -99,6 +109,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         } else {
           console.log('Active session still exists, ignoring sign out event');
         }
+        setIsLoading(false);
       }
     });
     
@@ -237,21 +248,54 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       
       if (fetchedProfile) {
         setProfile(fetchedProfile);
+        setIsLoading(false);
       } else {
-        console.log("No profile found, creating default profile");
-        // Creating a default profile requires authentication
-        if (session) {
-          await createDefaultProfile(address);
-          // Fetch the profile after creating it
-          const newProfile = await getProfileByWallet(address);
-          if (newProfile) {
-            setProfile(newProfile);
+        console.log("No profile found, checking if we can create default profile");
+        // Check if we have a valid session before attempting to create profile
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        
+        if (currentSession) {
+          console.log("Creating default profile");
+          try {
+            const defaultProfile: Profile = {
+              id: crypto.randomUUID(),
+              wallet_address: address,
+              display_name: `User ${address.substring(0, 6)}`,
+              username: `user_${Date.now().toString(36)}`,
+              profile_pic_url: '',
+              created_at: new Date().toISOString(),
+              x_link: '',
+              website_link: '',
+              bio: '',
+              points: 0
+            };
+            
+            const savedProfile = await saveProfile(defaultProfile);
+            
+            if (savedProfile) {
+              setProfile(savedProfile);
+              toast({
+                title: 'Profile Created',
+                description: 'Default profile has been created. You can update it in your profile page.',
+              });
+            }
+          } catch (error) {
+            console.error('Error creating default profile:', error);
             toast({
-              title: 'Profile Created',
-              description: 'Default profile has been created. You can update it in your profile page.',
+              title: 'Error',
+              description: 'Failed to create profile',
+              variant: 'destructive',
             });
           }
+        } else {
+          console.log("No session available, cannot create profile");
+          toast({
+            title: 'Authentication Required',
+            description: 'Please connect your wallet to create a profile',
+            variant: 'destructive',
+          });
         }
+        setIsLoading(false);
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -260,44 +304,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         description: 'Failed to load profile',
         variant: 'destructive',
       });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const createDefaultProfile = async (address: string) => {
-    try {
-      setIsLoading(true);
-      const defaultProfile: Profile = {
-        id: crypto.randomUUID(),
-        wallet_address: address,
-        display_name: `User ${address.substring(0, 6)}`,
-        username: `user_${Date.now().toString(36)}`,
-        profile_pic_url: '',
-        created_at: new Date().toISOString(),
-        x_link: '',
-        website_link: '',
-        bio: '',
-        points: 0
-      };
-      
-      const savedProfile = await saveProfile(defaultProfile);
-      
-      if (savedProfile) {
-        setProfile(savedProfile);
-        toast({
-          title: 'Profile Created',
-          description: 'Default profile has been created. You can update it in your profile page.',
-        });
-      }
-    } catch (error) {
-      console.error('Error creating default profile:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to create profile',
-        variant: 'destructive',
-      });
-    } finally {
       setIsLoading(false);
     }
   };
