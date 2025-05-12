@@ -89,9 +89,7 @@ export async function signInWithCustomToken(walletAddress: string, signedMessage
     const res = await supabase.functions.invoke('login-wallet', {
       method: 'POST',
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        'Authrization': `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ walletAddress, signedMessage, nonce }),
