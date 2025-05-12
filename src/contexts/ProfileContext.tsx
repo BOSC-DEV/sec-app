@@ -59,7 +59,11 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     // Setup auth state change listener for Supabase
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, sessionData) => {
       console.log('Auth state changed:', event, sessionData?.user?.email);
-      setSession(sessionData);
+      
+      // Only update session if the event is not a token refresh
+      if (event !== 'TOKEN_REFRESHED') {
+        setSession(sessionData);
+      }
       
       if (sessionData && sessionData.user) {
         // Extract wallet address from user email or user metadata
@@ -71,16 +75,22 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
           setIsConnected(true);
           localStorage.setItem('walletAddress', walletFromEmail);
           
-          // Delay fetching the profile to avoid race conditions
-          setTimeout(() => {
-            fetchProfile(walletFromEmail);
-          }, 0);
+          // Only fetch profile if this is a new sign in
+          if (event === 'SIGNED_IN') {
+            // Delay fetching the profile to avoid race conditions
+            setTimeout(() => {
+              fetchProfile(walletFromEmail);
+            }, 0);
+          }
         }
       } else if (event === 'SIGNED_OUT') {
-        setProfile(null);
-        setWalletAddress(null);
-        setIsConnected(false);
-        localStorage.removeItem('walletAddress');
+        // Only clear state if we're actually signed out
+        if (!sessionData) {
+          setProfile(null);
+          setWalletAddress(null);
+          setIsConnected(false);
+          localStorage.removeItem('walletAddress');
+        }
       }
     });
     
@@ -150,7 +160,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
                 setWalletAddress(publicKey);
                 setIsConnected(true);
                 localStorage.setItem('walletAddress', publicKey);
-                console.log("Fetching profile for wallet:", publicKey);
                 await fetchProfile(publicKey);
               } else {
                 toast({
