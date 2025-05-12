@@ -70,7 +70,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       if (event === 'SIGNED_IN') {
         console.log('Sign in event received');
         setSession(sessionData);
-        setIsLoading(true);  // Set loading state here
         
         if (sessionData?.user?.email) {
           const walletFromEmail = sessionData.user.email.split('@')[0];
@@ -81,8 +80,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
             localStorage.setItem('walletAddress', walletFromEmail);
             
             try {
-              // Use a longer delay to ensure all auth state updates are complete
-              await new Promise(resolve => setTimeout(resolve, 1000));
               await fetchProfile(walletFromEmail);
             } catch (error) {
               console.error('Error in auth state change profile fetch:', error);
@@ -248,7 +245,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       
       if (fetchedProfile) {
         setProfile(fetchedProfile);
-        setIsLoading(false);
       } else {
         console.log("No profile found, checking if we can create default profile");
         // Check if we have a valid session before attempting to create profile
@@ -295,7 +291,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
             variant: 'destructive',
           });
         }
-        setIsLoading(false);
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -304,6 +299,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         description: 'Failed to load profile',
         variant: 'destructive',
       });
+    } finally {
       setIsLoading(false);
     }
   };
