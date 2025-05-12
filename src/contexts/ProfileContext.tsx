@@ -57,39 +57,47 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     checkPhantomAvailability();
     
     // Setup auth state change listener for Supabase
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, sessionData) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, sessionData) => {
       console.log('Auth state changed:', event, sessionData?.user?.email);
       
-      // Only update session if the event is not a token refresh
-      if (event !== 'TOKEN_REFRESHED') {
+      // Handle token refresh separately to avoid state changes
+      if (event === 'TOKEN_REFRESHED') {
+        console.log('Token refreshed, updating session');
         setSession(sessionData);
+        return;
       }
-      
-      if (sessionData && sessionData.user) {
-        // Extract wallet address from user email or user metadata
-        const email = sessionData.user.email;
-        const walletFromEmail = email ? email.split('@')[0] : null;
+
+      if (event === 'SIGNED_IN') {
+        console.log('Sign in event received');
+        setSession(sessionData);
         
-        if (walletFromEmail && walletFromEmail !== 'null') {
-          setWalletAddress(walletFromEmail);
-          setIsConnected(true);
-          localStorage.setItem('walletAddress', walletFromEmail);
+        if (sessionData?.user?.email) {
+          const walletFromEmail = sessionData.user.email.split('@')[0];
           
-          // Only fetch profile if this is a new sign in
-          if (event === 'SIGNED_IN') {
-            // Delay fetching the profile to avoid race conditions
-            setTimeout(() => {
-              fetchProfile(walletFromEmail);
-            }, 0);
+          if (walletFromEmail && walletFromEmail !== 'null') {
+            setWalletAddress(walletFromEmail);
+            setIsConnected(true);
+            localStorage.setItem('walletAddress', walletFromEmail);
+            
+            // Use a longer delay to ensure all auth state updates are complete
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await fetchProfile(walletFromEmail);
           }
         }
       } else if (event === 'SIGNED_OUT') {
-        // Only clear state if we're actually signed out
-        if (!sessionData) {
+        console.log('Sign out event received');
+        // Double check if we really should sign out
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        
+        if (!currentSession) {
+          console.log('No active session found, clearing state');
+          setSession(null);
           setProfile(null);
           setWalletAddress(null);
           setIsConnected(false);
           localStorage.removeItem('walletAddress');
+        } else {
+          console.log('Active session still exists, ignoring sign out event');
         }
       }
     });
@@ -148,8 +156,24 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         const publicKey = getWalletPublicKey();
         if (publicKey) {
           setIsLoading(true);
-          // Need to authenticate with Supabase after wallet connect
           try {
+            // Check if we already have a valid session for this wallet
+            const { data: { session: existingSession } } = await supabase.auth.getSession();
+            if (existingSession?.user?.email?.split('@')[0] === publicKey) {
+              console.log('Already authenticated with this wallet');
+              setWalletAddress(publicKey);
+              setIsConnected(true);
+              localStorage.setItem('walletAddress', publicKey);
+              await fetchProfile(publicKey);
+              return;
+            }
+
+            // Sign out of any existing session before attempting new authentication
+            if (existingSession) {
+              console.log('Signing out of existing session before new authentication');
+              await supabase.auth.signOut();
+            }
+
             const message = `Login to SEC Community with wallet ${publicKey} at ${Date.now()}`;
             const signature = await signMessageWithPhantom(message);
             
@@ -157,17 +181,16 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
               const authenticated = await signInWithCustomToken(publicKey, signature, message);
               
               if (authenticated) {
-                setWalletAddress(publicKey);
-                setIsConnected(true);
-                localStorage.setItem('walletAddress', publicKey);
-                await fetchProfile(publicKey);
+                console.log('Authentication successful');
+                // Let the auth state change listener handle the state updates
               } else {
+                console.error('Authentication failed');
                 toast({
                   title: 'Authentication Failed',
                   description: 'Could not authenticate with your wallet',
                   variant: 'destructive',
                 });
-                disconnectWallet();
+                await disconnectWallet();
               }
             }
           } catch (error) {
@@ -177,18 +200,28 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
               description: 'Failed to authenticate wallet signature',
               variant: 'destructive',
             });
+            await disconnectWallet();
+          } finally {
             setIsLoading(false);
           }
         }
       });
       
-      provider.on('disconnect', () => {
+      provider.on('disconnect', async () => {
+        console.log('Wallet disconnect event received');
+        // Get current session before disconnecting
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        
         setWalletAddress(null);
         setIsConnected(false);
         setProfile(null);
         localStorage.removeItem('walletAddress');
-        // Also sign out from Supabase
-        supabase.auth.signOut();
+        
+        // Only sign out if we have an active session
+        if (currentSession) {
+          console.log('Active session found, signing out from Supabase');
+          await supabase.auth.signOut();
+        }
       });
     }
   }, [isPhantomAvailable]);
