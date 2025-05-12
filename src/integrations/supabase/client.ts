@@ -90,11 +90,13 @@ export async function signInWithCustomToken(walletAddress: string, signedMessage
       body: JSON.stringify({ walletAddress, signedMessage, nonce }),
     });
 
-    const result = await res.json();
-    console.log("signInWithCustomToken Result: ", result);
-    if (!res.ok) throw new Error(result.error || 'Login failed');
+    // const result = await res.json();
+    // console.log("signInWithCustomToken Result: ", result);
+    // if (!res.ok) throw new Error(result.error || 'Login failed');
+    console.log("res: ", res);
 
-    const { access_token, refresh_token } = result;
+    // const { access_token, refresh_token } = result;
+    const { access_token, refresh_token } = res;
     const { data, error } = await supabase.auth.setSession({ access_token, refresh_token });
 
     if (error) throw error;
