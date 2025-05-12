@@ -163,7 +163,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       provider.on('connect', async () => {
         const publicKey = getWalletPublicKey();
         if (publicKey) {
-          setIsLoading(true);
           try {
             // Check if we already have a valid session for this wallet
             const { data: { session: existingSession } } = await supabase.auth.getSession();
@@ -209,39 +208,72 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
               variant: 'destructive',
             });
             await disconnectWallet();
-          } finally {
-            setIsLoading(false);
           }
         }
       });
       
       provider.on('disconnect', async () => {
         console.log('Wallet disconnect event received');
-        // Get current session before disconnecting
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
-        
-        setWalletAddress(null);
-        setIsConnected(false);
-        setProfile(null);
-        localStorage.removeItem('walletAddress');
-        
-        // Only sign out if we have an active session
-        if (currentSession) {
-          console.log('Active session found, signing out from Supabase');
-          await supabase.auth.signOut();
+        setIsLoading(true);
+        try {
+          // Get current session before disconnecting
+          const { data: { session: currentSession } } = await supabase.auth.getSession();
+          
+          setWalletAddress(null);
+          setIsConnected(false);
+          setProfile(null);
+          localStorage.removeItem('walletAddress');
+          
+          // Only sign out if we have an active session
+          if (currentSession) {
+            console.log('Active session found, signing out from Supabase');
+            await supabase.auth.signOut();
+          }
+        } catch (error) {
+          console.error('Error during disconnect:', error);
+        } finally {
+          setIsLoading(false);
         }
       });
     }
   }, [isPhantomAvailable]);
 
+  // Add a cleanup effect for loading state
+  useEffect(() => {
+    let mounted = true;
+    
+    if (isLoading) {
+      // Set a maximum time for loading state
+      const timeoutId = setTimeout(() => {
+        if (mounted) {
+          console.log('Loading state timeout reached, clearing loading state');
+          setIsLoading(false);
+        }
+      }, 5000); // 5 seconds maximum loading time
+      
+      return () => {
+        mounted = false;
+        clearTimeout(timeoutId);
+      };
+    }
+    
+    return () => {
+      mounted = false;
+    };
+  }, [isLoading]);
+
   const fetchProfile = async (address: string) => {
+    let mounted = true;
+    setIsLoading(true);
+    
     try {
       console.log("Fetching profile for wallet:", address);
-      setIsLoading(true);
       
       // Use getProfileByWallet which has been modified to work without authentication
       const fetchedProfile = await getProfileByWallet(address);
       console.log("Fetched profile:", fetchedProfile);
+      
+      if (!mounted) return;
       
       if (fetchedProfile) {
         setProfile(fetchedProfile);
@@ -249,6 +281,8 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         console.log("No profile found, checking if we can create default profile");
         // Check if we have a valid session before attempting to create profile
         const { data: { session: currentSession } } = await supabase.auth.getSession();
+        
+        if (!mounted) return;
         
         if (currentSession) {
           console.log("Creating default profile");
@@ -268,6 +302,8 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
             
             const savedProfile = await saveProfile(defaultProfile);
             
+            if (!mounted) return;
+            
             if (savedProfile) {
               setProfile(savedProfile);
               toast({
@@ -276,6 +312,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
               });
             }
           } catch (error) {
+            if (!mounted) return;
             console.error('Error creating default profile:', error);
             toast({
               title: 'Error',
@@ -293,6 +330,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         }
       }
     } catch (error) {
+      if (!mounted) return;
       console.error('Error fetching profile:', error);
       toast({
         title: 'Error',
@@ -300,8 +338,14 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         variant: 'destructive',
       });
     } finally {
-      setIsLoading(false);
+      if (mounted) {
+        setIsLoading(false);
+      }
     }
+    
+    return () => {
+      mounted = false;
+    };
   };
 
   const uploadAvatar = async (file: File): Promise<string | null> => {
