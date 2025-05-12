@@ -83,6 +83,10 @@ const ProfilePage = () => {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    
+    // Reset the input value to allow uploading the same file again
+    e.target.value = '';
+    
     if (file.size > 2 * 1024 * 1024) {
       toast({
         title: 'File too large',
@@ -99,11 +103,26 @@ const ProfilePage = () => {
       });
       return;
     }
+    
+    const loadingToastId = toast({
+      title: 'Uploading...',
+      description: 'Please wait while we upload your profile picture',
+    });
+    
     try {
       const publicUrl = await uploadAvatar(file);
       if (publicUrl) {
         setAvatarUrl(publicUrl);
         setAvatarKey(Date.now());
+        
+        // Refresh profile to ensure we have the latest data
+        await refreshProfile();
+        
+        toast({
+          title: 'Success',
+          description: 'Profile picture uploaded successfully',
+          variant: 'default',
+        });
       }
     } catch (error) {
       console.error('Error uploading avatar:', error);
@@ -116,20 +135,53 @@ const ProfilePage = () => {
   };
 
   const onSubmit = async (data: ProfileFormValues) => {
-    if (!walletAddress || !profile) return;
+    if (!walletAddress) {
+      toast({
+        title: 'Error',
+        description: 'Please connect your wallet to update profile',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     try {
       setIsSaving(true);
-      const updatedProfile = await updateProfile({
-        ...profile,
-        display_name: data.display_name,
-        username: data.username,
-        bio: data.bio,
-        x_link: data.x_link,
-        website_link: data.website_link,
-        profile_pic_url: avatarUrl || profile.profile_pic_url
+      
+      const loadingToastId = toast({
+        title: 'Saving...',
+        description: 'Please wait while we update your profile',
       });
-      if (data.username) {
-        navigate(`/${data.username}?t=${Date.now()}`);
+      
+      const profileData = {
+        ...(profile || {}),
+        id: profile?.id || crypto.randomUUID(),
+        wallet_address: walletAddress,
+        display_name: data.display_name || `User ${walletAddress.substring(0, 6)}`,
+        username: data.username || `user_${Date.now().toString(36)}`,
+        bio: data.bio || '',
+        x_link: data.x_link || '',
+        website_link: data.website_link || '',
+        profile_pic_url: avatarUrl || profile?.profile_pic_url || '',
+        created_at: profile?.created_at || new Date().toISOString(),
+        points: profile?.points || 0
+      };
+      
+      const updatedProfile = await updateProfile(profileData);
+      
+      if (updatedProfile) {
+        // Refresh profile to ensure we have the latest data
+        await refreshProfile();
+        
+        toast({
+          title: 'Success',
+          description: isNewProfile ? 'Profile created successfully' : 'Profile updated successfully',
+          variant: 'default',
+        });
+        
+        // Navigate to the profile page
+        if (updatedProfile.username) {
+          navigate(`/${updatedProfile.username}?t=${Date.now()}`);
+        }
       }
     } catch (error) {
       console.error('Error saving profile:', error);
