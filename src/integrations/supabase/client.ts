@@ -91,34 +91,12 @@ export const authenticateWallet = async (
     }
 
     const { access_token, refresh_token } = data;
-    
-    // Try setting the session multiple times if needed
-    let retries = 3;
-    let success = false;
-    
-    while (retries > 0 && !success) {
-      const { error: authError } = await supabase.auth.setSession({
-        access_token,
-        refresh_token,
-      });
-      
-      if (!authError) {
-        success = true;
-        break;
-      }
-      
-      console.warn(`Failed to set session, retries left: ${retries - 1}`, authError);
-      retries--;
-      
-      if (retries > 0) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-    }
-    
-    if (!success) {
-      throw new Error('Failed to set Supabase session after multiple attempts');
-    }
-    
+
+    await supabase.auth.setSession({
+      access_token,
+      refresh_token,
+    });
+   
     console.log('Wallet login successful');
     return true;
   } catch (error) {
