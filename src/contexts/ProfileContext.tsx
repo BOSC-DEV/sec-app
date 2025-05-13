@@ -77,18 +77,26 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
           await fetchProfile(walletFromEmail);
         }
       } else if (event === 'SIGNED_OUT') {
-        // Only clear state if we're actually signed out and there's no active session
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
-        if (!currentSession) {
-          setSession(null);
-          setProfile(null);
-          setWalletAddress(null);
-          setIsConnected(false);
-          localStorage.removeItem('walletAddress');
-        }
+        // Clear all auth state
+        setSession(null);
+        setProfile(null);
+        setWalletAddress(null);
+        setIsConnected(false);
+        localStorage.removeItem('walletAddress');
       } else if (event === 'TOKEN_REFRESHED') {
-        // Just update the session without changing other state
+        // Update session and verify wallet address matches
         setSession(sessionData);
+        const email = sessionData?.user?.email;
+        const walletFromEmail = email ? email.split('@')[0] : null;
+        
+        if (walletFromEmail && walletFromEmail !== 'null' && walletFromEmail.toLowerCase() === walletAddress?.toLowerCase()) {
+          // Session is still valid for the same wallet
+          console.log('Token refreshed successfully');
+        } else {
+          // Session is for a different wallet, sign out
+          console.warn('Token refresh mismatch, signing out');
+          supabase.auth.signOut();
+        }
       }
     });
     
@@ -97,6 +105,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       try {
         setIsLoading(true);
         const { data: { session: existingSession } } = await supabase.auth.getSession();
+        
         if (existingSession) {
           setSession(existingSession);
           
@@ -105,11 +114,22 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
           const walletFromEmail = email ? email.split('@')[0] : null;
           
           if (walletFromEmail && walletFromEmail !== 'null') {
-            setWalletAddress(walletFromEmail);
-            setIsConnected(true);
-            fetchProfile(walletFromEmail);
-          } else {
-            setIsLoading(false);
+            // Verify the session is still valid
+            try {
+              const { data: { user }, error: userError } = await supabase.auth.getUser();
+              
+              if (!userError && user?.email?.split('@')[0].toLowerCase() === walletFromEmail.toLowerCase()) {
+                setWalletAddress(walletFromEmail);
+                setIsConnected(true);
+                localStorage.setItem('walletAddress', walletFromEmail);
+                await fetchProfile(walletFromEmail);
+              } else {
+                throw new Error('Invalid session');
+              }
+            } catch (err) {
+              console.warn('Session validation failed:', err);
+              supabase.auth.signOut();
+            }
           }
         } else {
           // Try from localStorage as fallback
@@ -325,28 +345,68 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
           variant: 'destructive',
         });
         
-        // Open the Phantom wallet website in a new tab
         window.open('https://phantom.app/', '_blank');
         return;
+      }
+      
+      // First check if we already have a session
+      const { data: { session: existingSession } } = await supabase.auth.getSession();
+      if (existingSession) {
+        await supabase.auth.signOut();
       }
       
       const publicKey = await connectPhantomWallet();
       
       if (publicKey) {
-        // We'll handle authentication and profile fetching in the connect event handler
-        console.log("Wallet connected with public key:", publicKey);
-        
-        // Authentication will be handled in the connect event handler
-      } else {
-        setIsLoading(false);
+        try {
+          // Generate a unique nonce for this login attempt
+          const nonce = `Login to SEC Community with wallet ${publicKey} at ${Date.now()}`;
+          
+          // Request signature from Phantom
+          const signature = await signMessageWithPhantom(nonce);
+          
+          if (!signature) {
+            throw new Error('Failed to get signature from wallet');
+          }
+          
+          // Authenticate with Supabase using the edge function
+          const authenticated = await signInWithCustomToken(publicKey, signature, nonce);
+          
+          if (authenticated) {
+            setWalletAddress(publicKey);
+            setIsConnected(true);
+            localStorage.setItem('walletAddress', publicKey);
+            
+            // Fetch profile after successful authentication
+            await fetchProfile(publicKey);
+            
+            toast({
+              title: 'Connected Successfully',
+              description: 'Your wallet has been connected',
+            });
+          } else {
+            throw new Error('Authentication failed');
+          }
+        } catch (error) {
+          console.error('Error during wallet authentication:', error);
+          toast({
+            title: 'Authentication Error',
+            description: error.message || 'Failed to authenticate wallet',
+            variant: 'destructive',
+          });
+          
+          // Clean up on error
+          disconnectWallet();
+        }
       }
     } catch (error) {
       console.error('Error connecting wallet:', error);
       toast({
         title: 'Connection Failed',
-        description: 'Could not connect to wallet',
+        description: error.message || 'Could not connect to wallet',
         variant: 'destructive',
       });
+    } finally {
       setIsLoading(false);
     }
   };
