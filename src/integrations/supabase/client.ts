@@ -54,7 +54,7 @@ export const secureFetch = async (url: string, options: RequestInit = {}) => {
   return fetch(sanitizedUrl, secureOptions);
 };
 
-// Wallet authentication function for Supabase
+// Authenticate with wallet via edge function, and receiving a custom Supabase JWT token.
 export const authenticateWallet = async (
   walletAddress: string, 
   signedMessage: string,
@@ -67,71 +67,59 @@ export const authenticateWallet = async (
 
   try {
     console.log("Authenticating wallet:", walletAddress);
-    
-    // First check if a user exists with this wallet address
-    const { data: existingUser, error: userCheckError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('wallet_address', walletAddress)
-      .maybeSingle();
-      
-    if (userCheckError) {
-      console.error("Error checking for existing user:", userCheckError);
+
+    // First check if there's an existing session
+    const { data: { session: existingSession } } = await supabase.auth.getSession();
+    if (existingSession?.user?.email?.split('@')[0] === walletAddress) {
+      console.log('Already authenticated with this wallet');
+      return true;
+    }
+
+    // If there's a different session, sign out first
+    if (existingSession) {
+      await supabase.auth.signOut();
     }
     
-    // Generate a consistent email format that will be used for auth
-    const walletEmail = `${walletAddress}@phantom.wallet`;
-    
-    // Try to sign in first
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: walletEmail,
-      password: signedMessage.slice(0, 20), // Using part of signature as password
+    // Call the login-wallet Edge Function
+    const { data, error } = await supabase.functions.invoke('login-wallet', {
+      body: JSON.stringify({ walletAddress, signedMessage }),
     });
 
     if (error) {
-      console.log("Sign in failed, trying sign up:", error.message);
-      
-      // If sign in fails, try sign up
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: walletEmail,
-        password: signedMessage.slice(0, 20),
-        options: {
-          data: {
-            wallet_address: walletAddress,
-          }
-        }
-      });
-
-      if (signUpError) {
-        console.error("Error in wallet signup:", signUpError);
-        return false;
-      }
-      
-      console.log("User signed up successfully");
-      
-      // If the user didn't exist in profiles, we need to create a profile
-      if (!existingUser) {
-        // Create a default profile for the new user
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: crypto.randomUUID(),
-            wallet_address: walletAddress,
-            display_name: `User ${walletAddress.substring(0, 6)}`,
-            username: `user_${Date.now().toString(36)}`,
-            created_at: new Date().toISOString()
-          });
-          
-        if (profileError) {
-          console.error("Error creating profile:", profileError);
-        } else {
-          console.log("Created new profile for wallet");
-        }
-      }
-    } else {
-      console.log("User signed in successfully");
+      console.error('[Edge Function Error]', error);
+      throw new Error('Failed to call login-wallet function');
     }
 
+    const { access_token, refresh_token } = data;
+    
+    // Try setting the session multiple times if needed
+    let retries = 3;
+    let success = false;
+    
+    while (retries > 0 && !success) {
+      const { error: authError } = await supabase.auth.setSession({
+        access_token,
+        refresh_token,
+      });
+      
+      if (!authError) {
+        success = true;
+        break;
+      }
+      
+      console.warn(`Failed to set session, retries left: ${retries - 1}`, authError);
+      retries--;
+      
+      if (retries > 0) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
+    
+    if (!success) {
+      throw new Error('Failed to set Supabase session after multiple attempts');
+    }
+    
+    console.log('Wallet login successful');
     return true;
   } catch (error) {
     console.error("Error in wallet authentication:", error);
