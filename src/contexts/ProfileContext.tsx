@@ -60,43 +60,53 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, sessionData) => {
       console.log('Auth state changed:', event, sessionData?.user?.email);
       
-      if (event === 'SIGNED_IN') {
-        setSession(sessionData);
-        
-        // Extract wallet address from user email or user metadata
-        const email = sessionData?.user?.email;
-        const walletFromEmail = email ? email.split('@')[0] : null;
-        
-        if (walletFromEmail && walletFromEmail !== 'null') {
-          setWalletAddress(walletFromEmail);
-          setIsConnected(true);
-          localStorage.setItem('walletAddress', walletFromEmail);
+      try {
+        if (event === 'SIGNED_IN') {
+          setSession(sessionData);
           
-          // Delay fetching the profile to avoid race conditions
-          await new Promise(resolve => setTimeout(resolve, 500));
-          await fetchProfile(walletFromEmail);
+          // Extract wallet address from user email or user metadata
+          const email = sessionData?.user?.email;
+          const walletFromEmail = email ? email.split('@')[0] : null;
+          
+          if (walletFromEmail && walletFromEmail !== 'null') {
+            setWalletAddress(walletFromEmail);
+            setIsConnected(true);
+            localStorage.setItem('walletAddress', walletFromEmail);
+            
+            // Delay fetching the profile to avoid race conditions
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await fetchProfile(walletFromEmail);
+          }
+        } else if (event === 'SIGNED_OUT') {
+          // Clear all auth state
+          setSession(null);
+          setProfile(null);
+          setWalletAddress(null);
+          setIsConnected(false);
+          localStorage.removeItem('walletAddress');
+        } else if (event === 'TOKEN_REFRESHED') {
+          // Update session and verify wallet address matches
+          setSession(sessionData);
+          const email = sessionData?.user?.email;
+          const walletFromEmail = email ? email.split('@')[0] : null;
+          
+          if (walletFromEmail && walletFromEmail !== 'null' && walletFromEmail.toLowerCase() === walletAddress?.toLowerCase()) {
+            // Session is still valid for the same wallet
+            console.log('Token refreshed successfully');
+          } else {
+            // Session is for a different wallet, sign out
+            console.warn('Token refresh mismatch, signing out');
+            await supabase.auth.signOut();
+          }
         }
-      } else if (event === 'SIGNED_OUT') {
-        // Clear all auth state
+      } catch (error) {
+        console.error('Error in auth state change:', error);
+        // Ensure we clean up state on error
         setSession(null);
         setProfile(null);
         setWalletAddress(null);
         setIsConnected(false);
         localStorage.removeItem('walletAddress');
-      } else if (event === 'TOKEN_REFRESHED') {
-        // Update session and verify wallet address matches
-        setSession(sessionData);
-        const email = sessionData?.user?.email;
-        const walletFromEmail = email ? email.split('@')[0] : null;
-        
-        if (walletFromEmail && walletFromEmail !== 'null' && walletFromEmail.toLowerCase() === walletAddress?.toLowerCase()) {
-          // Session is still valid for the same wallet
-          console.log('Token refreshed successfully');
-        } else {
-          // Session is for a different wallet, sign out
-          console.warn('Token refresh mismatch, signing out');
-          supabase.auth.signOut();
-        }
       }
     });
     
@@ -128,8 +138,11 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
               }
             } catch (err) {
               console.warn('Session validation failed:', err);
-              supabase.auth.signOut();
+              await supabase.auth.signOut();
+              setIsLoading(false); // Ensure loading is set to false after signout
             }
+          } else {
+            setIsLoading(false);
           }
         } else {
           // Try from localStorage as fallback
@@ -137,23 +150,24 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
           if (savedWallet) {
             // If we have a wallet address but no session, we need to reconnect
             console.log("Found saved wallet but no session, attempting to reconnect");
-            setIsLoading(false);
-          } else {
-            setIsLoading(false);
           }
+          setIsLoading(false);
         }
       } catch (error) {
         console.error('Error checking session:', error);
+        // Clean up state on error
+        setSession(null);
+        setProfile(null);
+        setWalletAddress(null);
+        setIsConnected(false);
+        localStorage.removeItem('walletAddress');
         setIsLoading(false);
       }
     };
 
     checkExistingSession();
     
-    window.addEventListener('DOMContentLoaded', checkPhantomAvailability);
-    
     return () => {
-      window.removeEventListener('DOMContentLoaded', checkPhantomAvailability);
       subscription.unsubscribe();
     };
   }, []);
@@ -223,7 +237,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       console.log("Fetching profile for wallet:", address);
       setIsLoading(true);
       
-      // Use getProfileByWallet which has been modified to work without authentication
       const fetchedProfile = await getProfileByWallet(address);
       console.log("Fetched profile:", fetchedProfile);
       
@@ -231,10 +244,8 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         setProfile(fetchedProfile);
       } else {
         console.log("No profile found, creating default profile");
-        // Creating a default profile requires authentication
         if (session) {
           await createDefaultProfile(address);
-          // Fetch the profile after creating it
           const newProfile = await getProfileByWallet(address);
           if (newProfile) {
             setProfile(newProfile);

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -97,7 +96,8 @@ const Header = () => {
     path: '/community'
   }];
 
-  return <header className="icc-header sticky top-0 z-50">
+  return (
+    <header className="icc-header sticky top-0 z-50">
       <div className="icc-container py-3">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
@@ -106,52 +106,119 @@ const Header = () => {
             </Link>
 
             <nav className="hidden md:flex items-center space-x-6 ml-6">
-              {navigationItems.map(item => <Link key={item.path} to={item.path} className={`text-white hover:text-icc-gold transition-colors flex items-center ${location.pathname === item.path ? 'text-icc-gold font-medium' : ''}`}>
+              {navigationItems.map(item => (
+                <Link 
+                  key={item.path} 
+                  to={item.path} 
+                  className={`text-white hover:text-icc-gold transition-colors flex items-center ${
+                    location.pathname === item.path ? 'text-icc-gold font-medium' : ''
+                  }`}
+                >
                   {item.label}
-                </Link>)}
+                </Link>
+              ))}
             </nav>
           </div>
 
           <div className="flex items-center space-x-2">
             <ThemeToggle variant="outline" size="sm" className="mr-2" />
-            {isLoading ? <Button variant="outline" size="sm" disabled className="opacity-75">
+            
+            {isLoading ? (
+              <Button variant="ghost" size="sm" disabled className="text-white">
                 Loading...
-              </Button> : isConnected ? <div className="flex items-center space-x-3">
+              </Button>
+            ) : isConnected ? (
+              <div className="flex items-center space-x-3">
                 <NotificationIndicator onClick={toggleNotifications} />
                 
-                <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light" onClick={handleProfileClick} aria-label="Profile">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-white hover:bg-icc-blue-light" 
+                  onClick={handleProfileClick} 
+                  aria-label="Profile"
+                >
                   <User className="h-5 w-5" />
                 </Button>
-                {isMobile && <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light md:hidden" onClick={toggleMenu} aria-label="Menu">
+                
+                {isMobile && (
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="text-white hover:bg-icc-blue-light md:hidden" 
+                    onClick={toggleMenu} 
+                    aria-label="Menu"
+                  >
                     {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                  </Button>}
-              </div> : <div className="flex items-center space-x-3">
-                <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light" onClick={copyToClipboard} aria-label="Copy Contract Address">
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center space-x-3">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-white hover:bg-icc-blue-light" 
+                  onClick={copyToClipboard} 
+                  aria-label="Copy Contract Address"
+                >
                   <Copy className="h-5 w-5" />
                 </Button>
-                <Button variant="gold" size="sm" className="flex items-center gap-2" onClick={handleWalletButtonClick}>
-                  {!isPhantomAvailable ? <>
+                
+                <Button 
+                  variant="gold" 
+                  size="sm" 
+                  className="flex items-center gap-2" 
+                  onClick={handleWalletButtonClick}
+                >
+                  {!isPhantomAvailable ? (
+                    <>
                       <ExternalLink className="h-4 w-4" />
                       {!isMobile && "Install Phantom"}
-                    </> : isMobile ? <Wallet className="h-4 w-4 text-white" /> : <>
+                    </>
+                  ) : isMobile ? (
+                    <Wallet className="h-4 w-4 text-white" />
+                  ) : (
+                    <>
                       <LogIn className="h-4 w-4" />
                       Connect Wallet
-                    </>}
+                    </>
+                  )}
                 </Button>
-                {isMobile && <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light md:hidden" onClick={toggleMenu} aria-label="Menu">
+                
+                {isMobile && (
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="text-white hover:bg-icc-blue-light md:hidden" 
+                    onClick={toggleMenu} 
+                    aria-label="Menu"
+                  >
                     {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                  </Button>}
-              </div>}
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {isMenuOpen && <div className="md:hidden bg-icc-blue-light">
+      {isMenuOpen && isMobile && (
+        <div className="md:hidden bg-icc-blue border-t border-icc-blue-light">
           <div className="icc-container py-4">
             <nav className="flex flex-col space-y-4">
-              {navigationItems.map(item => <Link key={item.path} to={item.path} className={`text-white hover:text-icc-gold transition-colors px-2 py-1 flex items-center ${location.pathname === item.path ? 'text-icc-gold font-medium' : ''}`} onClick={() => setIsMenuOpen(false)}>
+              {navigationItems.map(item => (
+                <Link 
+                  key={item.path} 
+                  to={item.path} 
+                  className={`text-white hover:text-icc-gold transition-colors px-2 py-1 flex items-center ${
+                    location.pathname === item.path ? 'text-icc-gold font-medium' : ''
+                  }`} 
+                  onClick={() => setIsMenuOpen(false)}
+                >
                   {item.label}
-                </Link>)}
+                </Link>
+              ))}
               
               <button 
                 className="text-white hover:text-icc-gold transition-colors px-2 py-1 text-left" 
@@ -164,10 +231,12 @@ const Header = () => {
               </button>
             </nav>
           </div>
-        </div>}
+        </div>
+      )}
       
       <NotificationDropdown open={notificationsOpen} onOpenChange={setNotificationsOpen} />
-    </header>;
+    </header>
+  );
 };
 
 export default Header;
