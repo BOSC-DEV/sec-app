@@ -82,7 +82,7 @@ export const authenticateWallet = async (
     
     // Call the login-wallet Edge Function
     const { data, error } = await supabase.functions.invoke('login-wallet', {
-      body: JSON.stringify({ walletAddress, signedMessage }),
+      body: JSON.stringify({ walletAddress }),
     });
 
     if (error) {
