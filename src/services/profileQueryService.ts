@@ -1,12 +1,10 @@
+
 import { Profile } from '@/types/dataTypes';
-import { supabase, safeQuery } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { handleError } from '@/utils/errorHandling';
 import { sanitizeInput } from '@/utils/securityUtils';
 import { ErrorSeverity } from '@/utils/errorSeverity';
 import { saveProfile } from './profileUpdateService';
-import { PostgrestError, PostgrestSingleResponse } from '@supabase/supabase-js';
-
-type QueryPromise<T> = Promise<{ data: T | null; error: any }>;
 
 // Get profile by username
 export const getProfileByUsername = async (username: string): Promise<Profile | null> => {
@@ -17,16 +15,11 @@ export const getProfileByUsername = async (username: string): Promise<Profile | 
     
     const sanitizedUsername = sanitizeInput(username);
     
-    const { data, error } = await safeQuery<Profile>(
-      'read',
-      () => supabase
-        .from('profiles')
-        .select('*')
-        .eq('username', sanitizedUsername)
-        .maybeSingle()
-        .then(result => Promise.resolve({ data: result.data as Profile, error: result.error })) as QueryPromise<Profile>,
-      { bypassAuth: true } // Allow public read access
-    );
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('username', sanitizedUsername)
+      .maybeSingle();
 
     if (error) throw error;
     return data;
@@ -49,18 +42,13 @@ export const getProfilesByDisplayName = async (displayName: string): Promise<Pro
     
     const sanitizedDisplayName = sanitizeInput(displayName);
     
-    const { data, error } = await safeQuery<Profile[]>(
-      'read',
-      () => supabase
-        .from('profiles')
-        .select('*')
-        .eq('display_name', sanitizedDisplayName)
-        .then(result => Promise.resolve({ data: result.data as Profile[], error: result.error })) as QueryPromise<Profile[]>,
-      { bypassAuth: true } // Allow public read access
-    );
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('display_name', sanitizedDisplayName);
 
     if (error) throw error;
-    return data ?? [];
+    return data || [];
   } catch (error) {
     handleError(error, {
       fallbackMessage: 'Error fetching profiles by display name',
@@ -71,7 +59,7 @@ export const getProfilesByDisplayName = async (displayName: string): Promise<Pro
   }
 };
 
-// Get profile by wallet with proper typing
+// Modify getProfileByWallet to use direct Supabase queries and better error handling
 export const getProfileByWallet = async (walletAddress: string): Promise<Profile | null> => {
   try {
     if (!walletAddress) {
@@ -81,22 +69,23 @@ export const getProfileByWallet = async (walletAddress: string): Promise<Profile
     console.log("Getting profile by wallet address:", walletAddress);
     const sanitizedWallet = sanitizeInput(walletAddress);
     
-    const { data, error } = await safeQuery<Profile>(
-      'read',
-      () => supabase
-        .from('profiles')
-        .select('*')
-        .eq('wallet_address', sanitizedWallet)
-        .maybeSingle()
-        .then(result => Promise.resolve({ data: result.data as Profile, error: result.error })) as QueryPromise<Profile>,
-      { bypassAuth: true } // Allow public read access for basic profile info
-    );
+    // Skip authentication check to avoid chicken-and-egg problem
+    // This allows fetching profile info even when not authenticated
+    
+    // Directly query profiles table, don't use single() to avoid errors if no profile exists
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('wallet_address', sanitizedWallet)
+      .maybeSingle();
 
     if (error) {
       console.error('Error fetching profile by wallet:', error);
       throw error;
     }
 
+    // Return the profile data without updating SEC balance
+    // This is to avoid authentication errors when not logged in
     return data;
   } catch (error) {
     handleError(error, {

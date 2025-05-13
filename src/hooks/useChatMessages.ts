@@ -122,23 +122,13 @@ export const useChatMessages = () => {
         imageUrl = data.publicUrl;
       }
       
-      // Prepare the chat message data with all required fields
-      const chatMessageData = {
+      // Use the new safeInsert function to insert the chat message
+      const result = await safeInsert('chat_messages', {
         ...sanitizedData,
-        content: messageData.content,  // Make sure content is included
-        author_id: messageData.author_id,  // Make sure author_id is included
-        author_name: messageData.author_name,  // Make sure author_name is included
         image_url: imageUrl,
         likes: 0,
         dislikes: 0
-      };
-      
-      // Use the safeInsert function to insert the chat message
-      const result = await safeInsert(
-        'chat_messages',
-        chatMessageData,
-        { returning: 'representation' }
-      );
+      }, { returning: 'representation' });
         
       if (result.error) {
         console.error('Error inserting chat message:', result.error);
@@ -146,7 +136,7 @@ export const useChatMessages = () => {
       }
       
       const insertedData = result.data;
-      if (insertedData && Array.isArray(insertedData) && insertedData.length > 0) {
+      if (insertedData && insertedData.length > 0) {
         return insertedData[0] as ChatMessage;
       }
       
