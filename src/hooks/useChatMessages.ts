@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { ChatMessage } from '@/types/dataTypes';
 import { supabase, safeInsert } from '@/integrations/supabase/client';
@@ -122,13 +121,20 @@ export const useChatMessages = () => {
         imageUrl = data.publicUrl;
       }
       
-      // Use the new safeInsert function to insert the chat message
-      const result = await safeInsert('chat_messages', {
+      // Prepare the chat message data with all required fields
+      const chatMessageData = {
         ...sanitizedData,
         image_url: imageUrl,
         likes: 0,
         dislikes: 0
-      }, { returning: 'representation' });
+      };
+      
+      // Use the safeInsert function to insert the chat message
+      const result = await safeInsert(
+        'chat_messages',
+        chatMessageData,
+        { returning: 'representation' }
+      );
         
       if (result.error) {
         console.error('Error inserting chat message:', result.error);
@@ -136,7 +142,7 @@ export const useChatMessages = () => {
       }
       
       const insertedData = result.data;
-      if (insertedData && insertedData.length > 0) {
+      if (insertedData && Array.isArray(insertedData) && insertedData.length > 0) {
         return insertedData[0] as ChatMessage;
       }
       

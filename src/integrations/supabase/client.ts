@@ -54,13 +54,13 @@ export const secureFetch = async (url: string, options: RequestInit = {}) => {
 };
 
 // Helper function to safely insert data with RLS validation
-export const safeInsert = async <T>(
-  table: keyof Database['public']['Tables'],
-  data: any,
+export const safeInsert = async <T extends keyof Database['public']['Tables']>(
+  table: T,
+  data: Database['public']['Tables'][T]['Insert'],
   options?: { returning?: 'minimal' | 'representation' }
 ) => {
   // Clone data to avoid modifying original
-  const sanitizedData = { ...data };
+  const sanitizedData = { ...data } as any;
   
   // Sanitize all string fields to prevent XSS and SQL injection
   Object.keys(sanitizedData).forEach(key => {

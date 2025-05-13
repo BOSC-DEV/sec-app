@@ -1,5 +1,5 @@
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, fireEvent } from '@/utils/testUtils';
 import { describe, expect, test, vi, beforeEach } from 'vitest';
 import ScammerPhotoUpload from './ScammerPhotoUpload';
 
@@ -20,7 +20,7 @@ describe('ScammerPhotoUpload', () => {
   });
   
   test('renders upload button when no preview exists', () => {
-    render(
+    const { getByText } = render(
       <ScammerPhotoUpload 
         photoPreview="" 
         setPhotoPreview={mockSetPhotoPreview}
@@ -29,11 +29,11 @@ describe('ScammerPhotoUpload', () => {
       />
     );
     
-    expect(screen.getByText('Upload Photo')).toBeInTheDocument();
+    expect(getByText('Upload Photo')).toBeInTheDocument();
   });
   
   test('renders change button when preview exists', () => {
-    render(
+    const { getByText } = render(
       <ScammerPhotoUpload 
         photoPreview="data:image/png;base64,test" 
         setPhotoPreview={mockSetPhotoPreview}
@@ -42,11 +42,11 @@ describe('ScammerPhotoUpload', () => {
       />
     );
     
-    expect(screen.getByText('Change Photo')).toBeInTheDocument();
+    expect(getByText('Change Photo')).toBeInTheDocument();
   });
   
   test('shows description text', () => {
-    render(
+    const { getByText } = render(
       <ScammerPhotoUpload 
         photoPreview="" 
         setPhotoPreview={mockSetPhotoPreview}
@@ -55,7 +55,7 @@ describe('ScammerPhotoUpload', () => {
       />
     );
     
-    expect(screen.getByText('Upload a photo of the scammer, if available.')).toBeInTheDocument();
+    expect(getByText('Upload a photo of the scammer, if available.')).toBeInTheDocument();
   });
   
   test('opens file dialog when button is clicked', () => {
@@ -73,7 +73,7 @@ describe('ScammerPhotoUpload', () => {
     const clickSpy = vi.spyOn(fileInput, 'click');
     
     // Click the upload button
-    fireEvent.click(screen.getByText('Upload Photo'));
+    fireEvent.click(container.querySelector('button') as HTMLButtonElement);
     
     expect(clickSpy).toHaveBeenCalled();
   });

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, fireEvent } from '@/utils/testUtils';
 import { describe, expect, test, vi } from 'vitest';
 import PhotoPreview from './PhotoPreview';
 
@@ -12,30 +12,30 @@ describe('PhotoPreview', () => {
   });
   
   test('renders without a preview image', () => {
-    render(<PhotoPreview photoPreview="" onClick={mockOnClick} />);
+    const { getByTestId } = render(<PhotoPreview photoPreview="" onClick={mockOnClick} />);
     
     // Should show fallback icon
-    expect(screen.getByTestId('fallback-icon')).toBeInTheDocument();
+    expect(getByTestId('fallback-icon')).toBeInTheDocument();
   });
   
   test('renders with a preview image', () => {
-    render(<PhotoPreview photoPreview="data:image/png;base64,test" onClick={mockOnClick} />);
+    const { getByAltText } = render(<PhotoPreview photoPreview="data:image/png;base64,test" onClick={mockOnClick} />);
     
     // Should show the avatar image
-    expect(screen.getByAltText('Preview')).toBeInTheDocument();
+    expect(getByAltText('Preview')).toBeInTheDocument();
   });
   
   test('calls onClick handler when clicked', () => {
-    render(<PhotoPreview photoPreview="" onClick={mockOnClick} />);
+    const { getByRole } = render(<PhotoPreview photoPreview="" onClick={mockOnClick} />);
     
-    fireEvent.click(screen.getByRole('button'));
+    fireEvent.click(getByRole('button'));
     expect(mockOnClick).toHaveBeenCalledTimes(1);
   });
   
   test('shows upload icon on hover', () => {
-    render(<PhotoPreview photoPreview="" onClick={mockOnClick} />);
+    const { getByTestId } = render(<PhotoPreview photoPreview="" onClick={mockOnClick} />);
     
     // Upload icon should be in the document
-    expect(screen.getByTestId('upload-icon')).toBeInTheDocument();
+    expect(getByTestId('upload-icon')).toBeInTheDocument();
   });
 });
