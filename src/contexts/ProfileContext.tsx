@@ -162,52 +162,59 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     const provider = getPhantomProvider();
     
     if (provider) {
-      provider.on('connect', async () => {
+      const handleConnect = async () => {
         const publicKey = getWalletPublicKey();
-        if (publicKey) {
-          setIsLoading(true);
-          // Need to authenticate with Supabase after wallet connect
-          try {
-            const message = `Login to SEC Community with wallet ${publicKey} at ${Date.now()}`;
-            const signature = await signMessageWithPhantom(message);
-            
-            if (signature) {
-              const authenticated = await signInWithCustomToken(publicKey, signature, message);
-              
-              if (authenticated) {
-                setWalletAddress(publicKey);
-                setIsConnected(true);
-                localStorage.setItem('walletAddress', publicKey);
-                await fetchProfile(publicKey);
-              } else {
-                toast({
-                  title: 'Authentication Failed',
-                  description: 'Could not authenticate with your wallet',
-                  variant: 'destructive',
-                });
-                disconnectWallet();
-              }
-            }
-          } catch (error) {
-            console.error('Error during wallet authentication:', error);
-            toast({
-              title: 'Authentication Error',
-              description: 'Failed to authenticate wallet signature',
-              variant: 'destructive',
-            });
-            setIsLoading(false);
+        if (!publicKey) return;
+        
+        setIsLoading(true);
+        try {
+          const message = `Login to SEC Community with wallet ${publicKey} at ${Date.now()}`;
+          const signature = await signMessageWithPhantom(message);
+          
+          if (!signature) {
+            throw new Error('Failed to get signature');
           }
+          
+          const authenticated = await signInWithCustomToken(publicKey, signature, message);
+          
+          if (!authenticated) {
+            throw new Error('Authentication failed');
+          }
+          
+          setWalletAddress(publicKey);
+          setIsConnected(true);
+          localStorage.setItem('walletAddress', publicKey);
+          await fetchProfile(publicKey);
+          
+        } catch (error) {
+          console.error('Error during wallet authentication:', error);
+          toast({
+            title: 'Authentication Error',
+            description: 'Failed to authenticate wallet signature',
+            variant: 'destructive',
+          });
+          disconnectWallet();
+        } finally {
+          setIsLoading(false);
         }
-      });
+      };
       
-      provider.on('disconnect', () => {
+      const handleDisconnect = () => {
         setWalletAddress(null);
         setIsConnected(false);
         setProfile(null);
         localStorage.removeItem('walletAddress');
         // Also sign out from Supabase
         supabase.auth.signOut();
-      });
+      };
+      
+      provider.on('connect', handleConnect);
+      provider.on('disconnect', handleDisconnect);
+      
+      return () => {
+        provider.off('connect', handleConnect);
+        provider.off('disconnect', handleDisconnect);
+      };
     }
   }, [isPhantomAvailable]);
 
@@ -335,6 +342,8 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const connectWallet = async () => {
+    if (isLoading) return; // Prevent multiple connection attempts
+    
     try {
       setIsLoading(true);
       
@@ -357,50 +366,44 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       
       const publicKey = await connectPhantomWallet();
       
-      if (publicKey) {
-        try {
-          // Generate a unique nonce for this login attempt
-          const nonce = `Login to SEC Community with wallet ${publicKey} at ${Date.now()}`;
-          
-          // Request signature from Phantom
-          const signature = await signMessageWithPhantom(nonce);
-          
-          if (!signature) {
-            throw new Error('Failed to get signature from wallet');
-          }
-          
-          // Authenticate with Supabase using the edge function
-          const authenticated = await signInWithCustomToken(publicKey, signature, nonce);
-          
-          if (authenticated) {
-            setWalletAddress(publicKey);
-            setIsConnected(true);
-            localStorage.setItem('walletAddress', publicKey);
-            
-            // Fetch profile after successful authentication
-            await fetchProfile(publicKey);
-            
-            toast({
-              title: 'Connected Successfully',
-              description: 'Your wallet has been connected',
-            });
-          } else {
-            throw new Error('Authentication failed');
-          }
-        } catch (error) {
-          console.error('Error during wallet authentication:', error);
-          toast({
-            title: 'Authentication Error',
-            description: error.message || 'Failed to authenticate wallet',
-            variant: 'destructive',
-          });
-          
-          // Clean up on error
-          disconnectWallet();
-        }
+      if (!publicKey) {
+        throw new Error('Failed to connect wallet');
       }
+
+      // Generate a unique nonce for this login attempt
+      const nonce = `Login to SEC Community with wallet ${publicKey} at ${Date.now()}`;
+      
+      // Request signature from Phantom
+      const signature = await signMessageWithPhantom(nonce);
+      
+      if (!signature) {
+        throw new Error('Failed to get signature from wallet');
+      }
+      
+      // Authenticate with Supabase using the edge function
+      const authenticated = await signInWithCustomToken(publicKey, signature, nonce);
+      
+      if (!authenticated) {
+        throw new Error('Authentication failed');
+      }
+
+      setWalletAddress(publicKey);
+      setIsConnected(true);
+      localStorage.setItem('walletAddress', publicKey);
+      
+      // Fetch profile after successful authentication
+      await fetchProfile(publicKey);
+      
+      toast({
+        title: 'Connected Successfully',
+        description: 'Your wallet has been connected',
+      });
+      
     } catch (error) {
       console.error('Error connecting wallet:', error);
+      // Clean up on error
+      disconnectWallet();
+      
       toast({
         title: 'Connection Failed',
         description: error.message || 'Could not connect to wallet',
@@ -412,17 +415,22 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const disconnectWallet = () => {
-    if (isPhantomAvailable) {
-      disconnectPhantomWallet();
+    setIsLoading(true);
+    try {
+      if (isPhantomAvailable) {
+        disconnectPhantomWallet();
+      }
+      
+      localStorage.removeItem('walletAddress');
+      setWalletAddress(null);
+      setIsConnected(false);
+      setProfile(null);
+      
+      // Also sign out from Supabase
+      supabase.auth.signOut();
+    } finally {
+      setIsLoading(false);
     }
-    
-    localStorage.removeItem('walletAddress');
-    setWalletAddress(null);
-    setIsConnected(false);
-    setProfile(null);
-    
-    // Also sign out from Supabase
-    supabase.auth.signOut();
   };
 
   const refreshProfile = async () => {
