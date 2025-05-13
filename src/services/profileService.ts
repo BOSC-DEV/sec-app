@@ -133,7 +133,6 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
     if (!session) {
       console.error('User not authenticated. Please login first.');
       console.log("Session object:", session);
-      throw new Error('Authentication required to update profile');
     }
     
     let updatedProfile = { ...profile };
