@@ -167,3 +167,94 @@ export async function signInWithCustomToken(walletAddress: string, signedMessage
     return false;
   }
 }
+
+// Add a helper function to check authentication status
+export const isAuthenticated = async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  return !!session;
+};
+
+// Add a helper function for authenticated data fetching with retry logic
+export const authenticatedQuery = async <T>(
+  queryFn: () => Promise<{ data: T | null; error: any }>,
+  maxRetries = 3
+): Promise<{ data: T | null; error: any }> => {
+  let retries = 0;
+  
+  while (retries < maxRetries) {
+    try {
+      // Check authentication before making the query
+      const authenticated = await isAuthenticated();
+      if (!authenticated) {
+        console.warn('Not authenticated, waiting for session...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        retries++;
+        continue;
+      }
+      
+      const result = await queryFn();
+      
+      if (!result.error) {
+        return result;
+      }
+      
+      // If error is related to auth, retry
+      if (result.error.code === 'PGRST301' || result.error.message?.includes('JWT')) {
+        console.warn('Auth error, retrying...', result.error);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        retries++;
+        continue;
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('Query error:', error);
+      return { data: null, error };
+    }
+  }
+  
+  return { data: null, error: new Error('Max retries reached') };
+};
+
+// Helper function to check if authentication is required for an operation
+export const requiresAuth = async (operation: 'read' | 'write' | 'admin', throwError: boolean = true): Promise<boolean> => {
+  const authenticated = await isAuthenticated();
+  
+  if (!authenticated && throwError) {
+    throw new Error(`Authentication required for ${operation} operation`);
+  }
+  
+  return authenticated;
+};
+
+// Helper function to safely execute Supabase queries with authentication checks
+export const safeQuery = async <T>(
+  operation: 'read' | 'write' | 'admin',
+  queryFn: () => Promise<{ data: T | null; error: any }>,
+  options: { 
+    fallbackValue?: T | null;
+    bypassAuth?: boolean;
+    maxRetries?: number;
+  } = {}
+): Promise<{ data: T | null; error: any }> => {
+  const { fallbackValue = null, bypassAuth = false, maxRetries = 3 } = options;
+  
+  try {
+    // Check authentication if required
+    if (!bypassAuth) {
+      const authenticated = await requiresAuth(operation, false);
+      if (!authenticated) {
+        return { 
+          data: fallbackValue, 
+          error: new Error(`Authentication required for ${operation} operation`) 
+        };
+      }
+    }
+    
+    // Use the existing authenticatedQuery for the actual query
+    return await authenticatedQuery(queryFn, maxRetries);
+  } catch (error) {
+    console.error(`Error in ${operation} operation:`, error);
+    return { data: fallbackValue, error };
+  }
+};

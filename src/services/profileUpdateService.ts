@@ -1,9 +1,12 @@
 import { Profile } from '@/types/dataTypes';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, safeQuery, requiresAuth } from '@/integrations/supabase/client';
 import { handleError } from '@/utils/errorHandling';
 import { sanitizeInput, sanitizeUrl } from '@/utils/securityUtils';
 import { ErrorSeverity } from '@/utils/errorSeverity';
 import { getSECTokenBalance } from './tokenBalanceService';
+import { PostgrestSingleResponse } from '@supabase/supabase-js';
+
+type QueryPromise<T> = Promise<{ data: T | null; error: any }>;
 
 // Modified saveProfile function to work with Supabase auth
 export const saveProfile = async (profile: Profile): Promise<Profile | null> => {
@@ -14,8 +17,8 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
     
     console.log("Saving profile:", profile);
     
-    // Check authentication status
-    const { data: { session } } = await supabase.auth.getSession();
+    // Check authentication status for write operations
+    const isAuthenticated = await requiresAuth('write', false);
     
     // Allow saving profiles even when not authenticated in certain scenarios
     // This helps with displaying basic profile information for public pages
@@ -42,7 +45,7 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
     }
 
     // If wallet address is present, fetch SEC balance
-    if (profile.wallet_address && session) {
+    if (profile.wallet_address && isAuthenticated) {
       try {
         // Only update balance if authenticated
         const secBalance = await getSECTokenBalance(profile.wallet_address);
@@ -54,26 +57,30 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
     }
 
     // For profile updates that modify data, require authentication
-    if (!session && 
+    if (!isAuthenticated && 
         (profile.username || profile.display_name || profile.bio || 
          profile.x_link || profile.website_link || profile.profile_pic_url)) {
       console.error('User not authenticated. Please login first.');
-      console.log("Session object:", session);
       throw new Error('Authentication required to update profile');
     }
 
     console.log("Upserting profile with data:", updatedProfile);
 
     // Call the existing upsert function in Supabase
-    const { data, error } = await supabase
-      .from('profiles')
-      .upsert({
-        ...updatedProfile,
-        id: profile.id,
-        wallet_address: profile.wallet_address
-      })
-      .select()
-      .single();
+    const { data, error } = await safeQuery<Profile>(
+      'write',
+      () => supabase
+        .from('profiles')
+        .upsert({
+          ...updatedProfile,
+          id: profile.id,
+          wallet_address: profile.wallet_address
+        })
+        .select()
+        .single()
+        .then(result => Promise.resolve({ data: result.data as Profile, error: result.error })) as QueryPromise<Profile>,
+      { bypassAuth: false } // Require auth for profile updates
+    );
 
     if (error) {
       console.error('Error saving profile:', error);
@@ -98,6 +105,9 @@ export const createDefaultProfile = async (walletAddress: string): Promise<Profi
     if (!walletAddress) {
       throw new Error('No wallet address provided');
     }
+    
+    // Require authentication for creating profiles
+    await requiresAuth('write', true);
     
     const defaultProfile: Profile = {
       id: crypto.randomUUID(),

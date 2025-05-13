@@ -1,5 +1,4 @@
-
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, isAuthenticated } from '@/integrations/supabase/client';
 import { handleError } from '@/utils/errorHandling';
 import { sanitizeInput, sanitizeUrl } from '@/utils/securityUtils';
 import { ErrorSeverity } from '@/utils/errorSeverity';
@@ -29,8 +28,8 @@ export const uploadProfilePicture = async (walletAddress: string, file: File): P
     const filePath = `profile-pics/${fileName}`;
 
     // Ensure user is authenticated
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
+    const authenticated = await isAuthenticated();
+    if (!authenticated) {
       throw new Error('Authentication required to upload profile picture');
     }
 

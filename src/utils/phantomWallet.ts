@@ -20,7 +20,7 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID
 } from '@solana/spl-token';
 import { handleError, ErrorSeverity } from '@/utils/errorHandling';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, isAuthenticated } from '@/integrations/supabase/client';
 
 export type PhantomEvent = "connect" | "disconnect";
 
@@ -153,14 +153,14 @@ export const disconnectPhantomWallet = async (): Promise<void> => {
         return;
       }
       
-      // Get current session before disconnecting
-      const { data: { session } } = await supabase.auth.getSession();
+      // Check if we have an active session
+      const authenticated = await isAuthenticated();
       
       // Disconnect from Phantom
       await provider.disconnect();
       
       // If we had an active session, sign out from Supabase
-      if (session) {
+      if (authenticated) {
         await supabase.auth.signOut();
       }
       

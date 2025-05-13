@@ -15,7 +15,7 @@ import {
   isPhantomInstalled,
   signMessageWithPhantom
 } from '@/utils/phantomWallet';
-import { supabase, signInWithCustomToken } from '@/integrations/supabase/client';
+import { supabase, signInWithCustomToken, isAuthenticated } from '@/integrations/supabase/client';
 import { Session } from '@supabase/supabase-js';
 
 export const PROFILE_UPDATED_EVENT = 'profile-updated';
@@ -114,13 +114,14 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     const checkExistingSession = async () => {
       try {
         setIsLoading(true);
-        const { data: { session: existingSession } } = await supabase.auth.getSession();
+        const isUserAuthenticated = await isAuthenticated();
         
-        if (existingSession) {
+        if (isUserAuthenticated) {
+          const { data: { session: existingSession } } = await supabase.auth.getSession();
           setSession(existingSession);
           
           // Extract wallet address from session
-          const email = existingSession.user.email;
+          const email = existingSession?.user?.email;
           const walletFromEmail = email ? email.split('@')[0] : null;
           
           if (walletFromEmail && walletFromEmail !== 'null') {
@@ -370,8 +371,8 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       }
       
       // First check if we already have a session
-      const { data: { session: existingSession } } = await supabase.auth.getSession();
-      if (existingSession) {
+      const hasExistingSession = await isAuthenticated();
+      if (hasExistingSession) {
         await supabase.auth.signOut();
       }
       
@@ -392,9 +393,9 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       }
       
       // Authenticate with Supabase using the edge function
-      const authenticated = await signInWithCustomToken(publicKey, signature, nonce);
+      const authSuccess = await signInWithCustomToken(publicKey, signature, nonce);
       
-      if (!authenticated) {
+      if (!authSuccess) {
         throw new Error('Authentication failed');
       }
 

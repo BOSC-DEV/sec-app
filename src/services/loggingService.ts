@@ -1,6 +1,7 @@
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, safeQuery } from '@/integrations/supabase/client';
 import { ErrorSeverity } from '@/utils/errorSeverity';
 import analyticsService from './analyticsService';
+import { LogEntry, LogLevel } from '@/types/loggingTypes';
 
 // Define log levels 
 export enum LogLevel {
