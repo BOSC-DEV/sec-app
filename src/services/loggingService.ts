@@ -3,30 +3,6 @@ import { ErrorSeverity } from '@/utils/errorSeverity';
 import analyticsService from './analyticsService';
 import { LogEntry, LogLevel } from '@/types/loggingTypes';
 
-// Define log levels 
-export enum LogLevel {
-  DEBUG = 'debug',
-  INFO = 'info',
-  WARN = 'warn',
-  ERROR = 'error',
-  CRITICAL = 'critical'
-}
-
-interface LogEntry {
-  timestamp: string;
-  level: LogLevel;
-  message: string;
-  context?: string;
-  data?: Record<string, any>;
-  sessionId?: string;
-  userId?: string;
-  error?: {
-    name: string;
-    message: string;
-    stack?: string;
-  };
-}
-
 // Map ErrorSeverity to LogLevel
 const severityToLogLevel = {
   [ErrorSeverity.LOW]: LogLevel.INFO,

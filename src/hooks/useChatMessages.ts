@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { ChatMessage } from '@/types/dataTypes';
 import { supabase, safeInsert } from '@/integrations/supabase/client';
@@ -124,6 +125,9 @@ export const useChatMessages = () => {
       // Prepare the chat message data with all required fields
       const chatMessageData = {
         ...sanitizedData,
+        content: messageData.content,  // Make sure content is included
+        author_id: messageData.author_id,  // Make sure author_id is included
+        author_name: messageData.author_name,  // Make sure author_name is included
         image_url: imageUrl,
         likes: 0,
         dislikes: 0
