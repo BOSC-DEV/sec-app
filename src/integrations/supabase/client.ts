@@ -140,13 +140,13 @@ export const authenticateWallet = async (
 };
 
 // Helper function to safely insert data with RLS validation
-export const safeInsert = async <T extends keyof Database['public']['Tables']>(
-  table: T,
-  data: Database['public']['Tables'][T]['Insert'],
+export const safeInsert = async <T>(
+  table: keyof Database['public']['Tables'],
+  data: any,
   options?: { returning?: 'minimal' | 'representation' }
 ) => {
   // Clone data to avoid modifying original
-  const sanitizedData = { ...data } as Record<string, any>;
+  const sanitizedData = { ...data };
   
   // Sanitize all string fields to prevent XSS and SQL injection
   Object.keys(sanitizedData).forEach(key => {
@@ -158,7 +158,7 @@ export const safeInsert = async <T extends keyof Database['public']['Tables']>(
   // Insert the data with returning option
   const result = supabase
     .from(table)
-    .insert(sanitizedData as any);
+    .insert(sanitizedData);
     
   if (options?.returning) {
     return result.select();
