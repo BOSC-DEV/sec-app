@@ -158,7 +158,7 @@ export const safeInsert = async <T extends keyof Database['public']['Tables']>(
   // Insert the data with returning option
   const result = supabase
     .from(table)
-    .insert(sanitizedData);
+    .insert(sanitizedData as any);
     
   if (options?.returning) {
     return result.select();
