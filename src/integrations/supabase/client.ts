@@ -16,6 +16,7 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     autoRefreshToken: true,
     storageKey: 'supabase-auth',
     detectSessionInUrl: false, // Disable automatic detection of OAuth redirects
+    flowType: 'implicit', // Add this to disable email confirmation
   },
   global: {
     headers: {
