@@ -137,7 +137,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
           try {
             // Check if already authenticated
             const { data: { session } } = await supabase.auth.getSession();
-            if (session?.user?.email === `${publicKey}@phantom.wallet`) {
+            if (session?.user?.email === `${publicKey}@sec.digital`) {
               console.log("Already authenticated with this wallet");
               setWalletAddress(publicKey);
               setIsConnected(true);
