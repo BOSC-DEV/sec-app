@@ -85,7 +85,7 @@ export const authenticateWallet = async (
     // Try to sign in first
     const { data, error } = await supabase.auth.signInWithPassword({
       email: walletEmail,
-      password: signedMessage.slice(0, 20), // Using part of signature as password
+      password: walletAddress.slice(0, 20), // Using part of signature as password
     });
 
     if (error) {
@@ -94,7 +94,7 @@ export const authenticateWallet = async (
       // If sign in fails, try sign up
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: walletEmail,
-        password: signedMessage.slice(0, 20),
+        password: walletAddress.slice(0, 20),
         options: {
           data: {
             wallet_address: walletAddress,
