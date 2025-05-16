@@ -80,7 +80,7 @@ export const authenticateWallet = async (
     }
     
     // Generate a consistent email format that will be used for auth
-    const walletEmail = `${walletAddress}@sec.digital`;
+    const walletEmail = `${walletAddress.toLowerCase()}@sec.digital`;
     
     // Try to sign in first
     const { data, error } = await supabase.auth.signInWithPassword({
