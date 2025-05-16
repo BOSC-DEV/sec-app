@@ -1,4 +1,3 @@
-
 import { toast } from '@/hooks/use-toast';
 import { 
   Connection, 
@@ -182,6 +181,8 @@ export const isPhantomInstalled = (): boolean => {
   return getPhantomProvider() !== null;
 };
 
+let isSigningMessage = false;
+
 export const signMessageWithPhantom = async (message: string): Promise<string | null> => {
   const provider = getPhantomProvider();
   
@@ -193,14 +194,21 @@ export const signMessageWithPhantom = async (message: string): Promise<string | 
     });
     return null;
   }
+
+  // Prevent multiple concurrent signature requests
+  if (isSigningMessage) {
+    console.log("Message signing already in progress");
+    return null;
+  }
   
   try {
+    isSigningMessage = true;
     console.log("Signing message with Phantom wallet...");
     const encodedMessage = new TextEncoder().encode(message);
     const { signature } = await provider.signMessage(encodedMessage);
     
     const signatureBase64 = btoa(String.fromCharCode(...signature));
-    console.log("Message signed successfully:", signatureBase64);
+    console.log("Message signed successfully");
     
     return signatureBase64;
   } catch (error) {
@@ -211,6 +219,8 @@ export const signMessageWithPhantom = async (message: string): Promise<string | 
       variant: "destructive",
     });
     return null;
+  } finally {
+    isSigningMessage = false;
   }
 };
 

@@ -1,4 +1,3 @@
-
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { Profile } from '@/types/dataTypes';
 import { getProfileByWallet, uploadProfilePicture, saveProfile } from '@/services/profileService';
@@ -136,25 +135,40 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
           setIsLoading(true);
           // Need to authenticate with Supabase after wallet connect
           try {
+            // Check if already authenticated
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user?.email === `${publicKey}@phantom.wallet`) {
+              console.log("Already authenticated with this wallet");
+              setWalletAddress(publicKey);
+              setIsConnected(true);
+              localStorage.setItem('walletAddress', publicKey);
+              await fetchProfile(publicKey);
+              return;
+            }
+
             const message = `Login to SEC Community with wallet ${publicKey} at ${Date.now()}`;
             const signature = await signMessageWithPhantom(message);
             
-            if (signature) {
-              const authenticated = await authenticateWallet(publicKey, signature, message);
-              
-              if (authenticated) {
-                setWalletAddress(publicKey);
-                setIsConnected(true);
-                localStorage.setItem('walletAddress', publicKey);
-                await fetchProfile(publicKey);
-              } else {
-                toast({
-                  title: 'Authentication Failed',
-                  description: 'Could not authenticate with your wallet',
-                  variant: 'destructive',
-                });
-                disconnectWallet();
-              }
+            if (!signature) {
+              console.log("Signature request was cancelled or already in progress");
+              setIsLoading(false);
+              return;
+            }
+            
+            const authenticated = await authenticateWallet(publicKey, signature, message);
+            
+            if (authenticated) {
+              setWalletAddress(publicKey);
+              setIsConnected(true);
+              localStorage.setItem('walletAddress', publicKey);
+              await fetchProfile(publicKey);
+            } else {
+              toast({
+                title: 'Authentication Failed',
+                description: 'Could not authenticate with your wallet',
+                variant: 'destructive',
+              });
+              disconnectWallet();
             }
           } catch (error) {
             console.error('Error during wallet authentication:', error);
@@ -163,6 +177,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
               description: 'Failed to authenticate wallet signature',
               variant: 'destructive',
             });
+          } finally {
             setIsLoading(false);
           }
         }
@@ -189,8 +204,15 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       if (fetchedProfile) {
         setProfile(fetchedProfile);
       } else {
-        console.log("No profile found, creating default profile");
-        await createDefaultProfile(address);
+        // Only attempt to create a profile if we have an authenticated session
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          console.log("No profile found, creating default profile");
+          await createDefaultProfile(address);
+        } else {
+          console.log("No authenticated session, skipping profile creation");
+          setProfile(null);
+        }
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
