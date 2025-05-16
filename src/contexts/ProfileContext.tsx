@@ -1,4 +1,3 @@
-
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { Profile } from '@/types/dataTypes';
 import { getProfileByWallet, uploadProfilePicture, saveProfile } from '@/services/profileService';
@@ -189,8 +188,15 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       if (fetchedProfile) {
         setProfile(fetchedProfile);
       } else {
-        console.log("No profile found, creating default profile");
-        await createDefaultProfile(address);
+        // Only attempt to create a profile if we have an authenticated session
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          console.log("No profile found, creating default profile");
+          await createDefaultProfile(address);
+        } else {
+          console.log("No authenticated session, skipping profile creation");
+          setProfile(null);
+        }
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
