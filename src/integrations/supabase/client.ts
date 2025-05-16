@@ -16,6 +16,7 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     autoRefreshToken: true,
     storageKey: 'supabase-auth',
     detectSessionInUrl: false, // Disable automatic detection of OAuth redirects
+    flowType: 'implicit', // Add this to disable email confirmation
   },
   global: {
     headers: {
@@ -80,12 +81,12 @@ export const authenticateWallet = async (
     }
     
     // Generate a consistent email format that will be used for auth
-    const walletEmail = `${walletAddress}@sec.digital`;
+    const walletEmail = `${walletAddress.toLowerCase()}@sec.digital`;
     
     // Try to sign in first
     const { data, error } = await supabase.auth.signInWithPassword({
       email: walletEmail,
-      password: signedMessage.slice(0, 20), // Using part of signature as password
+      password: walletAddress.slice(0, 20), // Using part of signature as password
     });
 
     if (error) {
@@ -94,7 +95,7 @@ export const authenticateWallet = async (
       // If sign in fails, try sign up
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: walletEmail,
-        password: signedMessage.slice(0, 20),
+        password: walletAddress.slice(0, 20),
         options: {
           data: {
             wallet_address: walletAddress,
