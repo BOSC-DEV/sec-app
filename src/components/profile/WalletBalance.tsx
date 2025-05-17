@@ -11,7 +11,7 @@ import BadgeTier from './BadgeTier';
 import { useBadgeTier } from '@/hooks/useBadgeTier';
 
 // Import from phantomWallet utility
-import { getConnection } from '@/utils/phantomWallet';
+import { getConnection, getFallbackConnection } from '@/utils/phantomWallet';
 
 // SEC token mint address
 const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump');
@@ -27,12 +27,21 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
   
   const badgeInfo = useBadgeTier(secBalance);
 
-  const fetchSolBalance = async (address: string) => {
+  const fetchSolBalance = async (address: string): Promise<number> => {
     try {
       const connection = getConnection();
+      const fallbackConn = getFallbackConnection();
       const publicKey = new PublicKey(address);
-      const balance = await connection.getBalance(publicKey);
-      return balance / LAMPORTS_PER_SOL;
+      
+      // Fallback to public RPC if QuickNode fails
+      try {
+        const balance = await connection.getBalance(publicKey, 'confirmed');
+        return balance / LAMPORTS_PER_SOL;
+      } catch (quickNodeError) {
+        console.warn("QuickNode failed, trying fallback RPC...");
+        const balance = await fallbackConn.getBalance(publicKey, 'confirmed');
+        return balance / LAMPORTS_PER_SOL;
+      }
     } catch (error) {
       console.error('Error fetching SOL balance:', error);
       return 0;

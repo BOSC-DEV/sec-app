@@ -243,34 +243,6 @@ export const getProfileByWallet = async (walletAddress: string): Promise<Profile
       console.log("Found existing profile:", data);
       return data;
     }
-    
-    // If no profile exists, check if user is authenticated before creating one
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      console.log("No authenticated session found");
-      return null;
-    }
-    
-    // Only create a new profile if authenticated
-    if (!data && walletAddress) {
-      console.log("No profile found, creating one...");
-      const defaultProfile: Profile = {
-        id: crypto.randomUUID(),
-        wallet_address: walletAddress,
-        display_name: `User ${walletAddress.substring(0, 6)}`,
-        username: `user_${Date.now().toString(36)}`,
-        profile_pic_url: '',
-        created_at: new Date().toISOString(),
-        x_link: '',
-        website_link: '',
-        bio: '',
-        points: 0
-      };
-      
-      console.log("Default profile created:", defaultProfile);
-      return await saveProfile(defaultProfile);
-    }
-
     return null;
   } catch (error) {
     handleError(error, {
