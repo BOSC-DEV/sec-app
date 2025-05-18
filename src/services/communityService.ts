@@ -463,14 +463,14 @@ export const likeAnnouncement = async (announcementId: string, userId: string): 
       }
     }
     
-    // Get updated counts
+    // Get updated counts - Modified to handle no results
     const { data: updated } = await supabase
       .from('announcements')
       .select('likes, dislikes')
       .eq('id', announcementId)
-      .single();
+      .maybeSingle(); // Changed from single() to maybeSingle()
       
-    return updated;
+    return updated || { likes: 0, dislikes: 0 }; // Return default if no data
   } catch (error) {
     console.error('Error liking announcement:', error);
     return null;
@@ -562,14 +562,14 @@ export const dislikeAnnouncement = async (announcementId: string, userId: string
       }
     }
     
-    // Get updated counts
+    // Get updated counts - Modified to handle no results
     const { data: updated } = await supabase
       .from('announcements')
       .select('likes, dislikes')
       .eq('id', announcementId)
-      .single();
+      .maybeSingle(); // Changed from single() to maybeSingle()
       
-    return updated;
+    return updated || { likes: 0, dislikes: 0 }; // Return default if no data
   } catch (error) {
     console.error('Error disliking announcement:', error);
     return null;
@@ -662,14 +662,14 @@ export const likeReply = async (replyId: string, userId: string): Promise<any> =
       }
     }
     
-    // Get updated counts
+    // Get updated counts - Modified to handle no results
     const { data: updated } = await supabase
       .from('announcement_replies')
       .select('likes, dislikes')
       .eq('id', replyId)
-      .single();
+      .maybeSingle(); // Changed from single() to maybeSingle()
       
-    return updated;
+    return updated || { likes: 0, dislikes: 0 }; // Return default if no data
   } catch (error) {
     console.error('Error liking reply:', error);
     return null;
@@ -761,14 +761,14 @@ export const dislikeReply = async (replyId: string, userId: string): Promise<any
       }
     }
     
-    // Get updated counts
+    // Get updated counts - Modified to handle no results
     const { data: updated } = await supabase
       .from('announcement_replies')
       .select('likes, dislikes')
       .eq('id', replyId)
-      .single();
+      .maybeSingle(); // Changed from single() to maybeSingle()
       
-    return updated;
+    return updated || { likes: 0, dislikes: 0 }; // Return default if no data
   } catch (error) {
     console.error('Error disliking reply:', error);
     return null;
@@ -861,14 +861,14 @@ export const likeChatMessage = async (messageId: string, userId: string): Promis
       }
     }
     
-    // Get updated counts
+    // Get updated counts - Modified to handle no results
     const { data: updated } = await supabase
       .from('chat_messages')
       .select('likes, dislikes')
       .eq('id', messageId)
-      .single();
+      .maybeSingle(); // Changed from single() to maybeSingle()
       
-    return updated;
+    return updated || { likes: 0, dislikes: 0 }; // Return default if no data
   } catch (error) {
     console.error('Error liking chat message:', error);
     return null;
@@ -960,14 +960,14 @@ export const dislikeChatMessage = async (messageId: string, userId: string): Pro
       }
     }
     
-    // Get updated counts
+    // Get updated counts - Modified to handle no results
     const { data: updated } = await supabase
       .from('chat_messages')
       .select('likes, dislikes')
       .eq('id', messageId)
-      .single();
+      .maybeSingle(); // Changed from single() to maybeSingle()
       
-    return updated;
+    return updated || { likes: 0, dislikes: 0 }; // Return default if no data
   } catch (error) {
     console.error('Error disliking chat message:', error);
     return null;
