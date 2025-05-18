@@ -57,15 +57,12 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       setSession(sessionData);
       
       if (sessionData && sessionData.user) {
-        // Extract wallet address from user email or user metadata
-        const email = sessionData.user.email;
-        const walletFromEmail = email ? email.split('@')[0] : null;
-        
-        if (walletFromEmail && walletFromEmail !== 'null') {
-          setWalletAddress(walletFromEmail);
+        // Get the actual public key from Phantom wallet
+        const publicKey = getWalletPublicKey();
+        if (publicKey) {
+          setWalletAddress(publicKey);
           setIsConnected(true);
-          localStorage.setItem('walletAddress', walletFromEmail);
-          // Remove the immediate profile fetch here as it will be handled by the walletAddress effect
+          localStorage.setItem('walletAddress', publicKey);
         }
       } else if (event === 'SIGNED_OUT') {
         setProfile(null);
@@ -83,14 +80,11 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         if (existingSession) {
           setSession(existingSession);
           
-          // Extract wallet address from session
-          const email = existingSession.user.email;
-          const walletFromEmail = email ? email.split('@')[0] : null;
-          
-          if (walletFromEmail && walletFromEmail !== 'null') {
-            setWalletAddress(walletFromEmail);
+          // Get the actual public key from Phantom wallet
+          const publicKey = getWalletPublicKey();
+          if (publicKey) {
+            setWalletAddress(publicKey);
             setIsConnected(true);
-            // Remove the immediate profile fetch here as it will be handled by the walletAddress effect
           } else {
             setIsLoading(false);
           }
