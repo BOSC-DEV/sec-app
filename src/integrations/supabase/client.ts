@@ -21,6 +21,7 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     headers: {
       'Content-Type': 'application/json',
       'X-Client-Info': 'sec-community-app',
+      'apikey': SUPABASE_PUBLISHABLE_KEY
     },
   },
   db: {
