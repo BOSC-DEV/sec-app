@@ -1,4 +1,3 @@
-
 -- Enable Row Level Security on tables that may need protection
 
 -- Scammers table
@@ -38,16 +37,18 @@ FOR SELECT
 USING (true);
 
 -- Create policy that allows users to update their own profile
-CREATE POLICY IF NOT EXISTS "Users can update own profile" 
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
+CREATE POLICY "Users can update own profile" 
 ON public.profiles
 FOR UPDATE
-USING (auth.uid()::uuid = id);
+USING (SPLIT_PART(auth.jwt()->>'email', '@', 1) = LOWER(wallet_address));
 
 -- Create policy that allows users to insert their own profile
-CREATE POLICY IF NOT EXISTS "Users can insert own profile" 
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.profiles;
+CREATE POLICY "Users can insert own profile" 
 ON public.profiles
 FOR INSERT
-WITH CHECK (auth.uid()::uuid = id);
+WITH CHECK (SPLIT_PART(auth.jwt()->>'email', '@', 1) = LOWER(wallet_address));
 
 -- Bounty contributions
 ALTER TABLE IF EXISTS public.bounty_contributions ENABLE ROW LEVEL SECURITY;
