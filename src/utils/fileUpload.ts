@@ -48,7 +48,8 @@ export const fileUpload = {
         .from('uploads')
         .upload(fullPath, fileToUpload, {
           cacheControl: '3600',
-          upsert: true
+          upsert: true,
+          contentType: fileToUpload.type
         });
       
       if (error) {

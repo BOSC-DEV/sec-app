@@ -10,6 +10,20 @@ import { ErrorSeverity } from '@/utils/errorSeverity';
 // SEC token mint address
 const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump');
 
+// Helper to get correct MIME type based on file extension
+function getMimeType(file: File): string {
+  if (file.type && file.type !== '') return file.type;
+  const ext = file.name.split('.').pop()?.toLowerCase();
+  switch (ext) {
+    case 'png': return 'image/png';
+    case 'jpg':
+    case 'jpeg': return 'image/jpeg';
+    case 'webp': return 'image/webp';
+    case 'gif': return 'image/gif';
+    default: return 'application/octet-stream';
+  }
+}
+
 // Function to upload profile picture
 export const uploadProfilePicture = async (walletAddress: string, file: File): Promise<string | null> => {
   try {
@@ -18,8 +32,9 @@ export const uploadProfilePicture = async (walletAddress: string, file: File): P
     }
     
     // Validate file type
+    const mimeType = getMimeType(file);
     const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-    if (!validTypes.includes(file.type)) {
+    if (!validTypes.includes(mimeType)) {
       throw new Error('Invalid file type. Only JPEG, PNG, WEBP and GIF are allowed');
     }
     
@@ -45,7 +60,7 @@ export const uploadProfilePicture = async (walletAddress: string, file: File): P
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: true,
-        contentType: file.type
+        contentType: mimeType
       });
 
     if (uploadError) throw uploadError;
