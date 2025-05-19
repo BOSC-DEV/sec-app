@@ -391,6 +391,19 @@ export const likeAnnouncement = async (announcementId: string, userId: string): 
 
     if (fetchError) throw fetchError;
 
+    // Get current announcement data first
+    const { data: currentAnnouncement, error: currentError } = await supabase
+      .from('announcements')
+      .select('likes, dislikes')
+      .eq('id', announcementId)
+      .single();
+    
+    if (currentError) throw currentError;
+    
+    // Initialize counts if they don't exist
+    const currentLikes = currentAnnouncement?.likes || 0;
+    const currentDislikes = currentAnnouncement?.dislikes || 0;
+
     if (existingReaction) {
       // Unlike if already liked
       const { error: deleteError } = await supabase
@@ -401,17 +414,9 @@ export const likeAnnouncement = async (announcementId: string, userId: string): 
       if (deleteError) throw deleteError;
 
       // Decrement likes count
-      const { data: announcement, error: announcementError } = await supabase
-        .from('announcements')
-        .select('likes')
-        .eq('id', announcementId)
-        .single();
-
-      if (announcementError) throw announcementError;
-
       const { error: updateError } = await supabase
         .from('announcements')
-        .update({ likes: Math.max(0, (announcement?.likes || 0) - 1) })
+        .update({ likes: Math.max(0, currentLikes - 1) })
         .eq('id', announcementId);
 
       if (updateError) throw updateError;
@@ -435,61 +440,52 @@ export const likeAnnouncement = async (announcementId: string, userId: string): 
 
         if (deleteDislikeError) throw deleteDislikeError;
 
-        // Decrement dislikes count
-        const { data: announcement, error: announcementError } = await supabase
-          .from('announcements')
-          .select('dislikes')
-          .eq('id', announcementId)
-          .single();
-
-        if (announcementError) throw announcementError;
-
+        // Update both likes and dislikes in one operation
         const { error: updateError } = await supabase
           .from('announcements')
-          .update({ dislikes: Math.max(0, (announcement?.dislikes || 0) - 1) })
+          .update({ 
+            dislikes: Math.max(0, currentDislikes - 1),
+            likes: currentLikes + 1 
+          })
+          .eq('id', announcementId);
+
+        if (updateError) throw updateError;
+      } else {
+        // Add new like
+        const { error: insertError } = await supabase
+          .from('announcement_reactions')
+          .insert({
+            announcement_id: announcementId,
+            user_id: userId,
+            reaction_type: 'like'
+          });
+
+        if (insertError) throw insertError;
+
+        // Increment likes count
+        const { error: updateError } = await supabase
+          .from('announcements')
+          .update({ likes: currentLikes + 1 })
           .eq('id', announcementId);
 
         if (updateError) throw updateError;
       }
-
-      // Add new like
-      const { error: insertError } = await supabase
-        .from('announcement_reactions')
-        .insert({
-          announcement_id: announcementId,
-          user_id: userId,
-          reaction_type: 'like'
-        });
-
-      if (insertError) throw insertError;
-
-      // Increment likes count
-      const { data: announcement, error: announcementError } = await supabase
-        .from('announcements')
-        .select('likes')
-        .eq('id', announcementId)
-        .single();
-
-      if (announcementError) throw announcementError;
-
-      const { error: updateError } = await supabase
-        .from('announcements')
-        .update({ likes: (announcement?.likes || 0) + 1 })
-        .eq('id', announcementId);
-
-      if (updateError) throw updateError;
     }
 
-    // Get updated counts
+    // Get updated counts and ensure they are numbers
     const { data: updated, error: updatedError } = await supabase
       .from('announcements')
       .select('likes, dislikes')
       .eq('id', announcementId)
-      .maybeSingle();
+      .single();
 
     if (updatedError) throw updatedError;
 
-    return updated || { likes: 0, dislikes: 0 };
+    // Ensure we return valid numbers
+    return {
+      likes: updated?.likes || 0,
+      dislikes: updated?.dislikes || 0
+    };
   } catch (error) {
     console.error('Error in likeAnnouncement:', error);
     throw error; // Re-throw to let calling code handle it
