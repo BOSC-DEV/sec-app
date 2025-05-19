@@ -44,6 +44,21 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   const [isPhantomAvailable, setIsPhantomAvailable] = useState<boolean>(false);
   const [session, setSession] = useState<Session | null>(null);
 
+  // Helper function to validate and set wallet address
+  const setValidatedWalletAddress = (address: string | null) => {
+    if (address) {
+      // Only set if we have a valid public key from Phantom
+      const publicKey = getWalletPublicKey();
+      if (publicKey && publicKey.toLowerCase() === address.toLowerCase()) {
+        setWalletAddress(publicKey); // Use the actual public key with correct case
+        localStorage.setItem('walletAddress', publicKey);
+        setIsConnected(true);
+        return true;
+      }
+    }
+    return false;
+  };
+
   useEffect(() => {
     const checkPhantomAvailability = () => {
       setIsPhantomAvailable(isPhantomInstalled());
@@ -52,17 +67,27 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     checkPhantomAvailability();
     
     // Setup auth state change listener for Supabase
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, sessionData) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, sessionData) => {
       console.log('Auth state changed:', event, sessionData?.user?.email);
       setSession(sessionData);
       
       if (sessionData && sessionData.user) {
-        // Get the actual public key from Phantom wallet
-        const publicKey = getWalletPublicKey();
-        if (publicKey) {
-          setWalletAddress(publicKey);
-          setIsConnected(true);
-          localStorage.setItem('walletAddress', publicKey);
+        // Extract wallet address from session email (it's in lowercase)
+        const sessionWalletAddress = sessionData.user.email?.split('@')[0];
+        if (sessionWalletAddress) {
+          // Validate against actual Phantom wallet public key
+          const publicKey = getWalletPublicKey();
+          if (publicKey && publicKey.toLowerCase() === sessionWalletAddress.toLowerCase()) {
+            setWalletAddress(publicKey);
+            setIsConnected(true);
+            localStorage.setItem('walletAddress', publicKey);
+          } else {
+            // If wallet is not connected or public key doesn't match, sign out
+            await supabase.auth.signOut();
+            setWalletAddress(null);
+            setIsConnected(false);
+            localStorage.removeItem('walletAddress');
+          }
         }
       } else if (event === 'SIGNED_OUT') {
         setProfile(null);
@@ -77,30 +102,46 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       try {
         setIsLoading(true);
         const { data: { session: existingSession } } = await supabase.auth.getSession();
+        
         if (existingSession) {
           setSession(existingSession);
+          const sessionWalletAddress = existingSession.user.email?.split('@')[0];
           
-          // Get the actual public key from Phantom wallet
-          const publicKey = getWalletPublicKey();
-          if (publicKey) {
-            setWalletAddress(publicKey);
-            setIsConnected(true);
-          } else {
-            setIsLoading(false);
+          if (sessionWalletAddress) {
+            // Validate against actual Phantom wallet public key
+            const publicKey = getWalletPublicKey();
+            if (publicKey && publicKey.toLowerCase() === sessionWalletAddress.toLowerCase()) {
+              setWalletAddress(publicKey);
+              setIsConnected(true);
+              localStorage.setItem('walletAddress', publicKey);
+            } else {
+              // If wallet is not connected or public key doesn't match, sign out
+              await supabase.auth.signOut();
+              setWalletAddress(null);
+              setIsConnected(false);
+              localStorage.removeItem('walletAddress');
+            }
           }
         } else {
-          // Try from localStorage as fallback
+          // Check if we have a saved wallet address
           const savedWallet = localStorage.getItem('walletAddress');
           if (savedWallet) {
-            // If we have a wallet address but no session, we need to reconnect
-            console.log("Found saved wallet but no session, attempting to reconnect");
-            setIsLoading(false);
-          } else {
-            setIsLoading(false);
+            // Validate against actual Phantom wallet public key
+            const publicKey = getWalletPublicKey();
+            if (publicKey && publicKey.toLowerCase() === savedWallet.toLowerCase()) {
+              setWalletAddress(publicKey);
+              setIsConnected(true);
+            } else {
+              // If wallet is not connected or public key doesn't match, clear saved state
+              setWalletAddress(null);
+              setIsConnected(false);
+              localStorage.removeItem('walletAddress');
+            }
           }
         }
       } catch (error) {
         console.error('Error checking session:', error);
+      } finally {
         setIsLoading(false);
       }
     };
