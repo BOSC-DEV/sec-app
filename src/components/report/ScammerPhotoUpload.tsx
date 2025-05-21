@@ -11,6 +11,7 @@ interface ScammerPhotoUploadProps {
   setPhotoFile: React.Dispatch<React.SetStateAction<File | null>>;
   setValue?: UseFormSetValue<any>;
   control?: Control<any>;
+  isEditMode?: boolean;
 }
 
 /**
@@ -23,6 +24,7 @@ interface ScammerPhotoUploadProps {
  * @param setPhotoFile - Function to update the photo file
  * @param setValue - Optional React Hook Form setValue function
  * @param control - Optional React Hook Form control object
+ * @param isEditMode - Optional boolean indicating if the component is in edit mode
  * @returns A component for uploading and previewing scammer photos
  */
 const ScammerPhotoUpload = ({
@@ -31,7 +33,8 @@ const ScammerPhotoUpload = ({
   photoFile,
   setPhotoFile,
   setValue,
-  control
+  control,
+  isEditMode = false
 }: ScammerPhotoUploadProps) => {
   const {
     toast
@@ -72,18 +75,17 @@ const ScammerPhotoUpload = ({
     reader.onloadend = () => {
       const preview = reader.result as string;
       setPhotoPreview(preview);
-      if (setValue) {
-        setValue('photo_url', preview);
-      }
     };
     reader.readAsDataURL(file);
-  }, [setPhotoFile, setPhotoPreview, setValue, toast]);
+  }, [setPhotoFile, setPhotoPreview, toast]);
   return <div className="photo-upload-container" role="region" aria-label="Photo upload section">
       <div className="flex items-center gap-x-3 my-[10px] py-[10px]">
         <PhotoPreview photoPreview={photoPreview} onClick={handlePhotoClick} />
-        <Button type="button" variant="outline" size="sm" onClick={handlePhotoClick} aria-label={photoPreview ? "Change the uploaded photo" : "Upload a new photo"}>
-          {photoPreview ? 'Change Photo' : 'Upload Photo'}
-        </Button>
+        {isEditMode && (
+          <Button type="button" variant="outline" size="sm" onClick={handlePhotoClick} aria-label={photoPreview ? "Change the uploaded photo" : "Upload a new photo"}>
+            {photoPreview ? 'Change Photo' : 'Upload Photo'}
+          </Button>
+        )}
         <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} aria-label="Upload photo" aria-hidden="true" tabIndex={-1} />
       </div>
       <FormDescription className="mt-1">

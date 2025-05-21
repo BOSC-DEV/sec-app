@@ -1,7 +1,7 @@
 
 import { toast } from "@/hooks/use-toast";
 import { handleError, ErrorSeverity } from "./errorHandling";
-import { supabase } from "@/integrations/supabase/client";
+import { supabaseStorage } from "@/integrations/supabase/client";
 
 // Maximum file size in bytes (5MB default)
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -44,11 +44,12 @@ export const fileUpload = {
       const fullPath = `${folderPath}/${fileName}`;
       
       // Upload file to Supabase storage - using the correct bucket name 'uploads'
-      const { data, error } = await supabase.storage
+      const { data, error } = await supabaseStorage.storage
         .from('uploads')
         .upload(fullPath, fileToUpload, {
           cacheControl: '3600',
-          upsert: true
+          upsert: true,
+          contentType: fileToUpload.type
         });
       
       if (error) {
@@ -57,7 +58,7 @@ export const fileUpload = {
       }
       
       // Get public URL
-      const { data: publicUrlData } = supabase.storage
+      const { data: publicUrlData } = supabaseStorage.storage
         .from('uploads')
         .getPublicUrl(data.path);
       

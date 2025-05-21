@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useReportForm } from '@/hooks/useReportForm';
@@ -124,6 +123,7 @@ const ReportPage = () => {
                 setPhotoFile={setPhotoFile}
                 photoPreview={photoPreview}
                 setPhotoPreview={setPhotoPreview}
+                isEditMode={isEditMode}
               />
               
               <div className="flex justify-end space-x-4">

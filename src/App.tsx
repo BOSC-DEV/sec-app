@@ -167,11 +167,11 @@ const App = () => (
   <EnhancedErrorBoundary componentName="App">
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <ProfileProvider>
-          <HelmetProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
+        <BrowserRouter>
+          <ProfileProvider>
+            <HelmetProvider>
+              <Toaster />
+              <Sonner />
               <AnalyticsTracker />
               {environmentUtils.featureFlags.enablePerformanceMonitoring && <PerformanceMonitor />}
               <Layout>
@@ -205,7 +205,6 @@ const App = () => (
                     <Route path="/profile/:username" element={<PublicProfilePage />} />
                     <Route path="/wallet/:address" element={<PublicProfilePage />} />
                     <Route path="/:username" element={<PublicProfilePage />} />
-                    
                     {/* Legal and Information Pages */}
                     <Route path="/terms" element={<LegalPages />} />
                     <Route path="/privacy" element={<LegalPages />} />
@@ -215,20 +214,18 @@ const App = () => (
                     <Route path="/faq" element={<LegalPages />} />
                     <Route path="/about" element={<LegalPages />} />
                     <Route path="/contact" element={<LegalPages />} />
-                    
                     <Route path="/analytics" element={
                       <ProtectedRoute>
                         <AnalyticsPage />
                       </ProtectedRoute>
                     } />
-                    
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </EnhancedErrorBoundary>
               </Layout>
-            </BrowserRouter>
-          </HelmetProvider>
-        </ProfileProvider>
+            </HelmetProvider>
+          </ProfileProvider>
+        </BrowserRouter>
       </TooltipProvider>
       {environmentUtils.isDevelopment() && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>

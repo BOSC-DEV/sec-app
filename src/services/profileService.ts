@@ -2,13 +2,27 @@ import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 import { getConnection } from '@/utils/phantomWallet';
 import { Profile } from '@/types/dataTypes';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, supabaseStorage } from '@/integrations/supabase/client';
 import { handleError } from '@/utils/errorHandling';
 import { sanitizeInput, sanitizeUrl } from '@/utils/securityUtils';
 import { ErrorSeverity } from '@/utils/errorSeverity';
 
 // SEC token mint address
 const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump');
+
+// Helper to get correct MIME type based on file extension
+function getMimeType(file: File): string {
+  if (file.type && file.type !== '') return file.type;
+  const ext = file.name.split('.').pop()?.toLowerCase();
+  switch (ext) {
+    case 'png': return 'image/png';
+    case 'jpg':
+    case 'jpeg': return 'image/jpeg';
+    case 'webp': return 'image/webp';
+    case 'gif': return 'image/gif';
+    default: return 'application/octet-stream';
+  }
+}
 
 // Function to upload profile picture
 export const uploadProfilePicture = async (walletAddress: string, file: File): Promise<string | null> => {
@@ -18,8 +32,9 @@ export const uploadProfilePicture = async (walletAddress: string, file: File): P
     }
     
     // Validate file type
+    const mimeType = getMimeType(file);
     const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-    if (!validTypes.includes(file.type)) {
+    if (!validTypes.includes(mimeType)) {
       throw new Error('Invalid file type. Only JPEG, PNG, WEBP and GIF are allowed');
     }
     
@@ -40,17 +55,17 @@ export const uploadProfilePicture = async (walletAddress: string, file: File): P
       throw new Error('Authentication required to upload profile picture');
     }
 
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabaseStorage.storage
       .from('profiles')
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: true,
-        contentType: file.type
+        contentType: mimeType
       });
 
     if (uploadError) throw uploadError;
 
-    const { data } = supabase.storage
+    const { data } = supabaseStorage.storage
       .from('profiles')
       .getPublicUrl(filePath);
 

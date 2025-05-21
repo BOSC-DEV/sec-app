@@ -16,6 +16,7 @@ interface ScammerInfoFieldsProps {
   setPhotoFile: (file: File | null) => void;
   photoPreview: string;
   setPhotoPreview: (url: string) => void;
+  isEditMode?: boolean;
 }
 
 const ScammerInfoFields = ({
@@ -23,7 +24,8 @@ const ScammerInfoFields = ({
   photoFile,
   setPhotoFile,
   photoPreview,
-  setPhotoPreview
+  setPhotoPreview,
+  isEditMode = false
 }: ScammerInfoFieldsProps) => {
   const { control, watch } = form;
   const navigate = useNavigate();
@@ -86,6 +88,7 @@ const ScammerInfoFields = ({
           setPhotoPreview={setPhotoPreview}
           setValue={form.setValue}
           control={control}
+          isEditMode={isEditMode}
         />
       </div>
       

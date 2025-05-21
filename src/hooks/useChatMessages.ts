@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { ChatMessage } from '@/types/dataTypes';
-import { supabase, safeInsert } from '@/integrations/supabase/client';
+import { supabase, supabaseStorage, safeInsert } from '@/integrations/supabase/client';
 import { sanitizeHtml, sanitizeInput, detectMaliciousPattern, sanitizeFormData } from '@/utils/securityUtils';
 import { toast } from '@/hooks/use-toast';
 
@@ -106,7 +106,7 @@ export const useChatMessages = () => {
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
         const filePath = `chat-images/${sanitizeInput(fileName)}`;
         
-        const { error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabaseStorage.storage
           .from('community')
           .upload(filePath, messageData.image_file, {
             cacheControl: '3600',
@@ -115,7 +115,7 @@ export const useChatMessages = () => {
           
         if (uploadError) throw uploadError;
         
-        const { data } = supabase.storage
+        const { data } = supabaseStorage.storage
           .from('community')
           .getPublicUrl(filePath);
           
