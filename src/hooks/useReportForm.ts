@@ -106,26 +106,45 @@ export const useReportForm = (id?: string) => {
     try {
       let photoUrl = data.photo_url;
       
+      // Handle photo upload
       if (photoFile) {
         try {
-          photoUrl = await uploadScammerPhoto(photoFile);
-          console.log("Generated public URL:", photoUrl);
+          const newPhotoUrl = await uploadScammerPhoto(photoFile);
+          if (newPhotoUrl) {
+            photoUrl = newPhotoUrl;
+            // Update the form data with the new photo URL
+            form.setValue('photo_url', photoUrl);
+            // Update the photo preview with the new URL
+            setPhotoPreview(photoUrl);
+          } else {
+            throw new Error("Failed to get photo URL after upload");
+          }
         } catch (uploadErr) {
           setUploadError("Failed to upload photo. Please try again or skip adding a photo.");
           throw uploadErr;
         }
+      } else if (isEditMode) {
+        // In edit mode, if no new photo is uploaded, keep the existing photo URL
+        photoUrl = photoPreview || data.photo_url;
       }
       
       let scammerId;
       
       if (isEditMode && id) {
-        scammerId = await updateScammerReport(id, data, photoUrl);
+        // Get the latest form data after photo URL update
+        const formData = form.getValues();
+        // Update the form data with the final photo URL
+        formData.photo_url = photoUrl;
+        // Pass only the formData to updateScammerReport
+        scammerId = await updateScammerReport(id, formData);
         
         toast({
           title: "Scammer updated",
           description: "The scammer report has been updated successfully.",
         });
       } else {
+        // For new reports, ensure photo_url is included
+        data.photo_url = photoUrl;
         scammerId = await createScammerReport(data, photoUrl, profile);
         
         toast({

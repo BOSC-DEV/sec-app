@@ -2,7 +2,7 @@ import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 import { getConnection } from '@/utils/phantomWallet';
 import { Profile } from '@/types/dataTypes';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, supabaseStorage } from '@/integrations/supabase/client';
 import { handleError } from '@/utils/errorHandling';
 import { sanitizeInput, sanitizeUrl } from '@/utils/securityUtils';
 import { ErrorSeverity } from '@/utils/errorSeverity';
@@ -55,7 +55,7 @@ export const uploadProfilePicture = async (walletAddress: string, file: File): P
       throw new Error('Authentication required to upload profile picture');
     }
 
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabaseStorage.storage
       .from('profiles')
       .upload(filePath, file, {
         cacheControl: '3600',
@@ -65,7 +65,7 @@ export const uploadProfilePicture = async (walletAddress: string, file: File): P
 
     if (uploadError) throw uploadError;
 
-    const { data } = supabase.storage
+    const { data } = supabaseStorage.storage
       .from('profiles')
       .getPublicUrl(filePath);
 

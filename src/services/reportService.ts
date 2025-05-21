@@ -1,5 +1,4 @@
-
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, supabaseStorage } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { ReportFormValues } from '@/hooks/useReportForm';
 import { Profile } from '@/types/dataTypes';
@@ -38,7 +37,7 @@ export const uploadScammerPhoto = async (
     
     console.log("Uploading file to bucket 'media':", safeFileName);
     
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { data: uploadData, error: uploadError } = await supabaseStorage.storage
       .from('media')
       .upload(safeFileName, file, {
         cacheControl: '3600',
@@ -52,7 +51,7 @@ export const uploadScammerPhoto = async (
     
     console.log("File uploaded successfully, getting public URL");
     
-    const { data: publicUrlData } = supabase.storage
+    const { data: publicUrlData } = supabaseStorage.storage
       .from('media')
       .getPublicUrl(safeFileName);
       
@@ -132,8 +131,7 @@ export const isScammerCreator = async (scammerId: string, walletAddress: string)
  */
 export const updateScammerReport = async (
   id: string,
-  data: ReportFormValues,
-  photoUrl: string | null
+  data: ReportFormValues
 ) => {
   try {
     if (!id) {
@@ -154,23 +152,48 @@ export const updateScammerReport = async (
     const sanitizedResponse = data.official_response ? sanitizeInput(data.official_response) : null;
     
     console.log("Updating existing scammer:", sanitizedId);
-    
-    const { error } = await supabase
+    console.log("Photo URL for update:", data.photo_url);
+
+    // Check if the row exists first
+    const { data: existing, error: selectError } = await supabase
       .from('scammers')
-      .update({
-        name: sanitizedName,
-        accused_of: sanitizedAccusedOf,
-        wallet_addresses,
-        photo_url: photoUrl,
-        aliases,
-        links,
-        accomplices,
-        official_response: sanitizedResponse,
-      })
-      .eq('id', sanitizedId);
-      
-    if (error) throw error;
+      .select('id')
+      .eq('id', sanitizedId)
+      .maybeSingle();
+
+    if (selectError) throw selectError;
+    if (!existing) throw new Error('Scammer not found');
     
+    // Create update data object
+    const updateData = {
+      name: sanitizedName,
+      accused_of: sanitizedAccusedOf,
+      wallet_addresses,
+      photo_url: data.photo_url,
+      aliases,
+      links,
+      accomplices,
+      official_response: sanitizedResponse,
+    };
+    
+    // Perform the update with return options
+    const { data: updatedData, error } = await supabase
+      .from('scammers')
+      .update(updateData)
+      .eq('id', sanitizedId)
+      .select() // Request the updated record
+      .single(); // Expect a single record
+    
+    if (error) {
+      console.error("Error updating scammer:", error);
+      throw error;
+    }
+    
+    if (!updatedData) {
+      throw new Error("No data returned after update");
+    }
+    
+    console.log("Successfully updated scammer:", updatedData);
     return sanitizedId;
   } catch (error) {
     handleError(error, {
@@ -198,7 +221,6 @@ export const createScammerReport = async (
     console.log("Creating new scammer report");
     
     const newId = await generateScammerId();
-    console.log("Generated new scammer ID:", newId);
     
     // Filter out empty values and sanitize arrays
     const aliases = data.aliases?.filter(item => item !== '').map(sanitizeInput) || [];
@@ -256,22 +278,15 @@ export const createScammerReport = async (
   }
 };
 
-/**
- * Generates a new scammer ID
- */
-export const generateScammerId = async (): Promise<number> => {
+// Generate a sequential ID for a new scammer
+export const generateScammerId = async (): Promise<string> => {
   try {
-    const { data, error } = await supabase
-      .from('scammers')
-      .select('id')
-      .order('id', { ascending: false })
-      .limit(1);
-      
-    if (error) throw error;
-    
-    return data[0]?.id ? parseInt(data[0].id) + 1 : 1;
+    // Generate a unique ID based on timestamp to avoid collisions
+    const timestamp = Date.now();
+    const randomSuffix = Math.floor(Math.random() * 1000);
+    return `scammer-${timestamp}-${randomSuffix}`;
   } catch (error) {
-    console.error("Error generating scammer ID:", error);
+    console.error('Error generating scammer ID:', error);
     throw error;
   }
 };

@@ -5,41 +5,6 @@ import { handleError } from '@/utils/errorHandling';
 import { sanitizeInput } from '@/utils/securityUtils';
 import { ErrorSeverity } from '@/utils/errorSeverity';
 
-// Generate a sequential ID for a new scammer
-export const generateScammerId = async (): Promise<string> => {
-  try {
-    // Get the highest current numeric ID
-    const { data, error } = await supabase
-      .from('scammers')
-      .select('id')
-      .order('id', { ascending: false })
-      .limit(1);
-    
-    if (error) {
-      console.error('Error fetching highest ID:', error);
-      throw error;
-    }
-    
-    // Parse the highest ID and increment by 1
-    let nextId = 1;
-    
-    if (data && data.length > 0) {
-      const currentId = parseInt(data[0].id);
-      if (!isNaN(currentId)) {
-        nextId = currentId + 1;
-      }
-    }
-    
-    return nextId.toString();
-  } catch (e) {
-    console.error('Error generating scammer ID:', e);
-    // Fallback to a timestamp-based ID if any error occurs
-    const timestamp = Date.now();
-    const randomSuffix = Math.floor(Math.random() * 1000);
-    return `${timestamp}-${randomSuffix}`;
-  }
-};
-
 export const getScammers = async (): Promise<Scammer[]> => {
   try {
     const { data, error } = await supabase

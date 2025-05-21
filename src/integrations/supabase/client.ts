@@ -21,6 +21,32 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     headers: {
       'Content-Type': 'application/json',
       'X-Client-Info': 'sec-community-app',
+      'apikey': SUPABASE_PUBLISHABLE_KEY,
+      'Prefer': 'return=representation' // Request the updated record in response
+    },
+  },
+  db: {
+    schema: 'public',
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 10,
+    },
+  },
+});
+
+// Storage client for uploading and downloading files
+export const supabaseStorage = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    storageKey: 'supabase-auth',
+    detectSessionInUrl: false, // Disable automatic detection of OAuth redirects
+    flowType: 'implicit', // Add this to disable email confirmation
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'sec-community-app',
       'apikey': SUPABASE_PUBLISHABLE_KEY
     },
   },
