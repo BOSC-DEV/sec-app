@@ -43,21 +43,81 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isPhantomAvailable, setIsPhantomAvailable] = useState<boolean>(false);
   const [session, setSession] = useState<Session | null>(null);
+  const [isWalletReady, setIsWalletReady] = useState<boolean>(false);
 
   // Helper function to validate and set wallet address
-  const setValidatedWalletAddress = (address: string | null) => {
+  const setValidatedWalletAddress = async (address: string | null): Promise<boolean> => {
     if (address) {
-      // Only set if we have a valid public key from Phantom
-      const publicKey = getWalletPublicKey();
-      if (publicKey && publicKey.toLowerCase() === address.toLowerCase()) {
-        setWalletAddress(publicKey); // Use the actual public key with correct case
-        localStorage.setItem('walletAddress', publicKey);
-        setIsConnected(true);
-        return true;
+      const provider = getPhantomProvider();
+      if (!provider) {
+        console.log("Phantom provider not available");
+        return false;
+      }
+
+      try {
+        // If wallet is not connected, try to reconnect using trusted apps feature
+        if (!provider.isConnected) {
+          console.log("Attempting to reconnect to Phantom wallet...");
+          await provider.connect({ onlyIfTrusted: true });
+        }
+
+        // Check if the wallet is now connected and matches
+        if (!provider.isConnected || !provider.publicKey || provider.publicKey.toString().toLowerCase() !== address.toLowerCase()) {
+          console.log("Wallet not properly connected in Phantom");
+          return false;
+        }
+
+        const publicKey = getWalletPublicKey();
+        if (publicKey && publicKey.toLowerCase() === address.toLowerCase()) {
+          setWalletAddress(publicKey); // Use the actual public key with correct case
+          localStorage.setItem('walletAddress', publicKey);
+          setIsConnected(true);
+          setIsWalletReady(true);
+          return true;
+        }
+      } catch (error) {
+        console.error("Error reconnecting to Phantom wallet:", error);
+        return false;
       }
     }
     return false;
   };
+
+  const fetchProfile = async (address: string) => {
+    if (!address || !isWalletReady) {
+      console.log("Skipping profile fetch - wallet not ready or no address");
+      return;
+    }
+    
+    try {
+      console.log("Fetching profile for wallet:", address);
+      setIsLoading(true);
+      const fetchedProfile = await getProfileByWallet(address);
+      console.log("Fetched profile:", fetchedProfile);
+      
+      if (fetchedProfile) {
+        setProfile(fetchedProfile);
+      } else {
+        setProfile(null);
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load profile',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Effect to handle profile fetching when wallet is ready
+  useEffect(() => {
+    if (isWalletReady && walletAddress) {
+      fetchProfile(walletAddress);
+    }
+  }, [isWalletReady, walletAddress]);
 
   useEffect(() => {
     const checkPhantomAvailability = () => {
@@ -75,17 +135,14 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         // Extract wallet address from session email (it's in lowercase)
         const sessionWalletAddress = sessionData.user.email?.split('@')[0];
         if (sessionWalletAddress) {
-          // Validate against actual Phantom wallet public key
-          const publicKey = getWalletPublicKey();
-          if (publicKey && publicKey.toLowerCase() === sessionWalletAddress.toLowerCase()) {
-            setWalletAddress(publicKey);
-            setIsConnected(true);
-            localStorage.setItem('walletAddress', publicKey);
-          } else {
-            // If wallet is not connected or public key doesn't match, sign out
+          const isValid = await setValidatedWalletAddress(sessionWalletAddress);
+          if (!isValid) {
+            // If wallet validation fails, sign out
             await supabase.auth.signOut();
             setWalletAddress(null);
             setIsConnected(false);
+            setProfile(null);
+            setIsWalletReady(false);
             localStorage.removeItem('walletAddress');
           }
         }
@@ -93,6 +150,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         setProfile(null);
         setWalletAddress(null);
         setIsConnected(false);
+        setIsWalletReady(false);
         localStorage.removeItem('walletAddress');
       }
     });
@@ -101,6 +159,34 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     const checkExistingSession = async () => {
       try {
         setIsLoading(true);
+
+        // First check if Phantom is available and wait a bit for it to initialize if needed
+        const maxAttempts = 5;
+        let attempts = 0;
+        let provider = getPhantomProvider();
+        
+        while (!provider && attempts < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+          provider = getPhantomProvider();
+          attempts++;
+        }
+
+        if (!provider) {
+          console.log("Phantom provider not available after waiting");
+          setIsLoading(false);
+          return;
+        }
+
+        // Try to reconnect to Phantom if we have a previous connection
+        try {
+          if (!provider.isConnected && provider.isPhantom) {
+            console.log("Attempting to restore Phantom connection...");
+            await provider.connect({ onlyIfTrusted: true });
+          }
+        } catch (error) {
+          console.log("Could not auto-reconnect to Phantom:", error);
+        }
+
         const { data: { session: existingSession } } = await supabase.auth.getSession();
         
         if (existingSession) {
@@ -108,17 +194,13 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
           const sessionWalletAddress = existingSession.user.email?.split('@')[0];
           
           if (sessionWalletAddress) {
-            // Validate against actual Phantom wallet public key
-            const publicKey = getWalletPublicKey();
-            if (publicKey && publicKey.toLowerCase() === sessionWalletAddress.toLowerCase()) {
-              setWalletAddress(publicKey);
-              setIsConnected(true);
-              localStorage.setItem('walletAddress', publicKey);
-            } else {
-              // If wallet is not connected or public key doesn't match, sign out
+            const isValid = await setValidatedWalletAddress(sessionWalletAddress);
+            if (!isValid) {
               await supabase.auth.signOut();
               setWalletAddress(null);
               setIsConnected(false);
+              setProfile(null);
+              setIsWalletReady(false);
               localStorage.removeItem('walletAddress');
             }
           }
@@ -126,15 +208,12 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
           // Check if we have a saved wallet address
           const savedWallet = localStorage.getItem('walletAddress');
           if (savedWallet) {
-            // Validate against actual Phantom wallet public key
-            const publicKey = getWalletPublicKey();
-            if (publicKey && publicKey.toLowerCase() === savedWallet.toLowerCase()) {
-              setWalletAddress(publicKey);
-              setIsConnected(true);
-            } else {
-              // If wallet is not connected or public key doesn't match, clear saved state
+            const isValid = await setValidatedWalletAddress(savedWallet);
+            if (!isValid) {
               setWalletAddress(null);
               setIsConnected(false);
+              setProfile(null);
+              setIsWalletReady(false);
               localStorage.removeItem('walletAddress');
             }
           }
@@ -155,13 +234,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       subscription.unsubscribe();
     };
   }, []);
-
-  // Add a new effect to handle profile fetching when walletAddress changes
-  useEffect(() => {
-    if (walletAddress) {
-      fetchProfile(walletAddress);
-    }
-  }, [walletAddress]);
 
   useEffect(() => {
     const provider = getPhantomProvider();
@@ -231,30 +303,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       });
     }
   }, [isPhantomAvailable]);
-
-  const fetchProfile = async (address: string) => {
-    try {
-      console.log("Fetching profile for wallet:", address);
-      setIsLoading(true);
-      const fetchedProfile = await getProfileByWallet(address);
-      console.log("Fetched profile:", fetchedProfile);
-      
-      if (fetchedProfile) {
-        setProfile(fetchedProfile);
-      } else {
-        setProfile(null);
-      }
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load profile',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const uploadAvatar = async (file: File): Promise<string | null> => {
     if (!walletAddress) {
