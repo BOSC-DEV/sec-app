@@ -1,6 +1,6 @@
 
 import React, { ReactElement } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
+import { render, RenderOptions, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -118,6 +118,6 @@ const mockSupabaseClient = () => {
   };
 };
 
-// Export all test utilities
+// Export all test utilities including screen and fireEvent
 export * from '@testing-library/react';
-export { customRender as render, mockFormField, mockApiResponse, mockApiError, mockLocalStorage, mockSupabaseClient };
+export { customRender as render, screen, fireEvent, mockFormField, mockApiResponse, mockApiError, mockLocalStorage, mockSupabaseClient };
