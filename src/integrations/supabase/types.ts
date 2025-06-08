@@ -662,6 +662,7 @@ export type Database = {
           official_response: string | null
           photo_url: string | null
           shares: number | null
+          updated_at: string | null
           views: number | null
           wallet_addresses: string[] | null
         }
@@ -682,6 +683,7 @@ export type Database = {
           official_response?: string | null
           photo_url?: string | null
           shares?: number | null
+          updated_at?: string | null
           views?: number | null
           wallet_addresses?: string[] | null
         }
@@ -702,6 +704,7 @@ export type Database = {
           official_response?: string | null
           photo_url?: string | null
           shares?: number | null
+          updated_at?: string | null
           views?: number | null
           wallet_addresses?: string[] | null
         }
@@ -903,6 +906,10 @@ export type Database = {
           profile_bio: string
         }
         Returns: undefined
+      }
+      validate_and_sanitize_text: {
+        Args: { input_text: string }
+        Returns: string
       }
     }
     Enums: {

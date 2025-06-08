@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -17,7 +18,10 @@ import PublicProfilePage from "./pages/PublicProfilePage";
 import LegalPages from "./pages/LegalPages";
 import NotFound from "./pages/NotFound";
 import NotificationsPage from "./pages/NotificationsPage";
-import AnalyticsPage from "./pages/AnalyticsPage";  // Add this import
+import AnalyticsPage from "./pages/AnalyticsPage";
+import DocsPage from "./pages/DocsPage";
+import QuickStartPage from "./pages/docs/QuickStartPage";
+import DocsLayout from "./components/docs/DocsLayout";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ProfileProvider, useProfile } from "./contexts/ProfileContext";
 import EnhancedErrorBoundary from "./components/common/EnhancedErrorBoundary";

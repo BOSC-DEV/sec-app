@@ -95,6 +95,9 @@ const Header = () => {
   }, {
     label: 'Community',
     path: '/community'
+  }, {
+    label: 'Docs',
+    path: '/docs'
   }];
 
   return <header className="icc-header sticky top-0 z-50">
