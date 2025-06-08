@@ -1,5 +1,5 @@
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '@/utils/testUtils';
 import { describe, expect, test, vi, beforeEach } from 'vitest';
 import ScammerPhotoUpload from './ScammerPhotoUpload';
 
