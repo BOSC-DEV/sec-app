@@ -1,11 +1,14 @@
 
 import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom';
 import DocsSidebar from './DocsSidebar';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-const DocsLayout = () => {
+interface DocsLayoutProps {
+  children: React.ReactNode;
+}
+
+const DocsLayout = ({ children }: DocsLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -43,7 +46,7 @@ const DocsLayout = () => {
           
           {/* Content area */}
           <div className="px-6 py-8 lg:px-12">
-            <Outlet />
+            {children}
           </div>
         </main>
       </div>
