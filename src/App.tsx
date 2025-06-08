@@ -206,9 +206,17 @@ const App = () => (
                         <ProfilePage />
                       </ProtectedRoute>
                     } />
-                    <Route path="/profile/:username" element={<PublicProfilePage />} />
-                    <Route path="/wallet/:address" element={<PublicProfilePage />} />
-                    <Route path="/:username" element={<PublicProfilePage />} />
+                    {/* Documentation routes - MUST come before catch-all routes */}
+                    <Route path="/docs" element={
+                      <DocsLayout>
+                        <DocsPage />
+                      </DocsLayout>
+                    } />
+                    <Route path="/docs/*" element={
+                      <DocsLayout>
+                        <QuickStartPage />
+                      </DocsLayout>
+                    } />
                     {/* Legal and Information Pages */}
                     <Route path="/terms" element={<LegalPages />} />
                     <Route path="/privacy" element={<LegalPages />} />
@@ -223,6 +231,11 @@ const App = () => (
                         <AnalyticsPage />
                       </ProtectedRoute>
                     } />
+                    {/* Profile routes - MUST come after all other specific routes */}
+                    <Route path="/profile/:username" element={<PublicProfilePage />} />
+                    <Route path="/wallet/:address" element={<PublicProfilePage />} />
+                    {/* Catch-all username route - MUST be last */}
+                    <Route path="/:username" element={<PublicProfilePage />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </EnhancedErrorBoundary>
