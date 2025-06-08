@@ -44,10 +44,8 @@ export type WindowWithPhantom = Window & {
   };
 };
 
-// const QUICKNODE_RPC_URL = 'https://old-hidden-sea.solana-mainnet.quiknode.pro/8451b71239184be1451907adce1e53d217c53cb4/';
-// const QUICKNODE_WS_URL = 'wss://old-hidden-sea.solana-mainnet.quiknode.pro/8451b71239184be1451907adce1e53d217c53cb4/';
-const QUICKNODE_RPC_URL = 'https://dawn-crimson-leaf.solana-mainnet.quiknode.pro/123d927f63533eee846037037baeb471af1e3418/';
-const QUICKNODE_WS_URL = 'wss://dawn-crimson-leaf.solana-mainnet.quiknode.pro/123d927f63533eee846037037baeb471af1e3418/';
+const QUICKNODE_RPC_URL = 'https://newest-bold-emerald.solana-mainnet.quiknode.pro/5a5facbf570647115626f7b6612e534ad61f2ced/';
+const QUICKNODE_WS_URL = 'wss://newest-bold-emerald.solana-mainnet.quiknode.pro/5a5facbf570647115626f7b6612e534ad61f2ced/';
 
 const FALLBACK_RPC_URL = 'https://api.mainnet-beta.solana.com';
 
