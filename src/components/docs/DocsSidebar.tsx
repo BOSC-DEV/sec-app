@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -38,7 +39,7 @@ const DocsSidebar = ({ onClose }: DocsSidebarProps) => {
       title: 'Features',
       items: [
         { title: 'Sign Up', path: '/docs/features/wallet' },
-        { title: 'Scammer Reporting', path: '/docs/features/reporting' },
+        { title: 'Report', path: '/docs/features/reporting' },
         { title: 'Bounty System', path: '/docs/features/bounty' },
         { title: 'Badge & Tier System', path: '/docs/features/badges' },
         { title: 'Community Features', path: '/docs/features/community' },
