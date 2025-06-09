@@ -126,12 +126,6 @@ const DocsPage = () => {
           </p>
           <div className="flex flex-wrap gap-3">
             <Button variant="outline" asChild>
-              <a href="https://discord.gg/sec" target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Join Discord
-              </a>
-            </Button>
-            <Button variant="outline" asChild>
               <a href="https://github.com/BOSC-DEV/sec-platform/issues" target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Report Issue
