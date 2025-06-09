@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -22,21 +21,12 @@ const Footer = () => {
   const [faqOpen, setFaqOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
 
-  const copyToClipboard = async () => {
-    const contractAddress = "HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump";
-    try {
-      await navigator.clipboard.writeText(contractAddress);
-      toast({
-        title: "Copied CA",
-        variant: "default"
-      });
-    } catch (err) {
-      toast({
-        title: "Copy failed",
-        variant: "destructive"
-      });
-      console.error("Failed to copy: ", err);
-    }
+  const showTokenWarning = () => {
+    toast({
+      title: "SEC Token Coming Soon",
+      description: "The SEC token is coming soon. Be wary of scam imitations",
+      variant: "default"
+    });
   };
 
   return (
@@ -57,7 +47,7 @@ const Footer = () => {
               <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 p-1" onClick={() => window.open("https://x.com/sandecommission", "_blank")} aria-label="SEC on X">
                 <img src="/lovable-uploads/91abf77b-554f-410f-85a0-15dfdfcc77e4.png" alt="X (Twitter)" className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 p-1" onClick={copyToClipboard} aria-label="Copy Contract Address">
+              <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 p-1" onClick={showTokenWarning} aria-label="SEC Token Info">
                 <Copy className="h-5 w-5 text-white" />
               </Button>
             </div>
