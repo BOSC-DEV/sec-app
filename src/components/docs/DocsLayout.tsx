@@ -31,10 +31,10 @@ const DocsLayout = ({ children }: DocsLayoutProps) => {
         <DocsSidebar onClose={() => setSidebarOpen(false)} />
       </aside>
 
-      {/* Main content - Independent scroll area */}
-      <main className="flex-1 min-w-0 flex flex-col h-full lg:ml-0">
+      {/* Main content - Fully contained with no page scroll */}
+      <main className="flex-1 min-w-0 h-full overflow-hidden flex flex-col lg:ml-0">
         {/* Mobile header */}
-        <div className="lg:hidden sticky top-0 z-30 bg-background border-b p-4 flex-shrink-0">
+        <div className="lg:hidden bg-background border-b p-4 flex-shrink-0">
           <Button
             variant="ghost"
             size="icon"
@@ -44,8 +44,8 @@ const DocsLayout = ({ children }: DocsLayoutProps) => {
           </Button>
         </div>
         
-        {/* Content area with independent scroll */}
-        <div className="flex-1 overflow-y-auto h-full">
+        {/* Content area with independent scroll - fully contained */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden">
           <div className="px-6 py-8 lg:px-12">
             {children}
           </div>
