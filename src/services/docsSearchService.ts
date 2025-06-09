@@ -257,8 +257,8 @@ const DOCS_SEARCH_INDEX: SearchResult[] = [
   {
     id: 'api-endpoints',
     title: 'Core API Endpoints',
-    content: 'Core API Endpoints GET /scammers Retrieve a list of reported scammers with optional filtering and pagination. POST /scammers Submit a new scammer report with evidence and details. POST /bounties/contribute Add SEC tokens to a scammer bounty pool. POST /bounties/transfer Transfer bounty tokens between users or scammer reports.',
-    excerpt: 'GET and POST endpoints for scammers, bounty contributions, and transfers',
+    content: 'Core API Endpoints GET /scammers Retrieve a list of reported scammers with optional filtering and pagination. POST /scammers Submit a new scammer report with evidence and details. POST /reports/scammer Report a scammer with comprehensive details including evidence wallet addresses and supporting documentation. POST /bounties/contribute Add SEC tokens to a scammer bounty pool. POST /bounties/transfer Transfer bounty tokens between users or scammer reports.',
+    excerpt: 'GET and POST endpoints for scammers, reports, bounty contributions, and transfers',
     path: '/docs/developer/api',
     section: 'Core Endpoints',
     sectionId: 'core-endpoints',
@@ -280,6 +280,15 @@ const DOCS_SEARCH_INDEX: SearchResult[] = [
     excerpt: 'Submit new scammer reports with evidence and crypto addresses',
     path: '/docs/developer/api',
     section: 'POST /scammers',
+    type: 'section'
+  },
+  {
+    id: 'api-reports-scammer',
+    title: 'POST /reports/scammer',
+    content: 'POST /reports/scammer Report a scammer with comprehensive details including evidence wallet addresses and supporting documentation. Required fields: scammer_name accused_of wallet_addresses aliases accomplices links evidence_description photo_evidence official_response. Creates detailed scammer report with full evidence trail.',
+    excerpt: 'Report scammers with comprehensive evidence and supporting documentation',
+    path: '/docs/developer/api',
+    section: 'POST /reports/scammer',
     type: 'section'
   },
   {

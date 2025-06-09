@@ -93,6 +93,26 @@ const APIPage = () => {
             </div>
 
             <div className="border rounded-lg p-6">
+              <h3 className="text-xl font-semibold mb-3 text-red-600">POST /reports/scammer</h3>
+              <p className="mb-4">Report a scammer with comprehensive details including evidence, wallet addresses, and supporting documentation.</p>
+              <div className="bg-muted p-4 rounded">
+                <pre className="text-sm">
+{`{
+  "scammer_name": "Crypto Fraudster",
+  "accused_of": "Investment fraud and rug pull",
+  "wallet_addresses": ["1A2B3C4D...", "5E6F7G8H..."],
+  "aliases": ["John Crypto", "BitcoinJohn"],
+  "accomplices": ["Jane Doe", "Bob Smith"],
+  "links": ["https://fraudulent-site.com"],
+  "evidence_description": "Screenshots and transaction logs",
+  "photo_evidence": "base64_image_data_or_url",
+  "official_response": "Scammer's public statement"
+}`}
+                </pre>
+              </div>
+            </div>
+
+            <div className="border rounded-lg p-6">
               <h3 className="text-xl font-semibold mb-3 text-purple-600">POST /bounties/contribute</h3>
               <p className="mb-4">Add SEC tokens to a scammer's bounty pool.</p>
               <div className="bg-muted p-4 rounded">
