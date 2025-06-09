@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown, ChevronRight, Search, X, Book } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -98,7 +97,7 @@ const DocsSidebar = ({ onClose }: DocsSidebarProps) => {
   })).filter(section => section.items.length > 0);
 
   return (
-    <div className="h-full bg-muted/50 border-r flex flex-col">
+    <div className="h-full bg-muted/50 border-r flex flex-col overflow-hidden">
       {/* Header - Fixed */}
       <div className="p-4 border-b flex-shrink-0">
         <div className="flex items-center justify-between mb-3">
@@ -125,8 +124,8 @@ const DocsSidebar = ({ onClose }: DocsSidebarProps) => {
         </div>
       </div>
 
-      {/* Navigation - Scrollable */}
-      <ScrollArea className="flex-1">
+      {/* Navigation - Scrollable container that doesn't affect parent */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden">
         <nav className="p-2">
           <div className="space-y-0.5">
             {filteredItems.map((section) => (
@@ -171,7 +170,7 @@ const DocsSidebar = ({ onClose }: DocsSidebarProps) => {
             ))}
           </div>
         </nav>
-      </ScrollArea>
+      </div>
     </div>
   );
 };

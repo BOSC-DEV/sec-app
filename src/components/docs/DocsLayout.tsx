@@ -12,7 +12,7 @@ const DocsLayout = ({ children }: DocsLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="h-screen bg-background flex overflow-hidden">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
@@ -21,19 +21,18 @@ const DocsLayout = ({ children }: DocsLayoutProps) => {
         />
       )}
       
-      {/* Sidebar - Fixed positioning with independent scroll */}
+      {/* Sidebar - Fixed height with internal scroll */}
       <aside className={`
         fixed inset-y-0 left-0 z-50 w-56 transform transition-transform duration-200 ease-in-out
         lg:relative lg:translate-x-0 lg:z-0 lg:flex-shrink-0
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        h-full overflow-hidden
       `}>
-        <div className="h-full overflow-hidden">
-          <DocsSidebar onClose={() => setSidebarOpen(false)} />
-        </div>
+        <DocsSidebar onClose={() => setSidebarOpen(false)} />
       </aside>
 
       {/* Main content - Independent scroll area */}
-      <main className="flex-1 min-w-0 flex flex-col lg:ml-0">
+      <main className="flex-1 min-w-0 flex flex-col h-full lg:ml-0">
         {/* Mobile header */}
         <div className="lg:hidden sticky top-0 z-30 bg-background border-b p-4 flex-shrink-0">
           <Button
@@ -46,7 +45,7 @@ const DocsLayout = ({ children }: DocsLayoutProps) => {
         </div>
         
         {/* Content area with independent scroll */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto h-full">
           <div className="px-6 py-8 lg:px-12">
             {children}
           </div>
