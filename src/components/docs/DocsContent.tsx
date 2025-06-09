@@ -77,14 +77,14 @@ const DocsContent = ({ children, title, description }: DocsContentProps) => {
           </footer>
         </div>
 
-        {/* Table of contents - Independent scroll container */}
+        {/* Table of contents - Sticky sidebar */}
         {headings.length > 0 && (
           <aside className="w-64 shrink-0 lg:block hidden">
-            <div className="h-fit max-h-[calc(100vh-8rem)] overflow-hidden border rounded-lg bg-muted/30">
+            <div className="sticky top-4 h-fit max-h-[calc(100vh-2rem)] overflow-hidden border rounded-lg bg-muted/30">
               <div className="p-4 border-b bg-muted/50">
                 <h3 className="font-semibold text-sm">On this page</h3>
               </div>
-              <nav className="p-4 overflow-y-auto max-h-[calc(100vh-12rem)]">
+              <nav className="p-4 overflow-y-auto max-h-[calc(100vh-8rem)]">
                 <div className="space-y-2">
                   {headings.map((heading) => (
                     <a
