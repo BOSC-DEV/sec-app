@@ -19,7 +19,7 @@ const BountyPage = () => {
             <Coins className="h-12 w-12 mb-4" />
             <p className="text-xl leading-relaxed">
               The SEC bounty system creates financial incentives for exposing scammers and fraudulent 
-              activities. Community members can contribute SOL to bounties, increasing the reward for 
+              activities. Community members can contribute SEC tokens to bounties, increasing the reward for 
               bringing scammers to justice.
             </p>
           </div>
@@ -40,7 +40,7 @@ const BountyPage = () => {
               <div className="bg-icc-gold text-icc-blue-dark rounded-full w-8 h-8 flex items-center justify-center font-bold">2</div>
               <div>
                 <h3 className="text-xl font-semibold mb-2">Community Contributes</h3>
-                <p>Other users can add SOL to the bounty, increasing the total reward pool for that scammer.</p>
+                <p>Other users can add SEC tokens to the bounty, increasing the total reward pool for that scammer.</p>
               </div>
             </div>
             <div className="flex items-start gap-4 p-6 border rounded-lg">
@@ -67,7 +67,7 @@ const BountyPage = () => {
             <div className="p-6 bg-muted rounded-lg">
               <Target className="h-8 w-8 text-icc-gold mb-4" />
               <h3 className="text-xl font-semibold mb-3">Minimum Contribution</h3>
-              <p>You can contribute as little as 0.01 SOL to any bounty. Every contribution counts and helps increase the incentive.</p>
+              <p>You can contribute as few as 1 SEC token to any bounty. Every contribution counts and helps increase the incentive.</p>
             </div>
             <div className="p-6 bg-muted rounded-lg">
               <TrendingUp className="h-8 w-8 text-icc-gold mb-4" />
@@ -86,7 +86,7 @@ const BountyPage = () => {
               <h3 className="font-semibold mb-2 text-red-600">High Priority</h3>
               <p className="text-sm">Major scammers with significant victim impact</p>
               <div className="mt-3 px-3 py-1 bg-red-100 dark:bg-red-900 rounded-full text-xs">
-                10+ SOL Average
+                1000+ SEC Average
               </div>
             </div>
             <div className="p-6 border rounded-lg text-center">
@@ -94,7 +94,7 @@ const BountyPage = () => {
               <h3 className="font-semibold mb-2 text-yellow-600">Medium Priority</h3>
               <p className="text-sm">Scammers with moderate community impact</p>
               <div className="mt-3 px-3 py-1 bg-yellow-100 dark:bg-yellow-900 rounded-full text-xs">
-                1-10 SOL Average
+                100-1000 SEC Average
               </div>
             </div>
             <div className="p-6 border rounded-lg text-center">
@@ -102,7 +102,7 @@ const BountyPage = () => {
               <h3 className="font-semibold mb-2 text-green-600">Standard</h3>
               <p className="text-sm">Newly reported or smaller scale scams</p>
               <div className="mt-3 px-3 py-1 bg-green-100 dark:bg-green-900 rounded-full text-xs">
-                0.1-1 SOL Average
+                10-100 SEC Average
               </div>
             </div>
           </div>
@@ -137,19 +137,19 @@ const BountyPage = () => {
             <div className="space-y-3">
               <div className="flex justify-between items-center p-3 bg-background rounded">
                 <span>Your Contribution</span>
-                <span className="font-mono">5 SOL</span>
+                <span className="font-mono">500 SEC</span>
               </div>
               <div className="flex justify-between items-center p-3 bg-background rounded">
                 <span>Total Bounty Pool</span>
-                <span className="font-mono">50 SOL</span>
+                <span className="font-mono">5000 SEC</span>
               </div>
               <div className="flex justify-between items-center p-3 bg-background rounded">
                 <span>Your Share</span>
                 <span className="font-mono text-icc-gold">10%</span>
               </div>
               <div className="flex justify-between items-center p-3 bg-icc-gold text-icc-blue-dark rounded font-semibold">
-                <span>Recovered Amount (if 100 SOL recovered)</span>
-                <span className="font-mono">10 SOL</span>
+                <span>Recovered Amount (if 10,000 SEC recovered)</span>
+                <span className="font-mono">1,000 SEC</span>
               </div>
             </div>
           </div>

@@ -47,11 +47,11 @@ const LeaderboardPage = () => {
               <Award className="h-8 w-8 text-icc-gold mb-4" />
               <h3 className="text-xl font-semibold mb-3">Top Contributors</h3>
               <p className="mb-4">
-                Community members who have contributed the most SOL to bounties, incentivizing 
+                Community members who have contributed the most SEC tokens to bounties, incentivizing 
                 scammer exposure and accountability.
               </p>
               <ul className="space-y-2 text-sm">
-                <li>• Total bounty contributions in SOL</li>
+                <li>• Total bounty contributions in SEC tokens</li>
                 <li>• Number of different bounties supported</li>
                 <li>• Strategic contribution patterns</li>
                 <li>• Community impact of contributions</li>
@@ -103,7 +103,7 @@ const LeaderboardPage = () => {
               <div className="bg-icc-gold text-icc-blue-dark rounded-full w-8 h-8 flex items-center justify-center font-bold">2</div>
               <div>
                 <h3 className="text-xl font-semibold mb-2">Bounty Contributions</h3>
-                <p>Points awarded based on SOL contributed to bounties, encouraging financial support for scammer accountability.</p>
+                <p>Points awarded based on SEC tokens contributed to bounties, encouraging financial support for scammer accountability.</p>
               </div>
             </div>
             <div className="flex items-start gap-4 p-6 border rounded-lg">
