@@ -22,9 +22,9 @@ const DocsLayout = ({ children }: DocsLayoutProps) => {
           />
         )}
         
-        {/* Sidebar */}
+        {/* Sidebar - Made 30% smaller (from w-80 to w-56) */}
         <aside className={`
-          fixed inset-y-0 left-0 z-50 w-80 transform transition-transform duration-200 ease-in-out
+          fixed inset-y-0 left-0 z-50 w-56 transform transition-transform duration-200 ease-in-out
           lg:relative lg:translate-x-0 lg:z-0
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         `}>
