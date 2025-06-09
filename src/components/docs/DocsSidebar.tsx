@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -97,9 +98,9 @@ const DocsSidebar = ({ onClose }: DocsSidebarProps) => {
   })).filter(section => section.items.length > 0);
 
   return (
-    <div className="h-full bg-muted/50 border-r flex flex-col overflow-hidden">
+    <div className="h-full bg-background border-r flex flex-col overflow-hidden z-50">
       {/* Header - Fixed */}
-      <div className="p-4 border-b flex-shrink-0">
+      <div className="p-4 border-b flex-shrink-0 bg-background">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Book className="h-5 w-5 text-icc-gold" />
@@ -119,13 +120,13 @@ const DocsSidebar = ({ onClose }: DocsSidebarProps) => {
             placeholder="Search docs..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8 h-8 text-sm"
+            className="pl-8 h-8 text-sm bg-background"
           />
         </div>
       </div>
 
       {/* Navigation - Scrollable container that doesn't affect parent */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden bg-background">
         <nav className="p-2">
           <div className="space-y-0.5">
             {filteredItems.map((section) => (
