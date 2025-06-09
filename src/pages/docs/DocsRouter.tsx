@@ -12,122 +12,22 @@ import CommunityFeaturesPage from './features/CommunityFeaturesPage';
 import SearchPage from './features/SearchPage';
 import LeaderboardPage from './features/LeaderboardPage';
 import NotificationsPage from './features/NotificationsPage';
-
-// Technical Documentation placeholders
-const ArchitecturePage = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold mb-4">Architecture</h1>
-    <p>Technical architecture documentation coming soon...</p>
-  </div>
-);
-
-const FrontendPage = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold mb-4">Frontend Stack</h1>
-    <p>Frontend technology documentation coming soon...</p>
-  </div>
-);
-
-const BackendPage = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold mb-4">Backend Integration</h1>
-    <p>Backend integration documentation coming soon...</p>
-  </div>
-);
-
-const DatabasePage = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold mb-4">Database Schema</h1>
-    <p>Database schema documentation coming soon...</p>
-  </div>
-);
-
-const SecurityPage = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold mb-4">Security Features</h1>
-    <p>Security documentation coming soon...</p>
-  </div>
-);
-
-// User Guide placeholders
-const ReportsGuidePage = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold mb-4">Creating Reports</h1>
-    <p>User guide for creating reports coming soon...</p>
-  </div>
-);
-
-const BountiesGuidePage = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold mb-4">Managing Bounties</h1>
-    <p>User guide for managing bounties coming soon...</p>
-  </div>
-);
-
-const WalletGuidePage = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold mb-4">Using Wallet Features</h1>
-    <p>User guide for wallet features coming soon...</p>
-  </div>
-);
-
-const CommunityGuidePage = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold mb-4">Community Participation</h1>
-    <p>User guide for community participation coming soon...</p>
-  </div>
-);
-
-// Developer Resources placeholders
-const APIPage = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold mb-4">API Reference</h1>
-    <p>API documentation coming soon...</p>
-  </div>
-);
-
-const ContributingPage = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold mb-4">Contributing</h1>
-    <p>Contributing guide coming soon...</p>
-  </div>
-);
-
-const DeploymentPage = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold mb-4">Deployment</h1>
-    <p>Deployment guide coming soon...</p>
-  </div>
-);
-
-// Legal & Compliance placeholders
-const TermsPage = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold mb-4">Terms of Service</h1>
-    <p>Terms of service coming soon...</p>
-  </div>
-);
-
-const PrivacyPage = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold mb-4">Privacy Policy</h1>
-    <p>Privacy policy coming soon...</p>
-  </div>
-);
-
-const LegalConsiderationsPage = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold mb-4">Legal Considerations</h1>
-    <p>Legal considerations documentation coming soon...</p>
-  </div>
-);
-
-const TokenomicsPage = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold mb-4">Tokenomics</h1>
-    <p>Tokenomics documentation coming soon...</p>
-  </div>
-);
+import ArchitecturePage from './technical/ArchitecturePage';
+import FrontendPage from './technical/FrontendPage';
+import BackendPage from './technical/BackendPage';
+import DatabasePage from './technical/DatabasePage';
+import SecurityPage from './technical/SecurityPage';
+import ReportsGuidePage from './guide/ReportsGuidePage';
+import BountiesGuidePage from './guide/BountiesGuidePage';
+import WalletGuidePage from './guide/WalletGuidePage';
+import CommunityGuidePage from './guide/CommunityGuidePage';
+import APIPage from './developer/APIPage';
+import ContributingPage from './developer/ContributingPage';
+import DeploymentPage from './developer/DeploymentPage';
+import TermsPage from './legal/TermsPage';
+import PrivacyPage from './legal/PrivacyPage';
+import LegalConsiderationsPage from './legal/LegalConsiderationsPage';
+import TokenomicsPage from './legal/TokenomicsPage';
 
 const DocsRouter = () => {
   return (
@@ -146,7 +46,7 @@ const DocsRouter = () => {
       <Route path="features/leaderboard" element={<LeaderboardPage />} />
       <Route path="features/notifications" element={<NotificationsPage />} />
       
-      {/* Technical */}
+      {/* Technical Documentation */}
       <Route path="technical/architecture" element={<ArchitecturePage />} />
       <Route path="technical/frontend" element={<FrontendPage />} />
       <Route path="technical/backend" element={<BackendPage />} />
@@ -159,12 +59,12 @@ const DocsRouter = () => {
       <Route path="guide/wallet" element={<WalletGuidePage />} />
       <Route path="guide/community" element={<CommunityGuidePage />} />
       
-      {/* Developer */}
+      {/* Developer Resources */}
       <Route path="developer/api" element={<APIPage />} />
       <Route path="developer/contributing" element={<ContributingPage />} />
       <Route path="developer/deployment" element={<DeploymentPage />} />
       
-      {/* Legal */}
+      {/* Legal & Compliance */}
       <Route path="legal/terms" element={<TermsPage />} />
       <Route path="legal/privacy" element={<PrivacyPage />} />
       <Route path="legal/considerations" element={<LegalConsiderationsPage />} />
