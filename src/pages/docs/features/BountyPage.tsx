@@ -153,6 +153,11 @@ const BountyPage = () => {
               </div>
             </div>
           </div>
+          <div className="mt-6 p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
+            <p className="text-green-800 dark:text-green-200 font-medium">
+              All recovered funds are used to buy back SEC and distribute to contributors of each bounty
+            </p>
+          </div>
         </section>
 
         {/* Risks and Considerations */}
