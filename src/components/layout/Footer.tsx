@@ -9,9 +9,9 @@ import DisclaimerDialog from '../common/DisclaimerDialog';
 import CookieDialog from '../common/CookieDialog';
 import SafetyDialog from '../common/SafetyDialog';
 import FAQDialog from '../common/FAQDialog';
-import AboutDialog from '../common/AboutDialog';
 import ContactDialog from '../common/ContactDialog';
 import { toast } from '@/hooks/use-toast';
+
 const Footer = () => {
   const [termsOpen, setTermsOpen] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
@@ -19,8 +19,8 @@ const Footer = () => {
   const [cookiesOpen, setCookiesOpen] = useState(false);
   const [safetyOpen, setSafetyOpen] = useState(false);
   const [faqOpen, setFaqOpen] = useState(false);
-  const [aboutOpen, setAboutOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
+
   const copyToClipboard = async () => {
     const contractAddress = "HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump";
     try {
@@ -37,7 +37,9 @@ const Footer = () => {
       console.error("Failed to copy: ", err);
     }
   };
-  return <footer className="icc-footer">
+
+  return (
+    <footer className="icc-footer">
       <div className="icc-container">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-1 text-center md:text-left">
@@ -76,9 +78,14 @@ const Footer = () => {
             <h4 className="text-white dark:text-gray-200 font-serif font-bold mb-4">Resources</h4>
             <ul className="space-y-2">
               <li>
-                <button onClick={() => setAboutOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
+                <Link to="/docs" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
                   About SEC
-                </button>
+                </Link>
+              </li>
+              <li>
+                <Link to="/docs" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
+                  Documentation
+                </Link>
               </li>
               <li>
                 <button onClick={() => setFaqOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
@@ -149,8 +156,9 @@ const Footer = () => {
       <CookieDialog open={cookiesOpen} onOpenChange={setCookiesOpen} />
       <SafetyDialog open={safetyOpen} onOpenChange={setSafetyOpen} />
       <FAQDialog open={faqOpen} onOpenChange={setFaqOpen} />
-      <AboutDialog open={aboutOpen} onOpenChange={setAboutOpen} />
       <ContactDialog open={contactOpen} onOpenChange={setContactOpen} />
-    </footer>;
+    </footer>
+  );
 };
+
 export default Footer;
