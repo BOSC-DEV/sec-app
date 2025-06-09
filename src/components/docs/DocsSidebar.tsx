@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown, ChevronRight, Search, X, Book } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -99,8 +99,8 @@ const DocsSidebar = ({ onClose }: DocsSidebarProps) => {
 
   return (
     <div className="h-full bg-muted/50 border-r flex flex-col">
-      {/* Header */}
-      <div className="p-4 border-b">
+      {/* Header - Fixed */}
+      <div className="p-4 border-b flex-shrink-0">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Book className="h-5 w-5 text-icc-gold" />
@@ -125,51 +125,53 @@ const DocsSidebar = ({ onClose }: DocsSidebarProps) => {
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto p-2">
-        <div className="space-y-0.5">
-          {filteredItems.map((section) => (
-            <Collapsible
-              key={section.id}
-              open={openSections.includes(section.id)}
-              onOpenChange={() => toggleSection(section.id)}
-            >
-              <CollapsibleTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-between font-medium text-xs h-7 px-2 hover:bg-accent/50"
-                >
-                  <span className="text-left truncate">{section.title}</span>
-                  {openSections.includes(section.id) ? (
-                    <ChevronDown className="h-3 w-3 shrink-0" />
-                  ) : (
-                    <ChevronRight className="h-3 w-3 shrink-0" />
-                  )}
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="mt-0.5">
-                <div className="ml-0 pl-0 space-y-0.5">
-                  {section.items.map((item) => (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      onClick={onClose}
-                      className={cn(
-                        "block px-2 py-1.5 text-xs rounded transition-colors hover:bg-accent hover:text-accent-foreground truncate",
-                        location.pathname === item.path
-                          ? "bg-accent text-accent-foreground font-medium"
-                          : "text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      {item.title}
-                    </Link>
-                  ))}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-          ))}
-        </div>
-      </nav>
+      {/* Navigation - Scrollable */}
+      <ScrollArea className="flex-1">
+        <nav className="p-2">
+          <div className="space-y-0.5">
+            {filteredItems.map((section) => (
+              <Collapsible
+                key={section.id}
+                open={openSections.includes(section.id)}
+                onOpenChange={() => toggleSection(section.id)}
+              >
+                <CollapsibleTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-between font-medium text-xs h-7 px-2 hover:bg-accent/50"
+                  >
+                    <span className="text-left truncate">{section.title}</span>
+                    {openSections.includes(section.id) ? (
+                      <ChevronDown className="h-3 w-3 shrink-0" />
+                    ) : (
+                      <ChevronRight className="h-3 w-3 shrink-0" />
+                    )}
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-0.5">
+                  <div className="ml-0 pl-0 space-y-0.5">
+                    {section.items.map((item) => (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        onClick={onClose}
+                        className={cn(
+                          "block px-2 py-1.5 text-xs rounded transition-colors hover:bg-accent hover:text-accent-foreground truncate",
+                          location.pathname === item.path
+                            ? "bg-accent text-accent-foreground font-medium"
+                            : "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        {item.title}
+                      </Link>
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            ))}
+          </div>
+        </nav>
+      </ScrollArea>
     </div>
   );
 };
