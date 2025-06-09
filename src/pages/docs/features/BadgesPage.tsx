@@ -1,3 +1,4 @@
+
 import React from 'react';
 import DocsContent from '@/components/docs/DocsContent';
 import { Badge, Trophy, Coins, TrendingUp, Vote } from 'lucide-react';
@@ -19,6 +20,9 @@ const BadgesPage = () => {
 
   // Calculate voting weight for each tier (tier index + 1)
   const getVotingWeight = (tierIndex: number) => tierIndex + 1;
+  
+  // Calculate delegation slots for each tier (tier index + 1)
+  const getDelegationSlots = (tierIndex: number) => tierIndex + 1;
 
   return (
     <DocsContent 
@@ -34,7 +38,7 @@ const BadgesPage = () => {
             <p className="text-xl leading-relaxed">
               The SEC badge system recognizes community members based on their SEC token holdings. 
               Each badge tier represents a different level of commitment to the platform and unlocks 
-              special privileges within the community, including enhanced voting power.
+              special privileges within the community, including enhanced voting power and delegation abilities.
             </p>
           </div>
           
@@ -90,41 +94,6 @@ const BadgesPage = () => {
             </p>
           </div>
 
-          <div className="grid gap-4">
-            <h4 className="text-lg font-semibold mb-2">Voting Weight by Tier</h4>
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse border border-gray-300 dark:border-gray-600">
-                <thead>
-                  <tr className="bg-muted">
-                    <th className="border border-gray-300 dark:border-gray-600 p-3 text-left">Badge Tier</th>
-                    <th className="border border-gray-300 dark:border-gray-600 p-3 text-center">Minimum SEC</th>
-                    <th className="border border-gray-300 dark:border-gray-600 p-3 text-center">Voting Weight</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortedTiers.map((tierInfo, index) => (
-                    <tr key={tierInfo.tier}>
-                      <td className="border border-gray-300 dark:border-gray-600 p-3">
-                        <div className="flex items-center gap-2">
-                          <span className="text-lg">{tierInfo.icon}</span>
-                          <span className="font-medium">{tierInfo.tier}</span>
-                        </div>
-                      </td>
-                      <td className="border border-gray-300 dark:border-gray-600 p-3 text-center font-mono">
-                        {formatSecAmount(tierInfo.minHolding)}
-                      </td>
-                      <td className="border border-gray-300 dark:border-gray-600 p-3 text-center">
-                        <span className="font-bold text-purple-600 dark:text-purple-400">
-                          {getVotingWeight(index)} vote{getVotingWeight(index) > 1 ? 's' : ''}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
           <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800">
             <h4 className="font-semibold mb-2 text-blue-800 dark:text-blue-300">How Governance Works</h4>
             <ul className="space-y-1 text-sm text-blue-700 dark:text-blue-400">
@@ -134,6 +103,42 @@ const BadgesPage = () => {
               <li>• Higher tiers can influence platform direction, feature development, and community rules</li>
               <li>• Voting power is balanced to ensure fair representation while rewarding commitment</li>
             </ul>
+          </div>
+        </section>
+
+        {/* Badge Delegation Section */}
+        <section>
+          <h2 className="text-2xl font-bold mb-6">Badge Delegation</h2>
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg p-6 mb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Trophy className="h-8 w-8 text-green-600 dark:text-green-400" />
+              <h3 className="text-xl font-semibold">Multi-Wallet Access & Social Rewards</h3>
+            </div>
+            <p className="text-muted-foreground mb-4">
+              Each badge holder can delegate their badge to other wallets or accounts. This provides a secure way to use hot wallets 
+              for app access while keeping cold storage safe, and also serves as a social activity to reward good community members with badges!
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="p-6 bg-muted rounded-lg">
+              <h3 className="text-xl font-semibold mb-3">Security Benefits</h3>
+              <ul className="space-y-2">
+                <li>• Keep your main wallet in cold storage for maximum security</li>
+                <li>• Use hot wallets for daily platform interactions</li>
+                <li>• Delegate badges to trusted accounts without transferring SEC tokens</li>
+                <li>• Maintain your badge status across multiple devices</li>
+              </ul>
+            </div>
+            <div className="p-6 bg-muted rounded-lg">
+              <h3 className="text-xl font-semibold mb-3">Social Features</h3>
+              <ul className="space-y-2">
+                <li>• Reward active community members with badge delegations</li>
+                <li>• Share voting power with trusted allies</li>
+                <li>• Recognize valuable contributions to the platform</li>
+                <li>• Build stronger community bonds through badge sharing</li>
+              </ul>
+            </div>
           </div>
         </section>
 
@@ -161,7 +166,8 @@ const BadgesPage = () => {
                         )}
                       </p>
                       <p className="text-sm font-medium text-purple-600 dark:text-purple-400">
-                        Voting Power: {getVotingWeight(index)} vote{getVotingWeight(index) > 1 ? 's' : ''}
+                        Voting Power: {getVotingWeight(index)} vote{getVotingWeight(index) > 1 ? 's' : ''} | 
+                        Delegation Slots: {getDelegationSlots(index)}
                       </p>
                     </div>
                   </div>
@@ -181,13 +187,55 @@ const BadgesPage = () => {
                         <li>• Enhanced community recognition</li>
                         <li>• Special badge display in chat and profile</li>
                         <li>• {getVotingWeight(index)} vote{getVotingWeight(index) > 1 ? 's' : ''} in community decisions</li>
-                        <li>• Access to tier-specific features</li>
+                        <li>• {getDelegationSlots(index)} badge delegation slot{getDelegationSlots(index) > 1 ? 's' : ''}</li>
                       </ul>
                     </div>
                   </div>
                 </div>
               );
             })}
+          </div>
+
+          {/* Voting Weight & Delegation Table */}
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold mb-4">Voting Weight & Delegation by Tier</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse border border-gray-300 dark:border-gray-600">
+                <thead>
+                  <tr className="bg-muted">
+                    <th className="border border-gray-300 dark:border-gray-600 p-3 text-left">Badge Tier</th>
+                    <th className="border border-gray-300 dark:border-gray-600 p-3 text-center">Minimum SEC</th>
+                    <th className="border border-gray-300 dark:border-gray-600 p-3 text-center">Voting Weight</th>
+                    <th className="border border-gray-300 dark:border-gray-600 p-3 text-center">Delegation Slots</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedTiers.map((tierInfo, index) => (
+                    <tr key={tierInfo.tier}>
+                      <td className="border border-gray-300 dark:border-gray-600 p-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">{tierInfo.icon}</span>
+                          <span className="font-medium">{tierInfo.tier}</span>
+                        </div>
+                      </td>
+                      <td className="border border-gray-300 dark:border-gray-600 p-3 text-center font-mono">
+                        {formatSecAmount(tierInfo.minHolding)}
+                      </td>
+                      <td className="border border-gray-300 dark:border-gray-600 p-3 text-center">
+                        <span className="font-bold text-purple-600 dark:text-purple-400">
+                          {getVotingWeight(index)} vote{getVotingWeight(index) > 1 ? 's' : ''}
+                        </span>
+                      </td>
+                      <td className="border border-gray-300 dark:border-gray-600 p-3 text-center">
+                        <span className="font-bold text-green-600 dark:text-green-400">
+                          {getDelegationSlots(index)} slot{getDelegationSlots(index) > 1 ? 's' : ''}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
 
