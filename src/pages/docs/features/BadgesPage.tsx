@@ -145,46 +145,6 @@ const BadgesPage = () => {
           </div>
         </section>
 
-        {/* Badge Statistics */}
-        <section>
-          <h2 className="text-2xl font-bold mb-6">Token Distribution</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse border border-gray-300">
-              <thead>
-                <tr className="bg-muted">
-                  <th className="border border-gray-300 p-3 text-left">Badge Tier</th>
-                  <th className="border border-gray-300 p-3 text-center">Minimum SEC</th>
-                  <th className="border border-gray-300 p-3 text-center">% of Total Supply</th>
-                  <th className="border border-gray-300 p-3 text-center">Exclusivity</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedTiers.map((tierInfo) => (
-                  <tr key={tierInfo.tier}>
-                    <td className="border border-gray-300 p-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">{tierInfo.icon}</span>
-                        <span className="font-medium">{tierInfo.tier}</span>
-                      </div>
-                    </td>
-                    <td className="border border-gray-300 p-3 text-center font-mono">
-                      {formatSecAmount(tierInfo.minHolding)}
-                    </td>
-                    <td className="border border-gray-300 p-3 text-center">
-                      {tierInfo.minPercent}%
-                    </td>
-                    <td className="border border-gray-300 p-3 text-center">
-                      {tierInfo.minPercent >= 1 ? 'Ultra Rare' : 
-                       tierInfo.minPercent >= 0.1 ? 'Very Rare' : 
-                       tierInfo.minPercent >= 0.02 ? 'Rare' : 'Common'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
         {/* Call to Action */}
         <section className="text-center p-8 bg-muted rounded-lg">
           <h2 className="text-2xl font-bold mb-4">Check Your Badge Status</h2>
