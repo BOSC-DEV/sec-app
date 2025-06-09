@@ -53,6 +53,13 @@ const BountyPage = () => {
             <div className="flex items-start gap-4 p-6 border rounded-lg">
               <div className="bg-icc-gold text-icc-blue-dark rounded-full w-8 h-8 flex items-center justify-center font-bold">4</div>
               <div>
+                <h3 className="text-xl font-semibold mb-2">Bounty Funds Used to Apply Social and Legal Pressure</h3>
+                <p>Accumulated bounty funds are utilized to apply social and legal pressure on scammers through various channels.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4 p-6 border rounded-lg">
+              <div className="bg-icc-gold text-icc-blue-dark rounded-full w-8 h-8 flex items-center justify-center font-bold">5</div>
+              <div>
                 <h3 className="text-xl font-semibold mb-2">Justice Served</h3>
                 <p>When the scammer is apprehended or funds recovered, bounty contributors are rewarded proportionally.</p>
               </div>
