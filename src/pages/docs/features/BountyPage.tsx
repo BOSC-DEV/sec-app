@@ -84,37 +84,6 @@ const BountyPage = () => {
           </div>
         </section>
 
-        {/* Bounty Types */}
-        <section>
-          <h2 className="text-2xl font-bold mb-6">Types of Bounties</h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="p-6 border rounded-lg text-center">
-              <Award className="h-8 w-8 mx-auto mb-3 text-red-500" />
-              <h3 className="font-semibold mb-2 text-red-600">High Priority</h3>
-              <p className="text-sm">Major scammers with significant victim impact</p>
-              <div className="mt-3 px-3 py-1 bg-red-100 dark:bg-red-900 rounded-full text-xs">
-                1000+ SEC Average
-              </div>
-            </div>
-            <div className="p-6 border rounded-lg text-center">
-              <Award className="h-8 w-8 mx-auto mb-3 text-yellow-500" />
-              <h3 className="font-semibold mb-2 text-yellow-600">Medium Priority</h3>
-              <p className="text-sm">Scammers with moderate community impact</p>
-              <div className="mt-3 px-3 py-1 bg-yellow-100 dark:bg-yellow-900 rounded-full text-xs">
-                100-1000 SEC Average
-              </div>
-            </div>
-            <div className="p-6 border rounded-lg text-center">
-              <Award className="h-8 w-8 mx-auto mb-3 text-green-500" />
-              <h3 className="font-semibold mb-2 text-green-600">Standard</h3>
-              <p className="text-sm">Newly reported or smaller scale scams</p>
-              <div className="mt-3 px-3 py-1 bg-green-100 dark:bg-green-900 rounded-full text-xs">
-                10-100 SEC Average
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* Bounty Strategy */}
         <section>
           <h2 className="text-2xl font-bold mb-6">Strategic Bounty Participation</h2>
