@@ -37,8 +37,8 @@ const DocsSidebar = ({ onClose }: DocsSidebarProps) => {
       id: 'features',
       title: 'Features',
       items: [
-        { title: 'Scammer Reporting', path: '/docs/features/reporting' },
         { title: 'Sign Up', path: '/docs/features/wallet' },
+        { title: 'Scammer Reporting', path: '/docs/features/reporting' },
         { title: 'Bounty System', path: '/docs/features/bounty' },
         { title: 'Badge & Tier System', path: '/docs/features/badges' },
         { title: 'Community Features', path: '/docs/features/community' },
