@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -19,9 +18,8 @@ import LegalPages from "./pages/LegalPages";
 import NotFound from "./pages/NotFound";
 import NotificationsPage from "./pages/NotificationsPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
-import DocsPage from "./pages/DocsPage";
-import QuickStartPage from "./pages/docs/QuickStartPage";
 import DocsLayout from "./components/docs/DocsLayout";
+import DocsRouter from "./pages/docs/DocsRouter";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ProfileProvider, useProfile } from "./contexts/ProfileContext";
 import EnhancedErrorBoundary from "./components/common/EnhancedErrorBoundary";
@@ -206,15 +204,10 @@ const App = () => (
                         <ProfilePage />
                       </ProtectedRoute>
                     } />
-                    {/* Documentation routes - MUST come before catch-all routes */}
-                    <Route path="/docs" element={
-                      <DocsLayout>
-                        <DocsPage />
-                      </DocsLayout>
-                    } />
+                    {/* Documentation routes - Updated to use DocsRouter */}
                     <Route path="/docs/*" element={
                       <DocsLayout>
-                        <QuickStartPage />
+                        <DocsRouter />
                       </DocsLayout>
                     } />
                     {/* Legal and Information Pages */}
