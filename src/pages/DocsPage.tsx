@@ -1,8 +1,10 @@
+
 import React from 'react';
 import DocsContent from '@/components/docs/DocsContent';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Shield, Users, Coins, Search } from 'lucide-react';
+import { ExternalLink, Shield, Users, Coins, Trophy } from 'lucide-react';
 import { Link } from 'react-router-dom';
+
 const DocsPage = () => {
   return <DocsContent title="SEC Documentation" description="Welcome to the complete guide for the Scams & E-crimes Commission platform">
       <div className="space-y-8">
@@ -68,7 +70,7 @@ const DocsPage = () => {
               </Button>
             </div>
             <div className="p-4 bg-muted rounded-lg text-center">
-              <Search className="h-8 w-8 mx-auto mb-3 text-icc-gold" />
+              <Trophy className="h-8 w-8 mx-auto mb-3 text-icc-gold" />
               <h3 className="font-semibold mb-2">Leaderboards &amp; Most Wanted</h3>
               <p className="text-sm text-muted-foreground">Track, search and publicly scrutinise scammers</p>
               <Button variant="ghost" size="sm" className="mt-2" asChild>
@@ -139,4 +141,5 @@ const DocsPage = () => {
       </div>
     </DocsContent>;
 };
+
 export default DocsPage;
