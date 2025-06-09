@@ -185,7 +185,135 @@ const DOCS_SEARCH_INDEX: SearchResult[] = [
     type: 'page'
   },
 
-  // Wallet Features
+  // PHANTOM WALLET FEATURES - COMPREHENSIVE CONTENT
+  {
+    id: 'wallet-phantom-overview',
+    title: 'Phantom Wallet Integration',
+    content: 'Phantom Wallet Integration Phantom wallet required Solana wallet SEC platform authentication secure fast user-friendly access Solana ecosystem. Why Phantom Wallet leading Solana wallet secure authentication token management seamless integration bounty system. Phantom provides secure, fast, and user-friendly access to the Solana ecosystem. Required for all SEC platform interactions to ensure security and accountability.',
+    excerpt: 'Phantom is the leading Solana wallet providing secure access to the SEC platform',
+    path: '/docs/features/wallet',
+    type: 'page'
+  },
+  {
+    id: 'phantom-installation',
+    title: 'Phantom Wallet Installation',
+    content: 'Phantom Installation Guide browser extension desktop mobile app Chrome Web Store Firefox Add-ons Edge Add-ons Brave Browser iOS App Store Google Play Store Direct APK download. Install Phantom as browser extension for Chrome Firefox Brave Edge. Get Phantom mobile app iOS Android devices. Download extension mobile-optimized interface biometric authentication support.',
+    excerpt: 'Install Phantom wallet as browser extension or mobile app from official sources',
+    path: '/docs/features/wallet',
+    section: 'Installation Guide',
+    type: 'section'
+  },
+  {
+    id: 'phantom-setup-process',
+    title: 'Phantom Wallet Setup',
+    content: 'Phantom Wallet Setup create new wallet import existing wallet seed phrase recovery phrase. Download install Phantom create new wallet import existing using seed phrase. Secure seed phrase 12-word recovery phrase store safely never share anyone. Fund wallet add SOL transaction fees few cents per transaction. Connect to SEC platform click Connect Wallet link Phantom wallet.',
+    excerpt: 'Step-by-step process to create, secure, and connect your Phantom wallet',
+    path: '/docs/features/wallet',
+    section: 'Setting Up Your Wallet',
+    type: 'section'
+  },
+  {
+    id: 'phantom-security-tips',
+    title: 'Phantom Wallet Security',
+    content: 'Phantom Wallet Security Best Practices never share seed phrase verify SEC website URL before connecting only connect trusted applications keep Phantom extension updated use hardware wallets large amounts cautious phishing attempts. Important Security Tips never share seed phrase anyone always verify website URL before connecting only connect to trusted applications keep extension updated use hardware wallets for large amounts be cautious of phishing attempts.',
+    excerpt: 'Essential security practices for protecting your Phantom wallet and funds',
+    path: '/docs/features/wallet',
+    section: 'Security Best Practices',
+    type: 'section'
+  },
+  {
+    id: 'phantom-troubleshooting',
+    title: 'Phantom Wallet Troubleshooting',
+    content: 'Phantom Wallet Troubleshooting common issues solutions wallet connection problems transaction failures profile loading issues. Wallet Won Connect make sure Phantom installed unlocked refresh page click connect again. Transaction Failed ensure enough SOL transaction fees network congestion delays. Profile Not Loading disconnect reconnect wallet clear browser cache issue persists.',
+    excerpt: 'Solutions for common Phantom wallet connection and transaction issues',
+    path: '/docs/features/wallet',
+    section: 'Common Issues & Solutions',
+    type: 'section'
+  },
+
+  // PHANTOM WALLET GUIDE - DETAILED CONTENT
+  {
+    id: 'phantom-guide-overview',
+    title: 'Using Phantom Wallet - Complete Guide',
+    content: 'Using Phantom Wallet Complete Guide setting up using Phantom wallet SEC platform. Phantom Wallet Overview Phantom recommended Solana wallet SEC platform provides secure authentication token management seamless integration bounty system. Complete guide help set up use Phantom effectively Solana wallet browser extension mobile app seed phrase security transaction fees SOL network.',
+    excerpt: 'Complete guide to setting up and using Phantom wallet with the SEC platform',
+    path: '/docs/guide/wallet',
+    type: 'page'
+  },
+  {
+    id: 'phantom-guide-installation',
+    title: 'Installing Phantom Wallet - Detailed Guide',
+    content: 'Installing Phantom Wallet browser extension Chrome Firefox Brave Edge mobile app iOS Android. Visit phantom.app click Download for your browser add to browser extensions pin extension easy access. Download Phantom mobile app iOS Android devices available App Store Google Play mobile-optimized interface biometric authentication support sync with browser extension.',
+    excerpt: 'Detailed installation instructions for Phantom wallet on desktop and mobile',
+    path: '/docs/guide/wallet',
+    section: 'Installing Phantom Wallet',
+    type: 'section'
+  },
+  {
+    id: 'phantom-guide-setup',
+    title: 'Setting Up Phantom Wallet Step by Step',
+    content: 'Setting Up Phantom Wallet step by step create new wallet secure seed phrase set password import existing wallet. Create New Wallet open Phantom choose create new wallet new to Solana wallets. Secure Your Seed Phrase write down 12-word recovery phrase store securely offline never share anyone. Set Password create strong password protect wallet device. Import Existing Wallet already have Solana wallet choose import wallet enter seed phrase.',
+    excerpt: 'Four-step process to set up your Phantom wallet securely',
+    path: '/docs/guide/wallet',
+    section: 'Setting Up Your Wallet',
+    type: 'section'
+  },
+  {
+    id: 'phantom-guide-sec-connection',
+    title: 'Connecting Phantom to SEC Platform',
+    content: 'Connecting Phantom SEC Platform authentication message signing ready use. Authentication click Connect Wallet approve connection request. Message Signing sign authentication messages verify wallet ownership. Ready to Use access all SEC features including bounties profile management. Secure authentication wallet serves secure login platform. Bounty Contributions contribute SOL bounties exposing scammers. Profile Verification verified wallet ownership ensures authentic user profiles.',
+    excerpt: 'How to connect and authenticate your Phantom wallet with the SEC platform',
+    path: '/docs/guide/wallet',
+    section: 'Connecting to SEC Platform',
+    type: 'section'
+  },
+  {
+    id: 'phantom-guide-sec-tokens',
+    title: 'Managing SEC Tokens with Phantom',
+    content: 'Managing SEC Tokens Phantom wallet token operations. Token Operations use Phantom wallet manage SEC tokens bounty contributions platform features. View SEC token balance wallet send receive SEC tokens other users contribute tokens scammer bounties transfer bounties between reports monitor transaction history check token prices market data. SEC token management bounty contributions token transfer transaction monitoring.',
+    excerpt: 'Use Phantom wallet to manage SEC tokens for bounties and platform features',
+    path: '/docs/guide/wallet',
+    section: 'Managing SEC Tokens',
+    type: 'section'
+  },
+  {
+    id: 'phantom-guide-security',
+    title: 'Phantom Wallet Security Best Practices',
+    content: 'Phantom Wallet Security Best Practices critical security rules general security tips. Critical Security Rules never share seed phrase anyone don store seed phrases digitally photos always verify website URLs before connecting use hardware wallets large amounts enable all available security features. General Security Tips keep browser extension updated use strong unique passwords enable two-factor authentication where possible regularly check transaction history be cautious phishing attempts.',
+    excerpt: 'Critical security rules and general tips for protecting your Phantom wallet',
+    path: '/docs/guide/wallet',
+    section: 'Wallet Security Best Practices',
+    type: 'section'
+  },
+  {
+    id: 'phantom-guide-troubleshooting',
+    title: 'Phantom Wallet Common Issues and Solutions',
+    content: 'Phantom Wallet Common Issues Solutions connection issues transaction problems token display issues. Connection Issues refresh page try connecting again check Phantom extension enabled clear browser cache cookies try different browser incognito mode. Transaction Problems ensure sufficient SOL transaction fees check network status congestion wait previous transactions confirm verify recipient addresses before sending. Token Display Issues add SEC token manually if not visible check correct Solana network refresh token balances wallet settings verify token contract address.',
+    excerpt: 'Solutions for connection, transaction, and token display issues',
+    path: '/docs/guide/wallet',
+    section: 'Common Issues & Solutions',
+    type: 'section'
+  },
+  {
+    id: 'phantom-guide-advanced',
+    title: 'Advanced Phantom Wallet Features',
+    content: 'Advanced Phantom Features DeFi Integration Portfolio Tracking. DeFi Integration swap tokens directly wallet access Solana DeFi protocols staking yield farming NFT collection management. Portfolio Tracking real-time token prices portfolio value tracking transaction history analysis performance metrics. Advanced features decentralized finance integration portfolio management tools.',
+    excerpt: 'Advanced Phantom features including DeFi integration and portfolio tracking',
+    path: '/docs/guide/wallet',
+    section: 'Advanced Phantom Features',
+    type: 'section'
+  },
+  {
+    id: 'phantom-guide-warnings',
+    title: 'Important Phantom Wallet Security Warnings',
+    content: 'Important Phantom Wallet Security Warnings security reminders. Security Reminders SEC platform never ask seed phrase always verify correct SEC website URL cautious fake Phantom extensions apps report suspicious activity support team keep small amounts hot wallets larger amounts cold storage. SEC platform will never ask for your seed phrase always verify you are on the correct SEC website URL be cautious of fake Phantom extensions or apps.',
+    excerpt: 'Critical security warnings and reminders for Phantom wallet users',
+    path: '/docs/guide/wallet',
+    section: 'Important Warnings',
+    type: 'section'
+  },
+
+  // Wallet Features (Legacy entry maintained for compatibility)
   {
     id: 'wallet-overview',
     title: 'Sign Up and Wallet Connection',
