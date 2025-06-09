@@ -22,10 +22,10 @@ const DocsLayout = ({ children }: DocsLayoutProps) => {
           />
         )}
         
-        {/* Sidebar - Made 30% smaller (from w-80 to w-56) */}
+        {/* Sidebar - Made sticky and independently scrollable */}
         <aside className={`
           fixed inset-y-0 left-0 z-50 w-56 transform transition-transform duration-200 ease-in-out
-          lg:relative lg:translate-x-0 lg:z-0
+          lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:z-0
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         `}>
           <DocsSidebar onClose={() => setSidebarOpen(false)} />
