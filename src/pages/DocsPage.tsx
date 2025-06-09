@@ -1,16 +1,10 @@
-
 import React from 'react';
 import DocsContent from '@/components/docs/DocsContent';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Shield, Users, Coins, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
 const DocsPage = () => {
-  return (
-    <DocsContent 
-      title="SEC Documentation" 
-      description="Welcome to the complete guide for the Scams & E-crimes Commission platform"
-    >
+  return <DocsContent title="SEC Documentation" description="Welcome to the complete guide for the Scams & E-crimes Commission platform">
       <div className="space-y-8">
         {/* Hero Section */}
         <section className="bg-gradient-to-r from-icc-blue to-icc-blue-light rounded-lg p-8 text-white mb-8">
@@ -75,8 +69,8 @@ const DocsPage = () => {
             </div>
             <div className="p-4 bg-muted rounded-lg text-center">
               <Search className="h-8 w-8 mx-auto mb-3 text-icc-gold" />
-              <h3 className="font-semibold mb-2">Advanced Search</h3>
-              <p className="text-sm text-muted-foreground">Robust filtering and navigation tools</p>
+              <h3 className="font-semibold mb-2">Leaderboards &amp; Most Wanted</h3>
+              <p className="text-sm text-muted-foreground">Track, search and publicly scrutinise scammers</p>
               <Button variant="ghost" size="sm" className="mt-2" asChild>
                 <Link to="/docs/features/search">Learn More</Link>
               </Button>
@@ -126,6 +120,12 @@ const DocsPage = () => {
           </p>
           <div className="flex flex-wrap gap-3">
             <Button variant="outline" asChild>
+              <a href="https://discord.gg/sec" target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Join Discord
+              </a>
+            </Button>
+            <Button variant="outline" asChild>
               <a href="https://github.com/BOSC-DEV/sec-platform/issues" target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Report Issue
@@ -137,8 +137,6 @@ const DocsPage = () => {
           </div>
         </section>
       </div>
-    </DocsContent>
-  );
+    </DocsContent>;
 };
-
 export default DocsPage;
