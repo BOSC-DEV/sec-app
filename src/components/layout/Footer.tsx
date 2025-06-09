@@ -102,9 +102,9 @@ const Footer = () => {
                 
               </li>
               <li>
-                <a href="https://solscan.io/token/HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump" target="_blank" rel="noopener noreferrer" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
+                <button onClick={showTokenWarning} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
                   SEC Token
-                </a>
+                </button>
               </li>
             </ul>
           </div>
