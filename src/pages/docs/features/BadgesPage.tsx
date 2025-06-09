@@ -1,4 +1,3 @@
-
 import React from 'react';
 import DocsContent from '@/components/docs/DocsContent';
 import { Badge, Trophy, Coins, TrendingUp, Vote } from 'lucide-react';
@@ -100,7 +99,6 @@ const BadgesPage = () => {
                     <th className="border border-gray-300 dark:border-gray-600 p-3 text-left">Badge Tier</th>
                     <th className="border border-gray-300 dark:border-gray-600 p-3 text-center">Minimum SEC</th>
                     <th className="border border-gray-300 dark:border-gray-600 p-3 text-center">Voting Weight</th>
-                    <th className="border border-gray-300 dark:border-gray-600 p-3 text-center">Governance Impact</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -119,12 +117,6 @@ const BadgesPage = () => {
                         <span className="font-bold text-purple-600 dark:text-purple-400">
                           {getVotingWeight(index)} vote{getVotingWeight(index) > 1 ? 's' : ''}
                         </span>
-                      </td>
-                      <td className="border border-gray-300 dark:border-gray-600 p-3 text-center text-sm">
-                        {index === 0 ? 'Basic governance rights' :
-                         index <= 2 ? 'Enhanced community influence' :
-                         index <= 5 ? 'Significant decision power' :
-                         'Major governance influence'}
                       </td>
                     </tr>
                   ))}
