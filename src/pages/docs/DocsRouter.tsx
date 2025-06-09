@@ -8,35 +8,10 @@ import ReportingPage from './features/ReportingPage';
 import WalletPage from './features/WalletPage';
 import BountyPage from './features/BountyPage';
 import BadgesPage from './features/BadgesPage';
-
-// Placeholder components for remaining pages
-const CommunityFeaturesPage = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold mb-4">Community Features</h1>
-    <p>Documentation for community features coming soon...</p>
-  </div>
-);
-
-const SearchPage = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold mb-4">Search & Navigation</h1>
-    <p>Documentation for search features coming soon...</p>
-  </div>
-);
-
-const LeaderboardPage = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold mb-4">Leaderboard</h1>
-    <p>Documentation for leaderboard coming soon...</p>
-  </div>
-);
-
-const NotificationsPage = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold mb-4">Notifications</h1>
-    <p>Documentation for notifications coming soon...</p>
-  </div>
-);
+import CommunityFeaturesPage from './features/CommunityFeaturesPage';
+import SearchPage from './features/SearchPage';
+import LeaderboardPage from './features/LeaderboardPage';
+import NotificationsPage from './features/NotificationsPage';
 
 // Technical Documentation placeholders
 const ArchitecturePage = () => (
