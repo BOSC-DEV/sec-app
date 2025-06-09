@@ -223,6 +223,252 @@ const DOCS_SEARCH_INDEX: SearchResult[] = [
     excerpt: 'Real-time alerts for community updates, bounty changes, and badge updates',
     path: '/docs/features/notifications',
     type: 'page'
+  },
+
+  // API Documentation - COMPREHENSIVE CONTENT
+  {
+    id: 'api-overview',
+    title: 'API Documentation',
+    content: 'API Documentation Complete reference for integrating with the SEC platform API endpoints and services. The SEC platform provides a comprehensive REST API built on Supabase, enabling developers to integrate scammer reporting, bounty management, and community features into their own applications.',
+    excerpt: 'Complete reference for integrating with the SEC platform API endpoints and services',
+    path: '/docs/developer/api',
+    type: 'page'
+  },
+  {
+    id: 'api-overview-section',
+    title: 'API Overview',
+    content: 'API Overview The SEC platform provides a comprehensive REST API built on Supabase, enabling developers to integrate scammer reporting, bounty management, and community features into their own applications. REST API Supabase integration scammer reporting bounty management community features developer integration.',
+    excerpt: 'Comprehensive REST API built on Supabase for scammer reporting and bounty management',
+    path: '/docs/developer/api',
+    section: 'API Overview',
+    sectionId: 'api-overview',
+    type: 'section'
+  },
+  {
+    id: 'api-authentication',
+    title: 'API Authentication',
+    content: 'Authentication API Keys Authenticate using Supabase service role keys for server-side access. Authorization Bearer YOUR_SUPABASE_ANON_KEY. Row Level Security All endpoints respect RLS policies ensuring users can only access authorized data. X-User-ID user_uuid_here.',
+    excerpt: 'Authenticate using Supabase service role keys with row level security',
+    path: '/docs/developer/api',
+    section: 'Authentication',
+    sectionId: 'authentication',
+    type: 'section'
+  },
+  {
+    id: 'api-endpoints',
+    title: 'Core API Endpoints',
+    content: 'Core API Endpoints GET /scammers Retrieve a list of reported scammers with optional filtering and pagination. POST /scammers Submit a new scammer report with evidence and details. POST /bounties/contribute Add SEC tokens to a scammer bounty pool. POST /bounties/transfer Transfer bounty tokens between users or scammer reports.',
+    excerpt: 'GET and POST endpoints for scammers, bounty contributions, and transfers',
+    path: '/docs/developer/api',
+    section: 'Core Endpoints',
+    sectionId: 'core-endpoints',
+    type: 'section'
+  },
+  {
+    id: 'api-scammers-get',
+    title: 'GET /scammers',
+    content: 'GET /scammers Retrieve a list of reported scammers with optional filtering and pagination. Response includes scammer_id name total_bounty report_count created_at. Supports filtering by scam type date range bounty amount. Pagination with count and page parameters.',
+    excerpt: 'Retrieve reported scammers with filtering and pagination support',
+    path: '/docs/developer/api',
+    section: 'GET /scammers',
+    type: 'section'
+  },
+  {
+    id: 'api-scammers-post',
+    title: 'POST /scammers',
+    content: 'POST /scammers Submit a new scammer report with evidence and details. Required fields: name crypto_addresses scam_type evidence photos. Creates new scammer entry in database with evidence documentation.',
+    excerpt: 'Submit new scammer reports with evidence and crypto addresses',
+    path: '/docs/developer/api',
+    section: 'POST /scammers',
+    type: 'section'
+  },
+  {
+    id: 'api-bounties-contribute',
+    title: 'POST /bounties/contribute',
+    content: 'POST /bounties/contribute Add SEC tokens to a scammer bounty pool. Required fields: scammer_id amount comment transaction_signature. Increases total bounty amount for specified scammer.',
+    excerpt: 'Add SEC tokens to scammer bounty pools with transaction verification',
+    path: '/docs/developer/api',
+    section: 'POST /bounties/contribute',
+    type: 'section'
+  },
+  {
+    id: 'api-bounties-transfer',
+    title: 'POST /bounties/transfer',
+    content: 'POST /bounties/transfer Transfer bounty tokens between users or scammer reports. Required fields: from_scammer_id to_scammer_id amount reason. Moves bounty contributions between different scammer targets.',
+    excerpt: 'Transfer bounty tokens between scammer reports with reasoning',
+    path: '/docs/developer/api',
+    section: 'POST /bounties/transfer',
+    type: 'section'
+  },
+  {
+    id: 'api-response-formats',
+    title: 'Response Formats',
+    content: 'Response Formats Success Response includes success true data object message. Error Response includes success false error message code. Standard JSON responses for all API endpoints with consistent structure.',
+    excerpt: 'Consistent JSON response formats for success and error cases',
+    path: '/docs/developer/api',
+    section: 'Response Formats',
+    sectionId: 'response-formats',
+    type: 'section'
+  },
+  {
+    id: 'api-rate-limiting',
+    title: 'Rate Limiting',
+    content: 'Rate Limiting API Limits 100 requests per minute for authenticated users. 10 requests per minute for unauthenticated requests. 1000 requests per hour for premium users. Rate limit headers included in all responses.',
+    excerpt: 'Rate limits: 100/min authenticated, 10/min unauthenticated, 1000/hour premium',
+    path: '/docs/developer/api',
+    section: 'Rate Limiting',
+    sectionId: 'rate-limiting',
+    type: 'section'
+  },
+  {
+    id: 'api-sdk-examples',
+    title: 'SDK Examples',
+    content: 'SDK Examples JavaScript TypeScript import createClient from @supabase/supabase-js. Example code for fetching scammers using Supabase client with select and limit operations.',
+    excerpt: 'JavaScript/TypeScript SDK examples using Supabase client',
+    path: '/docs/developer/api',
+    section: 'SDK Examples',
+    sectionId: 'sdk-examples',
+    type: 'section'
+  },
+  {
+    id: 'api-webhooks',
+    title: 'Webhooks',
+    content: 'Webhooks New Reports Triggered when new scammer reports are submitted. Bounty Updates Notifications for bounty contributions and transfers. Community Events Real-time updates for chat and community interactions.',
+    excerpt: 'Webhooks for new reports, bounty updates, and community events',
+    path: '/docs/developer/api',
+    section: 'Webhooks',
+    sectionId: 'webhooks',
+    type: 'section'
+  },
+
+  // Developer - Contributing
+  {
+    id: 'contributing-overview',
+    title: 'Contributing',
+    content: 'Contributing Guide How to contribute to the SEC platform development. Code contribution guidelines development setup pull request process issue reporting. Open source community development standards best practices.',
+    excerpt: 'Guide for contributing to SEC platform development with guidelines and setup',
+    path: '/docs/developer/contributing',
+    type: 'page'
+  },
+
+  // Developer - Deployment
+  {
+    id: 'deployment-overview',
+    title: 'Deployment',
+    content: 'Deployment Guide How to deploy the SEC platform to production environments. Environment setup configuration management database migrations security considerations. Production deployment best practices monitoring logging.',
+    excerpt: 'Production deployment guide with environment setup and security considerations',
+    path: '/docs/developer/deployment',
+    type: 'page'
+  },
+
+  // Technical Documentation
+  {
+    id: 'architecture-overview',
+    title: 'Architecture',
+    content: 'Architecture Overview System architecture design patterns infrastructure components. Frontend React TypeScript backend Supabase database schema API design. Scalability security performance considerations.',
+    excerpt: 'System architecture with React frontend, Supabase backend, and security design',
+    path: '/docs/technical/architecture',
+    type: 'page'
+  },
+  {
+    id: 'frontend-overview',
+    title: 'Frontend Stack',
+    content: 'Frontend Stack React TypeScript Tailwind CSS Vite build system. Component architecture state management routing authentication. Development tools testing framework deployment pipeline.',
+    excerpt: 'React TypeScript frontend with Tailwind CSS and Vite build system',
+    path: '/docs/technical/frontend',
+    type: 'page'
+  },
+  {
+    id: 'backend-overview',
+    title: 'Backend Integration',
+    content: 'Backend Integration Supabase backend services database management authentication API endpoints. Real-time subscriptions row level security edge functions file storage.',
+    excerpt: 'Supabase backend with database, authentication, and real-time features',
+    path: '/docs/technical/backend',
+    type: 'page'
+  },
+  {
+    id: 'database-overview',
+    title: 'Database Schema',
+    content: 'Database Schema Table structures relationships indexes constraints. Scammers table bounties table users table community tables. Data integrity referential integrity performance optimization.',
+    excerpt: 'Database schema with scammers, bounties, users, and community tables',
+    path: '/docs/technical/database',
+    type: 'page'
+  },
+  {
+    id: 'security-overview',
+    title: 'Security Features',
+    content: 'Security Features Row level security authentication authorization data protection. Input validation SQL injection prevention XSS protection CSRF protection. Wallet security transaction verification.',
+    excerpt: 'Comprehensive security with RLS, authentication, and wallet protection',
+    path: '/docs/technical/security',
+    type: 'page'
+  },
+
+  // User Guide
+  {
+    id: 'reports-guide',
+    title: 'Creating Reports',
+    content: 'Creating Reports Step-by-step guide for submitting scammer reports. Evidence collection photo upload wallet address verification. Report quality guidelines community standards.',
+    excerpt: 'Step-by-step guide for submitting quality scammer reports with evidence',
+    path: '/docs/guide/reports',
+    type: 'page'
+  },
+  {
+    id: 'bounties-guide',
+    title: 'Managing Bounties',
+    content: 'Managing Bounties How to contribute to bounties transfer funds track progress. Bounty strategy optimization contribution timing reward distribution.',
+    excerpt: 'Guide for contributing to and managing bounty funds effectively',
+    path: '/docs/guide/bounties',
+    type: 'page'
+  },
+  {
+    id: 'wallet-guide',
+    title: 'Using Wallet Features',
+    content: 'Using Wallet Features Phantom wallet connection SEC token management badge tier system. Wallet security best practices transaction signing delegation features.',
+    excerpt: 'Complete guide for Phantom wallet integration and SEC token management',
+    path: '/docs/guide/wallet',
+    type: 'page'
+  },
+  {
+    id: 'community-guide',
+    title: 'Community Participation',
+    content: 'Community Participation Live chat participation community guidelines moderation features. Voting surveys discussions announcement engagement best practices.',
+    excerpt: 'Guide for effective community participation and engagement',
+    path: '/docs/guide/community',
+    type: 'page'
+  },
+
+  // Legal & Compliance
+  {
+    id: 'terms-overview',
+    title: 'Terms of Service',
+    content: 'Terms of Service Legal terms conditions user agreements platform usage. User responsibilities prohibited activities dispute resolution liability limitations.',
+    excerpt: 'Legal terms and conditions for platform usage and user responsibilities',
+    path: '/docs/legal/terms',
+    type: 'page'
+  },
+  {
+    id: 'privacy-overview',
+    title: 'Privacy Policy',
+    content: 'Privacy Policy Data collection usage storage protection user privacy rights. Personal information handling cookie policy data retention deletion.',
+    excerpt: 'Privacy policy covering data handling, storage, and user privacy rights',
+    path: '/docs/legal/privacy',
+    type: 'page'
+  },
+  {
+    id: 'legal-considerations',
+    title: 'Legal Considerations',
+    content: 'Legal Considerations Regulatory compliance jurisdiction issues international law. Scammer reporting legal implications evidence handling law enforcement cooperation.',
+    excerpt: 'Legal considerations for scammer reporting and regulatory compliance',
+    path: '/docs/legal/considerations',
+    type: 'page'
+  },
+  {
+    id: 'tokenomics-overview',
+    title: 'Tokenomics',
+    content: 'Tokenomics SEC token economics supply distribution utility value proposition. Token allocation bounty economics deflationary mechanisms staking rewards.',
+    excerpt: 'SEC token economics, distribution, and utility within the platform',
+    path: '/docs/legal/tokenomics',
+    type: 'page'
   }
 ];
 
