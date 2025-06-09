@@ -39,8 +39,8 @@ const DocsContent = ({ children, title, description }: DocsContentProps) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="flex flex-col lg:flex-row gap-8">
+    <div className="max-w-5xl mx-auto">
+      <div className="flex flex-col lg:flex-row gap-6">
         {/* Main content */}
         <div className="flex-1 min-w-0">
           {/* Page header */}
@@ -77,14 +77,14 @@ const DocsContent = ({ children, title, description }: DocsContentProps) => {
           </footer>
         </div>
 
-        {/* Table of contents - Sticky sidebar */}
+        {/* Table of contents - Moved closer to edge with reduced width */}
         {headings.length > 0 && (
-          <aside className="w-64 shrink-0 lg:block hidden">
-            <div className="sticky top-4 h-fit max-h-[calc(100vh-2rem)] overflow-hidden border rounded-lg bg-muted/30">
-              <div className="p-4 border-b bg-muted/50">
+          <aside className="w-52 shrink-0 lg:block hidden">
+            <div className="sticky top-4 h-fit max-h-[calc(100vh-2rem)] overflow-hidden border rounded-lg bg-muted/30 mr-2">
+              <div className="p-3 border-b bg-muted/50">
                 <h3 className="font-semibold text-sm">On this page</h3>
               </div>
-              <nav className="p-4 overflow-y-auto max-h-[calc(100vh-8rem)]">
+              <nav className="p-3 overflow-y-auto max-h-[calc(100vh-8rem)]">
                 <div className="space-y-2">
                   {headings.map((heading) => (
                     <a
@@ -93,8 +93,8 @@ const DocsContent = ({ children, title, description }: DocsContentProps) => {
                       className={`
                         block text-sm transition-colors hover:text-foreground
                         ${heading.level === 1 ? 'font-medium' : 'text-muted-foreground'}
-                        ${heading.level > 2 ? 'ml-4' : ''}
-                        ${heading.level > 3 ? 'ml-8' : ''}
+                        ${heading.level > 2 ? 'ml-3' : ''}
+                        ${heading.level > 3 ? 'ml-6' : ''}
                       `}
                     >
                       {heading.text}
