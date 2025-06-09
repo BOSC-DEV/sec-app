@@ -24,6 +24,11 @@ const BadgesPage = () => {
   // Calculate delegation slots for each tier (tier index + 1)
   const getDelegationSlots = (tierIndex: number) => tierIndex + 1;
 
+  // Check if tier has moderation privileges
+  const hasModerationPrivileges = (tier: BadgeTier) => {
+    return tier === BadgeTier.Goat || tier === BadgeTier.Whale;
+  };
+
   return (
     <DocsContent 
       title="Badge & Tier System" 
@@ -148,6 +153,7 @@ const BadgesPage = () => {
           <div className="grid gap-6">
             {sortedTiers.map((tierInfo, index) => {
               const nextTier = index < sortedTiers.length - 1 ? sortedTiers[index + 1] : null;
+              const hasModeration = hasModerationPrivileges(tierInfo.tier);
               
               return (
                 <div key={tierInfo.tier} className="p-6 border-2 rounded-lg bg-card">
@@ -168,6 +174,11 @@ const BadgesPage = () => {
                       <p className="text-sm font-medium text-purple-600 dark:text-purple-400">
                         Voting Power: {getVotingWeight(index)} vote{getVotingWeight(index) > 1 ? 's' : ''} | 
                         Delegation Slots: {getDelegationSlots(index)}
+                        {hasModeration && (
+                          <span className="ml-2 text-red-600 dark:text-red-400 font-bold">
+                            | Chat Moderation Powers
+                          </span>
+                        )}
                       </p>
                     </div>
                   </div>
@@ -188,6 +199,9 @@ const BadgesPage = () => {
                         <li>• Special badge display in chat and profile</li>
                         <li>• {getVotingWeight(index)} vote{getVotingWeight(index) > 1 ? 's' : ''} in community decisions</li>
                         <li>• {getDelegationSlots(index)} badge delegation slot{getDelegationSlots(index) > 1 ? 's' : ''}</li>
+                        {hasModeration && (
+                          <li className="text-red-600 dark:text-red-400 font-medium">• Group chat moderation privileges</li>
+                        )}
                       </ul>
                     </div>
                   </div>
@@ -216,6 +230,11 @@ const BadgesPage = () => {
                         <div className="flex items-center gap-2">
                           <span className="text-lg">{tierInfo.icon}</span>
                           <span className="font-medium">{tierInfo.tier}</span>
+                          {hasModerationPrivileges(tierInfo.tier) && (
+                            <span className="text-xs bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded">
+                              MOD
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td className="border border-gray-300 dark:border-gray-600 p-3 text-center font-mono">
