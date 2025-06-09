@@ -1,7 +1,7 @@
 
 import React from 'react';
 import DocsContent from '@/components/docs/DocsContent';
-import { Coins, Target, TrendingUp, Users, Award, AlertCircle } from 'lucide-react';
+import { Coins, Target, TrendingUp, Users, Award, AlertCircle, RefreshCw, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
@@ -64,6 +64,36 @@ const BountyPage = () => {
                 <p>When the scammer is apprehended or funds recovered, bounty contributors are rewarded proportionally.</p>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Growth Flywheel */}
+        <section>
+          <h2 className="text-2xl font-bold mb-6">Growth Flywheel</h2>
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-8 text-white mb-6">
+            <RefreshCw className="h-12 w-12 mb-4" />
+            <p className="text-xl leading-relaxed mb-4">
+              As SEC value increases, bounty values increase proportionally, creating a powerful growth flywheel that benefits the entire ecosystem.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="p-6 bg-muted rounded-lg">
+              <TrendingUp className="h-8 w-8 text-icc-gold mb-4" />
+              <h3 className="text-xl font-semibold mb-3">Value Appreciation</h3>
+              <p>As SEC token value rises, existing bounties become more valuable, attracting more attention and resources to active cases.</p>
+            </div>
+            <div className="p-6 bg-muted rounded-lg">
+              <Lock className="h-8 w-8 text-icc-gold mb-4" />
+              <h3 className="text-xl font-semibold mb-3">Supply Reduction</h3>
+              <p>Bounties can't be withdrawn but can be transferred to other reports, permanently decreasing the liquid supply of SEC tokens.</p>
+            </div>
+          </div>
+          
+          <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <p className="text-blue-800 dark:text-blue-200 font-medium">
+              This mechanism creates a deflationary pressure on SEC tokens while increasing the incentive to participate in the bounty system.
+            </p>
           </div>
         </section>
 
