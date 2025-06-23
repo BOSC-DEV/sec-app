@@ -28,6 +28,17 @@ export const addComment = async (comment: {
 }): Promise<Comment> => {
   console.log('Adding comment:', comment);
   
+  // Validate that user is authenticated
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    throw new Error('User must be authenticated to add comments');
+  }
+  
+  // Ensure the author matches the authenticated user
+  if (user.id !== comment.author) {
+    throw new Error('Cannot create comments for other users');
+  }
+  
   // Generate a unique ID for the comment
   const id = `cmt-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
   
@@ -88,4 +99,44 @@ export const addComment = async (comment: {
   }
   
   return data;
+};
+
+export const deleteComment = async (commentId: string): Promise<boolean> => {
+  // Validate that user is authenticated
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    throw new Error('User must be authenticated to delete comments');
+  }
+  
+  const { error } = await supabase
+    .from('comments')
+    .delete()
+    .eq('id', commentId);
+  
+  if (error) {
+    console.error('Error deleting comment:', error);
+    throw error;
+  }
+  
+  return true;
+};
+
+export const updateComment = async (commentId: string, content: string): Promise<boolean> => {
+  // Validate that user is authenticated
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    throw new Error('User must be authenticated to update comments');
+  }
+  
+  const { error } = await supabase
+    .from('comments')
+    .update({ content })
+    .eq('id', commentId);
+  
+  if (error) {
+    console.error('Error updating comment:', error);
+    throw error;
+  }
+  
+  return true;
 };

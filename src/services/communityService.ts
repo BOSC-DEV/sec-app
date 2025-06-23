@@ -349,11 +349,33 @@ export const addAnnouncementReply = async (reply: {
 
 export const deleteAnnouncementReply = async (replyId: string): Promise<boolean> => {
   try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error('Authentication required');
+    }
+
+    // Check if user is admin or owns the reply
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('wallet_address', user.id)
+      .single();
+
+    const { data: reply } = await supabase
+      .from('announcement_replies')
+      .select('author_id')
+      .eq('id', replyId)
+      .single();
+
+    if (!profile?.is_admin && reply?.author_id !== user.id) {
+      throw new Error('Unauthorized to delete this reply');
+    }
+
     const { error } = await supabase
       .from('announcement_replies')
       .delete()
       .eq('id', replyId);
-      
+
     if (error) throw error;
     return true;
   } catch (error) {
@@ -364,11 +386,33 @@ export const deleteAnnouncementReply = async (replyId: string): Promise<boolean>
 
 export const editAnnouncementReply = async (replyId: string, content: string): Promise<boolean> => {
   try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error('Authentication required');
+    }
+
+    // Check if user is admin or owns the reply
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('wallet_address', user.id)
+      .single();
+
+    const { data: reply } = await supabase
+      .from('announcement_replies')
+      .select('author_id')
+      .eq('id', replyId)
+      .single();
+
+    if (!profile?.is_admin && reply?.author_id !== user.id) {
+      throw new Error('Unauthorized to edit this reply');
+    }
+
     const { error } = await supabase
       .from('announcement_replies')
       .update({ content })
       .eq('id', replyId);
-      
+
     if (error) throw error;
     return true;
   } catch (error) {

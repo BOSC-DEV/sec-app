@@ -82,62 +82,48 @@ export const secureFetch = async (url: string, options: RequestInit = {}) => {
   return fetch(sanitizedUrl, secureOptions);
 };
 
+// Enhanced secure password generation
+const generateSecurePassword = (length: number = 32): string => {
+  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    password += charset.charAt(Math.floor(Math.random() * charset.length));
+  }
+  return password;
+};
+
 // Rate limiting for authentication attempts
 const authAttempts = new Map<string, { count: number; lastAttempt: number }>();
 const MAX_AUTH_ATTEMPTS = 5;
 const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minutes
 
-const checkAuthRateLimit = (walletAddress: string): boolean => {
+const checkRateLimit = (walletAddress: string): boolean => {
   const now = Date.now();
-  const key = walletAddress.toLowerCase();
-  const attempts = authAttempts.get(key);
+  const attempts = authAttempts.get(walletAddress);
   
   if (!attempts) {
-    authAttempts.set(key, { count: 1, lastAttempt: now });
+    authAttempts.set(walletAddress, { count: 1, lastAttempt: now });
     return true;
   }
   
   // Reset if window has passed
   if (now - attempts.lastAttempt > RATE_LIMIT_WINDOW) {
-    authAttempts.set(key, { count: 1, lastAttempt: now });
+    authAttempts.set(walletAddress, { count: 1, lastAttempt: now });
     return true;
   }
   
   // Check if limit exceeded
   if (attempts.count >= MAX_AUTH_ATTEMPTS) {
-    console.warn(`Rate limit exceeded for wallet: ${walletAddress}`);
     return false;
   }
   
-  // Increment attempts
+  // Increment attempt count
   attempts.count++;
   attempts.lastAttempt = now;
   return true;
 };
 
-const resetAuthRateLimit = (walletAddress: string): void => {
-  authAttempts.delete(walletAddress.toLowerCase());
-};
-
-// Generate a secure, deterministic password for wallet authentication
-const generateSecureWalletPassword = (walletAddress: string, message: string): string => {
-  // Use a combination of wallet address and a fixed salt for deterministic but secure password
-  const salt = 'SEC_WALLET_AUTH_2024';
-  const combined = `${walletAddress}:${salt}:${message}`;
-  
-  // Simple hash function (in production, use a proper crypto library)
-  let hash = 0;
-  for (let i = 0; i < combined.length; i++) {
-    const char = combined.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  
-  // Convert to a more secure string format
-  return Math.abs(hash).toString(36) + walletAddress.slice(-8);
-};
-
-// Wallet authentication function for Supabase
+// Wallet authentication function for Supabase with enhanced security
 export const authenticateWallet = async (
   walletAddress: string, 
   signedMessage: string,
@@ -149,7 +135,7 @@ export const authenticateWallet = async (
   }
 
   // Check rate limiting
-  if (!checkAuthRateLimit(walletAddress)) {
+  if (!checkRateLimit(walletAddress)) {
     console.error("Rate limit exceeded for wallet authentication");
     return false;
   }
@@ -171,8 +157,8 @@ export const authenticateWallet = async (
     // Generate a consistent email format that will be used for auth
     const walletEmail = `${walletAddress.toLowerCase()}@sec.digital`;
     
-    // Generate secure password using wallet address and message
-    const securePassword = generateSecureWalletPassword(walletAddress, message);
+    // Generate a secure random password instead of using predictable wallet address
+    const securePassword = generateSecurePassword();
     
     // Try to sign in first
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -183,7 +169,7 @@ export const authenticateWallet = async (
     if (error) {
       console.log("Sign in failed, trying sign up:", error.message);
       
-      // If sign in fails, try sign up
+      // If sign in fails, try sign up with the secure password
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: walletEmail,
         password: securePassword,
@@ -229,8 +215,8 @@ export const authenticateWallet = async (
       console.log("User signed in successfully");
     }
 
-    // Reset rate limit on successful authentication
-    resetAuthRateLimit(walletAddress);
+    // Reset rate limiting on successful authentication
+    authAttempts.delete(walletAddress);
     return true;
   } catch (error) {
     console.error("Error in wallet authentication:", error);
@@ -244,6 +230,12 @@ export const safeInsert = async <T>(
   data: any,
   options?: { returning?: 'minimal' | 'representation' }
 ) => {
+  // Validate authentication for sensitive operations
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user && ['scammers', 'comments', 'bounty_contributions'].includes(table)) {
+    throw new Error('Authentication required for this operation');
+  }
+  
   // Clone data to avoid modifying original
   const sanitizedData = { ...data };
   
@@ -253,6 +245,15 @@ export const safeInsert = async <T>(
       sanitizedData[key] = sanitizeInput(sanitizedData[key]);
     }
   });
+  
+  // Ensure user ownership for user-specific tables
+  if (user && ['comments', 'bounty_contributions'].includes(table)) {
+    if (table === 'comments') {
+      sanitizedData.author = user.id;
+    } else if (table === 'bounty_contributions') {
+      sanitizedData.contributor_id = user.id;
+    }
+  }
   
   // Insert the data with returning option
   const result = supabase
