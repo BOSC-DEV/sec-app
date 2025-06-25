@@ -15,15 +15,15 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     persistSession: true,
     autoRefreshToken: true,
     storageKey: 'supabase-auth',
-    detectSessionInUrl: false, // Disable automatic detection of OAuth redirects
-    flowType: 'implicit', // Add this to disable email confirmation
+    detectSessionInUrl: false,
+    flowType: 'implicit',
   },
   global: {
     headers: {
       'Content-Type': 'application/json',
       'X-Client-Info': 'sec-community-app',
       'apikey': SUPABASE_PUBLISHABLE_KEY,
-      'Prefer': 'return=representation' // Request the updated record in response
+      'Prefer': 'return=representation'
     },
   },
   db: {
@@ -42,8 +42,8 @@ export const supabaseStorage = createClient<Database>(SUPABASE_URL, SUPABASE_PUB
     persistSession: true,
     autoRefreshToken: true,
     storageKey: 'supabase-auth',
-    detectSessionInUrl: false, // Disable automatic detection of OAuth redirects
-    flowType: 'implicit', // Add this to disable email confirmation
+    detectSessionInUrl: false,
+    flowType: 'implicit',
   },
   global: {
     headers: {
@@ -63,10 +63,8 @@ export const supabaseStorage = createClient<Database>(SUPABASE_URL, SUPABASE_PUB
 
 // Helper function to secure fetch requests to Supabase
 export const secureFetch = async (url: string, options: RequestInit = {}) => {
-  // Sanitize URL to prevent header injection
   const sanitizedUrl = sanitizeInput(url);
   
-  // Apply default security headers
   const secureOptions = {
     ...options,
     headers: {
@@ -80,148 +78,6 @@ export const secureFetch = async (url: string, options: RequestInit = {}) => {
   };
   
   return fetch(sanitizedUrl, secureOptions);
-};
-
-// Enhanced secure password generation
-const generateSecurePassword = (length: number = 32): string => {
-  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
-  let password = '';
-  for (let i = 0; i < length; i++) {
-    password += charset.charAt(Math.floor(Math.random() * charset.length));
-  }
-  return password;
-};
-
-// Rate limiting for authentication attempts
-const authAttempts = new Map<string, { count: number; lastAttempt: number }>();
-const MAX_AUTH_ATTEMPTS = 5;
-const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minutes
-
-const checkRateLimit = (walletAddress: string): boolean => {
-  const now = Date.now();
-  const attempts = authAttempts.get(walletAddress);
-  
-  if (!attempts) {
-    authAttempts.set(walletAddress, { count: 1, lastAttempt: now });
-    return true;
-  }
-  
-  // Reset if window has passed
-  if (now - attempts.lastAttempt > RATE_LIMIT_WINDOW) {
-    authAttempts.set(walletAddress, { count: 1, lastAttempt: now });
-    return true;
-  }
-  
-  // Check if limit exceeded
-  if (attempts.count >= MAX_AUTH_ATTEMPTS) {
-    return false;
-  }
-  
-  // Increment attempt count
-  attempts.count++;
-  attempts.lastAttempt = now;
-  return true;
-};
-
-// Wallet authentication function for Supabase with enhanced security
-export const authenticateWallet = async (
-  walletAddress: string, 
-  signedMessage: string,
-  message: string
-): Promise<boolean> => {
-  if (!walletAddress || !signedMessage) {
-    console.error("Missing required parameters for wallet authentication");
-    return false;
-  }
-
-  // Check rate limiting
-  if (!checkRateLimit(walletAddress)) {
-    console.error("Rate limit exceeded for wallet authentication");
-    return false;
-  }
-
-  try {
-    console.log("Authenticating wallet:", walletAddress);
-    
-    // First check if a user exists with this wallet address
-    const { data: existingUser, error: userCheckError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('wallet_address', walletAddress)
-      .maybeSingle();
-      
-    if (userCheckError) {
-      console.error("Error checking for existing user:", userCheckError);
-    }
-    
-    // Generate a consistent email format that will be used for auth
-    const walletEmail = `${walletAddress.toLowerCase()}@sec.digital`;
-    
-    // Generate a secure random password instead of using predictable wallet address
-    const securePassword = generateSecurePassword();
-    
-    // Try to sign in first
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: walletEmail,
-      password: securePassword,
-    });
-
-    if (error) {
-      console.log("Sign in failed, trying sign up:", error.message);
-      
-      // If sign in fails, try sign up with the secure password
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: walletEmail,
-        password: securePassword,
-        options: {
-          data: {
-            wallet_address: walletAddress,
-          }
-        }
-      });
-
-      if (signUpError) {
-        console.error("Error in wallet signup:", signUpError);
-        return false;
-      }
-      
-      console.log("User signed up successfully");
-
-      // If the user didn't exist in profiles, we need to create a profile
-      if (!existingUser) {
-        // Create a default profile for the new user
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: crypto.randomUUID(),
-            wallet_address: walletAddress,
-            display_name: `User ${walletAddress.substring(0, 6)}`,
-            username: `user_${Date.now().toString(36)}`,
-            profile_pic_url: '',
-            created_at: new Date().toISOString(),
-            x_link: '',
-            website_link: '',
-            bio: '',
-            points: 0
-          });
-          
-        if (profileError) {
-          console.error("Error creating profile:", profileError);
-        } else {
-          console.log("Created new profile for wallet");
-        }
-      }
-    } else {
-      console.log("User signed in successfully");
-    }
-
-    // Reset rate limiting on successful authentication
-    authAttempts.delete(walletAddress);
-    return true;
-  } catch (error) {
-    console.error("Error in wallet authentication:", error);
-    return false;
-  }
 };
 
 // Helper function to safely insert data with RLS validation

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, User, Copy, Bell, LogIn, Wallet, ExternalLink, Clipboard } from 'lucide-react';
+import { Menu, X, User, Copy, Bell, LogIn, Wallet, LogOut } from 'lucide-react';
 import ICCLogo from '../common/ICCLogo';
 import { useProfile } from '@/contexts/ProfileContext';
 import ThemeToggle from '@/components/common/ThemeToggle';
@@ -17,8 +17,8 @@ const Header = () => {
   const {
     isConnected,
     connectWallet,
+    disconnectWallet,
     profile,
-    isPhantomAvailable,
     isLoading
   } = useProfile();
   const navigate = useNavigate();
@@ -45,17 +45,14 @@ const Header = () => {
   const handleWalletButtonClick = () => {
     if (isConnected) {
       navigate('/profile');
-    } else if (isPhantomAvailable) {
-      connectWallet();
     } else {
-      // Open Phantom install page
-      window.open('https://phantom.app/', '_blank');
-      toast({
-        title: "Phantom Wallet Required",
-        description: "Please install Phantom wallet to continue",
-        variant: "default"
-      });
+      connectWallet();
     }
+    setIsMenuOpen(false);
+  };
+
+  const handleDisconnect = () => {
+    disconnectWallet();
     setIsMenuOpen(false);
   };
 
@@ -125,6 +122,11 @@ const Header = () => {
                 <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light" onClick={handleProfileClick} aria-label="Profile">
                   <User className="h-5 w-5" />
                 </Button>
+                
+                <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light" onClick={handleDisconnect} aria-label="Disconnect">
+                  <LogOut className="h-5 w-5" />
+                </Button>
+                
                 {isMobile && <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light md:hidden" onClick={toggleMenu} aria-label="Menu">
                     {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                   </Button>}
@@ -133,10 +135,7 @@ const Header = () => {
                   <Copy className="h-5 w-5" />
                 </Button>
                 <Button variant="gold" size="sm" className="flex items-center gap-2" onClick={handleWalletButtonClick}>
-                  {!isPhantomAvailable ? <>
-                      <ExternalLink className="h-4 w-4" />
-                      {!isMobile && "Install Phantom"}
-                    </> : isMobile ? <Wallet className="h-4 w-4 text-white" /> : <>
+                  {isMobile ? <Wallet className="h-4 w-4 text-white" /> : <>
                       <LogIn className="h-4 w-4" />
                       Connect Wallet
                     </>}
@@ -165,6 +164,15 @@ const Header = () => {
               >
                 Contract Address
               </button>
+              
+              {isConnected && (
+                <button 
+                  className="text-white hover:text-icc-gold transition-colors px-2 py-1 text-left" 
+                  onClick={handleDisconnect}
+                >
+                  Disconnect Wallet
+                </button>
+              )}
             </nav>
           </div>
         </div>}

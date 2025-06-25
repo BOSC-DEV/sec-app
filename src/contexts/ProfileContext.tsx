@@ -1,17 +1,10 @@
+
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { Profile } from '@/types/dataTypes';
 import { getProfileByWallet, uploadProfilePicture, saveProfile } from '@/services/profileService';
 import { toast } from '@/hooks/use-toast';
-import { 
-  connectPhantomWallet, 
-  disconnectPhantomWallet, 
-  getPhantomProvider, 
-  getWalletPublicKey, 
-  isPhantomInstalled,
-  signMessageWithPhantom
-} from '@/utils/phantomWallet';
-import { supabase, authenticateWallet } from '@/integrations/supabase/client';
-import { Session } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 
 export const PROFILE_UPDATED_EVENT = 'profile-updated';
 
@@ -25,67 +18,32 @@ interface ProfileContextType {
   walletAddress: string | null;
   profile: Profile | null;
   isLoading: boolean;
-  connectWallet: () => Promise<void>;
+  connectWallet: () => void;
   disconnectWallet: () => void;
   refreshProfile: () => Promise<void>;
   uploadAvatar: (file: File) => Promise<string | null>;
   isPhantomAvailable: boolean;
   updateProfile: (updatedProfile: Profile) => Promise<Profile | null>;
-  session: Session | null;
+  session: any | null;
 }
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
 
 export const ProfileProvider = ({ children }: { children: ReactNode }) => {
-  const [isConnected, setIsConnected] = useState<boolean>(false);
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const { ready, authenticated, user, login, logout } = usePrivy();
+  const { wallets } = useWallets();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isPhantomAvailable, setIsPhantomAvailable] = useState<boolean>(false);
-  const [session, setSession] = useState<Session | null>(null);
-  const [isWalletReady, setIsWalletReady] = useState<boolean>(false);
 
-  // Helper function to validate and set wallet address
-  const setValidatedWalletAddress = async (address: string | null): Promise<boolean> => {
-    if (address) {
-      const provider = getPhantomProvider();
-      if (!provider) {
-        console.log("Phantom provider not available");
-        return false;
-      }
+  // Get the connected wallet address
+  const walletAddress = wallets.find(wallet => wallet.walletClientType === 'phantom')?.address || 
+                       wallets[0]?.address || null;
 
-      try {
-        // If wallet is not connected, try to reconnect using trusted apps feature
-        if (!provider.isConnected) {
-          console.log("Attempting to reconnect to Phantom wallet...");
-          await provider.connect({ onlyIfTrusted: true });
-        }
-
-        // Check if the wallet is now connected and matches
-        if (!provider.isConnected || !provider.publicKey || provider.publicKey.toString().toLowerCase() !== address.toLowerCase()) {
-          console.log("Wallet not properly connected in Phantom");
-          return false;
-        }
-
-        const publicKey = getWalletPublicKey();
-        if (publicKey && publicKey.toLowerCase() === address.toLowerCase()) {
-          setWalletAddress(publicKey); // Use the actual public key with correct case
-          localStorage.setItem('walletAddress', publicKey);
-          setIsConnected(true);
-          setIsWalletReady(true);
-          return true;
-        }
-      } catch (error) {
-        console.error("Error reconnecting to Phantom wallet:", error);
-        return false;
-      }
-    }
-    return false;
-  };
+  const isConnected = authenticated && !!walletAddress;
 
   const fetchProfile = async (address: string) => {
-    if (!address || !isWalletReady) {
-      console.log("Skipping profile fetch - wallet not ready or no address");
+    if (!address) {
+      console.log("No wallet address provided");
       return;
     }
     
@@ -112,197 +70,55 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Effect to handle profile fetching when wallet is ready
+  // Effect to handle authentication and profile fetching
   useEffect(() => {
-    if (isWalletReady && walletAddress) {
-      fetchProfile(walletAddress);
+    if (!ready) {
+      setIsLoading(true);
+      return;
     }
-  }, [isWalletReady, walletAddress]);
 
-  useEffect(() => {
-    const checkPhantomAvailability = () => {
-      setIsPhantomAvailable(isPhantomInstalled());
-    };
-
-    checkPhantomAvailability();
-    
-    // Setup auth state change listener for Supabase
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, sessionData) => {
-      console.log('Auth state changed:', event, sessionData?.user?.email);
-      setSession(sessionData);
-      
-      if (sessionData && sessionData.user) {
-        // Extract wallet address from session email (it's in lowercase)
-        const sessionWalletAddress = sessionData.user.email?.split('@')[0];
-        if (sessionWalletAddress) {
-          const isValid = await setValidatedWalletAddress(sessionWalletAddress);
-          if (!isValid) {
-            // If wallet validation fails, sign out
-            await supabase.auth.signOut();
-            setWalletAddress(null);
-            setIsConnected(false);
-            setProfile(null);
-            setIsWalletReady(false);
-            localStorage.removeItem('walletAddress');
-          }
-        }
-      } else if (event === 'SIGNED_OUT') {
-        setProfile(null);
-        setWalletAddress(null);
-        setIsConnected(false);
-        setIsWalletReady(false);
-        localStorage.removeItem('walletAddress');
-      }
-    });
-    
-    // Check for existing session
-    const checkExistingSession = async () => {
-      try {
-        setIsLoading(true);
-
-        // First check if Phantom is available and wait a bit for it to initialize if needed
-        const maxAttempts = 5;
-        let attempts = 0;
-        let provider = getPhantomProvider();
-        
-        while (!provider && attempts < maxAttempts) {
-          await new Promise(resolve => setTimeout(resolve, 500));
-          provider = getPhantomProvider();
-          attempts++;
-        }
-
-        if (!provider) {
-          console.log("Phantom provider not available after waiting");
-          setIsLoading(false);
-          return;
-        }
-
-        // Try to reconnect to Phantom if we have a previous connection
+    if (authenticated && walletAddress) {
+      // Authenticate with Supabase using wallet address
+      const authenticateWithSupabase = async () => {
         try {
-          if (!provider.isConnected && provider.isPhantom) {
-            console.log("Attempting to restore Phantom connection...");
-            await provider.connect({ onlyIfTrusted: true });
+          const walletEmail = `${walletAddress.toLowerCase()}@sec.digital`;
+          
+          // Try to sign in, if that fails, sign up
+          const { error } = await supabase.auth.signInWithPassword({
+            email: walletEmail,
+            password: walletAddress, // Use wallet address as password for simplicity
+          });
+
+          if (error) {
+            // Sign up if sign in fails
+            const { error: signUpError } = await supabase.auth.signUp({
+              email: walletEmail,
+              password: walletAddress,
+              options: {
+                data: {
+                  wallet_address: walletAddress,
+                }
+              }
+            });
+
+            if (signUpError) {
+              console.error('Supabase auth error:', signUpError);
+            }
           }
         } catch (error) {
-          console.log("Could not auto-reconnect to Phantom:", error);
+          console.error('Error authenticating with Supabase:', error);
         }
+      };
 
-        const { data: { session: existingSession } } = await supabase.auth.getSession();
-        
-        if (existingSession) {
-          setSession(existingSession);
-          const sessionWalletAddress = existingSession.user.email?.split('@')[0];
-          
-          if (sessionWalletAddress) {
-            const isValid = await setValidatedWalletAddress(sessionWalletAddress);
-            if (!isValid) {
-              await supabase.auth.signOut();
-              setWalletAddress(null);
-              setIsConnected(false);
-              setProfile(null);
-              setIsWalletReady(false);
-              localStorage.removeItem('walletAddress');
-            }
-          }
-        } else {
-          // Check if we have a saved wallet address
-          const savedWallet = localStorage.getItem('walletAddress');
-          if (savedWallet) {
-            const isValid = await setValidatedWalletAddress(savedWallet);
-            if (!isValid) {
-              setWalletAddress(null);
-              setIsConnected(false);
-              setProfile(null);
-              setIsWalletReady(false);
-              localStorage.removeItem('walletAddress');
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error checking session:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkExistingSession();
-    
-    window.addEventListener('DOMContentLoaded', checkPhantomAvailability);
-    
-    return () => {
-      window.removeEventListener('DOMContentLoaded', checkPhantomAvailability);
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  useEffect(() => {
-    const provider = getPhantomProvider();
-    
-    if (provider) {
-      provider.on('connect', async () => {
-        const publicKey = getWalletPublicKey();
-        if (publicKey) {
-          setIsLoading(true);
-          // Need to authenticate with Supabase after wallet connect
-          try {
-            // Check if already authenticated
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session?.user?.email === `${publicKey}@sec.digital`) {
-              console.log("Already authenticated with this wallet");
-              setWalletAddress(publicKey);
-              setIsConnected(true);
-              localStorage.setItem('walletAddress', publicKey);
-              await fetchProfile(publicKey);
-              return;
-            }
-
-            const message = `Login to SEC Community with wallet ${publicKey} at ${Date.now()}`;
-            const signature = await signMessageWithPhantom(message);
-            
-            if (!signature) {
-              console.log("Signature request was cancelled or already in progress");
-              setIsLoading(false);
-              return;
-            }
-            
-            const authenticated = await authenticateWallet(publicKey, signature, message);
-            
-            if (authenticated) {
-              setWalletAddress(publicKey);
-              setIsConnected(true);
-              localStorage.setItem('walletAddress', publicKey);
-              await fetchProfile(publicKey);
-            } else {
-              toast({
-                title: 'Authentication Failed',
-                description: 'Could not authenticate with your wallet',
-                variant: 'destructive',
-              });
-              disconnectWallet();
-            }
-          } catch (error) {
-            console.error('Error during wallet authentication:', error);
-            toast({
-              title: 'Authentication Error',
-              description: 'Failed to authenticate wallet signature',
-              variant: 'destructive',
-            });
-          } finally {
-            setIsLoading(false);
-          }
-        }
-      });
-      
-      provider.on('disconnect', () => {
-        setWalletAddress(null);
-        setIsConnected(false);
-        setProfile(null);
-        localStorage.removeItem('walletAddress');
-        // Also sign out from Supabase
-        supabase.auth.signOut();
-      });
+      authenticateWithSupabase();
+      fetchProfile(walletAddress);
+    } else {
+      setProfile(null);
+      setIsLoading(false);
+      // Sign out from Supabase if not authenticated with Privy
+      supabase.auth.signOut();
     }
-  }, [isPhantomAvailable]);
+  }, [ready, authenticated, walletAddress]);
 
   const uploadAvatar = async (file: File): Promise<string | null> => {
     if (!walletAddress) {
@@ -351,54 +167,15 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const connectWallet = async () => {
-    try {
-      setIsLoading(true);
-      
-      if (!isPhantomAvailable) {
-        toast({
-          title: 'Phantom Wallet Not Installed',
-          description: 'Please install Phantom wallet to continue',
-          variant: 'destructive',
-        });
-        
-        // Open the Phantom wallet website in a new tab
-        window.open('https://phantom.app/', '_blank');
-        return;
-      }
-      
-      const publicKey = await connectPhantomWallet();
-      
-      if (publicKey) {
-        // We'll handle authentication and profile fetching in the connect event handler
-        console.log("Wallet connected with public key:", publicKey);
-        
-        // Authentication will be handled in the connect event handler
-      } else {
-        setIsLoading(false);
-      }
-    } catch (error) {
-      console.error('Error connecting wallet:', error);
-      toast({
-        title: 'Connection Failed',
-        description: 'Could not connect to wallet',
-        variant: 'destructive',
-      });
-      setIsLoading(false);
-    }
+  const connectWallet = () => {
+    if (!ready) return;
+    login();
   };
 
   const disconnectWallet = () => {
-    if (isPhantomAvailable) {
-      disconnectPhantomWallet();
-    }
-    
-    localStorage.removeItem('walletAddress');
-    setWalletAddress(null);
-    setIsConnected(false);
+    if (!ready) return;
+    logout();
     setProfile(null);
-    
-    // Also sign out from Supabase
     supabase.auth.signOut();
   };
 
@@ -442,14 +219,14 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     isConnected,
     walletAddress,
     profile,
-    isLoading,
+    isLoading: isLoading || !ready,
     connectWallet,
     disconnectWallet,
     refreshProfile,
     uploadAvatar,
-    isPhantomAvailable,
+    isPhantomAvailable: true, // Privy handles wallet availability
     updateProfile,
-    session
+    session: user // Privy user object acts as session
   };
 
   return (
