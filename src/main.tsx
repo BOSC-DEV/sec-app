@@ -36,7 +36,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         },
         loginMethods: ['wallet', 'email'],
         defaultChain: {
-          id: 101, // Solana Mainnet
+          id: 101,
           name: 'Solana',
           network: 'solana-mainnet',
           nativeCurrency: {
@@ -46,9 +46,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           },
           rpcUrls: {
             default: {
-              http: ['https://api.mainnet-beta.solana.com'],
-            },
-            public: {
               http: ['https://api.mainnet-beta.solana.com'],
             },
           },
@@ -64,9 +61,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           },
           rpcUrls: {
             default: {
-              http: ['https://api.mainnet-beta.solana.com'],
-            },
-            public: {
               http: ['https://api.mainnet-beta.solana.com'],
             },
           },

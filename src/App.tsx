@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -32,7 +33,11 @@ import { HelmetProvider } from "react-helmet-async";
 import { supabase } from "./integrations/supabase/client";
 
 // Initialize analytics service
-analyticsService.initAnalytics();
+try {
+  analyticsService.initAnalytics();
+} catch (error) {
+  console.warn('Analytics initialization failed:', error);
+}
 
 // Create query client with improved error handling
 const queryClient = new QueryClient({
@@ -112,7 +117,7 @@ const AnalyticsTracker = () => {
         log.info(`Page view: ${location.pathname}`, 'page_navigation');
       } catch (error) {
         // Log error but don't throw - we don't want to break the app if analytics fails
-        log.error('Analytics tracking failed:', error);
+        console.warn('Analytics tracking failed:', error);
       }
     };
 
@@ -121,10 +126,14 @@ const AnalyticsTracker = () => {
   
   // Identify user when profile changes
   useEffect(() => {
-    analyticsService.identifyUser(profile);
-    
-    if (profile) {
-      log.info(`User identified: ${profile.username || profile.wallet_address}`, 'user_authentication');
+    try {
+      analyticsService.identifyUser(profile);
+      
+      if (profile) {
+        log.info(`User identified: ${profile.username || profile.wallet_address}`, 'user_authentication');
+      }
+    } catch (error) {
+      console.warn('User identification failed:', error);
     }
   }, [profile]);
   
@@ -136,20 +145,24 @@ const PerformanceMonitor = () => {
   useEffect(() => {
     // Report initial performance metrics
     const reportPerformance = () => {
-      if (window.performance) {
-        const metrics = {
-          dns: window.performance.timing.domainLookupEnd - window.performance.timing.domainLookupStart,
-          tcp: window.performance.timing.connectEnd - window.performance.timing.connectStart,
-          ttfb: window.performance.timing.responseStart - window.performance.timing.requestStart,
-          domLoad: window.performance.timing.domContentLoadedEventEnd - window.performance.timing.navigationStart,
-          fullLoad: window.performance.timing.loadEventEnd - window.performance.timing.navigationStart
-        };
-        
-        log.info('Performance metrics', 'performance', metrics);
-        
-        if (metrics.domLoad > 3000 || metrics.fullLoad > 5000) {
-          log.warn('Slow page load detected', 'performance', metrics);
+      try {
+        if (window.performance) {
+          const metrics = {
+            dns: window.performance.timing.domainLookupEnd - window.performance.timing.domainLookupStart,
+            tcp: window.performance.timing.connectEnd - window.performance.timing.connectStart,
+            ttfb: window.performance.timing.responseStart - window.performance.timing.requestStart,
+            domLoad: window.performance.timing.domContentLoadedEventEnd - window.performance.timing.navigationStart,
+            fullLoad: window.performance.timing.loadEventEnd - window.performance.timing.navigationStart
+          };
+          
+          log.info('Performance metrics', 'performance', metrics);
+          
+          if (metrics.domLoad > 3000 || metrics.fullLoad > 5000) {
+            log.warn('Slow page load detected', 'performance', metrics);
+          }
         }
+      } catch (error) {
+        console.warn('Performance monitoring failed:', error);
       }
     };
     
