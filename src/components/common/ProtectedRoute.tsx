@@ -5,7 +5,7 @@ import { useProfile } from '@/contexts/ProfileContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Wallet, LogIn } from 'lucide-react';
+import { Wallet, LogIn, ExternalLink } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -17,7 +17,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const {
     isConnected,
     isLoading,
-    connectWallet
+    connectWallet,
+    isPhantomAvailable,
+    session
   } = useProfile();
   
   const [showDialog, setShowDialog] = React.useState(false);
@@ -39,28 +41,41 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       </div>;
   }
 
-  // Show wallet connection dialog if not connected
+  // Show different dialogs based on wallet availability
   if (!isConnected) {
     return <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Wallet Connection Required</DialogTitle>
             <DialogDescription>
-              To access this content, you need to connect your wallet first.
+              {isPhantomAvailable 
+                ? "To access this content, you need to connect your wallet first."
+                : "Phantom wallet is required but not installed. Please install it to continue."}
             </DialogDescription>
           </DialogHeader>
           <div className="flex items-center justify-center py-4">
             <Wallet className="h-12 w-12 text-icc-gold mb-2" />
           </div>
           <DialogFooter className="sm:justify-center">
-            <Button 
-              variant="default" 
-              className="bg-icc-gold text-icc-blue hover:bg-icc-gold-light flex items-center gap-2" 
-              onClick={connectWallet}
-            >
-              <LogIn className="h-4 w-4" />
-              Connect Wallet
-            </Button>
+            {isPhantomAvailable ? (
+              <Button 
+                variant="default" 
+                className="bg-icc-gold text-icc-blue hover:bg-icc-gold-light flex items-center gap-2" 
+                onClick={connectWallet}
+              >
+                <LogIn className="h-4 w-4" />
+                Connect Wallet
+              </Button>
+            ) : (
+              <Button 
+                variant="default" 
+                className="bg-icc-gold text-icc-blue hover:bg-icc-gold-light flex items-center gap-2" 
+                onClick={() => window.open('https://phantom.app/', '_blank')}
+              >
+                <ExternalLink className="h-4 w-4" />
+                Install Phantom Wallet
+              </Button>
+            )}
             <Button variant="outline" onClick={() => {
               setShowDialog(false);
               navigate('/');
