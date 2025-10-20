@@ -1,5 +1,63 @@
-
 import { supabase } from '@/integrations/supabase/client';
+import * as nacl from 'tweetnacl';
+import { PublicKey } from '@solana/web3.js';
+
+export const authenticateWallet = async (
+  walletAddress: string,
+  signature: string,
+  message: string
+): Promise<boolean> => {
+  try {
+    // Verify the signature
+    const messageBytes = new TextEncoder().encode(message);
+    const signatureBytes = Buffer.from(signature, 'base64');
+    const publicKeyBytes = new PublicKey(walletAddress).toBytes();
+    
+    const verified = nacl.sign.detached.verify(
+      messageBytes,
+      signatureBytes,
+      publicKeyBytes
+    );
+    
+    if (!verified) {
+      console.error('Signature verification failed');
+      return false;
+    }
+    
+    // Sign in with email (wallet address as email)
+    const email = `${walletAddress}@sec.digital`;
+    const password = signature; // Use signature as password
+    
+    // Try to sign in first
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    
+    // If sign in fails, try to sign up
+    if (signInError) {
+      const { error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            wallet_address: walletAddress,
+          },
+        },
+      });
+      
+      if (signUpError) {
+        console.error('Sign up error:', signUpError);
+        return false;
+      }
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Authentication error:', error);
+    return false;
+  }
+};
 
 export const validateUserAuthentication = async (): Promise<string | null> => {
   try {

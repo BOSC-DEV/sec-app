@@ -1,4 +1,4 @@
-import { supabase, supabaseStorage } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { ReportFormValues } from '@/hooks/useReportForm';
 import { Profile } from '@/types/dataTypes';

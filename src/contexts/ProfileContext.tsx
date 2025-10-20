@@ -10,7 +10,8 @@ import {
   isPhantomInstalled,
   signMessageWithPhantom
 } from '@/utils/phantomWallet';
-import { supabase, authenticateWallet } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
+import { authenticateWallet } from '@/utils/authUtils';
 import { Session } from '@supabase/supabase-js';
 
 export const PROFILE_UPDATED_EVENT = 'profile-updated';

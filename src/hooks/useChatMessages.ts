@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { ChatMessage } from '@/types/dataTypes';
-import { supabase, supabaseStorage, safeInsert } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { sanitizeHtml, sanitizeInput, detectMaliciousPattern, sanitizeFormData } from '@/utils/securityUtils';
 import { toast } from '@/hooks/use-toast';
 
@@ -106,7 +106,7 @@ export const useChatMessages = () => {
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
         const filePath = `chat-images/${sanitizeInput(fileName)}`;
         
-        const { error: uploadError } = await supabaseStorage.storage
+        const { error: uploadError } = await supabase.storage
           .from('community')
           .upload(filePath, messageData.image_file, {
             cacheControl: '3600',
@@ -115,32 +115,31 @@ export const useChatMessages = () => {
           
         if (uploadError) throw uploadError;
         
-        const { data } = supabaseStorage.storage
+        const { data } = supabase.storage
           .from('community')
           .getPublicUrl(filePath);
           
         imageUrl = data.publicUrl;
       }
       
-      // Use the new safeInsert function to insert the chat message
-      const result = await safeInsert('chat_messages', {
-        ...sanitizedData,
-        image_url: imageUrl,
-        likes: 0,
-        dislikes: 0
-      }, { returning: 'representation' });
+      // Insert the chat message
+      const { data: insertedData, error: insertError } = await supabase
+        .from('chat_messages')
+        .insert({
+          ...sanitizedData,
+          image_url: imageUrl,
+          likes: 0,
+          dislikes: 0
+        })
+        .select()
+        .single();
         
-      if (result.error) {
-        console.error('Error inserting chat message:', result.error);
-        throw result.error;
+      if (insertError) {
+        console.error('Error inserting chat message:', insertError);
+        throw insertError;
       }
       
-      const insertedData = result.data;
-      if (insertedData && insertedData.length > 0) {
-        return insertedData[0] as ChatMessage;
-      }
-      
-      return null;
+      return insertedData as ChatMessage;
     } catch (error) {
       console.error('Error sending chat message:', error);
       
