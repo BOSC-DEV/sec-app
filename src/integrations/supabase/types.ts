@@ -56,24 +56,45 @@ export type Database = {
       announcements: {
         Row: {
           author_id: string | null
+          author_name: string | null
+          author_profile_pic: string | null
+          author_username: string | null
           content: string
           created_at: string | null
+          dislikes: number | null
           id: string
+          likes: number | null
+          survey_data: Json | null
           updated_at: string | null
+          views: number | null
         }
         Insert: {
           author_id?: string | null
+          author_name?: string | null
+          author_profile_pic?: string | null
+          author_username?: string | null
           content: string
           created_at?: string | null
+          dislikes?: number | null
           id?: string
+          likes?: number | null
+          survey_data?: Json | null
           updated_at?: string | null
+          views?: number | null
         }
         Update: {
           author_id?: string | null
+          author_name?: string | null
+          author_profile_pic?: string | null
+          author_username?: string | null
           content?: string
           created_at?: string | null
+          dislikes?: number | null
           id?: string
+          likes?: number | null
+          survey_data?: Json | null
           updated_at?: string | null
+          views?: number | null
         }
         Relationships: [
           {
@@ -88,27 +109,45 @@ export type Database = {
       bounty_contributions: {
         Row: {
           amount: number
+          comment: string | null
           contributor_id: string | null
+          contributor_name: string | null
+          contributor_profile_pic: string | null
           created_at: string | null
           id: string
+          is_active: boolean | null
           scammer_id: string | null
           transaction_signature: string | null
+          transferred_from_id: string | null
+          transferred_to_id: string | null
         }
         Insert: {
           amount: number
+          comment?: string | null
           contributor_id?: string | null
+          contributor_name?: string | null
+          contributor_profile_pic?: string | null
           created_at?: string | null
           id?: string
+          is_active?: boolean | null
           scammer_id?: string | null
           transaction_signature?: string | null
+          transferred_from_id?: string | null
+          transferred_to_id?: string | null
         }
         Update: {
           amount?: number
+          comment?: string | null
           contributor_id?: string | null
+          contributor_name?: string | null
+          contributor_profile_pic?: string | null
           created_at?: string | null
           id?: string
+          is_active?: boolean | null
           scammer_id?: string | null
           transaction_signature?: string | null
+          transferred_from_id?: string | null
+          transferred_to_id?: string | null
         }
         Relationships: [
           {
@@ -168,29 +207,114 @@ export type Database = {
       }
       chat_messages: {
         Row: {
+          author_id: string | null
+          author_name: string | null
+          author_profile_pic: string | null
+          author_sec_balance: number | null
+          author_username: string | null
           content: string
           created_at: string | null
+          dislikes: number | null
           id: string
+          image_url: string | null
+          likes: number | null
           user_id: string | null
         }
         Insert: {
+          author_id?: string | null
+          author_name?: string | null
+          author_profile_pic?: string | null
+          author_sec_balance?: number | null
+          author_username?: string | null
           content: string
           created_at?: string | null
+          dislikes?: number | null
           id?: string
+          image_url?: string | null
+          likes?: number | null
           user_id?: string | null
         }
         Update: {
+          author_id?: string | null
+          author_name?: string | null
+          author_profile_pic?: string | null
+          author_sec_balance?: number | null
+          author_username?: string | null
           content?: string
           created_at?: string | null
+          dislikes?: number | null
           id?: string
+          image_url?: string | null
+          likes?: number | null
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "chat_messages_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "chat_messages_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comments: {
+        Row: {
+          author: string
+          author_name: string | null
+          author_profile_pic: string | null
+          content: string
+          created_at: string | null
+          dislikes: number | null
+          id: string
+          likes: number | null
+          scammer_id: string
+          views: number | null
+        }
+        Insert: {
+          author: string
+          author_name?: string | null
+          author_profile_pic?: string | null
+          content: string
+          created_at?: string | null
+          dislikes?: number | null
+          id?: string
+          likes?: number | null
+          scammer_id: string
+          views?: number | null
+        }
+        Update: {
+          author?: string
+          author_name?: string | null
+          author_profile_pic?: string | null
+          content?: string
+          created_at?: string | null
+          dislikes?: number | null
+          id?: string
+          likes?: number | null
+          scammer_id?: string
+          views?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_author_fkey"
+            columns: ["author"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_scammer_id_fkey"
+            columns: ["scammer_id"]
+            isOneToOne: false
+            referencedRelation: "scammers"
             referencedColumns: ["id"]
           },
         ]
@@ -244,23 +368,38 @@ export type Database = {
         Row: {
           announcement_id: string | null
           author_id: string | null
+          author_name: string | null
+          author_profile_pic: string | null
+          author_username: string | null
           content: string
           created_at: string | null
+          dislikes: number | null
           id: string
+          likes: number | null
         }
         Insert: {
           announcement_id?: string | null
           author_id?: string | null
+          author_name?: string | null
+          author_profile_pic?: string | null
+          author_username?: string | null
           content: string
           created_at?: string | null
+          dislikes?: number | null
           id?: string
+          likes?: number | null
         }
         Update: {
           announcement_id?: string | null
           author_id?: string | null
+          author_name?: string | null
+          author_profile_pic?: string | null
+          author_username?: string | null
           content?: string
           created_at?: string | null
+          dislikes?: number | null
           id?: string
+          likes?: number | null
         }
         Relationships: [
           {
@@ -354,14 +493,21 @@ export type Database = {
         Row: {
           accomplices: string[] | null
           accused_of: string
+          added_by: string | null
           aliases: string[] | null
           bounty_amount: number | null
+          comments: string[] | null
           created_at: string | null
+          date_added: string | null
+          deleted_at: string | null
+          dislikes: number | null
           id: string
+          likes: number | null
           links: string[] | null
           name: string
           official_response: string | null
           photo_url: string | null
+          shares: number | null
           updated_at: string | null
           views: number | null
           wallet_addresses: string[] | null
@@ -369,14 +515,21 @@ export type Database = {
         Insert: {
           accomplices?: string[] | null
           accused_of: string
+          added_by?: string | null
           aliases?: string[] | null
           bounty_amount?: number | null
+          comments?: string[] | null
           created_at?: string | null
+          date_added?: string | null
+          deleted_at?: string | null
+          dislikes?: number | null
           id?: string
+          likes?: number | null
           links?: string[] | null
           name: string
           official_response?: string | null
           photo_url?: string | null
+          shares?: number | null
           updated_at?: string | null
           views?: number | null
           wallet_addresses?: string[] | null
@@ -384,19 +537,34 @@ export type Database = {
         Update: {
           accomplices?: string[] | null
           accused_of?: string
+          added_by?: string | null
           aliases?: string[] | null
           bounty_amount?: number | null
+          comments?: string[] | null
           created_at?: string | null
+          date_added?: string | null
+          deleted_at?: string | null
+          dislikes?: number | null
           id?: string
+          likes?: number | null
           links?: string[] | null
           name?: string
           official_response?: string | null
           photo_url?: string | null
+          shares?: number | null
           updated_at?: string | null
           views?: number | null
           wallet_addresses?: string[] | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "scammers_added_by_fkey"
+            columns: ["added_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -416,6 +584,14 @@ export type Database = {
           count: number
           date: string
         }[]
+      }
+      track_pageview: {
+        Args: { pageview_data: Json }
+        Returns: undefined
+      }
+      track_visitor: {
+        Args: { visitor_data: Json }
+        Returns: undefined
       }
     }
     Enums: {
