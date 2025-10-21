@@ -76,7 +76,7 @@ export const validateUserAuthentication = async (): Promise<string | null> => {
 };
 
 export const validateUserOwnership = async (
-  table: 'comments' | 'scammers' | 'bounty_contributions' | 'announcements' | 'announcement_replies',
+  table: 'comments' | 'scammers' | 'bounty_contributions' | 'announcements' | 'replies',
   recordId: string,
   userIdField: string = 'author'
 ): Promise<boolean> => {

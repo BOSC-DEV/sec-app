@@ -325,6 +325,7 @@ export type Database = {
           created_at: string | null
           display_name: string | null
           id: string
+          is_admin: boolean | null
           points: number | null
           profile_pic_url: string | null
           sec_balance: number | null
@@ -339,6 +340,7 @@ export type Database = {
           created_at?: string | null
           display_name?: string | null
           id?: string
+          is_admin?: boolean | null
           points?: number | null
           profile_pic_url?: string | null
           sec_balance?: number | null
@@ -353,6 +355,7 @@ export type Database = {
           created_at?: string | null
           display_name?: string | null
           id?: string
+          is_admin?: boolean | null
           points?: number | null
           profile_pic_url?: string | null
           sec_balance?: number | null
@@ -566,6 +569,54 @@ export type Database = {
           },
         ]
       }
+      user_scammer_interactions: {
+        Row: {
+          bookmarked: boolean | null
+          created_at: string | null
+          disliked: boolean | null
+          id: string
+          liked: boolean | null
+          scammer_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          bookmarked?: boolean | null
+          created_at?: string | null
+          disliked?: boolean | null
+          id?: string
+          liked?: boolean | null
+          scammer_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          bookmarked?: boolean | null
+          created_at?: string | null
+          disliked?: boolean | null
+          id?: string
+          liked?: boolean | null
+          scammer_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_scammer_interactions_scammer_id_fkey"
+            columns: ["scammer_id"]
+            isOneToOne: false
+            referencedRelation: "scammers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_scammer_interactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -584,6 +635,10 @@ export type Database = {
           count: number
           date: string
         }[]
+      }
+      increment_announcement_views: {
+        Args: { announcement_id_param: string }
+        Returns: undefined
       }
       track_pageview: {
         Args: { pageview_data: Json }

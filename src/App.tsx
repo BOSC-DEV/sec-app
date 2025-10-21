@@ -90,22 +90,26 @@ const AnalyticsTracker = () => {
         
         // First track the visitor
         await supabase.rpc('track_visitor', {
-          p_visitor_id: visitorId,
-          p_ip_address: geoData.ip || null,
-          p_user_agent: navigator.userAgent,
-          p_country_code: geoData.country_code || null,
-          p_country_name: geoData.country_name || null,
-          p_city: geoData.city || null,
-          p_referrer: document.referrer || null
+          visitor_data: {
+            visitor_id: visitorId,
+            ip_address: geoData.ip || null,
+            user_agent: navigator.userAgent,
+            country_code: geoData.country_code || null,
+            country_name: geoData.country_name || null,
+            city: geoData.city || null,
+            referrer: document.referrer || null
+          }
         });
 
         // Then track the pageview
         const title = document.title;
         await supabase.rpc('track_pageview', {
-          p_visitor_id: visitorId,
-          p_page_path: location.pathname,
-          p_page_title: title,
-          p_session_id: localStorage.getItem('session_id') || null
+          pageview_data: {
+            visitor_id: visitorId,
+            page_path: location.pathname,
+            page_title: title,
+            session_id: localStorage.getItem('session_id') || null
+          }
         });
 
         analyticsService.trackPageView();

@@ -86,7 +86,7 @@ export const createAnnouncement = async (announcement: {
 export const incrementAnnouncementViews = async (announcementId: string): Promise<void> => {
   try {
     const { error } = await supabase.rpc('increment_announcement_views', {
-      p_announcement_id: announcementId
+      announcement_id_param: announcementId
     });
     
     if (error) throw error;
@@ -306,7 +306,7 @@ export const getUserSurveyVote = async (
 export const getAnnouncementReplies = async (announcementId: string): Promise<AnnouncementReply[]> => {
   try {
     const { data, error } = await supabase
-      .from('announcement_replies')
+      .from('replies')
       .select('*')
       .eq('announcement_id', announcementId)
       .order('created_at', { ascending: true });
@@ -331,7 +331,7 @@ export const addAnnouncementReply = async (reply: {
 }): Promise<AnnouncementReply | null> => {
   try {
     const { data, error } = await supabase
-      .from('announcement_replies')
+      .from('replies')
       .insert({
         ...reply,
         author_username: reply.author_username || null
@@ -362,7 +362,7 @@ export const deleteAnnouncementReply = async (replyId: string): Promise<boolean>
       .single();
 
     const { data: reply } = await supabase
-      .from('announcement_replies')
+      .from('replies')
       .select('author_id')
       .eq('id', replyId)
       .single();
@@ -372,7 +372,7 @@ export const deleteAnnouncementReply = async (replyId: string): Promise<boolean>
     }
 
     const { error } = await supabase
-      .from('announcement_replies')
+      .from('replies')
       .delete()
       .eq('id', replyId);
 
@@ -399,7 +399,7 @@ export const editAnnouncementReply = async (replyId: string, content: string): P
       .single();
 
     const { data: reply } = await supabase
-      .from('announcement_replies')
+      .from('replies')
       .select('author_id')
       .eq('id', replyId)
       .single();
@@ -409,7 +409,7 @@ export const editAnnouncementReply = async (replyId: string, content: string): P
     }
 
     const { error } = await supabase
-      .from('announcement_replies')
+      .from('replies')
       .update({ content })
       .eq('id', replyId);
 
@@ -679,7 +679,7 @@ export const likeReply = async (replyId: string, userId: string): Promise<any> =
 
       // Decrement likes count
       const { data: reply, error: replyError } = await supabase
-        .from('announcement_replies')
+        .from('replies')
         .select('likes')
         .eq('id', replyId)
         .single();
@@ -687,7 +687,7 @@ export const likeReply = async (replyId: string, userId: string): Promise<any> =
       if (replyError) throw replyError;
 
       const { error: updateError } = await supabase
-        .from('announcement_replies')
+        .from('replies')
         .update({ likes: Math.max(0, (reply?.likes || 0) - 1) })
         .eq('id', replyId);
 
@@ -714,7 +714,7 @@ export const likeReply = async (replyId: string, userId: string): Promise<any> =
 
         // Decrement dislikes count
         const { data: reply, error: replyError } = await supabase
-          .from('announcement_replies')
+          .from('replies')
           .select('dislikes')
           .eq('id', replyId)
           .single();
@@ -722,7 +722,7 @@ export const likeReply = async (replyId: string, userId: string): Promise<any> =
         if (replyError) throw replyError;
 
         const { error: updateError } = await supabase
-          .from('announcement_replies')
+          .from('replies')
           .update({ dislikes: Math.max(0, (reply?.dislikes || 0) - 1) })
           .eq('id', replyId);
 
@@ -742,7 +742,7 @@ export const likeReply = async (replyId: string, userId: string): Promise<any> =
 
       // Increment likes count
       const { data: reply, error: replyError } = await supabase
-        .from('announcement_replies')
+        .from('replies')
         .select('likes')
         .eq('id', replyId)
         .single();
@@ -750,7 +750,7 @@ export const likeReply = async (replyId: string, userId: string): Promise<any> =
       if (replyError) throw replyError;
 
       const { error: updateError } = await supabase
-        .from('announcement_replies')
+        .from('replies')
         .update({ likes: (reply?.likes || 0) + 1 })
         .eq('id', replyId);
 
@@ -759,7 +759,7 @@ export const likeReply = async (replyId: string, userId: string): Promise<any> =
 
     // Get updated counts
     const { data: updated, error: updatedError } = await supabase
-      .from('announcement_replies')
+      .from('replies')
       .select('likes, dislikes')
       .eq('id', replyId)
       .maybeSingle();
@@ -797,7 +797,7 @@ export const dislikeReply = async (replyId: string, userId: string): Promise<any
 
       // Decrement dislikes count
       const { data: reply, error: replyError } = await supabase
-        .from('announcement_replies')
+        .from('replies')
         .select('dislikes')
         .eq('id', replyId)
         .single();
@@ -805,7 +805,7 @@ export const dislikeReply = async (replyId: string, userId: string): Promise<any
       if (replyError) throw replyError;
 
       const { error: updateError } = await supabase
-        .from('announcement_replies')
+        .from('replies')
         .update({ dislikes: Math.max(0, (reply?.dislikes || 0) - 1) })
         .eq('id', replyId);
 
@@ -832,7 +832,7 @@ export const dislikeReply = async (replyId: string, userId: string): Promise<any
 
         // Decrement likes count
         const { data: reply, error: replyError } = await supabase
-          .from('announcement_replies')
+          .from('replies')
           .select('likes')
           .eq('id', replyId)
           .single();
@@ -840,7 +840,7 @@ export const dislikeReply = async (replyId: string, userId: string): Promise<any
         if (replyError) throw replyError;
 
         const { error: updateError } = await supabase
-          .from('announcement_replies')
+          .from('replies')
           .update({ likes: Math.max(0, (reply?.likes || 0) - 1) })
           .eq('id', replyId);
 
@@ -860,7 +860,7 @@ export const dislikeReply = async (replyId: string, userId: string): Promise<any
 
       // Increment dislikes count
       const { data: reply, error: replyError } = await supabase
-        .from('announcement_replies')
+        .from('replies')
         .select('dislikes')
         .eq('id', replyId)
         .single();
@@ -868,7 +868,7 @@ export const dislikeReply = async (replyId: string, userId: string): Promise<any
       if (replyError) throw replyError;
 
       const { error: updateError } = await supabase
-        .from('announcement_replies')
+        .from('replies')
         .update({ dislikes: (reply?.dislikes || 0) + 1 })
         .eq('id', replyId);
 
@@ -877,7 +877,7 @@ export const dislikeReply = async (replyId: string, userId: string): Promise<any
 
     // Get updated counts
     const { data: updated, error: updatedError } = await supabase
-      .from('announcement_replies')
+      .from('replies')
       .select('likes, dislikes')
       .eq('id', replyId)
       .maybeSingle();
