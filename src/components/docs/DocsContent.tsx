@@ -124,7 +124,7 @@ const DocsContent = ({ children, title, description }: DocsContentProps) => {
                 <div className="p-3 border-b bg-muted/50">
                   <h3 className="font-semibold text-sm">On this page</h3>
                 </div>
-                <nav className="p-3 overflow-y-auto max-h-[calc(100vh-8rem)]">
+                <nav className="p-3 overflow-hidden max-h-[calc(100vh-8rem)]">
                   <div className="space-y-2">
                     {headings.map((heading) => (
                       <a
