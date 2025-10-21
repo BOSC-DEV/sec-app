@@ -69,14 +69,14 @@ export const useChatMessages = () => {
       }
       
       // Sanitize all input data
-      const sanitizedData = sanitizeFormData({
-        content: messageData.content,
+      const sanitizedData = {
+        content: sanitizeInput(messageData.content),
         author_id: messageData.author_id,
-        author_name: messageData.author_name,
-        author_username: messageData.author_username,
+        author_name: sanitizeInput(messageData.author_name),
+        author_username: messageData.author_username ? sanitizeInput(messageData.author_username) : undefined,
         author_profile_pic: messageData.author_profile_pic,
         author_sec_balance: messageData.author_sec_balance
-      });
+      };
       
       let imageUrl = null;
       
@@ -122,14 +122,10 @@ export const useChatMessages = () => {
         imageUrl = data.publicUrl;
       }
       
-      // Insert the chat message (image_url will be added in future migration)
+      // Insert the chat message
       const { data: insertedData, error: insertError } = await supabase
         .from('chat_messages')
-        .insert({
-          ...sanitizedData,
-          likes: 0,
-          dislikes: 0
-        })
+        .insert(sanitizedData)
         .select()
         .single();
         
