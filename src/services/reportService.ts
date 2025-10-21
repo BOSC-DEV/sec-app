@@ -37,7 +37,7 @@ export const uploadScammerPhoto = async (
     
     console.log("Uploading file to bucket 'media':", safeFileName);
     
-    const { data: uploadData, error: uploadError } = await supabaseStorage.storage
+    const { data: uploadData, error: uploadError } = await supabase.storage
       .from('media')
       .upload(safeFileName, file, {
         cacheControl: '3600',
@@ -51,7 +51,7 @@ export const uploadScammerPhoto = async (
     
     console.log("File uploaded successfully, getting public URL");
     
-    const { data: publicUrlData } = supabaseStorage.storage
+    const { data: publicUrlData } = supabase.storage
       .from('media')
       .getPublicUrl(safeFileName);
       

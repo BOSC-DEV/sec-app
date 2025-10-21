@@ -319,6 +319,44 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          content: string
+          created_at: string | null
+          entity_id: string | null
+          id: string
+          is_read: boolean | null
+          recipient_id: string | null
+          type: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          entity_id?: string | null
+          id?: string
+          is_read?: boolean | null
+          recipient_id?: string | null
+          type: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          entity_id?: string | null
+          id?: string
+          is_read?: boolean | null
+          recipient_id?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           bio: string | null
@@ -492,6 +530,35 @@ export type Database = {
           },
         ]
       }
+      scammer_views: {
+        Row: {
+          created_at: string | null
+          id: string
+          scammer_id: string | null
+          visitor_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          scammer_id?: string | null
+          visitor_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          scammer_id?: string | null
+          visitor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scammer_views_scammer_id_fkey"
+            columns: ["scammer_id"]
+            isOneToOne: false
+            referencedRelation: "scammers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scammers: {
         Row: {
           accomplices: string[] | null
@@ -639,6 +706,10 @@ export type Database = {
       increment_announcement_views: {
         Args: { announcement_id_param: string }
         Returns: undefined
+      }
+      is_duplicate_view: {
+        Args: { p_scammer_id: string; p_visitor_id: string }
+        Returns: boolean
       }
       track_pageview: {
         Args: { pageview_data: Json }

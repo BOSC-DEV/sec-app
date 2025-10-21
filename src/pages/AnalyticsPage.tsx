@@ -154,8 +154,17 @@ const fetchAnalyticsData = async (): Promise<AnalyticsData & { revenue: RevenueD
     };
 
     return {
-      dailyVisitors: dailyVisitors || [],
-      countryStats: countryStats || [],
+      dailyVisitors: (dailyVisitors || []).map(item => ({
+        day: item.date,
+        unique_visitors: item.count,
+        total_visits: item.count
+      })),
+      countryStats: (countryStats || []).map(item => ({
+        country_code: item.country?.substring(0, 2) || 'XX',
+        country_name: item.country || 'Unknown',
+        visitor_count: item.count,
+        visit_count: item.count
+      })),
       topScammers: processedTopScammers,
       reportStats: reportStats,
       bountyStats: bountyStats,

@@ -122,12 +122,11 @@ export const useChatMessages = () => {
         imageUrl = data.publicUrl;
       }
       
-      // Insert the chat message
+      // Insert the chat message (image_url will be added in future migration)
       const { data: insertedData, error: insertError } = await supabase
         .from('chat_messages')
         .insert({
           ...sanitizedData,
-          image_url: imageUrl,
           likes: 0,
           dislikes: 0
         })

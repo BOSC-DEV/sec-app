@@ -55,22 +55,22 @@ export const getScammerById = async (id: string): Promise<Scammer | null> => {
     if (data) {
       try {
         // Generate a unique IP hash based on timestamp to avoid constraint violations
-        // In a production environment, you would use a real IP address hash
-        const ipHash = `anonymous-${new Date().getTime()}`;
+        // In a production environment, you would use a real visitor ID
+        const visitorId = localStorage.getItem('visitor_id') || `visitor-${Date.now()}`;
         
         // Check if this view is a duplicate using our new database function
         const { data: isDuplicate } = await supabase
           .rpc('is_duplicate_view', { 
             p_scammer_id: sanitizedId, 
-            p_ip_hash: ipHash 
+            p_visitor_id: visitorId 
           });
         
         // Only insert view record if it's not a duplicate
         if (!isDuplicate) {
-          // Insert view record - this will trigger our increment_scammer_views function
+          // Insert view record
           const { error: viewError } = await supabase
             .from('scammer_views')
-            .insert({ scammer_id: sanitizedId, ip_hash: ipHash });
+            .insert({ scammer_id: sanitizedId, visitor_id: visitorId });
             
           if (viewError) {
             console.error('Error logging scammer view:', viewError);
