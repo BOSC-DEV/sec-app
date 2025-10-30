@@ -2,6 +2,14 @@ import { supabase } from '@/integrations/supabase/client';
 import * as nacl from 'tweetnacl';
 import { PublicKey } from '@solana/web3.js';
 
+const hashToHex = async (input: string): Promise<string> => {
+  const data = new TextEncoder().encode(input);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+};
+
 export const authenticateWallet = async (
   walletAddress: string,
   signature: string,
@@ -26,7 +34,8 @@ export const authenticateWallet = async (
     
     // Sign in with email (wallet address as email)
     const email = `${walletAddress}@sec.digital`;
-    const password = signature; // Use signature as password
+    // Derive a ≤72-char password from signature (64-char SHA-256 hex)
+    const password = await hashToHex(signature);
     
     // Try to sign in first
     const { error: signInError } = await supabase.auth.signInWithPassword({
