@@ -35,19 +35,21 @@ export const authenticateWallet = async (
     // Sign in with email (wallet address as email)
     const email = `${walletAddress}@sec.digital`;
     // Derive a ≤72-char password from signature (64-char SHA-256 hex)
-    const password = await hashToHex(signature);
+    const hashedPassword = await hashToHex(signature);
     
-    // Try to sign in first
-    const { error: signInError } = await supabase.auth.signInWithPassword({
+    // Try to sign in with hashed password first (for new users)
+    let { error: signInError } = await supabase.auth.signInWithPassword({
       email,
-      password,
+      password: hashedPassword,
     });
     
-    // If sign in fails, try to sign up
+    // If sign in fails, try to sign up (new user or password migration)
     if (signInError) {
-      const { error: signUpError } = await supabase.auth.signUp({
+      // For existing users with old password format, signUp might fail
+      // In that case, they need to use password reset or admin migration
+      const { error: signUpError, data: signUpData } = await supabase.auth.signUp({
         email,
-        password,
+        password: hashedPassword,
         options: {
           data: {
             wallet_address: walletAddress,
@@ -56,8 +58,20 @@ export const authenticateWallet = async (
       });
       
       if (signUpError) {
+        // If user already exists, this is a legacy password issue
+        // We need admin access or password reset to fix this
+        if (signUpError.message?.includes('already registered') || signUpError.message?.includes('already exists')) {
+          console.error('Legacy user detected - password needs migration. User:', email);
+          throw new Error('Your account needs to be migrated. Please contact support or try resetting your password.');
+        }
         console.error('Sign up error:', signUpError);
         return false;
+      }
+      
+      // If signUp succeeded, user was created or password was updated
+      // Note: Supabase may require email confirmation
+      if (signUpData?.user && !signUpData?.session) {
+        console.log('User created but requires email confirmation');
       }
     }
     

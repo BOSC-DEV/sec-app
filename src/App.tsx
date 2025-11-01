@@ -18,12 +18,14 @@ import LegalPages from "./pages/LegalPages";
 import NotFound from "./pages/NotFound";
 import NotificationsPage from "./pages/NotificationsPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
+import AdminDashboard from "./pages/AdminDashboard";
 import DocsLayout from "./components/docs/DocsLayout";
 import DocsRouter from "./pages/docs/DocsRouter";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ProfileProvider, useProfile } from "./contexts/ProfileContext";
 import EnhancedErrorBoundary from "./components/common/EnhancedErrorBoundary";
 import ProtectedRoute from "./components/common/ProtectedRoute";
+import AdminProtectedRoute from "./components/common/AdminProtectedRoute";
 import analyticsService from "./services/analyticsService";
 import log from "./services/loggingService";
 import { handleError, ErrorSeverity } from "./utils/errorHandling";
@@ -227,6 +229,11 @@ const App = () => (
                       <ProtectedRoute>
                         <AnalyticsPage />
                       </ProtectedRoute>
+                    } />
+                    <Route path="/admin" element={
+                      <AdminProtectedRoute>
+                        <AdminDashboard />
+                      </AdminProtectedRoute>
                     } />
                     {/* Profile routes - MUST come after all other specific routes */}
                     <Route path="/profile/:username" element={<PublicProfilePage />} />

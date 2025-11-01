@@ -10,6 +10,7 @@ import { toast } from '@/hooks/use-toast';
 import NotificationDropdown from '../notifications/NotificationDropdown';
 import NotificationIndicator from '../notifications/NotificationIndicator';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAdminGuard } from '@/hooks/useAdminGuard';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -24,6 +25,7 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
+  const { isAdmin } = useAdminGuard();
 
   useEffect(() => {
     setIsMenuOpen(false);
@@ -122,6 +124,11 @@ const Header = () => {
               </Button> : isConnected ? <div className="flex items-center space-x-3">
                 <NotificationIndicator onClick={toggleNotifications} />
                 
+                {isAdmin && (
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-icc-blue-light" onClick={() => navigate('/admin')}>
+                    Admin
+                  </Button>
+                )}
                 <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light" onClick={handleProfileClick} aria-label="Profile">
                   <User className="h-5 w-5" />
                 </Button>
@@ -155,7 +162,11 @@ const Header = () => {
               {navigationItems.map(item => <Link key={item.path} to={item.path} className={`text-white hover:text-icc-gold transition-colors px-2 py-1 flex items-center ${location.pathname === item.path ? 'text-icc-gold font-medium' : ''}`} onClick={() => setIsMenuOpen(false)}>
                   {item.label}
                 </Link>)}
-              
+              {isAdmin && (
+                <Link to="/admin" className={`text-white hover:text-icc-gold transition-colors px-2 py-1 flex items-center ${location.pathname === '/admin' ? 'text-icc-gold font-medium' : ''}`} onClick={() => setIsMenuOpen(false)}>
+                  Admin
+                </Link>
+              )}
               <button 
                 className="text-white hover:text-icc-gold transition-colors px-2 py-1 text-left" 
                 onClick={() => {
