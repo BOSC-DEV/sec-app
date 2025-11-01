@@ -738,6 +738,10 @@ export type Database = {
         Returns: boolean
       }
       is_whale: { Args: { p_profile_id: string }; Returns: boolean }
+      migrate_user_password: {
+        Args: { p_signature_base64: string; p_wallet_address: string }
+        Returns: boolean
+      }
       track_pageview: { Args: { pageview_data: Json }; Returns: undefined }
       track_visitor: { Args: { visitor_data: Json }; Returns: undefined }
     }
