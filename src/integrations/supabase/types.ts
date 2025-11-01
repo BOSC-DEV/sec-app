@@ -714,6 +714,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      current_profile_id: { Args: never; Returns: string }
       get_country_stats: {
         Args: never
         Returns: {
@@ -736,6 +737,7 @@ export type Database = {
         Args: { p_scammer_id: string; p_visitor_id: string }
         Returns: boolean
       }
+      is_whale: { Args: { p_profile_id: string }; Returns: boolean }
       track_pageview: { Args: { pageview_data: Json }; Returns: undefined }
       track_visitor: { Args: { visitor_data: Json }; Returns: undefined }
     }
