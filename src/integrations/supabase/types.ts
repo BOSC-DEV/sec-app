@@ -364,9 +364,11 @@ export type Database = {
           display_name: string | null
           id: string
           is_admin: boolean | null
+          is_banned: boolean | null
           points: number | null
           profile_pic_url: string | null
           sec_balance: number | null
+          suspended_until: string | null
           updated_at: string | null
           username: string | null
           wallet_address: string
@@ -379,9 +381,11 @@ export type Database = {
           display_name?: string | null
           id?: string
           is_admin?: boolean | null
+          is_banned?: boolean | null
           points?: number | null
           profile_pic_url?: string | null
           sec_balance?: number | null
+          suspended_until?: string | null
           updated_at?: string | null
           username?: string | null
           wallet_address: string
@@ -394,9 +398,11 @@ export type Database = {
           display_name?: string | null
           id?: string
           is_admin?: boolean | null
+          is_banned?: boolean | null
           points?: number | null
           profile_pic_url?: string | null
           sec_balance?: number | null
+          suspended_until?: string | null
           updated_at?: string | null
           username?: string | null
           wallet_address?: string
@@ -503,24 +509,43 @@ export type Database = {
           created_at: string | null
           description: string
           id: string
+          resolution: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           scammer_name: string
+          status: Database["public"]["Enums"]["report_status"]
           user_id: string | null
         }
         Insert: {
           created_at?: string | null
           description: string
           id?: string
+          resolution?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           scammer_name: string
+          status?: Database["public"]["Enums"]["report_status"]
           user_id?: string | null
         }
         Update: {
           created_at?: string | null
           description?: string
           id?: string
+          resolution?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           scammer_name?: string
+          status?: Database["public"]["Enums"]["report_status"]
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "report_submissions_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "report_submissions_user_id_fkey"
             columns: ["user_id"]
@@ -690,14 +715,14 @@ export type Database = {
     }
     Functions: {
       get_country_stats: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           count: number
           country: string
         }[]
       }
       get_daily_visitors: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           count: number
           date: string
@@ -711,17 +736,11 @@ export type Database = {
         Args: { p_scammer_id: string; p_visitor_id: string }
         Returns: boolean
       }
-      track_pageview: {
-        Args: { pageview_data: Json }
-        Returns: undefined
-      }
-      track_visitor: {
-        Args: { visitor_data: Json }
-        Returns: undefined
-      }
+      track_pageview: { Args: { pageview_data: Json }; Returns: undefined }
+      track_visitor: { Args: { visitor_data: Json }; Returns: undefined }
     }
     Enums: {
-      [_ in never]: never
+      report_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -848,6 +867,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      report_status: ["pending", "approved", "rejected"],
+    },
   },
 } as const
