@@ -77,10 +77,30 @@ export const authenticateWallet = async (
         return false;
       }
       
-      // If signUp succeeded, user was created or password was updated
-      // Note: Supabase may require email confirmation
+      // If signUp succeeded, check if we have a session
+      if (signUpData?.user && signUpData?.session) {
+        // User created and authenticated (email confirmation disabled)
+        console.log('User created and authenticated successfully');
+        return true;
+      }
+      
       if (signUpData?.user && !signUpData?.session) {
-        console.log('User created but requires email confirmation');
+        // User created but email confirmation required
+        // Try to sign in again - sometimes Supabase auto-confirms
+        console.log('User created but requires email confirmation, trying to sign in...');
+        const { error: retrySignInError, data: retrySignInData } = await supabase.auth.signInWithPassword({
+          email,
+          password: hashedPassword,
+        });
+        
+        if (!retrySignInError && retrySignInData?.session) {
+          console.log('Sign-in successful after signup');
+          return true;
+        }
+        
+        // If still failing, email confirmation is required
+        console.error('Email confirmation required. Please disable email confirmation in Supabase Dashboard for wallet-based auth.');
+        throw new Error('Email confirmation required. Please check your Supabase settings to disable email confirmation for wallet-based authentication.');
       }
     }
     
