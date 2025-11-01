@@ -59,10 +59,19 @@ export const authenticateWallet = async (
       
       if (signUpError) {
         // If user already exists, this is a legacy password issue
-        // We need admin access or password reset to fix this
-        if (signUpError.message?.includes('already registered') || signUpError.message?.includes('already exists')) {
+        // Supabase signUp doesn't update existing users, so we need admin access
+        if (
+          signUpError.message?.toLowerCase().includes('already registered') || 
+          signUpError.message?.toLowerCase().includes('already exists') ||
+          signUpError.message?.toLowerCase().includes('user already registered')
+        ) {
           console.error('Legacy user detected - password needs migration. User:', email);
-          throw new Error('Your account needs to be migrated. Please contact support or try resetting your password.');
+          console.error('SignUp error details:', signUpError);
+          
+          // Provide clear error message
+          const errorMsg = `Account already exists with old password format. Please contact support to migrate your account, or delete your account and sign up again.`;
+          console.error(errorMsg);
+          throw new Error(errorMsg);
         }
         console.error('Sign up error:', signUpError);
         return false;
