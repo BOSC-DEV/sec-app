@@ -33,12 +33,12 @@ export const uploadScammerPhoto = async (
     
     // Create a safe filename
     const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
-    const safeFileName = `scammer_photos/${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExtension}`;
+    const safeFileName = `scammer-photos/${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExtension}`;
     
-    console.log("Uploading file to bucket 'media':", safeFileName);
+    console.log("Uploading file to bucket 'profiles':", safeFileName);
     
     const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('media')
+      .from('profiles')
       .upload(safeFileName, file, {
         cacheControl: '3600',
         contentType: file.type
@@ -52,7 +52,7 @@ export const uploadScammerPhoto = async (
     console.log("File uploaded successfully, getting public URL");
     
     const { data: publicUrlData } = supabase.storage
-      .from('media')
+      .from('profiles')
       .getPublicUrl(safeFileName);
       
     return publicUrlData.publicUrl;
