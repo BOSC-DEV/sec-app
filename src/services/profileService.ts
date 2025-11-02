@@ -249,11 +249,11 @@ export const getProfileByWallet = async (walletAddress: string): Promise<Profile
     console.log("Getting profile by wallet address:", walletAddress);
     const sanitizedWallet = sanitizeInput(walletAddress);
     
-    // First check if we can find the profile without authentication
+    // Use case-insensitive matching for wallet addresses
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('wallet_address', sanitizedWallet)
+      .ilike('wallet_address', sanitizedWallet)
       .maybeSingle();
 
     if (error) {

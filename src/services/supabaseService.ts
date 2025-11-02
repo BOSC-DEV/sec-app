@@ -20,7 +20,7 @@ export const getProfileByWallet = async (walletAddress: string): Promise<Profile
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
-    .eq('wallet_address', walletAddress)
+    .ilike('wallet_address', walletAddress)
     .maybeSingle();
   
   if (error) {

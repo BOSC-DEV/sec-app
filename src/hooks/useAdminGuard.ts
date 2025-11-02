@@ -40,12 +40,12 @@ export function useAdminGuard(): AdminGuardResult {
           return;
         }
 
-        // Get profile ID
+        // Get profile ID (case-insensitive wallet match)
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('id')
-          .eq('wallet_address', wallet)
-          .single();
+          .ilike('wallet_address', wallet)
+          .maybeSingle();
 
         if (profileError) {
           if (!cancelled) {

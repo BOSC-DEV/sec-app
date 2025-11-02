@@ -45,6 +45,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   const [isPhantomAvailable, setIsPhantomAvailable] = useState<boolean>(false);
   const [session, setSession] = useState<Session | null>(null);
   const [isWalletReady, setIsWalletReady] = useState<boolean>(false);
+  const [isConnecting, setIsConnecting] = useState<boolean>(false); // Prevent concurrent connections
 
   // Helper function to validate and set wallet address
   const setValidatedWalletAddress = async (address: string | null): Promise<boolean> => {
@@ -354,7 +355,14 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const connectWallet = async () => {
+    // Prevent concurrent connection attempts
+    if (isConnecting) {
+      console.log("Connection already in progress");
+      return;
+    }
+
     try {
+      setIsConnecting(true);
       setIsLoading(true);
       
       if (!isPhantomAvailable) {
@@ -387,6 +395,8 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         variant: 'destructive',
       });
       setIsLoading(false);
+    } finally {
+      setIsConnecting(false);
     }
   };
 
