@@ -116,19 +116,35 @@ const ProfilePage = () => {
   };
 
   const onSubmit = async (data: ProfileFormValues) => {
-    if (!walletAddress || !profile) return;
+    if (!walletAddress) return;
     try {
       setIsSaving(true);
+      
+      // Create base profile if it doesn't exist
+      const baseProfile = profile || {
+        id: '',
+        wallet_address: walletAddress,
+        display_name: '',
+        username: '',
+        profile_pic_url: '',
+        created_at: new Date().toISOString(),
+        x_link: '',
+        website_link: '',
+        bio: '',
+        points: 0
+      };
+      
       const updatedProfile = await updateProfile({
-        ...profile,
+        ...baseProfile,
         display_name: data.display_name,
         username: data.username,
         bio: data.bio,
         x_link: data.x_link,
         website_link: data.website_link,
-        profile_pic_url: avatarUrl || profile.profile_pic_url
+        profile_pic_url: avatarUrl || baseProfile.profile_pic_url
       });
-      if (data.username) {
+      
+      if (data.username && updatedProfile) {
         navigate(`/${data.username}?t=${Date.now()}`);
       }
     } catch (error) {

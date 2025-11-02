@@ -65,26 +65,26 @@ const PublicProfilePage = () => {
     data: bountyContributions,
     isLoading: isLoadingBounties
   } = useQuery({
-    queryKey: ['userBounties', profile?.wallet_address],
-    queryFn: () => getUserBountyContributions(profile?.wallet_address || '', 1, 50),
-    enabled: !!profile?.wallet_address
+    queryKey: ['userBounties', profile?.id],
+    queryFn: () => getUserBountyContributions(profile?.id || '', 1, 50),
+    enabled: !!profile?.id
   });
   const badgeInfo = useBadgeTier(profile?.sec_balance || null);
   const {
     data: scammerReports,
     isLoading: isLoadingReports
   } = useQuery({
-    queryKey: ['scammerReports', profile?.wallet_address],
-    queryFn: () => getScammersByReporter(profile?.wallet_address || ''),
-    enabled: !!profile?.wallet_address
+    queryKey: ['scammerReports', profile?.id],
+    queryFn: () => getScammersByReporter(profile?.id || ''),
+    enabled: !!profile?.id
   });
   const {
     data: likedScammers,
     isLoading: isLoadingLikedScammers
   } = useQuery({
-    queryKey: ['likedScammers', profile?.wallet_address],
-    queryFn: () => getLikedScammersByUser(profile?.wallet_address || ''),
-    enabled: !!profile?.wallet_address
+    queryKey: ['likedScammers', profile?.id],
+    queryFn: () => getLikedScammersByUser(profile?.id || ''),
+    enabled: !!profile?.id
   });
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);

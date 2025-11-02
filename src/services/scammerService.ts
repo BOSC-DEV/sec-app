@@ -121,19 +121,19 @@ export const getTopScammers = async (limit: number = 3): Promise<Scammer[]> => {
   }
 };
 
-export const getScammersByReporter = async (walletAddress: string): Promise<Scammer[]> => {
+export const getScammersByReporter = async (userId: string): Promise<Scammer[]> => {
   try {
     // Validate input
-    if (!walletAddress || typeof walletAddress !== 'string') {
-      throw new Error('Invalid wallet address provided');
+    if (!userId || typeof userId !== 'string') {
+      throw new Error('Invalid user ID provided');
     }
     
-    const sanitizedWallet = sanitizeInput(walletAddress);
+    const sanitizedUserId = sanitizeInput(userId);
     
     const { data, error } = await supabase
       .from('scammers')
       .select('*')
-      .eq('added_by', sanitizedWallet)
+      .eq('added_by', sanitizedUserId)
       .order('date_added', { ascending: false });
     
     if (error) {
@@ -153,20 +153,20 @@ export const getScammersByReporter = async (walletAddress: string): Promise<Scam
 };
 
 // Get scammers liked by a user
-export const getLikedScammersByUser = async (walletAddress: string): Promise<Scammer[]> => {
+export const getLikedScammersByUser = async (userId: string): Promise<Scammer[]> => {
   try {
-    if (!walletAddress) {
-      console.error('No wallet address provided to getLikedScammersByUser');
+    if (!userId) {
+      console.error('No user ID provided to getLikedScammersByUser');
       return [];
     }
     
-    const sanitizedWallet = sanitizeInput(walletAddress);
+    const sanitizedUserId = sanitizeInput(userId);
     
     // Get all the scammer IDs that this user has liked
     const { data: interactions, error: interactionsError } = await supabase
       .from('user_scammer_interactions')
       .select('scammer_id')
-      .eq('user_id', sanitizedWallet)
+      .eq('user_id', sanitizedUserId)
       .eq('liked', true);
     
     if (interactionsError) {
@@ -175,7 +175,7 @@ export const getLikedScammersByUser = async (walletAddress: string): Promise<Sca
     }
     
     if (!interactions || interactions.length === 0) {
-      console.log(`No liked scammers found for user: ${sanitizedWallet}`);
+      console.log(`No liked scammers found for user: ${sanitizedUserId}`);
       return [];
     }
     

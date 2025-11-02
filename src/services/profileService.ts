@@ -204,13 +204,21 @@ export const saveProfile = async (profile: Profile): Promise<Profile | null> => 
     console.log("Upserting profile with data:", updatedProfile);
 
     // Call the existing upsert function in Supabase
+    // For new profiles, omit id and let it be auto-generated
+    const { id, ...profileWithoutId } = updatedProfile;
+    const upsertData: any = {
+      ...profileWithoutId,
+      wallet_address: profile.wallet_address
+    };
+    
+    // Only include id if it's a valid UUID (existing profile)
+    if (id && id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+      upsertData.id = id;
+    }
+    
     const { data, error } = await supabase
       .from('profiles')
-      .upsert({
-        ...updatedProfile,
-        id: profile.id,
-        wallet_address: profile.wallet_address
-      })
+      .upsert(upsertData, { onConflict: 'wallet_address' })
       .select()
       .single();
 
