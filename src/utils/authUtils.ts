@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import * as nacl from 'tweetnacl';
 import { PublicKey } from '@solana/web3.js';
+import { toast } from '@/hooks/use-toast';
 
 const hashToHex = async (input: string): Promise<string> => {
   const data = new TextEncoder().encode(input);
@@ -10,13 +11,19 @@ const hashToHex = async (input: string): Promise<string> => {
     .join('');
 };
 
+/**
+ * Authenticate with Phantom wallet using Edge Function
+ * This bypasses all the complexity and uses a simple endpoint
+ */
 export const authenticateWallet = async (
   walletAddress: string,
   signature: string,
   message: string
 ): Promise<boolean> => {
   try {
-    // Verify the signature
+    console.log('[AUTH] Authenticating with Phantom wallet');
+    
+    // Verify the signature client-side first
     const messageBytes = new TextEncoder().encode(message);
     const signatureBytes = Buffer.from(signature, 'base64');
     const publicKeyBytes = new PublicKey(walletAddress).toBytes();
@@ -31,112 +38,48 @@ export const authenticateWallet = async (
       console.error('Signature verification failed');
       return false;
     }
+
+    // Call Edge Function for authentication
+    const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+    const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
     
-    // Sign in with email (wallet address as email)
-    // Use lowercase to avoid case sensitivity issues
-    const email = `${walletAddress}@sec.digital`.toLowerCase();
-    // Derive a ≤72-char password from signature (64-char SHA-256 hex)
-    const hashedPassword = await hashToHex(signature);
-    
-    // Try to sign in with hashed password first (for new users)
-    let { error: signInError, data: signInData } = await supabase.auth.signInWithPassword({
-      email,
-      password: hashedPassword,
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/auth-phantom`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({
+        walletAddress,
+        signature,
+        message,
+      }),
     });
-    
-    // If sign in fails, try with old password format (base64 signature) for legacy users
-    if (signInError) {
-      console.log('Hashed password failed, trying legacy base64 format...');
-      const { error: legacySignInError, data: legacySignInData } = await supabase.auth.signInWithPassword({
-        email,
-        password: signature, // Try with original base64 signature
-      });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('[AUTH] Edge function error:', data.error);
       
-      if (!legacySignInError && legacySignInData?.session) {
-        console.log('Successfully authenticated with legacy password format');
-        
-        // IMPORTANT: Update password to new format for future logins
-        // Use admin password update if service role key is available
-        const SUPABASE_SERVICE_ROLE_KEY = (import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || '') as string;
-        if (SUPABASE_SERVICE_ROLE_KEY) {
-          console.log('Updating legacy password to new format...');
-          try {
-            const { updateUserPassword } = await import('@/utils/adminPasswordUpdate');
-            const result = await updateUserPassword(walletAddress, signature);
-            if (result.success) {
-              console.log('Password successfully migrated to new format');
-            } else {
-              console.warn('Failed to migrate password:', result.error);
-            }
-          } catch (migrationError) {
-            console.warn('Password migration skipped:', migrationError);
-          }
-        } else {
-          console.warn('Service role key not available - password migration skipped. User will continue using legacy format.');
-        }
-        
-        return true;
-      }
-      
-      // If legacy format also fails, try to sign up (new user)
-      console.log('Both password formats failed, attempting signup...');
-      const { error: signUpError, data: signUpData } = await supabase.auth.signUp({
-        email,
-        password: hashedPassword,
-        options: {
-          data: {
-            wallet_address: walletAddress,
-          },
-        },
-      });
-      
-      if (signUpError) {
-        // If user already exists with old password format
-        if (
-          signUpError.message?.toLowerCase().includes('already registered') || 
-          signUpError.message?.toLowerCase().includes('already exists') ||
-          signUpError.message?.toLowerCase().includes('user already registered') ||
-          signUpError.code === 'user_already_registered'
-        ) {
-          console.error('Legacy user detected but both password formats failed');
-          console.error('SignUp error:', signUpError);
-          
-          const errorMsg = `Account exists but password doesn't match. Please delete the user account in Supabase Dashboard (Authentication → Users) and try again.`;
-          console.error(errorMsg);
-          throw new Error(errorMsg);
-        }
-        console.error('Sign up error:', signUpError);
-        return false;
-      }
-      
-      // If signUp succeeded, check if we have a session
-      if (signUpData?.user && signUpData?.session) {
-        // User created and authenticated (email confirmation disabled)
-        console.log('User created and authenticated successfully');
-        return true;
-      }
-      
-      if (signUpData?.user && !signUpData?.session) {
-        // User created but email confirmation required
-        // Try to sign in again - sometimes Supabase auto-confirms
-        console.log('User created but requires email confirmation, trying to sign in...');
-        const { error: retrySignInError, data: retrySignInData } = await supabase.auth.signInWithPassword({
-          email,
-          password: hashedPassword,
+      if (data.error?.includes('password mismatch') || data.error?.includes('already registered')) {
+        toast({
+          title: 'Account Exists',
+          description: 'Please delete your account in Supabase Dashboard and try again.',
+          variant: 'destructive'
         });
-        
-        if (!retrySignInError && retrySignInData?.session) {
-          console.log('Sign-in successful after signup');
-          return true;
-        }
-        
-        // If still failing, email confirmation is required
-        console.error('Email confirmation required. Please disable email confirmation in Supabase Dashboard for wallet-based auth.');
-        throw new Error('Email confirmation required. Please check your Supabase settings to disable email confirmation for wallet-based authentication.');
       }
+      
+      return false;
     }
-    
-    return true;
+
+    if (data.session) {
+      console.log('[AUTH] Authentication successful');
+      // Set the session in Supabase client
+      await supabase.auth.setSession(data.session);
+      return true;
+    }
+
+    return false;
   } catch (error) {
     console.error('Authentication error:', error);
     return false;
