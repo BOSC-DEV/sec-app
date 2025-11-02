@@ -62,7 +62,7 @@ export async function updateUserPassword(
     const email = `${walletAddress}@sec.digital`;
     
     // List users and find matching one
-    const { data: { users }, error: listError } = await adminClient.auth.admin.listUsers();
+    const { data, error: listError } = await adminClient.auth.admin.listUsers();
     
     if (listError) {
       return {
@@ -71,6 +71,7 @@ export async function updateUserPassword(
       };
     }
 
+    const users = data?.users || [];
     const user = users.find(u => u.email?.toLowerCase() === email.toLowerCase());
     
     if (!user) {
