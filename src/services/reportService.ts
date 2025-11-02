@@ -99,12 +99,12 @@ export const fetchScammerById = async (id: string) => {
 /**
  * Checks if the current user is the creator of a scammer report
  */
-export const isScammerCreator = async (scammerId: string, walletAddress: string): Promise<boolean> => {
+export const isScammerCreator = async (scammerId: string, profileId: string): Promise<boolean> => {
   try {
-    if (!scammerId || !walletAddress) return false;
+    if (!scammerId || !profileId) return false;
     
     const sanitizedId = sanitizeInput(scammerId);
-    const sanitizedWallet = sanitizeInput(walletAddress);
+    const sanitizedProfileId = sanitizeInput(profileId);
     
     const { data, error } = await supabase
       .from('scammers')
@@ -117,7 +117,7 @@ export const isScammerCreator = async (scammerId: string, walletAddress: string)
       return false;
     }
     
-    return data.added_by === sanitizedWallet;
+    return data.added_by === sanitizedProfileId;
   } catch (error) {
     handleError(error, {
       fallbackMessage: 'Failed to verify scammer creator',
@@ -217,7 +217,7 @@ export const createScammerReport = async (
   profile: Profile
 ) => {
   try {
-    if (!profile || !profile.wallet_address) {
+    if (!profile || !profile.id) {
       throw new Error('User profile information is missing');
     }
     
@@ -250,7 +250,7 @@ export const createScammerReport = async (
         aliases,
         links,
         accomplices,
-        added_by: profile.wallet_address,
+        added_by: profile.id,
         date_added: new Date().toISOString(),
         views: 0,
         likes: 0,

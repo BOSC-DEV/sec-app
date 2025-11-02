@@ -31,9 +31,9 @@ const ReportPage = () => {
 
   useEffect(() => {
     const checkEditPermission = async () => {
-      if (id && profile?.wallet_address) {
+      if (id && profile?.id) {
         try {
-          const hasPermission = await isScammerCreator(id, profile.wallet_address);
+          const hasPermission = await isScammerCreator(id, profile.id);
           
           if (!hasPermission) {
             toast({

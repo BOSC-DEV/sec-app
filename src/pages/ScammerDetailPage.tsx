@@ -170,9 +170,9 @@ const ScammerDetailPage = () => {
 
   useEffect(() => {
     const checkIsCreator = async () => {
-      if (!profile?.wallet_address || !id) return;
+      if (!profile?.id || !id) return;
       try {
-        const result = await isScammerCreator(id, profile.wallet_address);
+        const result = await isScammerCreator(id, profile.id);
         setIsCreator(result);
       } catch (error) {
         handleError(error, {
