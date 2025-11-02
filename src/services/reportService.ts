@@ -25,37 +25,40 @@ export const uploadScammerPhoto = async (
       throw new Error('Invalid file type. Only JPEG, PNG, WEBP and GIF are allowed');
     }
     
-    // Validate file size (5MB max)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    // Validate file size (10MB max)
+    const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
-      throw new Error('File size exceeds 5MB limit');
+      throw new Error('File size exceeds 10MB limit');
     }
     
-    // Create a safe filename
-    const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
-    const safeFileName = `scammer-photos/${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExtension}`;
+    console.log("Uploading scammer photo via edge function");
     
-    console.log("Uploading file to bucket 'profiles':", safeFileName);
-    
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('profiles')
-      .upload(safeFileName, file, {
-        cacheControl: '3600',
-        contentType: file.type
-      });
-      
-    if (uploadError) {
-      console.error("Photo upload error:", uploadError);
-      throw new Error(`Photo upload failed: ${uploadError.message}`);
+    // Get the current session
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      throw new Error('Authentication required to upload photos');
     }
-    
-    console.log("File uploaded successfully, getting public URL");
-    
-    const { data: publicUrlData } = supabase.storage
-      .from('profiles')
-      .getPublicUrl(safeFileName);
-      
-    return publicUrlData.publicUrl;
+
+    // Create FormData for the file upload
+    const formData = new FormData();
+    formData.append('file', file);
+
+    // Upload via edge function (bypasses RLS)
+    const { data, error } = await supabase.functions.invoke('upload-scammer-photo', {
+      body: formData,
+    });
+
+    if (error) {
+      console.error("Photo upload error:", error);
+      throw new Error(`Photo upload failed: ${error.message}`);
+    }
+
+    if (!data || !data.publicUrl) {
+      throw new Error('No URL returned from upload');
+    }
+
+    console.log("Photo uploaded successfully:", data.publicUrl);
+    return data.publicUrl;
   } catch (error) {
     handleError(error, {
       fallbackMessage: 'Failed to upload scammer photo',
