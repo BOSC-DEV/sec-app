@@ -133,19 +133,19 @@ export const createNotification = async (notification: Omit<Notification, 'id' |
   }
 };
 
-// Get all active user IDs
+// Get all active user IDs (returns profile.id UUIDs, not wallet addresses)
 export const getAllUserIds = async (): Promise<string[]> => {
   try {
     const { data, error } = await supabase
       .from('profiles')
-      .select('wallet_address');
+      .select('id');
       
     if (error) {
       console.error("Error fetching user IDs:", error);
       return [];
     }
     
-    return data.map(profile => profile.wallet_address) || [];
+    return data.map(profile => profile.id) || [];
   } catch (error) {
     handleError(error, 'Error fetching all user IDs');
     return [];

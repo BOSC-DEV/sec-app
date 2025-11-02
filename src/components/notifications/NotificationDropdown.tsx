@@ -25,15 +25,15 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   const navigate = useNavigate();
   
   const { data: notifications = [], refetch } = useQuery({
-    queryKey: ['notifications', profile?.wallet_address],
-    queryFn: () => getUserNotifications(profile?.wallet_address || ''),
-    enabled: !!profile?.wallet_address && open,
+    queryKey: ['notifications', profile?.id],
+    queryFn: () => getUserNotifications(profile?.id || ''),
+    enabled: !!profile?.id && open,
   });
   
   const handleMarkAllAsRead = async () => {
-    if (!profile?.wallet_address) return;
+    if (!profile?.id) return;
     
-    await markAllNotificationsAsRead(profile.wallet_address);
+    await markAllNotificationsAsRead(profile.id);
     // Update unread count immediately
     if (typeof window.setUnreadCount === 'function') {
       window.setUnreadCount();

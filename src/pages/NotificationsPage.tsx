@@ -39,9 +39,9 @@ const NotificationsPage: React.FC = () => {
     refetch, 
     isLoading 
   } = useQuery({
-    queryKey: ['notifications', profile?.wallet_address],
-    queryFn: () => getUserNotifications(profile?.wallet_address || ''),
-    enabled: !!profile?.wallet_address,
+    queryKey: ['notifications', profile?.id],
+    queryFn: () => getUserNotifications(profile?.id || ''),
+    enabled: !!profile?.id,
   });
   
   // Filter notifications by type
@@ -84,8 +84,8 @@ const NotificationsPage: React.FC = () => {
   
   // Mark all as read
   const handleMarkAllAsRead = async () => {
-    if (profile?.wallet_address) {
-      await markAllNotificationsAsRead(profile.wallet_address);
+    if (profile?.id) {
+      await markAllNotificationsAsRead(profile.id);
       refetch();
       toast({
         title: "Notifications cleared",

@@ -21,9 +21,9 @@ const NotificationIndicator: React.FC<NotificationIndicatorProps> = ({
   const queryClient = useQueryClient();
   
   const { data: unreadCount = 0 } = useQuery({
-    queryKey: ['notifications-unread-count', profile?.wallet_address],
-    queryFn: () => getUnreadNotificationsCount(profile?.wallet_address || ''),
-    enabled: !!profile?.wallet_address,
+    queryKey: ['notifications-unread-count', profile?.id],
+    queryFn: () => getUnreadNotificationsCount(profile?.id || ''),
+    enabled: !!profile?.id,
     refetchInterval: 60000, // Refetch every minute
   });
 
@@ -31,7 +31,7 @@ const NotificationIndicator: React.FC<NotificationIndicatorProps> = ({
   React.useEffect(() => {
     window.setUnreadCount = () => {
       queryClient.setQueryData(
-        ['notifications-unread-count', profile?.wallet_address],
+        ['notifications-unread-count', profile?.id],
         0
       );
     };
@@ -40,7 +40,7 @@ const NotificationIndicator: React.FC<NotificationIndicatorProps> = ({
       // Clean up the global function when component unmounts
       delete window.setUnreadCount;
     };
-  }, [queryClient, profile?.wallet_address]);
+  }, [queryClient, profile?.id]);
   
   return (
     <Button 
