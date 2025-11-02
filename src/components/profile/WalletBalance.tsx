@@ -33,12 +33,12 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
       const fallbackConn = getFallbackConnection();
       const publicKey = new PublicKey(address);
       
-      // Fallback to public RPC if QuickNode fails
+      // Fallback to secondary RPC if primary fails
       try {
         const balance = await connection.getBalance(publicKey, 'confirmed');
         return balance / LAMPORTS_PER_SOL;
-      } catch (quickNodeError) {
-        console.warn("QuickNode failed, trying fallback RPC...");
+      } catch (primaryError) {
+        console.warn("Primary RPC failed, trying fallback...");
         const balance = await fallbackConn.getBalance(publicKey, 'confirmed');
         return balance / LAMPORTS_PER_SOL;
       }

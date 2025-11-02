@@ -44,10 +44,9 @@ export type WindowWithPhantom = Window & {
   };
 };
 
-const QUICKNODE_RPC_URL = 'https://newest-bold-emerald.solana-mainnet.quiknode.pro/5a5facbf570647115626f7b6612e534ad61f2ced/';
-const QUICKNODE_WS_URL = 'wss://newest-bold-emerald.solana-mainnet.quiknode.pro/5a5facbf570647115626f7b6612e534ad61f2ced/';
-
-const FALLBACK_RPC_URL = 'https://api.mainnet-beta.solana.com';
+// Using public Solana RPC endpoints (free and reliable)
+const PRIMARY_RPC_URL = 'https://api.mainnet-beta.solana.com';
+const FALLBACK_RPC_URL = 'https://solana-api.projectserum.com';
 
 const TRANSACTION_TIMEOUT = 90 * 1000; // 90 seconds in milliseconds
 const MAX_RETRIES = 3;
@@ -58,14 +57,13 @@ const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpu
 const connectionConfig = {
   commitment: 'confirmed' as Commitment,
   confirmTransactionInitialTimeout: TRANSACTION_TIMEOUT,
-  wsEndpoint: QUICKNODE_WS_URL,
   disableRetryOnRateLimit: false,
   httpHeaders: {
     'Content-Type': 'application/json',
   }
 };
 
-const connection = new Connection(QUICKNODE_RPC_URL, connectionConfig);
+const connection = new Connection(PRIMARY_RPC_URL, connectionConfig);
 
 let fallbackConnection: Connection | null = null;
 
@@ -416,7 +414,7 @@ export const sendTransactionToDevWallet = async (
         transaction.recentBlockhash = blockhash;
         transaction.feePayer = fromPubkey;
         
-        console.log("Sending SEC token transaction via QuickNode RPC...");
+        console.log("Sending SEC token transaction via Solana RPC...");
         const { signature } = await provider.signAndSendTransaction(transaction);
         console.log("SEC token transaction sent, signature:", signature);
         
@@ -434,7 +432,7 @@ export const sendTransactionToDevWallet = async (
         
         return signature;
       } catch (error) {
-        console.error("Primary QuickNode connection failed, trying fallback:", error);
+        console.error("Primary RPC connection failed, trying fallback:", error);
         
         try {
           const fallbackConn = getFallbackConnection();
