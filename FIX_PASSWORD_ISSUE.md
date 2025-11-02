@@ -1,4 +1,3 @@
-# Fix Password Migration Issue
 
 ## Problem
 Users who signed up before the password hashing fix have old passwords stored (>72 chars base64). The new code uses hashed passwords (64-char hex), causing "Invalid login credentials" errors.
