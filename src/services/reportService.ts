@@ -223,8 +223,6 @@ export const createScammerReport = async (
     
     console.log("Creating new scammer report");
     
-    const newId = await generateScammerId();
-    
     // Filter out empty values and sanitize arrays
     const aliases = data.aliases?.filter(item => item !== '').map(sanitizeInput) || [];
     const links = data.links?.filter(item => item !== '').map(sanitizeInput) || [];
@@ -236,13 +234,9 @@ export const createScammerReport = async (
     const sanitizedAccusedOf = sanitizeInput(data.accused_of);
     const sanitizedResponse = data.official_response ? sanitizeInput(data.official_response) : null;
     
-    // Convert the numeric ID to a string before inserting
-    const newIdString = newId.toString();
-    
-    const { error } = await supabase
+    const { data: newScammer, error } = await supabase
       .from('scammers')
       .insert({
-        id: newIdString,
         name: sanitizedName,
         accused_of: sanitizedAccusedOf,
         wallet_addresses,
@@ -258,7 +252,9 @@ export const createScammerReport = async (
         shares: 0,
         bounty_amount: 0,
         official_response: sanitizedResponse,
-      });
+      })
+      .select()
+      .single();
       
     if (error) {
       console.error("Error inserting new scammer:", error);
@@ -270,7 +266,11 @@ export const createScammerReport = async (
       throw error;
     }
     
-    return newIdString;
+    if (!newScammer) {
+      throw new Error("No data returned after creating scammer");
+    }
+    
+    return newScammer.id;
   } catch (error) {
     handleError(error, {
       fallbackMessage: 'Failed to create scammer report',
@@ -281,15 +281,3 @@ export const createScammerReport = async (
   }
 };
 
-// Generate a sequential ID for a new scammer
-export const generateScammerId = async (): Promise<string> => {
-  try {
-    // Generate a unique ID based on timestamp to avoid collisions
-    const timestamp = Date.now();
-    const randomSuffix = Math.floor(Math.random() * 1000);
-    return `scammer-${timestamp}-${randomSuffix}`;
-  } catch (error) {
-    console.error('Error generating scammer ID:', error);
-    throw error;
-  }
-};
