@@ -36,7 +36,14 @@
 - Fixed getAllUserIds to return profile.id instead of wallet_address
 - Fixed all notification queries to use profile.id
 
-### 5. ❌ RLS Policy Type Errors
+### 5. ❌ Permission Denied for auth.users
+**Problem:** RLS policies querying `auth.users` were getting "permission denied for table users" errors.
+
+**Solution:** Added migration `20251101_fix_auth_users_access.sql`:
+- Grants SELECT on `auth.users` to `authenticated` role
+- Required for policies that check `raw_user_meta_data` for wallet_address
+
+### 6. ❌ RLS Policy Type Errors
 **Problem:** Old RLS policies used `auth.uid()::text = user_id` which caused type mismatches.
 
 **Solution:** Fixed all incorrect policies in `supabase/migrations/20251101_fix_reactions_rls_policies.sql`:
@@ -65,8 +72,9 @@ user_id = (
 2. `20251101_fix_reactions_rls_policies.sql` - Fix all RLS type errors
 3. `20251101_fix_profiles_rls_policies.sql` - Fix profiles UPDATE/INSERT permissions ⚠️
 4. `20251101_add_notification_actor_columns.sql` - Add missing notification columns ⚠️
-5. `20251101_cleanup_orphaned_profiles.sql` - Cleanup script (already existed)
-6. `20251101_migrate_user_passwords.sql` - Password migration helper (already existed)
+5. `20251101_fix_auth_users_access.sql` - Grant SELECT on auth.users for policies ⚠️
+6. `20251101_cleanup_orphaned_profiles.sql` - Cleanup script (already existed)
+7. `20251101_migrate_user_passwords.sql` - Password migration helper (already existed)
 
 ## Files Modified
 
@@ -100,6 +108,7 @@ After applying migrations, test:
    - `20251101_auto_create_profile_trigger.sql`
    - `20251101_fix_profiles_rls_policies.sql` (CRITICAL!)
    - `20251101_add_notification_actor_columns.sql` (CRITICAL!)
+   - `20251101_fix_auth_users_access.sql` (CRITICAL!)
    - `20251101_fix_reactions_rls_policies.sql`
 3. Test with a legacy user account
 4. Test with a new user signup

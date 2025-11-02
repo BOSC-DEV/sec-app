@@ -8,7 +8,7 @@
 
 ## The Solution
 
-Run these 4 SQL migrations in Supabase Dashboard:
+Run these 5 SQL migrations in Supabase Dashboard:
 
 ### Step 1: Open Supabase Dashboard
 1. Go to https://app.supabase.com/
@@ -43,6 +43,13 @@ Paste into SQL Editor and click **Run**.
 
 **Verify:** Should see "Success. No rows returned"
 
+### Step 6: Run Migration 5 (Fix auth.users Access) ⚠️ CRITICAL FOR PERMISSION ERRORS
+Copy entire contents of: `supabase/migrations/20251101_fix_auth_users_access.sql`
+
+Paste into SQL Editor and click **Run**.
+
+**Verify:** Should see "Success. No rows returned"
+
 ---
 
 ## Quick Test
@@ -64,6 +71,7 @@ After all migrations:
 | 2. **Profiles RLS** | **Can't update profile** | **Fixes permission denied** |
 | 3. Reactions RLS | UUID type errors | Fixes all RLS policies |
 | 4. **Actor columns** | **Missing notification fields** | **Adds actor columns** |
+| 5. **auth.users access** | **Permission denied for table users** | **Grants SELECT access** |
 
 ---
 
