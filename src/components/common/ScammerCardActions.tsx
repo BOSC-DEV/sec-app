@@ -131,7 +131,7 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
         }
       }
       
-      const result = await likeScammer(scammer.id, profile.wallet_address);
+      const result = await likeScammer(scammer.id, profile.id);
       console.log("Like result:", result);
       
       if (result && typeof result === 'object' && 'likes' in result) {
@@ -193,7 +193,7 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
         }
       }
       
-      const result = await dislikeScammer(scammer.id, profile.wallet_address);
+      const result = await dislikeScammer(scammer.id, profile.id);
       console.log("Dislike result:", result);
       
       if (result && typeof result === 'object' && 'likes' in result) {

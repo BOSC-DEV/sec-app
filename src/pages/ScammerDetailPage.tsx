@@ -187,9 +187,9 @@ const ScammerDetailPage = () => {
 
   useEffect(() => {
     const fetchUserInteraction = async () => {
-      if (!profile?.wallet_address || !scammer?.id) return;
+      if (!profile?.id || !scammer?.id) return;
       try {
-        const interaction = await getUserScammerInteraction(scammer.id, profile.wallet_address);
+        const interaction = await getUserScammerInteraction(scammer.id, profile.id);
         if (interaction) {
           setIsLiked(interaction.liked);
           setIsDisliked(interaction.disliked);
@@ -331,7 +331,7 @@ const ScammerDetailPage = () => {
     if (isLoading) return;
     setIsLoading(true);
     try {
-      const result = await likeScammer(scammer?.id || '', profile.wallet_address);
+      const result = await likeScammer(scammer?.id || '', profile.id);
       if (result && typeof result === 'object' && 'likes' in result) {
         setLikes(result.likes || 0);
         setDislikes(result.dislikes || 0);
@@ -378,7 +378,7 @@ const ScammerDetailPage = () => {
     if (isLoading) return;
     setIsLoading(true);
     try {
-      const result = await dislikeScammer(scammer?.id || '', profile.wallet_address);
+      const result = await dislikeScammer(scammer?.id || '', profile.id);
       if (result && typeof result === 'object' && 'likes' in result) {
         setLikes(result.likes || 0);
         setDislikes(result.dislikes || 0);

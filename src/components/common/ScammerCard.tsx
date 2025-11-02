@@ -54,10 +54,10 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
 
   useEffect(() => {
     const checkUserInteraction = async () => {
-      if (!profile?.wallet_address) return;
+      if (!profile?.id) return;
       
       try {
-        const interaction = await getUserScammerInteraction(scammer.id, profile.wallet_address);
+        const interaction = await getUserScammerInteraction(scammer.id, profile.id);
         
         if (interaction) {
           console.log("Found user interaction:", interaction);
@@ -114,7 +114,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
         }
       }
 
-      const result = await likeScammer(scammer.id, profile.wallet_address);
+      const result = await likeScammer(scammer.id, profile.id);
       
       if (result && typeof result === 'object' && 'likes' in result) {
         console.log("Received updated counts from likeScammer:", result);
@@ -131,7 +131,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
       
     } catch (error) {
       console.error("Error liking scammer:", error);
-      const interaction = await getUserScammerInteraction(scammer.id, profile.wallet_address);
+      const interaction = await getUserScammerInteraction(scammer.id, profile.id);
       setIsLiked(interaction?.liked || false);
       setIsDisliked(interaction?.disliked || false);
       setLikes(scammer.likes || 0);
@@ -186,7 +186,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
         }
       }
       
-      const result = await dislikeScammer(scammer.id, profile.wallet_address);
+      const result = await dislikeScammer(scammer.id, profile.id);
       
       if (result && typeof result === 'object' && 'likes' in result) {
         console.log("Received updated counts from dislikeScammer:", result);
@@ -203,7 +203,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
       
     } catch (error) {
       console.error("Error disliking scammer:", error);
-      const interaction = await getUserScammerInteraction(scammer.id, profile.wallet_address);
+      const interaction = await getUserScammerInteraction(scammer.id, profile.id);
       setIsLiked(interaction?.liked || false);
       setIsDisliked(interaction?.disliked || false);
       setLikes(scammer.likes || 0);

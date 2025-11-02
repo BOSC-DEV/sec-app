@@ -129,7 +129,7 @@ export const likeScammer = async (scammerId: string, userId: string): Promise<Sc
           const { data: userData } = await supabase
             .from('profiles')
             .select('display_name, username, profile_pic_url')
-            .eq('wallet_address', userId)
+            .eq('id', userId)
             .single();
             
           if (userData) {
@@ -178,7 +178,7 @@ export const likeScammer = async (scammerId: string, userId: string): Promise<Sc
           const { data: userData } = await supabase
             .from('profiles')
             .select('display_name, username, profile_pic_url')
-            .eq('wallet_address', userId)
+            .eq('id', userId)
             .single();
             
           if (userData) {
@@ -232,7 +232,7 @@ export const likeScammer = async (scammerId: string, userId: string): Promise<Sc
         const { data: userData } = await supabase
           .from('profiles')
           .select('display_name, username, profile_pic_url')
-          .eq('wallet_address', userId)
+          .eq('id', userId)
           .single();
           
         if (userData) {
