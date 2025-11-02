@@ -44,9 +44,9 @@ export type WindowWithPhantom = Window & {
   };
 };
 
-// Using public Solana RPC endpoints (free and reliable)
-const PRIMARY_RPC_URL = 'https://api.mainnet-beta.solana.com';
-const FALLBACK_RPC_URL = 'https://solana-api.projectserum.com';
+// Use custom RPC endpoint from environment variable
+const PRIMARY_RPC_URL = import.meta.env.VITE_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
+const FALLBACK_RPC_URL = 'https://api.mainnet-beta.solana.com';
 
 const TRANSACTION_TIMEOUT = 90 * 1000; // 90 seconds in milliseconds
 const MAX_RETRIES = 3;
