@@ -257,8 +257,8 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
               return;
             }
 
-            // Use a fixed message to ensure consistent signatures for login
-            const message = `Login to SEC Community with wallet ${publicKey}`;
+            // Use a constant message for authentication (never changes)
+            const message = 'Sign in to Scams & E-crimes Commission';
             const signature = await signMessageWithPhantom(message);
             
             if (!signature) {
