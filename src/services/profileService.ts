@@ -89,14 +89,34 @@ export const getProfileByUsername = async (username: string): Promise<Profile | 
     
     const sanitizedUsername = sanitizeInput(username);
     
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('username', sanitizedUsername)
-      .maybeSingle();
+    // Check if user is authenticated
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (session) {
+      // Authenticated: use full profiles table
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('username', sanitizedUsername)
+        .maybeSingle();
 
-    if (error) throw error;
-    return data;
+      if (error) throw error;
+      return data;
+    } else {
+      // Anonymous: use public view
+      const { data, error } = await supabase
+        .from('profiles_public' as any)
+        .select('*')
+        .eq('username', sanitizedUsername)
+        .maybeSingle();
+
+      if (error) throw error;
+      
+      // Add empty wallet_address for type compatibility
+      if (!data) return null;
+      const publicProfile: any = data;
+      return { ...publicProfile, wallet_address: '' } as Profile;
+    }
   } catch (error) {
     handleError(error, {
       fallbackMessage: 'Error fetching profile by username',
@@ -116,13 +136,34 @@ export const getProfilesByDisplayName = async (displayName: string): Promise<Pro
     
     const sanitizedDisplayName = sanitizeInput(displayName);
     
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('display_name', sanitizedDisplayName);
+    // Check if user is authenticated
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (session) {
+      // Authenticated: use full profiles table
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('display_name', sanitizedDisplayName);
 
-    if (error) throw error;
-    return data || [];
+      if (error) throw error;
+      return data || [];
+    } else {
+      // Anonymous: use public view
+      const { data, error } = await supabase
+        .from('profiles_public' as any)
+        .select('*')
+        .eq('display_name', sanitizedDisplayName);
+
+      if (error) throw error;
+      
+      // Add empty wallet_address for type compatibility
+      const publicProfiles: any[] = data || [];
+      return publicProfiles.map(profile => ({
+        ...profile,
+        wallet_address: ''
+      } as Profile));
+    }
   } catch (error) {
     handleError(error, {
       fallbackMessage: 'Error fetching profiles by display name',
