@@ -33,20 +33,53 @@ export const authenticateWallet = async (
     }
     
     // Sign in with email (wallet address as email)
-    const email = `${walletAddress}@sec.digital`;
+    // Use lowercase to avoid case sensitivity issues
+    const email = `${walletAddress}@sec.digital`.toLowerCase();
     // Derive a ≤72-char password from signature (64-char SHA-256 hex)
     const hashedPassword = await hashToHex(signature);
     
     // Try to sign in with hashed password first (for new users)
-    let { error: signInError } = await supabase.auth.signInWithPassword({
+    let { error: signInError, data: signInData } = await supabase.auth.signInWithPassword({
       email,
       password: hashedPassword,
     });
     
-    // If sign in fails, try to sign up (new user or password migration)
+    // If sign in fails, try with old password format (base64 signature) for legacy users
     if (signInError) {
-      // For existing users with old password format, signUp might fail
-      // In that case, they need to use password reset or admin migration
+      console.log('Hashed password failed, trying legacy base64 format...');
+      const { error: legacySignInError, data: legacySignInData } = await supabase.auth.signInWithPassword({
+        email,
+        password: signature, // Try with original base64 signature
+      });
+      
+      if (!legacySignInError && legacySignInData?.session) {
+        console.log('Successfully authenticated with legacy password format');
+        
+        // IMPORTANT: Update password to new format for future logins
+        // Use admin password update if service role key is available
+        const SUPABASE_SERVICE_ROLE_KEY = (import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || '') as string;
+        if (SUPABASE_SERVICE_ROLE_KEY) {
+          console.log('Updating legacy password to new format...');
+          try {
+            const { updateUserPassword } = await import('@/utils/adminPasswordUpdate');
+            const result = await updateUserPassword(walletAddress, signature);
+            if (result.success) {
+              console.log('Password successfully migrated to new format');
+            } else {
+              console.warn('Failed to migrate password:', result.error);
+            }
+          } catch (migrationError) {
+            console.warn('Password migration skipped:', migrationError);
+          }
+        } else {
+          console.warn('Service role key not available - password migration skipped. User will continue using legacy format.');
+        }
+        
+        return true;
+      }
+      
+      // If legacy format also fails, try to sign up (new user)
+      console.log('Both password formats failed, attempting signup...');
       const { error: signUpError, data: signUpData } = await supabase.auth.signUp({
         email,
         password: hashedPassword,
@@ -58,18 +91,17 @@ export const authenticateWallet = async (
       });
       
       if (signUpError) {
-        // If user already exists, this is a legacy password issue
-        // Supabase signUp doesn't update existing users, so we need admin access
+        // If user already exists with old password format
         if (
           signUpError.message?.toLowerCase().includes('already registered') || 
           signUpError.message?.toLowerCase().includes('already exists') ||
-          signUpError.message?.toLowerCase().includes('user already registered')
+          signUpError.message?.toLowerCase().includes('user already registered') ||
+          signUpError.code === 'user_already_registered'
         ) {
-          console.error('Legacy user detected - password needs migration. User:', email);
-          console.error('SignUp error details:', signUpError);
+          console.error('Legacy user detected but both password formats failed');
+          console.error('SignUp error:', signUpError);
           
-          // Provide clear error message
-          const errorMsg = `Account already exists with old password format. Please contact support to migrate your account, or delete your account and sign up again.`;
+          const errorMsg = `Account exists but password doesn't match. Please delete the user account in Supabase Dashboard (Authentication → Users) and try again.`;
           console.error(errorMsg);
           throw new Error(errorMsg);
         }

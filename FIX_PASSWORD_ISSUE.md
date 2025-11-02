@@ -3,6 +3,14 @@
 ## Problem
 Users who signed up before the password hashing fix have old passwords stored (>72 chars base64). The new code uses hashed passwords (64-char hex), causing "Invalid login credentials" errors.
 
+## ⚠️ CURRENT ISSUE: User Already Exists with Old Password
+
+If you're seeing:
+- Signup API: `{"code":"user_already_registered"}`
+- Login API: `{"code":"invalid_credentials"}`
+
+**This means:** User exists but password is in old format. You need to delete the user.
+
 ## Immediate Fix (Quickest Solution)
 
 ### Step 1: Delete User in Supabase Dashboard
