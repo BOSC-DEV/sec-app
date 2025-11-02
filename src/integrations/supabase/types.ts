@@ -673,6 +673,27 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_scammer_interactions: {
         Row: {
           bookmarked: boolean | null
@@ -741,10 +762,18 @@ export type Database = {
           date: string
         }[]
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       increment_announcement_views: {
         Args: { announcement_id_param: string }
         Returns: undefined
       }
+      is_current_user_admin: { Args: never; Returns: boolean }
       is_duplicate_view: {
         Args: { p_scammer_id: string; p_visitor_id: string }
         Returns: boolean
@@ -758,6 +787,7 @@ export type Database = {
       track_visitor: { Args: { visitor_data: Json }; Returns: undefined }
     }
     Enums: {
+      app_role: "admin" | "moderator" | "user"
       report_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
@@ -886,6 +916,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "moderator", "user"],
       report_status: ["pending", "approved", "rejected"],
     },
   },

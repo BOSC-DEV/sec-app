@@ -27,21 +27,46 @@ export function useAdminGuard(): AdminGuardResult {
         }
 
         const { data: userData } = await supabase.auth.getUser();
+        const userId = userData.user?.id;
         const email = userData.user?.email ?? '';
         const wallet = email.split('@')[0];
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id, is_admin')
-          .eq('wallet_address', wallet)
-          .single();
-        if (error) {
+
+        if (!userId) {
           if (!cancelled) {
             setIsAdmin(false);
             setProfileId(null);
+            setLoading(false);
           }
-        } else if (!cancelled) {
-          setIsAdmin(Boolean(data?.is_admin));
-          setProfileId(data?.id ?? null);
+          return;
+        }
+
+        // Get profile ID
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('wallet_address', wallet)
+          .single();
+
+        if (profileError) {
+          if (!cancelled) {
+            setIsAdmin(false);
+            setProfileId(null);
+            setLoading(false);
+          }
+          return;
+        }
+
+        // Check if user has admin role in user_roles table (SECURE)
+        const { data: roleData, error: roleError } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', userId)
+          .eq('role', 'admin')
+          .maybeSingle();
+
+        if (!cancelled) {
+          setIsAdmin(Boolean(roleData && !roleError));
+          setProfileId(profileData?.id ?? null);
         }
       } finally {
         if (!cancelled) setLoading(false);
