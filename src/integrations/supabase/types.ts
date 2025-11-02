@@ -321,6 +321,10 @@ export type Database = {
       }
       notifications: {
         Row: {
+          actor_id: string | null
+          actor_name: string | null
+          actor_profile_pic: string | null
+          actor_username: string | null
           content: string
           created_at: string | null
           entity_id: string | null
@@ -330,6 +334,10 @@ export type Database = {
           type: string
         }
         Insert: {
+          actor_id?: string | null
+          actor_name?: string | null
+          actor_profile_pic?: string | null
+          actor_username?: string | null
           content: string
           created_at?: string | null
           entity_id?: string | null
@@ -339,6 +347,10 @@ export type Database = {
           type: string
         }
         Update: {
+          actor_id?: string | null
+          actor_name?: string | null
+          actor_profile_pic?: string | null
+          actor_username?: string | null
           content?: string
           created_at?: string | null
           entity_id?: string | null
