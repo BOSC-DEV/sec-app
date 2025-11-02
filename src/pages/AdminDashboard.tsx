@@ -3,6 +3,7 @@ import { useAdminGuard } from '@/hooks/useAdminGuard';
 import { LayoutDashboard, Users, FileText, AlertCircle, BarChart3 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { supabase } from '@/integrations/supabase/client';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AnalyticsSection from '@/components/admin/AnalyticsSection';
 import UserManagementSection from '@/components/admin/UserManagementSection';
@@ -75,6 +76,33 @@ export default function AdminDashboard() {
 }
 
 function OverviewSection() {
+  const [stats, setStats] = React.useState<Record<string, number>>({});
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const tables = ['profiles', 'report_submissions', 'scammers', 'chat_messages'];
+        const entries: [string, number][] = [];
+        
+        for (const table of tables) {
+          const { count } = await supabase
+            .from(table as any)
+            .select('*', { count: 'exact', head: true });
+          entries.push([table, count || 0]);
+        }
+        
+        setStats(Object.fromEntries(entries));
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
   return (
     <div className="space-y-8">
       <div>
@@ -87,30 +115,30 @@ function OverviewSection() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Total Users"
-          value="Loading..."
+          value={loading ? 'Loading...' : stats.profiles || 0}
           icon={Users}
           description="Registered users"
           trend="+12% from last month"
         />
         <StatCard
           title="Active Reports"
-          value="Loading..."
+          value={loading ? 'Loading...' : stats.report_submissions || 0}
           icon={FileText}
-          description="Pending reports"
+          description="Total reports"
           trend="3 new today"
         />
         <StatCard
           title="Total Scammers"
-          value="Loading..."
+          value={loading ? 'Loading...' : stats.scammers || 0}
           icon={AlertCircle}
           description="In database"
           trend="+5 this week"
         />
         <StatCard
           title="Platform Activity"
-          value="Loading..."
+          value={loading ? 'Loading...' : stats.chat_messages || 0}
           icon={BarChart3}
-          description="Daily interactions"
+          description="Chat messages"
           trend="+8% from yesterday"
         />
       </div>

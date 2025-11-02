@@ -182,9 +182,18 @@ const App = () => (
               <Sonner />
               <AnalyticsTracker />
               {environmentUtils.featureFlags.enablePerformanceMonitoring && <PerformanceMonitor />}
-              <Layout>
-                <EnhancedErrorBoundary componentName="Routes">
-                  <Routes>
+              <EnhancedErrorBoundary componentName="Routes">
+                <Routes>
+                  {/* Admin route without Layout */}
+                  <Route path="/admin" element={
+                    <AdminProtectedRoute>
+                      <AdminDashboard />
+                    </AdminProtectedRoute>
+                  } />
+                  {/* All other routes wrapped in Layout */}
+                  <Route path="*" element={
+                    <Layout>
+                      <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/most-wanted" element={<MostWantedPage />} />
                     <Route path="/scammer/:id" element={<ScammerDetailPage />} />
@@ -230,20 +239,17 @@ const App = () => (
                         <AnalyticsPage />
                       </ProtectedRoute>
                     } />
-                    <Route path="/admin" element={
-                      <AdminProtectedRoute>
-                        <AdminDashboard />
-                      </AdminProtectedRoute>
-                    } />
                     {/* Profile routes - MUST come after all other specific routes */}
                     <Route path="/profile/:username" element={<PublicProfilePage />} />
                     <Route path="/wallet/:address" element={<PublicProfilePage />} />
                     {/* Catch-all username route - MUST be last */}
                     <Route path="/:username" element={<PublicProfilePage />} />
                     <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </EnhancedErrorBoundary>
-              </Layout>
+                      </Routes>
+                    </Layout>
+                  } />
+                </Routes>
+              </EnhancedErrorBoundary>
             </HelmetProvider>
           </ProfileProvider>
         </BrowserRouter>
