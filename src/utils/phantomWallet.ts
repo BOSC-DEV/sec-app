@@ -45,7 +45,6 @@ export type WindowWithPhantom = Window & {
 };
 
 // Use custom RPC endpoint from environment variable
-const PRIMARY_RPC_URL = import.meta.env.VITE_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
 const FALLBACK_RPC_URL = 'https://api.mainnet-beta.solana.com';
 
 const TRANSACTION_TIMEOUT = 90 * 1000; // 90 seconds in milliseconds
@@ -63,12 +62,17 @@ const connectionConfig = {
   }
 };
 
-const connection = new Connection(PRIMARY_RPC_URL, connectionConfig);
-
+// Lazy initialization to ensure env variable is available
+let connection: Connection | null = null;
 let fallbackConnection: Connection | null = null;
 
 // Export these utility functions
 export const getConnection = (): Connection => {
+  if (!connection) {
+    const PRIMARY_RPC_URL = import.meta.env.VITE_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
+    console.log('Initializing Solana connection with RPC:', PRIMARY_RPC_URL);
+    connection = new Connection(PRIMARY_RPC_URL, connectionConfig);
+  }
   return connection;
 };
 
