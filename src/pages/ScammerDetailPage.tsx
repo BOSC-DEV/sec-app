@@ -430,7 +430,7 @@ const ScammerDetailPage = () => {
     addCommentMutation.mutate({
       scammer_id: scammer?.id || '',
       content: commentText,
-      author: profile.wallet_address,
+      author: profile.id,
       author_name: profile.display_name,
       author_profile_pic: profile.profile_pic_url
     });

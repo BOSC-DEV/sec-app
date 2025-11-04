@@ -34,8 +34,19 @@ export const addComment = async (comment: {
     throw new Error('User must be authenticated to add comments');
   }
   
-  // Ensure the author matches the authenticated user
-  if (user.id !== comment.author) {
+  // Get the profile for the authenticated user
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('wallet_address', user.email?.split('@')[0])
+    .single();
+  
+  if (!profile) {
+    throw new Error('Profile not found for authenticated user');
+  }
+  
+  // Ensure the author matches the authenticated user's profile
+  if (profile.id !== comment.author) {
     throw new Error('Cannot create comments for other users');
   }
   
