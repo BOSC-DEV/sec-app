@@ -107,45 +107,45 @@ export const getProfileStatistics = async (): Promise<any[]> => {
     
     // Calculate statistics for each profile
     return profiles.map(profile => {
-      // Count reports by this profile
+      // Count reports by this profile (added_by is now UUID profile.id)
       const reportsCount = scammers.filter(scammer => 
-        scammer.added_by === profile.wallet_address
+        scammer.added_by === profile.id
       ).length;
       
       // Sum likes on scammers reported by this profile
       const scammerLikes = scammers
-        .filter(scammer => scammer.added_by === profile.wallet_address)
+        .filter(scammer => scammer.added_by === profile.id)
         .reduce((sum, scammer) => sum + (scammer.likes || 0), 0);
       
       // Sum views on scammers reported by this profile
       const scammerViews = scammers
-        .filter(scammer => scammer.added_by === profile.wallet_address)
+        .filter(scammer => scammer.added_by === profile.id)
         .reduce((sum, scammer) => sum + (scammer.views || 0), 0);
       
-      // Count comments by this profile
+      // Count comments by this profile (author is UUID profile.id)
       const commentsCount = comments.filter(comment => 
-        comment.author === profile.wallet_address
+        comment.author === profile.id
       ).length;
       
       // Sum likes on comments by this profile
       const commentLikes = comments
-        .filter(comment => comment.author === profile.wallet_address)
+        .filter(comment => comment.author === profile.id)
         .reduce((sum, comment) => sum + (comment.likes || 0), 0);
       
       // Sum views on comments by this profile
       const commentViews = comments
-        .filter(comment => comment.author === profile.wallet_address)
+        .filter(comment => comment.author === profile.id)
         .reduce((sum, comment) => sum + (comment.views || 0), 0);
       
-      // Sum total bounty contributed by this profile
+      // Sum total bounty contributed by this profile (contributor_id is UUID profile.id)
       const bountyAmount = bountyContributions
-        .filter(contribution => contribution.contributor_id === profile.wallet_address)
-        .reduce((sum, contribution) => sum + (contribution.amount || 0), 0);
+        .filter(contribution => contribution.contributor_id === profile.id)
+        .reduce((sum, contribution) => sum + Number(contribution.amount || 0), 0);
       
       // Calculate bounties raised (total bounties on scammers reported by this profile)
       const bountiesRaised = scammers
-        .filter(scammer => scammer.added_by === profile.wallet_address)
-        .reduce((sum, scammer) => sum + (scammer.bounty_amount || 0), 0);
+        .filter(scammer => scammer.added_by === profile.id)
+        .reduce((sum, scammer) => sum + Number(scammer.bounty_amount || 0), 0);
       
       // Add up all statistics
       return {

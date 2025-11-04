@@ -41,11 +41,11 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
 
   useEffect(() => {
     const fetchTransferableContributions = async () => {
-      if (!profile?.wallet_address || !isOpen) return;
+      if (!profile?.id || !isOpen) return;
       
       setIsLoading(true);
       try {
-        const contributions = await getUserTransferableContributions(profile.wallet_address, scammerId);
+        const contributions = await getUserTransferableContributions(profile.id, scammerId);
         setSourceContributions(contributions);
       } catch (error) {
         console.error("Error fetching transferable contributions:", error);
@@ -60,7 +60,7 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
     };
     
     fetchTransferableContributions();
-  }, [profile?.wallet_address, scammerId, isOpen, toast]);
+  }, [profile?.id, scammerId, isOpen, toast]);
 
   useEffect(() => {
     if (selectedContribution) {
@@ -137,7 +137,7 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
         selectedContribution.id,
         scammerId,
         parseFloat(transferAmount),
-        profile.wallet_address,
+        profile.id,
         profile.display_name,
         profile.profile_pic_url,
         transferComment

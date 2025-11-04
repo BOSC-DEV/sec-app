@@ -69,7 +69,7 @@ export const addBountyContribution = async (
       const { data: profile } = await supabase
         .from('profiles')
         .select('username')
-        .eq('wallet_address', sanitizedContributorId)
+        .eq('id', sanitizedContributorId)
         .maybeSingle();
         
       const contributorUsername = profile?.username;
