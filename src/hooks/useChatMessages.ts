@@ -122,16 +122,29 @@ export const useChatMessages = () => {
         imageUrl = data.publicUrl;
       }
       
-      // Insert the chat message
+      // Insert the chat message with image_url if available
       const { data: insertedData, error: insertError } = await supabase
         .from('chat_messages')
-        .insert(sanitizedData)
+        .insert({
+          ...sanitizedData,
+          image_url: imageUrl || null
+        })
         .select()
         .single();
         
       if (insertError) {
         console.error('Error inserting chat message:', insertError);
         throw insertError;
+      }
+      
+      // Add the new message to local state immediately (optimistic update)
+      if (insertedData) {
+        const newMessage = {
+          ...insertedData,
+          content: sanitizeHtml(insertedData.content)
+        } as ChatMessage;
+        
+        setMessages(prev => [...prev, newMessage]);
       }
       
       return insertedData as ChatMessage;
@@ -197,7 +210,16 @@ export const useChatMessages = () => {
         // Sanitize incoming message content
         const newMessage = payload.new as ChatMessage;
         newMessage.content = sanitizeHtml(newMessage.content);
-        setMessages(prev => [...prev, newMessage]);
+        
+        // Add to state only if message doesn't already exist (prevent duplicates)
+        setMessages(prev => {
+          // Check if message already exists (might have been added optimistically)
+          const exists = prev.some(msg => msg.id === newMessage.id);
+          if (exists) {
+            return prev;
+          }
+          return [...prev, newMessage];
+        });
       })
       .subscribe();
 

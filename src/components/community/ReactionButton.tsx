@@ -62,13 +62,22 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
     try {
       let success = false;
       
+      if (!profile?.id) {
+        toast({
+          title: "Error",
+          description: "Profile not found. Please try connecting your wallet again.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       if (itemType === 'announcement') {
         // Handle announcement reactions
         const { data: existing } = await supabase
           .from('announcement_reactions')
           .select('id')
           .eq('announcement_id', itemId)
-          .eq('user_id', profile?.wallet_address || '')
+          .eq('user_id', profile.id)
           .eq('reaction_type', reactionType)
           .maybeSingle();
           
@@ -87,7 +96,7 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
             .from('announcement_reactions')
             .insert({
               reaction_type: reactionType,
-              user_id: profile?.wallet_address || '',
+              user_id: profile.id,
               announcement_id: itemId
             });
             
@@ -100,7 +109,7 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
           .from('chat_message_reactions')
           .select('id')
           .eq('message_id', itemId)
-          .eq('user_id', profile?.wallet_address || '')
+          .eq('user_id', profile.id)
           .eq('reaction_type', reactionType)
           .maybeSingle();
           
@@ -119,7 +128,7 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
             .from('chat_message_reactions')
             .insert({
               reaction_type: reactionType,
-              user_id: profile?.wallet_address || '',
+              user_id: profile.id,
               message_id: itemId
             });
             
@@ -132,7 +141,7 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
           .from('reply_reactions')
           .select('id')
           .eq('reply_id', itemId)
-          .eq('user_id', profile?.wallet_address || '')
+          .eq('user_id', profile.id)
           .eq('reaction_type', reactionType)
           .maybeSingle();
           
@@ -151,7 +160,7 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
             .from('reply_reactions')
             .insert({
               reaction_type: reactionType,
-              user_id: profile?.wallet_address || '',
+              user_id: profile.id,
               reply_id: itemId
             });
             
@@ -212,20 +221,20 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
         reactionMap.set(type, { count: 0, has_reacted: false });
       });
       
-      if (reactionData && reactionData.length > 0) {
-        reactionData.forEach((reaction) => {
-          const type = reaction.reaction_type;
-          const currentData = reactionMap.get(type) || { count: 0, has_reacted: false };
-          
-          currentData.count += 1;
-          
-          if (reaction.user_id === profile?.wallet_address) {
-            currentData.has_reacted = true;
-          }
-          
-          reactionMap.set(type, currentData);
-        });
-      }
+             if (reactionData && reactionData.length > 0) {
+         reactionData.forEach((reaction) => {
+           const type = reaction.reaction_type;
+           const currentData = reactionMap.get(type) || { count: 0, has_reacted: false };
+           
+           currentData.count += 1;
+           
+           if (reaction.user_id === profile?.id) {
+             currentData.has_reacted = true;
+           }
+           
+           reactionMap.set(type, currentData);
+         });
+       }
       
       reactionMap.forEach((value, key) => {
         reactionCounts.push({
@@ -285,10 +294,10 @@ const ReactionButton = ({ itemId, itemType, size = 'sm', iconOnly = false }: Rea
       ).subscribe();
     }
     
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [itemId, itemType, profile?.wallet_address]);
+         return () => {
+       supabase.removeChannel(channel);
+     };
+   }, [itemId, itemType, profile?.id]);
 
   if (reactions.length === 0 && iconOnly) {
     return (

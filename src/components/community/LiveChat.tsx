@@ -91,9 +91,13 @@ const LiveChat = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isConnected) {
+      connectWallet();
+      return;
+    }
+    if (!profile?.id) {
       toast({
-        title: "Not connected",
-        description: "Please connect your wallet to chat",
+        title: "Error",
+        description: "Profile not found. Please try connecting your wallet again.",
         variant: "destructive"
       });
       return;
@@ -118,7 +122,7 @@ const LiveChat = () => {
     try {
       await sendChatMessage({
         content: newMessage,
-        author_id: profile?.wallet_address || '',
+        author_id: profile.id,
         author_name: profile?.display_name || '',
         author_username: profile?.username || '',
         author_profile_pic: profile?.profile_pic_url || '',

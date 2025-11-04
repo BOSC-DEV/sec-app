@@ -74,20 +74,20 @@ const CommunityInteractionButtons: React.FC<CommunityInteractionButtonsProps> = 
 
   useEffect(() => {
     const fetchUserInteraction = async () => {
-      if (!profile?.wallet_address) return;
+      if (!profile?.id) return;
 
       try {
         let interaction = { liked: false, disliked: false };
         
         switch (itemType) {
           case 'announcement':
-            interaction = await getUserAnnouncementInteraction(itemId, profile.wallet_address);
+            interaction = await getUserAnnouncementInteraction(itemId, profile.id);
             break;
           case 'reply':
-            interaction = await getUserReplyInteraction(itemId, profile.wallet_address);
+            interaction = await getUserReplyInteraction(itemId, profile.id);
             break;
           case 'message':
-            interaction = await getUserChatMessageInteraction(itemId, profile.wallet_address);
+            interaction = await getUserChatMessageInteraction(itemId, profile.id);
             break;
         }
         
@@ -99,7 +99,7 @@ const CommunityInteractionButtons: React.FC<CommunityInteractionButtonsProps> = 
     };
 
     fetchUserInteraction();
-  }, [itemId, itemType, profile?.wallet_address]);
+  }, [itemId, itemType, profile?.id]);
 
   useEffect(() => {
     setLocalLikes(initialLikes);
@@ -107,7 +107,7 @@ const CommunityInteractionButtons: React.FC<CommunityInteractionButtonsProps> = 
   }, [initialLikes, initialDislikes]);
 
   const handleLike = async () => {
-    if (!profile?.wallet_address) {
+    if (!profile?.id) {
       toast({
         title: "Authentication required",
         description: "Please connect your wallet to like this item",
@@ -138,13 +138,13 @@ const CommunityInteractionButtons: React.FC<CommunityInteractionButtonsProps> = 
       
       switch (itemType) {
         case 'announcement':
-          result = await likeAnnouncement(itemId, profile.wallet_address);
+          result = await likeAnnouncement(itemId, profile.id);
           break;
         case 'reply':
-          result = await likeReply(itemId, profile.wallet_address);
+          result = await likeReply(itemId, profile.id);
           break;
         case 'message':
-          result = await likeChatMessage(itemId, profile.wallet_address);
+          result = await likeChatMessage(itemId, profile.id);
           break;
       }
       
@@ -166,7 +166,7 @@ const CommunityInteractionButtons: React.FC<CommunityInteractionButtonsProps> = 
   };
 
   const handleDislike = async () => {
-    if (!profile?.wallet_address) {
+    if (!profile?.id) {
       toast({
         title: "Authentication required",
         description: "Please connect your wallet to dislike this item",
@@ -197,13 +197,13 @@ const CommunityInteractionButtons: React.FC<CommunityInteractionButtonsProps> = 
       
       switch (itemType) {
         case 'announcement':
-          result = await dislikeAnnouncement(itemId, profile.wallet_address);
+          result = await dislikeAnnouncement(itemId, profile.id);
           break;
         case 'reply':
-          result = await dislikeReply(itemId, profile.wallet_address);
+          result = await dislikeReply(itemId, profile.id);
           break;
         case 'message':
-          result = await dislikeChatMessage(itemId, profile.wallet_address);
+          result = await dislikeChatMessage(itemId, profile.id);
           break;
       }
       
@@ -225,7 +225,7 @@ const CommunityInteractionButtons: React.FC<CommunityInteractionButtonsProps> = 
   };
 
   const fetchCurrentInteraction = async () => {
-    if (!profile?.wallet_address) return;
+    if (!profile?.id) return;
 
     try {
       let interaction = { liked: false, disliked: false };
@@ -233,13 +233,13 @@ const CommunityInteractionButtons: React.FC<CommunityInteractionButtonsProps> = 
       
       switch (itemType) {
         case 'announcement':
-          interaction = await getUserAnnouncementInteraction(itemId, profile.wallet_address);
+          interaction = await getUserAnnouncementInteraction(itemId, profile.id);
           break;
         case 'reply':
-          interaction = await getUserReplyInteraction(itemId, profile.wallet_address);
+          interaction = await getUserReplyInteraction(itemId, profile.id);
           break;
         case 'message':
-          interaction = await getUserChatMessageInteraction(itemId, profile.wallet_address);
+          interaction = await getUserChatMessageInteraction(itemId, profile.id);
           break;
       }
       

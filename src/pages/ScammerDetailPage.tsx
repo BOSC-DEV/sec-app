@@ -160,9 +160,9 @@ const ScammerDetailPage = () => {
     data: userContributionAmount = 0,
     isLoading: isLoadingUserContribution
   } = useQuery({
-    queryKey: ['userContribution', id, profile?.wallet_address],
-    queryFn: () => getUserContributionAmountForScammer(id || '', profile?.wallet_address || ''),
-    enabled: !!id && !!profile?.wallet_address
+    queryKey: ['userContribution', id, profile?.id],
+    queryFn: () => getUserContributionAmountForScammer(id || '', profile?.id || ''),
+    enabled: !!id && !!profile?.id
   });
 
   const bountyContributions = bountyContributionsData?.contributions || [];
@@ -470,7 +470,7 @@ const ScammerDetailPage = () => {
         scammer_id: scammer?.id || '',
         amount: amount,
         comment: bountyComment || undefined,
-        contributor_id: profile.wallet_address,
+        contributor_id: profile.id,
         contributor_name: profile.display_name,
         contributor_profile_pic: profile.profile_pic_url,
         transaction_signature: transactionSignature

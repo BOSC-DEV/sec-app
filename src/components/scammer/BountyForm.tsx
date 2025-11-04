@@ -117,7 +117,7 @@ const BountyForm: React.FC<BountyFormProps> = ({
         scammer_id: scammerId,
         amount: amount,
         comment: bountyComment || undefined,
-        contributor_id: profile.wallet_address,
+        contributor_id: profile.id,
         contributor_name: profile.display_name,
         contributor_profile_pic: profile.profile_pic_url,
         transaction_signature: transactionSignature
