@@ -24,8 +24,8 @@ export function formatNumber(num: number) {
 export function formatDate(dateString: string) {
   const date = new Date(dateString);
   return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'long',
+    year: '2-digit',
+    month: 'numeric',
     day: 'numeric'
   }).format(date);
 }

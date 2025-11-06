@@ -781,7 +781,7 @@ const ScammerDetailPage = () => {
                   <div className="flex justify-between items-center mb-3">
                     <div className="text-sm text-gray-500 dark:text-gray-300 flex items-center">
                       <Calendar className="h-4 w-4 mr-1" aria-hidden="true" />
-                      Added on {formatDate(scammer.date_added)}
+                      Added {formatDate(scammer.date_added)}
                     </div>
                   </div>
                   <div className="flex justify-between items-center mb-3">
