@@ -299,8 +299,8 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
           className={`${isLiked ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200' : 'dark:text-white'} border border-gray-200 text-xs`}
           size="sm"
         >
-          <ThumbsUp className="h-3.5 w-3.5 mr-1" />
-          Agree
+          <ThumbsUp className="h-3.5 w-3.5 lg:mr-1" />
+          <span className="hidden lg:inline">Agree</span>
         </Toggle>
         
         <TooltipProvider>
@@ -312,8 +312,8 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
                 className="text-xs px-2 mx-1 dark:bg-transparent dark:border-transparent dark:hover:bg-transparent dark:text-white"
                 onClick={handleBountyClick}
               >
-                <Info className="h-3.5 w-3.5 mr-1" />
-                More
+                <Info className="h-3.5 w-3.5 lg:mr-1" />
+                <span className="hidden lg:inline">More</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent>
@@ -337,8 +337,8 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
             className={`${isDisliked ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200' : 'dark:text-white'} border border-gray-200 text-xs`}
             size="sm"
           >
-            <ThumbsDown className="h-3.5 w-3.5 mr-1" />
-            Disagree
+            <ThumbsDown className="h-3.5 w-3.5 lg:mr-1" />
+            <span className="hidden lg:inline">Disagree</span>
           </Toggle>
         )}
       </div>
