@@ -360,10 +360,10 @@ const MostWantedPage = () => {
                   const reporterProfile = getReporterProfile(scammer.added_by);
                   return <TableRow key={scammer.id} className="border-b border-icc-gold/30 hover:bg-icc-gold/10 cursor-pointer transition-colors" onClick={() => handleRowClick(scammer.report_number)}>
                           <TableCell className="font-medium">{index + 1}</TableCell>
-                          <TableCell className="max-w-[120px] md:max-w-none">
+                          <TableCell className="max-w-[200px] md:max-w-none">
                             <div className="flex items-center gap-3">
                               <img src={scammer.photo_url || '/placeholder.svg'} alt={scammer.name} className="w-10 h-10 aspect-square rounded-full object-cover object-center flex-shrink-0 border-2 border-icc-gold" />
-                              <span className="font-medium text-icc-blue dark:text-white truncate block max-w-[80px] md:max-w-none">{scammer.name}</span>
+                              <span className="font-medium text-icc-blue dark:text-white truncate block max-w-[140px] md:max-w-none">{scammer.name}</span>
                             </div>
                           </TableCell>
                           <TableCell className="text-center font-semibold text-icc-primary dark:text-white">
