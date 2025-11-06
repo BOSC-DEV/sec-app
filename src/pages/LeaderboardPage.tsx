@@ -417,7 +417,7 @@ const LeaderboardPage = () => {
                             <Link to={`/profile/${profile.username || profile.wallet_address}`} className="hover:underline">
                               {profile.bounty_amount ? (
                                 <span className="flex items-center justify-center">
-                                  {formatCurrency(profile.bounty_amount)} <CurrencyIcon size="sm" className="ml-1" />
+                                  {new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(profile.bounty_amount)} <CurrencyIcon size="sm" className="ml-1" />
                                 </span>
                               ) : (
                                 <span className="flex items-center justify-center">

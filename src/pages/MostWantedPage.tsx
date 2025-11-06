@@ -368,7 +368,7 @@ const MostWantedPage = () => {
                           </TableCell>
                           <TableCell className="text-center font-semibold text-icc-primary dark:text-white">
                             {scammer.bounty_amount ? <span className="flex items-center justify-center">
-                                {formatCurrency(scammer.bounty_amount)} <CurrencyIcon size="sm" className="ml-1" />
+                                {new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(scammer.bounty_amount)} <CurrencyIcon size="sm" className="ml-1" />
                               </span> : <span className="flex items-center justify-center">
                                 0 <CurrencyIcon size="sm" className="ml-1" />
                               </span>}
