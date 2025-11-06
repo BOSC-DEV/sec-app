@@ -93,36 +93,39 @@
 
   body {
     @apply bg-background text-foreground font-sans;
+  }
+
+  html {
     scrollbar-width: thin;
     scrollbar-color: #c9a227 transparent;
   }
 
-  body::-webkit-scrollbar {
+  html::-webkit-scrollbar {
     width: 10px;
   }
   
-  body::-webkit-scrollbar-track {
+  html::-webkit-scrollbar-track {
     background: transparent;
   }
   
-  body::-webkit-scrollbar-thumb {
+  html::-webkit-scrollbar-thumb {
     background-color: #c9a227;
     border-radius: 4px;
   }
   
-  body::-webkit-scrollbar-thumb:hover {
+  html::-webkit-scrollbar-thumb:hover {
     background-color: #d4af37;
   }
 
-  .dark body {
+  .dark html {
     scrollbar-color: #d4af37 transparent;
   }
   
-  .dark body::-webkit-scrollbar-thumb {
+  .dark html::-webkit-scrollbar-thumb {
     background-color: #d4af37;
   }
   
-  .dark body::-webkit-scrollbar-thumb:hover {
+  .dark html::-webkit-scrollbar-thumb:hover {
     background-color: #e5c158;
   }
 
