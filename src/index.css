@@ -97,7 +97,7 @@
 
   html {
     scrollbar-width: thin;
-    scrollbar-color: #c9a227 transparent;
+    scrollbar-color: #C8B06B transparent;
   }
 
   html::-webkit-scrollbar {
@@ -109,24 +109,24 @@
   }
   
   html::-webkit-scrollbar-thumb {
-    background-color: #c9a227;
+    background-color: #C8B06B;
     border-radius: 4px;
   }
   
   html::-webkit-scrollbar-thumb:hover {
-    background-color: #d4af37;
+    background-color: #D9C795;
   }
 
   .dark html {
-    scrollbar-color: #d4af37 transparent;
+    scrollbar-color: #D9C795 transparent;
   }
   
   .dark html::-webkit-scrollbar-thumb {
-    background-color: #d4af37;
+    background-color: #D9C795;
   }
   
   .dark html::-webkit-scrollbar-thumb:hover {
-    background-color: #e5c158;
+    background-color: #EFDBA4;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -184,7 +184,7 @@
   /* Custom gold scrollbar for horizontal overflow */
   .scrollbar-gold {
     scrollbar-width: thin;
-    scrollbar-color: #c9a227 transparent;
+    scrollbar-color: #C8B06B transparent;
   }
   
   .scrollbar-gold::-webkit-scrollbar {
@@ -196,24 +196,24 @@
   }
   
   .scrollbar-gold::-webkit-scrollbar-thumb {
-    background-color: #c9a227;
+    background-color: #C8B06B;
     border-radius: 4px;
   }
   
   .scrollbar-gold::-webkit-scrollbar-thumb:hover {
-    background-color: #d4af37;
+    background-color: #D9C795;
   }
   
   /* Dark mode variant */
   .dark .scrollbar-gold {
-    scrollbar-color: #d4af37 transparent;
+    scrollbar-color: #D9C795 transparent;
   }
   
   .dark .scrollbar-gold::-webkit-scrollbar-thumb {
-    background-color: #d4af37;
+    background-color: #D9C795;
   }
   
   .dark .scrollbar-gold::-webkit-scrollbar-thumb:hover {
-    background-color: #e5c158;
+    background-color: #EFDBA4;
   }
 }
