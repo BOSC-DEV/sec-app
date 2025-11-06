@@ -175,7 +175,7 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
         <DialogTrigger asChild>
           <Button variant="outline" size="sm" className="w-full">
             <ArrowRightIcon className="h-4 w-4 mr-2" /> 
-            Transfer from Another Bounty
+            Transfer Bounty
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[500px]">
