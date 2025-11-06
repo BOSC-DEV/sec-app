@@ -97,7 +97,7 @@ export default {
       fontFamily: {
         serif: ["Cambria", "Georgia", "serif"],
         sans: ["Open Sans", "Arial", "sans-serif"],
-        gothic: ["Century Gothic", "CenturyGothic", "AppleGothic", "sans-serif"],
+        gothic: ["Montserrat", "Century Gothic", "CenturyGothic", "AppleGothic", "sans-serif"],
       },
       keyframes: {
         "accordion-down": {
