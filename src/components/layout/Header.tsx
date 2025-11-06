@@ -111,7 +111,7 @@ const Header = () => {
             </Link>
 
             <nav className="hidden md:flex items-center space-x-6 ml-6">
-              {navigationItems.map(item => <Link key={item.path} to={item.path} className={`text-white hover:text-icc-gold transition-colors flex items-center ${location.pathname === item.path ? 'text-icc-gold font-medium' : ''}`}>
+              {navigationItems.map(item => <Link key={item.path} to={item.path} className={`text-white hover:text-icc-gold transition-colors flex items-center md:text-[0.85rem] lg:text-base ${location.pathname === item.path ? 'text-icc-gold font-medium' : ''}`}>
                   {item.label}
                 </Link>)}
             </nav>
