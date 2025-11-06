@@ -835,14 +835,14 @@ const ScammerDetailPage = () => {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div className="mb-3">
-                        <div className="flex justify-end text-sm md:text-xs lg:text-sm text-white mb-1">
-                          <span className="whitespace-nowrap">{agreePercentage}% Agree</span>
-                        </div>
                         <Progress value={agreePercentage} className="h-2 bg-red-100" aria-valuemin={0} aria-valuemax={100} aria-valuenow={agreePercentage} aria-label={`${agreePercentage}% agreement rate`}>
                           <div className="h-full bg-green-500 transition-all" style={{
                           width: `${agreePercentage}%`
                         }} />
                         </Progress>
+                        <div className="flex justify-center text-sm md:text-xs lg:text-sm text-white mt-1">
+                          <span className="whitespace-nowrap">{agreePercentage}% Agree</span>
+                        </div>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
