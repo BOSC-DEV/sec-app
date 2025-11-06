@@ -59,11 +59,11 @@ const NotificationsPage: React.FC = () => {
     // Navigate based on entity type
     switch (notification.entity_type) {
       case EntityType.scammer:
-        navigate(`/scammer/${notification.entity_id}`);
+        navigate(`/report/${notification.entity_id}`);
         break;
       case EntityType.comment:
         // For comments, we need to navigate to the scammer page
-        navigate(`/scammer/${notification.entity_id.split('-')[1]}`);
+        navigate(`/report/${notification.entity_id.split('-')[1]}`);
         break;
       case EntityType.announcement:
         navigate('/community');

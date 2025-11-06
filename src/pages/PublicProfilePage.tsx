@@ -299,7 +299,7 @@ const PublicProfilePage = () => {
                       {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full" />)}
                     </div> : scammerReports && scammerReports.length > 0 ? <div className="space-y-4">
                       {scammerReports.map(scammer => <Card key={scammer.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                          <Link to={`/scammer/${scammer.id}`}>
+                          <Link to={`/report/${scammer.report_number}`}>
                             <CardContent className="p-4">
                               <div className="flex items-center gap-4">
                                 <div className="flex-1">
@@ -346,7 +346,7 @@ const PublicProfilePage = () => {
                                 {formatDate(contribution.created_at)}
                               </TableCell>
                               <TableCell>
-                                {contribution.scammers ? <Link to={`/scammer/${contribution.scammer_id}`} className="flex items-center gap-2 hover:text-icc-gold">
+                                {contribution.scammers ? <Link to={`/report/${contribution.scammers.report_number}`} className="flex items-center gap-2 hover:text-icc-gold">
                                     <Avatar className="h-6 w-6">
                                       <AvatarImage src={contribution.scammers.photo_url} alt={contribution.scammers.name} />
                                       <AvatarFallback className="text-xs">

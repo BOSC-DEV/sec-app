@@ -1,5 +1,6 @@
 export interface Scammer {
   id: string;
+  report_number: number;
   name: string;
   photo_url: string;
   accused_of: string;

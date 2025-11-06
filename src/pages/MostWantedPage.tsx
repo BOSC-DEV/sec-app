@@ -65,8 +65,8 @@ const MostWantedPage = () => {
       setSortDirection('desc');
     }
   };
-  const handleRowClick = (scammerId: string) => {
-    navigate(`/scammer/${scammerId}`);
+  const handleRowClick = (reportNumber: number) => {
+    navigate(`/report/${reportNumber}`);
   };
   useEffect(() => {
     const filtered = scammers.filter(scammer => scammer.name.toLowerCase().includes(searchQuery.toLowerCase()) || scammer.accused_of && scammer.accused_of.toLowerCase().includes(searchQuery.toLowerCase()) || scammer.aliases && scammer.aliases.some(alias => alias.toLowerCase().includes(searchQuery.toLowerCase())) || scammer.wallet_addresses && scammer.wallet_addresses.some(address => address.toLowerCase().includes(searchQuery.toLowerCase())));
@@ -357,7 +357,7 @@ const MostWantedPage = () => {
                   <TableBody>
                     {filteredScammers.map((scammer, index) => {
                   const reporterProfile = getReporterProfile(scammer.added_by);
-                  return <TableRow key={scammer.id} className="border-b border-icc-gold/30 hover:bg-icc-gold/10 cursor-pointer transition-colors" onClick={() => handleRowClick(scammer.id)}>
+                  return <TableRow key={scammer.id} className="border-b border-icc-gold/30 hover:bg-icc-gold/10 cursor-pointer transition-colors" onClick={() => handleRowClick(scammer.report_number)}>
                           <TableCell className="font-medium">{index + 1}</TableCell>
                           <TableCell>
                             <div className="flex items-center gap-3">

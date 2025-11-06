@@ -89,7 +89,7 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
 
   const handleShare = async () => {
     try {
-      const url = `${window.location.origin}/scammer/${scammer.id}`;
+      const url = `${window.location.origin}/report/${scammer.report_number}`;
       await navigator.clipboard.writeText(url);
       
       toast({
@@ -229,7 +229,7 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
     if (showBountyDialog) {
       setBountyDialogOpen(true);
     } else {
-      window.location.href = `/scammer/${scammer.id}#bounty-section`;
+      window.location.href = `/report/${scammer.report_number}#bounty-section`;
     }
   };
 

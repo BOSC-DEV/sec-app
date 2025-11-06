@@ -222,12 +222,12 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
   const handleBountyClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    navigate(`/scammer/${scammer.id}#bounty-section`);
+    navigate(`/report/${scammer.report_number}#bounty-section`);
   };
 
   return (
     <div className="icc-card overflow-hidden group">
-      <Link to={`/scammer/${scammer.id}`} className="block">
+      <Link to={`/report/${scammer.report_number}`} className="block">
         <div className="relative aspect-square overflow-hidden">
           <img 
             src={scammer.photo_url || '/placeholder.svg'} 

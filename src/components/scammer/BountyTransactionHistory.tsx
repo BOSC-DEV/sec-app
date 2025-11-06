@@ -194,7 +194,7 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
                   {showScammerInfo && contribution.scammers && (
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Link to={`/scammer/${contribution.scammer_id}`} aria-label={`View ${contribution.scammers.name}'s profile`}>
+                        <Link to={`/report/${contribution.scammers.report_number}`} aria-label={`View ${contribution.scammers.name}'s profile`}>
                           <Avatar className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-icc-gold transition-all">
                             <AvatarImage 
                               src={contribution.scammers.photo_url || '/placeholder.svg'} 
@@ -206,7 +206,7 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
                           </Avatar>
                         </Link>
                         <Link 
-                          to={`/scammer/${contribution.scammer_id}`}
+                          to={`/report/${contribution.scammers.report_number}`}
                           className="text-sm hover:text-icc-gold hover:underline transition-colors"
                           aria-label={`View ${contribution.scammers.name}'s profile`}
                         >

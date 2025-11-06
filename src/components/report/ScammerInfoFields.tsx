@@ -33,7 +33,7 @@ const ScammerInfoFields = ({
   const debouncedName = useDebouncedValue(scammerName, 300);
   
   const handleScammerSelect = (scammer: Scammer) => {
-    navigate(`/scammer/${scammer.id}`);
+    navigate(`/report/${scammer.report_number}`);
   };
 
   return (

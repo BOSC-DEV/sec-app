@@ -55,7 +55,6 @@ export const getScammerById = async (id: string): Promise<Scammer | null> => {
     if (data) {
       try {
         // Generate a unique IP hash based on timestamp to avoid constraint violations
-        // In a production environment, you would use a real visitor ID
         const visitorId = localStorage.getItem('visitor_id') || `visitor-${Date.now()}`;
         
         // Check if this view is a duplicate using our new database function
@@ -88,6 +87,69 @@ export const getScammerById = async (id: string): Promise<Scammer | null> => {
       fallbackMessage: 'Failed to fetch scammer details',
       severity: ErrorSeverity.MEDIUM,
       context: 'getScammerById'
+    });
+    return null;
+  }
+};
+
+export const getScammerByReportNumber = async (reportNumber: number): Promise<Scammer | null> => {
+  try {
+    // Validate input
+    if (!reportNumber || typeof reportNumber !== 'number' || reportNumber < 1) {
+      throw new Error('Invalid report number provided');
+    }
+    
+    const { data, error } = await supabase
+      .from('scammers')
+      .select('*')
+      .eq('report_number', reportNumber)
+      .single();
+    
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // Record not found
+        return null;
+      }
+      console.error('Error fetching scammer by ID:', error);
+      throw error;
+    }
+    
+    if (data) {
+      try {
+        // Generate a unique IP hash based on timestamp to avoid constraint violations
+        // In a production environment, you would use a real visitor ID
+        const visitorId = localStorage.getItem('visitor_id') || `visitor-${Date.now()}`;
+        
+        // Check if this view is a duplicate using our new database function
+        const { data: isDuplicate } = await supabase
+          .rpc('is_duplicate_view', { 
+            p_scammer_id: data.id, 
+            p_visitor_id: visitorId 
+          });
+        
+        // Only insert view record if it's not a duplicate
+        if (!isDuplicate) {
+          // Insert view record
+          const { error: viewError } = await supabase
+            .from('scammer_views')
+            .insert({ scammer_id: data.id, visitor_id: visitorId });
+            
+          if (viewError) {
+            console.error('Error logging scammer view:', viewError);
+          }
+        }
+      } catch (e) {
+        // Silently fail on view tracking errors to not disrupt user experience
+        console.error('Failed to track view:', e);
+      }
+    }
+    
+    return data;
+  } catch (error) {
+    handleError(error, {
+      fallbackMessage: 'Failed to fetch scammer details',
+      severity: ErrorSeverity.MEDIUM,
+      context: 'getScammerByReportNumber'
     });
     return null;
   }

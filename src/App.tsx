@@ -196,13 +196,14 @@ const App = () => (
                       <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/most-wanted" element={<MostWantedPage />} />
-                    <Route path="/scammer/:id" element={<ScammerDetailPage />} />
-                    <Route path="/report" element={
+                    <Route path="/report/:id" element={<ScammerDetailPage />} />
+                    <Route path="/scammer/:id" element={<ScammerDetailPage />} /> {/* Legacy route */}
+                    <Route path="/new-report" element={
                       <ProtectedRoute>
                         <ReportPage />
                       </ProtectedRoute>
                     } />
-                    <Route path="/report/:id" element={
+                    <Route path="/edit-report/:id" element={
                       <ProtectedRoute>
                         <ReportPage />
                       </ProtectedRoute>

@@ -698,6 +698,7 @@ export type Database = {
           name: string
           official_response: string | null
           photo_url: string | null
+          report_number: number
           shares: number | null
           updated_at: string | null
           views: number | null
@@ -720,6 +721,7 @@ export type Database = {
           name: string
           official_response?: string | null
           photo_url?: string | null
+          report_number?: number
           shares?: number | null
           updated_at?: string | null
           views?: number | null
@@ -742,6 +744,7 @@ export type Database = {
           name?: string
           official_response?: string | null
           photo_url?: string | null
+          report_number?: number
           shares?: number | null
           updated_at?: string | null
           views?: number | null

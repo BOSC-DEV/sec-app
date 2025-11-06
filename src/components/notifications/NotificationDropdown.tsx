@@ -79,10 +79,11 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     
     switch (notification.entity_type) {
       case EntityType.scammer:
-        navigate(`/scammer/${notification.entity_id}`);
+        // Entity ID for scammers is the report_number
+        navigate(`/report/${notification.entity_id}`);
         break;
       case EntityType.comment:
-        navigate(`/scammer/${notification.entity_id.split('-')[1]}`);
+        navigate(`/report/${notification.entity_id.split('-')[1]}`);
         break;
       case EntityType.announcement:
         navigate('/community');

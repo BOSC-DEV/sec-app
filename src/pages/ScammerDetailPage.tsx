@@ -507,7 +507,7 @@ const ScammerDetailPage = () => {
 
   const handleShare = async () => {
     try {
-      const url = `${window.location.origin}/scammer/${scammer?.id || id}`;
+      const url = `${window.location.origin}/report/${scammer?.report_number || id}`;
       await navigator.clipboard.writeText(url);
       toast({
         title: "Link copied",

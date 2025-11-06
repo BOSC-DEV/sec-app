@@ -76,12 +76,13 @@ export const fetchScammerById = async (id: string) => {
   try {
     if (!id) return null;
     
-    const sanitizedId = sanitizeInput(id);
+    // Check if id is a number (report_number) or UUID (legacy id)
+    const isNumeric = /^\d+$/.test(id);
     
     const { data, error } = await supabase
       .from('scammers')
       .select('*')
-      .eq('id', sanitizedId)
+      .eq(isNumeric ? 'report_number' : 'id', isNumeric ? parseInt(id) : sanitizeInput(id))
       .single();
       
     if (error) throw error;
@@ -197,7 +198,7 @@ export const updateScammerReport = async (
     }
     
     console.log("Successfully updated scammer:", updatedData);
-    return sanitizedId;
+    return updatedData.report_number.toString();
   } catch (error) {
     handleError(error, {
       fallbackMessage: 'Failed to update scammer report',
@@ -270,7 +271,7 @@ export const createScammerReport = async (
       throw new Error("No data returned after creating scammer");
     }
     
-    return newScammer.id;
+    return newScammer.report_number.toString();
   } catch (error) {
     handleError(error, {
       fallbackMessage: 'Failed to create scammer report',
