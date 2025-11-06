@@ -49,22 +49,50 @@ export const transferBountyContribution = async (
     // Step 5: Calculate the remaining amount
     const remainingAmount = originalContribution.amount - amount;
     
+    console.log(`Updating contribution ${originalContributionId}: amount=${remainingAmount}, is_active=${remainingAmount > 0}`);
+    
     // Step 6: Begin transaction
     // Update the original contribution
-    const { data: updatedOriginal, error: updateError } = await supabase
+    // If remaining amount is 0, set is_active to false
+    // Note: We've already validated ownership and is_active status in steps 2-3
+    const { data: updatedOriginalArray, error: updateError } = await supabase
       .from("bounty_contributions")
       .update({ 
         amount: remainingAmount,
-        is_active: true
+        is_active: remainingAmount > 0
       })
       .eq("id", originalContributionId)
-      .select()
-      .single();
+      .select("*");
     
     if (updateError) {
       console.error("Error updating original contribution:", updateError);
+      console.error("Update error details:", JSON.stringify(updateError, null, 2));
       throw updateError;
     }
+    
+    console.log(`Update result: ${updatedOriginalArray?.length || 0} rows updated`);
+    
+    // Check if any rows were actually updated
+    if (!updatedOriginalArray || updatedOriginalArray.length === 0) {
+      // Re-fetch to check current state for better error message
+      const { data: currentState } = await supabase
+        .from("bounty_contributions")
+        .select("id, is_active, amount, contributor_id")
+        .eq("id", originalContributionId)
+        .maybeSingle();
+      
+      if (!currentState) {
+        throw new Error("Contribution not found - it may have been deleted");
+      } else if (currentState.is_active === false) {
+        throw new Error("This contribution has already been transferred");
+      } else if (currentState.contributor_id !== contributorId) {
+        throw new Error("Contribution ownership mismatch - please refresh and try again");
+      } else {
+        throw new Error("Failed to update contribution - please try again");
+      }
+    }
+    
+    const updatedOriginal = updatedOriginalArray[0];
     
     // Step 7: Create the new contribution with the transferred amount and comment
     const { data: newContribution, error: insertError } = await supabase
