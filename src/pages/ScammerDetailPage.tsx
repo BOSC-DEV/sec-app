@@ -800,7 +800,7 @@ const ScammerDetailPage = () => {
               </Card>
 
               <div className="mt-6">
-                <h3 className="text-lg font-semibold text-icc-blue dark:text-white mb-3">Take Action</h3>
+                <h3 className="text-lg font-semibold text-icc-blue dark:text-white mb-3 text-center md:text-left">Take Action</h3>
                 
                 <div className="flex space-x-2 mb-4">
                   <Button 
