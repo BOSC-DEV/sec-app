@@ -755,8 +755,6 @@ const ScammerDetailPage = () => {
                     </div> : <p className="text-icc-gray">No official response yet.</p>}
                 </TabsContent>
               </Tabs>
-              
-              {isMobile && <BountyForm scammerId={scammer.id} scammerName={scammer.name} developerWalletAddress={developerWalletAddress} />}
             </div>
 
             <div>
@@ -850,6 +848,12 @@ const ScammerDetailPage = () => {
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
+                
+                {isMobile && (
+                  <div className="mt-6">
+                    <BountyForm scammerId={scammer.id} scammerName={scammer.name} developerWalletAddress={developerWalletAddress} />
+                  </div>
+                )}
                 
                 {!isMobile && (
                   <div className="mt-6">
