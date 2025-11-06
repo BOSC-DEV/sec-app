@@ -267,7 +267,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
           
           <div className="mt-4 text-xs text-icc-gray-dark dark:text-gray-100 flex flex-col lg:flex-row lg:justify-between lg:items-center gap-2">
             <div className="dark:text-white">
-              Added: {new Date(scammer.date_added).toLocaleDateString()}
+              {new Date(scammer.date_added).toLocaleDateString()}
             </div>
             <div className="flex items-center space-x-3">
               <span className="flex items-center dark:text-white">
