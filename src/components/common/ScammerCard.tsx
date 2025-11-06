@@ -291,7 +291,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
         </div>
       </Link>
       
-      <div className="p-4 pt-0 mt-2 flex gap-1 lg:gap-0 lg:justify-between w-full">
+      <div className="p-4 pt-0 mt-2 flex gap-2 justify-between lg:gap-0 w-full">
         <Toggle
           pressed={isLiked}
           onPressedChange={() => {}}
