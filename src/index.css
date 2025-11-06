@@ -188,7 +188,7 @@
   }
   
   .scrollbar-gold::-webkit-scrollbar {
-    height: 8px;
+    height: 10px;
   }
   
   .scrollbar-gold::-webkit-scrollbar-track {
