@@ -75,7 +75,7 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
             </div>
             Processing...
           </span>
-        ) : profile ? buttonText : "Connect your wallet to contribute"}
+        ) : profile ? buttonText : "Connect Wallet"}
       </Button>
     </div>
   );
