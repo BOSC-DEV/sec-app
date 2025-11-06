@@ -13,12 +13,12 @@ export function truncateText(text: string, maxLength: number) {
 
 export function formatNumber(num: number) {
   if (num >= 1_000_000) {
-    return `${(num / 1_000_000).toFixed(1)}m`;
+    return `${(num / 1_000_000).toFixed(0)}m`;
   }
   if (num >= 1_000) {
-    return `${(num / 1_000).toFixed(1)}k`;
+    return `${(num / 1_000).toFixed(0)}k`;
   }
-  return num.toString();
+  return Math.round(num).toString();
 }
 
 export function formatDate(dateString: string) {
