@@ -4,10 +4,25 @@ import { Comment } from '@/types/dataTypes';
 import { notifyScammerComment } from '@/services/notificationService';
 
 export const getScammerComments = async (scammerId: string): Promise<Comment[]> => {
+  // First, resolve the scammer ID if it's a report number
+  let actualScammerId = scammerId;
+  const isNumeric = /^\d+$/.test(scammerId);
+  
+  if (isNumeric) {
+    const { data: scammer } = await supabase
+      .from('scammers')
+      .select('id')
+      .eq('report_number', parseInt(scammerId))
+      .maybeSingle();
+    
+    if (!scammer) return [];
+    actualScammerId = scammer.id;
+  }
+  
   const { data, error } = await supabase
     .from('comments')
     .select('*')
-    .eq('scammer_id', scammerId)
+    .eq('scammer_id', actualScammerId)
     .order('created_at', { ascending: false });
   
   if (error) {

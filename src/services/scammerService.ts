@@ -37,19 +37,22 @@ export const getScammerById = async (id: string): Promise<Scammer | null> => {
     
     const sanitizedId = sanitizeInput(id);
     
+    // Check if id is a number (report_number) or UUID
+    const isNumeric = /^\d+$/.test(sanitizedId);
+    
     const { data, error } = await supabase
       .from('scammers')
       .select('*')
-      .eq('id', sanitizedId)
-      .single();
+      .eq(isNumeric ? 'report_number' : 'id', isNumeric ? parseInt(sanitizedId) : sanitizedId)
+      .maybeSingle();
     
     if (error) {
-      if (error.code === 'PGRST116') {
-        // Record not found
-        return null;
-      }
       console.error('Error fetching scammer by ID:', error);
       throw error;
+    }
+    
+    if (!data) {
+      return null;
     }
     
     if (data) {
@@ -60,7 +63,7 @@ export const getScammerById = async (id: string): Promise<Scammer | null> => {
         // Check if this view is a duplicate using our new database function
         const { data: isDuplicate } = await supabase
           .rpc('is_duplicate_view', { 
-            p_scammer_id: sanitizedId, 
+            p_scammer_id: data.id, 
             p_visitor_id: visitorId 
           });
         
@@ -69,7 +72,7 @@ export const getScammerById = async (id: string): Promise<Scammer | null> => {
           // Insert view record
           const { error: viewError } = await supabase
             .from('scammer_views')
-            .insert({ scammer_id: sanitizedId, visitor_id: visitorId });
+            .insert({ scammer_id: data.id, visitor_id: visitorId });
             
           if (viewError) {
             console.error('Error logging scammer view:', viewError);

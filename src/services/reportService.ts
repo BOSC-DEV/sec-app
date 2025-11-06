@@ -107,11 +107,14 @@ export const isScammerCreator = async (scammerId: string, profileId: string): Pr
     const sanitizedId = sanitizeInput(scammerId);
     const sanitizedProfileId = sanitizeInput(profileId);
     
+    // Check if id is a number (report_number) or UUID
+    const isNumeric = /^\d+$/.test(sanitizedId);
+    
     const { data, error } = await supabase
       .from('scammers')
       .select('added_by')
-      .eq('id', sanitizedId)
-      .single();
+      .eq(isNumeric ? 'report_number' : 'id', isNumeric ? parseInt(sanitizedId) : sanitizedId)
+      .maybeSingle();
       
     if (error) {
       console.error("Error checking scammer creator:", error);

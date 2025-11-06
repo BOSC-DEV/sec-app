@@ -14,6 +14,21 @@ export const getScammerBountyContributions = async (
   try {
     console.log(`Fetching bounty contributions for scammer ${scammerId}, page ${page}, perPage ${perPage}`);
     
+    // First, resolve the scammer ID if it's a report number
+    let actualScammerId = scammerId;
+    const isNumeric = /^\d+$/.test(scammerId);
+    
+    if (isNumeric) {
+      const { data: scammer } = await supabase
+        .from("scammers")
+        .select("id")
+        .eq("report_number", parseInt(scammerId))
+        .maybeSingle();
+      
+      if (!scammer) return { contributions: [], totalCount: 0 };
+      actualScammerId = scammer.id;
+    }
+    
     // Calculate pagination
     const from = (page - 1) * perPage;
     const to = from + perPage - 1;
@@ -22,7 +37,7 @@ export const getScammerBountyContributions = async (
     const { count, error: countError } = await supabase
       .from("bounty_contributions")
       .select("*", { count: "exact", head: true })
-      .eq("scammer_id", scammerId)
+      .eq("scammer_id", actualScammerId)
       .eq("is_active", true);
 
     if (countError) {
@@ -34,7 +49,7 @@ export const getScammerBountyContributions = async (
     const { data, error } = await supabase
       .from("bounty_contributions")
       .select("*")
-      .eq("scammer_id", scammerId)
+      .eq("scammer_id", actualScammerId)
       .eq("is_active", true)
       .order("created_at", { ascending: false })
       .range(from, to);
@@ -210,10 +225,25 @@ export const getUserContributionAmountForScammer = async (
   try {
     console.log(`Fetching user ${userId} total contribution amount for scammer ${scammerId}`);
     
+    // First, resolve the scammer ID if it's a report number
+    let actualScammerId = scammerId;
+    const isNumeric = /^\d+$/.test(scammerId);
+    
+    if (isNumeric) {
+      const { data: scammer } = await supabase
+        .from("scammers")
+        .select("id")
+        .eq("report_number", parseInt(scammerId))
+        .maybeSingle();
+      
+      if (!scammer) return 0;
+      actualScammerId = scammer.id;
+    }
+    
     const { data, error } = await supabase
       .from("bounty_contributions")
       .select("amount")
-      .eq("scammer_id", scammerId)
+      .eq("scammer_id", actualScammerId)
       .eq("contributor_id", userId)
       .eq("is_active", true);
 
