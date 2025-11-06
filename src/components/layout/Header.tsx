@@ -142,10 +142,10 @@ const Header = () => {
                 <Button variant="gold" size="sm" className="flex items-center gap-2" onClick={handleWalletButtonClick}>
                   {!isPhantomAvailable ? <>
                       <ExternalLink className="h-4 w-4" />
-                      {!isMobile && "Install Phantom"}
-                    </> : isMobile ? <Wallet className="h-4 w-4 text-white" /> : <>
-                      <LogIn className="h-4 w-4" />
-                      Connect Wallet
+                      <span className="hidden lg:inline">Install Phantom</span>
+                    </> : <>
+                      <Wallet className="h-4 w-4 text-white" />
+                      <span className="hidden lg:inline">Connect Wallet</span>
                     </>}
                 </Button>
                 {isMobile && <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light md:hidden" onClick={toggleMenu} aria-label="Menu">
