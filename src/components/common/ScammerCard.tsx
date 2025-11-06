@@ -247,11 +247,8 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
         </div>
         
         <div className="p-4">
-          <h3 className="text-lg font-gothic font-bold text-icc-blue dark:text-white mb-2">{scammer.name}</h3>
-          <p className="text-sm text-icc-gray dark:text-gray-100 min-h-[3.6rem] md:min-h-[4.5rem] leading-relaxed md:leading-loose">
-            <span className="lg:hidden font-semibold">Accused: </span>
-            {truncateText(scammer.accused_of, 100)}
-          </p>
+          <h3 className="text-lg font-gothic font-bold text-icc-blue dark:text-white">{scammer.name}</h3>
+          <p className="text-sm text-icc-gray dark:text-gray-100">{truncateText(scammer.accused_of, 100)}</p>
           
           {creatorProfile && (
             <div className="mt-2 flex items-center">
