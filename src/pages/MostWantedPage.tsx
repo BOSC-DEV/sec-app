@@ -362,7 +362,7 @@ const MostWantedPage = () => {
                           <TableCell className="font-medium">{index + 1}</TableCell>
                           <TableCell className="max-w-[120px] md:max-w-none">
                             <div className="flex items-center gap-3">
-                              <img src={scammer.photo_url || '/placeholder.svg'} alt={scammer.name} className="w-10 h-10 rounded-full object-cover border-2 border-icc-gold" />
+                              <img src={scammer.photo_url || '/placeholder.svg'} alt={scammer.name} className="w-10 h-10 aspect-square rounded-full object-cover object-center flex-shrink-0 border-2 border-icc-gold" />
                               <span className="font-medium text-icc-blue dark:text-white truncate block max-w-[80px] md:max-w-none">{scammer.name}</span>
                             </div>
                           </TableCell>
