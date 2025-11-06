@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { transferBountyContribution, getUserTransferableContributions } from '@/services/bountyService';
 import { getScammerById } from '@/services/scammerService';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency } from '@/utils/formatCurrency';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
 import { Textarea } from '@/components/ui/textarea';

@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { getProfileStatistics } from '@/services/statisticsService';
 import { Profile } from '@/types/dataTypes';
 import { formatNumber, formatProfileAge } from '@/lib/utils';
+import { formatCurrency } from '@/utils/formatCurrency';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
 import BadgeTier from '@/components/profile/BadgeTier';
 import { calculateBadgeTier } from '@/utils/badgeUtils';
@@ -416,7 +417,7 @@ const LeaderboardPage = () => {
                             <Link to={`/profile/${profile.username || profile.wallet_address}`} className="hover:underline">
                               {profile.bounty_amount ? (
                                 <span className="flex items-center justify-center">
-                                  {formatNumber(profile.bounty_amount)} <CurrencyIcon size="sm" className="ml-1" />
+                                  {formatCurrency(profile.bounty_amount)} <CurrencyIcon size="sm" className="ml-1" />
                                 </span>
                               ) : (
                                 <span className="flex items-center justify-center">

@@ -8,7 +8,7 @@ import { toast } from '@/hooks/use-toast';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { CircleIcon } from 'lucide-react';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
-import { formatNumber } from '@/lib/utils';
+import { formatCurrency } from '@/utils/formatCurrency';
 
 interface ScammerSearchDropdownProps {
   searchTerm: string;
@@ -76,7 +76,7 @@ const ScammerSearchDropdown: React.FC<ScammerSearchDropdownProps> = ({
                     </div>
                     <div className="text-xs text-muted-foreground mt-1 flex items-center">
                       <CurrencyIcon size="sm" className="mr-1" />
-                      {formatNumber(scammer.bounty_amount || 0)}
+                      {formatCurrency(scammer.bounty_amount || 0)}
                     </div>
                   </div>
                 </div>

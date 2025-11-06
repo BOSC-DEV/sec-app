@@ -17,6 +17,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Plus } from 'lucide-react';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
+import { formatCurrency } from '@/utils/formatCurrency';
 import { formatNumber } from '@/lib/utils';
 const MostWantedPage = () => {
   const [filteredScammers, setFilteredScammers] = useState<Scammer[]>([]);
@@ -367,7 +368,7 @@ const MostWantedPage = () => {
                           </TableCell>
                           <TableCell className="text-center font-semibold text-icc-primary dark:text-white">
                             {scammer.bounty_amount ? <span className="flex items-center justify-center">
-                                {formatNumber(scammer.bounty_amount)} <CurrencyIcon size="sm" className="ml-1" />
+                                {formatCurrency(scammer.bounty_amount)} <CurrencyIcon size="sm" className="ml-1" />
                               </span> : <span className="flex items-center justify-center">
                                 0 <CurrencyIcon size="sm" className="ml-1" />
                               </span>}

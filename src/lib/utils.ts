@@ -36,10 +36,6 @@ export function getRandomInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-export function formatCurrency(value: number): string {
-  return formatNumber(value);
-}
-
 export function formatProfileAge(dateString: string): string {
   if (!dateString) return '-';
   

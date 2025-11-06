@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { BountyContribution } from '@/types/dataTypes';
-import { formatDate, formatCurrency } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { formatCurrency } from '@/utils/formatCurrency';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Calendar, ArrowLeftIcon, ArrowRightIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';

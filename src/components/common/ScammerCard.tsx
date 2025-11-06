@@ -4,6 +4,7 @@ import { Eye, ThumbsUp, ThumbsDown, MessageSquare, Edit, Info } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { truncateText, formatNumber } from '@/lib/utils';
+import { formatCurrency } from '@/utils/formatCurrency';
 import { Scammer } from '@/types/dataTypes';
 import { useProfile } from '@/contexts/ProfileContext';
 import { likeScammer, dislikeScammer, getUserScammerInteraction } from '@/services/interactionService';
@@ -241,7 +242,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
           )}
           <div className="absolute top-0 right-0 bg-icc-gold text-icc-blue-dark px-3 py-1 text-sm font-gothic font-bold flex items-center rounded-bl-lg">
             <CurrencyIcon className="h-4 w-4 mr-1" />
-            <span>{formatNumber(scammer.bounty_amount)}</span>
+            <span>{formatCurrency(scammer.bounty_amount)}</span>
           </div>
         </div>
         
