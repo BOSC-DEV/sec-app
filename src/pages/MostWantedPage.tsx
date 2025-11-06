@@ -262,7 +262,7 @@ const MostWantedPage = () => {
                 </Table>
               </div> : viewMode === 'grid' ? <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {filteredScammers.map((scammer, index) => <ScammerCard key={scammer.id} scammer={scammer} rank={index} />)}
-            </div> : <div className="w-full overflow-hidden rounded-lg border border-icc-gold/50">
+            </div> : <div className="w-full overflow-x-auto scrollbar-gold rounded-lg border border-icc-gold/50">
               <TooltipProvider>
                 <Table>
                   <TableHeader>

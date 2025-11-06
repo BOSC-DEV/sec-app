@@ -145,3 +145,41 @@
     @apply text-icc-blue-light hover:text-icc-blue dark:text-icc-gold dark:hover:text-icc-gold-light underline;
   }
 }
+
+@layer utilities {
+  /* Custom gold scrollbar for horizontal overflow */
+  .scrollbar-gold {
+    scrollbar-width: thin;
+    scrollbar-color: #c9a227 transparent;
+  }
+  
+  .scrollbar-gold::-webkit-scrollbar {
+    height: 8px;
+  }
+  
+  .scrollbar-gold::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-gold::-webkit-scrollbar-thumb {
+    background-color: #c9a227;
+    border-radius: 4px;
+  }
+  
+  .scrollbar-gold::-webkit-scrollbar-thumb:hover {
+    background-color: #d4af37;
+  }
+  
+  /* Dark mode variant */
+  .dark .scrollbar-gold {
+    scrollbar-color: #d4af37 transparent;
+  }
+  
+  .dark .scrollbar-gold::-webkit-scrollbar-thumb {
+    background-color: #d4af37;
+  }
+  
+  .dark .scrollbar-gold::-webkit-scrollbar-thumb:hover {
+    background-color: #e5c158;
+  }
+}
