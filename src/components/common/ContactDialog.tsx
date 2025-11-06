@@ -45,7 +45,7 @@ const ContactDialog: React.FC<ContactDialogProps> = ({
   return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-serif text-icc-blue">Contact Us</DialogTitle>
+          <DialogTitle className="text-2xl font-gothic text-icc-blue">Contact Us</DialogTitle>
           <DialogDescription>
             How to reach the Scams & E-crimes Commission team.
           </DialogDescription>

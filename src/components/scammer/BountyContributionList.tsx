@@ -91,7 +91,7 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
         </div>
       )}
 
-      <h4 id="contributions-heading" className="font-serif font-bold text-icc-blue text-lg text-center">Recent Contributors:</h4>
+      <h4 id="contributions-heading" className="font-gothic font-bold text-icc-blue text-lg text-center">Recent Contributors:</h4>
       
       <div aria-labelledby="contributions-heading" className="space-y-3">
         {contributions.map(contribution => {

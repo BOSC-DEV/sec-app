@@ -14,7 +14,7 @@ const CookieDialog: React.FC<CookieDialogProps> = ({
   return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-serif text-icc-blue">Cookie Policy</DialogTitle>
+          <DialogTitle className="text-2xl font-gothic text-icc-blue">Cookie Policy</DialogTitle>
           <DialogDescription>
             This policy explains how we use cookies and similar technologies.
           </DialogDescription>

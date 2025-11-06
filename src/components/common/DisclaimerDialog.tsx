@@ -16,7 +16,7 @@ const DisclaimerDialog: React.FC<DisclaimerDialogProps> = ({
   return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-serif text-icc-blue">Disclaimer</DialogTitle>
+          <DialogTitle className="text-2xl font-gothic text-icc-blue">Disclaimer</DialogTitle>
           <DialogDescription>
             Please read this disclaimer carefully before using our platform.
           </DialogDescription>

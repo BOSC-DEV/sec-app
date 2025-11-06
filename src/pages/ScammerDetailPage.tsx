@@ -669,7 +669,7 @@ const ScammerDetailPage = () => {
                 </div>
                 
                 <TabsContent value="comments" className="mt-2">
-                  <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="comments-section">Comments</h2>
+                  <h2 className="text-2xl font-gothic font-bold text-icc-blue mb-4" id="comments-section">Comments</h2>
                   <div className="mb-4">
                     <Textarea placeholder="Write your comment here..." value={commentText} onChange={e => setCommentText(e.target.value)} aria-label="Comment text" />
                     <Button 
@@ -707,7 +707,7 @@ const ScammerDetailPage = () => {
                 </TabsContent>
                 
                 <TabsContent value="links" className="mt-2">
-                  <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="links-section">Links</h2>
+                  <h2 className="text-2xl font-gothic font-bold text-icc-blue mb-4" id="links-section">Links</h2>
                   {scammer?.links && scammer.links.length > 0 ? <ul className="list-disc pl-5 space-y-2">
                       {scammer.links.map((link, index) => <li key={index} className="text-icc-gray">
                           <a href={link.startsWith('http') ? link : `https://${link}`} target="_blank" rel="noopener noreferrer" className="text-icc-blue hover:underline">
@@ -718,26 +718,26 @@ const ScammerDetailPage = () => {
                 </TabsContent>
                 
                 <TabsContent value="aliases" className="mt-2">
-                  <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="aliases-section">Aliases</h2>
+                  <h2 className="text-2xl font-gothic font-bold text-icc-blue mb-4" id="aliases-section">Aliases</h2>
                   {scammer?.aliases && scammer.aliases.length > 0 ? <div className="flex flex-wrap gap-2">
                       {scammer.aliases.map((alias, index) => <Badge key={index} className="bg-icc-blue text-white py-2 px-4">{alias}</Badge>)}
                     </div> : <p className="text-icc-gray">No aliases provided.</p>}
                 </TabsContent>
                 
                 <TabsContent value="accomplices" className="mt-2">
-                  <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="accomplices-section">Known Accomplices</h2>
+                  <h2 className="text-2xl font-gothic font-bold text-icc-blue mb-4" id="accomplices-section">Known Accomplices</h2>
                   {scammer?.accomplices && scammer.accomplices.length > 0 ? <div className="flex flex-wrap gap-2">
                       {scammer.accomplices.map((accomplice, index) => <Badge key={index} className="bg-icc-blue text-white py-2 px-4">{accomplice}</Badge>)}
                     </div> : <p className="text-icc-gray">No accomplices listed.</p>}
                 </TabsContent>
                 
                 <TabsContent value="evidence" className="mt-2">
-                  <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="evidence-section">Evidence</h2>
+                  <h2 className="text-2xl font-gothic font-bold text-icc-blue mb-4" id="evidence-section">Evidence</h2>
                   <div className="text-icc-gray">No evidence provided.</div>
                 </TabsContent>
                 
                 <TabsContent value="wallet-addresses" className="mt-2">
-                  <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="wallets-section">Wallet Addresses</h2>
+                  <h2 className="text-2xl font-gothic font-bold text-icc-blue mb-4" id="wallets-section">Wallet Addresses</h2>
                   {scammer?.wallet_addresses && scammer.wallet_addresses.length > 0 ? <ul className="list-disc pl-5 space-y-2 text-icc-gray">
                       {scammer.wallet_addresses.map((address, index) => <li key={index} className="flex items-center">
                           <span className="font-mono mr-2">{address}</span>
@@ -749,7 +749,7 @@ const ScammerDetailPage = () => {
                 </TabsContent>
                 
                 <TabsContent value="official" className="mt-2">
-                  <h2 className="text-2xl font-serif font-bold text-icc-blue mb-4" id="official-response-section">Official Response</h2>
+                  <h2 className="text-2xl font-gothic font-bold text-icc-blue mb-4" id="official-response-section">Official Response</h2>
                   {scammer?.official_response ? <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                       <p className="text-icc-gray whitespace-pre-wrap">{scammer.official_response}</p>
                     </div> : <p className="text-icc-gray">No official response yet.</p>}

@@ -88,7 +88,7 @@ const Index = () => {
               <div className="bg-icc-blue-light dark:bg-icc-blue inline-flex p-4 rounded-full mb-4">
                 <AlertTriangle className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-serif font-bold text-icc-blue dark:text-white mb-3">Report</h3>
+              <h3 className="text-xl font-gothic font-bold text-icc-blue dark:text-white mb-3">Report</h3>
               <p className="text-icc-gray dark:text-gray-400">
                 Community members report suspected scammers with evidence and details of fraudulent activities.
               </p>
@@ -98,7 +98,7 @@ const Index = () => {
               <div className="bg-icc-blue-light dark:bg-icc-blue inline-flex p-4 rounded-full mb-4">
                 <Shield className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-serif font-bold text-icc-blue dark:text-white mb-3">Verify</h3>
+              <h3 className="text-xl font-gothic font-bold text-icc-blue dark:text-white mb-3">Verify</h3>
               <p className="text-icc-gray dark:text-gray-400">
                 The community verifies reports through consensus and additional evidence from multiple sources.
               </p>
@@ -108,7 +108,7 @@ const Index = () => {
               <div className="bg-icc-blue-light dark:bg-icc-blue inline-flex p-4 rounded-full mb-4">
                 <DollarSign className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-serif font-bold text-icc-blue dark:text-white mb-3">Incentivize</h3>
+              <h3 className="text-xl font-gothic font-bold text-icc-blue dark:text-white mb-3">Incentivize</h3>
               <p className="text-icc-gray dark:text-gray-400">Bounties are placed on confirmed scammers, incentivizing the community to serve social justice.</p>
             </div>
           </div>
@@ -121,7 +121,7 @@ const Index = () => {
             <div className="flex items-start md:items-center mb-4 md:mb-0">
               <AlertTriangle className="h-10 w-10 mr-4 flex-shrink-0" />
               <div>
-                <h3 className="text-xl font-serif font-bold text-white">Responsible Reporting</h3>
+                <h3 className="text-xl font-gothic font-bold text-white">Responsible Reporting</h3>
                 <p className="text-gray-100 max-w-2xl">This platform is for informational purposes only. Always verify and follow all legal channels for reporting crimes.</p>
               </div>
             </div>

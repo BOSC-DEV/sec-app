@@ -96,7 +96,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif text-icc-blue dark:text-gray-100;
+    @apply font-gothic text-icc-blue dark:text-gray-100;
   }
 }
 
@@ -134,11 +134,11 @@
   }
 
   .icc-title {
-    @apply text-3xl md:text-4xl font-serif font-bold text-icc-blue dark:text-white mb-6;
+    @apply text-3xl md:text-4xl font-gothic font-bold text-icc-blue dark:text-white mb-6;
   }
 
   .icc-subtitle {
-    @apply text-xl font-serif text-icc-blue-light dark:text-gray-200 mb-4;
+    @apply text-xl font-gothic text-icc-blue-light dark:text-gray-200 mb-4;
   }
 
   .icc-link {

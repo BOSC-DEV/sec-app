@@ -33,7 +33,7 @@ const FAQDialog: React.FC<FAQDialogProps> = ({
   return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-serif text-icc-blue flex items-center gap-2">
+          <DialogTitle className="text-2xl font-gothic text-icc-blue flex items-center gap-2">
             <HelpCircle className="h-6 w-6" />
             Frequently Asked Questions
           </DialogTitle>

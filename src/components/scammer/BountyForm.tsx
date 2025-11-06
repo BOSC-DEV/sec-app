@@ -144,7 +144,7 @@ const BountyForm: React.FC<BountyFormProps> = ({
   
   return (
     <div className="bg-gray-50 dark:bg-icc-blue-dark p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-      <h3 className="text-xl font-serif font-bold text-icc-blue dark:text-white mb-3">Add Bounty for {scammerName}</h3>
+      <h3 className="text-xl font-gothic font-bold text-icc-blue dark:text-white mb-3">Add Bounty for {scammerName}</h3>
       
       <p className="text-sm text-icc-gray dark:text-gray-300 mb-4">
         Contribute to the bounty for catching this scammer. All funds go to the developer wallet to maintain this site.

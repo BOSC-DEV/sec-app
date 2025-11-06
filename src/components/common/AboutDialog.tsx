@@ -18,7 +18,7 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-serif text-icc-blue flex items-center gap-2">
+          <DialogTitle className="text-2xl font-gothic text-icc-blue flex items-center gap-2">
             <ShieldCheck className="h-6 w-6" />
             About the Scams & E-crimes Commission
           </DialogTitle>

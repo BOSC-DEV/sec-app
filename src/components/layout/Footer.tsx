@@ -36,7 +36,7 @@ const Footer = () => {
           <div className="md:col-span-1 text-center md:text-left">
             <Link to="/" className="flex justify-center md:justify-start items-center space-x-2 mb-4">
               <ICCLogo className="h-10 w-auto" />
-              <div className="font-serif">
+              <div className="font-gothic">
                 <div className="text-base font-bold leading-tight">Scams & E-crimes Commission</div>
               </div>
             </Link>
@@ -54,7 +54,7 @@ const Footer = () => {
           </div>
           
           <div>
-            <h4 className="text-white dark:text-gray-200 font-serif font-bold mb-4">Quick Links</h4>
+            <h4 className="text-white dark:text-gray-200 font-gothic font-bold mb-4">Quick Links</h4>
             <ul className="space-y-2">
               <li><Link to="/" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm">Home</Link></li>
               <li><Link to="/most-wanted" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm">Most Wanted</Link></li>
@@ -66,7 +66,7 @@ const Footer = () => {
           </div>
           
           <div>
-            <h4 className="text-white dark:text-gray-200 font-serif font-bold mb-4">Resources</h4>
+            <h4 className="text-white dark:text-gray-200 font-gothic font-bold mb-4">Resources</h4>
             <ul className="space-y-2">
               <li>
                 <Link to="/docs" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
@@ -110,7 +110,7 @@ const Footer = () => {
           </div>
           
           <div>
-            <h4 className="text-white dark:text-gray-200 font-serif font-bold mb-4">Legal</h4>
+            <h4 className="text-white dark:text-gray-200 font-gothic font-bold mb-4">Legal</h4>
             <ul className="space-y-2">
               <li>
                 <button onClick={() => setTermsOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">

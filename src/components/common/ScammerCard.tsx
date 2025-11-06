@@ -235,18 +235,18 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
           {rank !== undefined && rank < 3 && (
-            <div className="absolute top-0 left-0 bg-icc-red text-white px-3 py-1 text-sm font-serif font-bold rounded-br-lg">
+            <div className="absolute top-0 left-0 bg-icc-red text-white px-3 py-1 text-sm font-gothic font-bold rounded-br-lg">
               #{rank + 1} Most Wanted
             </div>
           )}
-          <div className="absolute top-0 right-0 bg-icc-gold text-icc-blue-dark px-3 py-1 text-sm font-serif font-bold flex items-center rounded-bl-lg">
+          <div className="absolute top-0 right-0 bg-icc-gold text-icc-blue-dark px-3 py-1 text-sm font-gothic font-bold flex items-center rounded-bl-lg">
             <CurrencyIcon className="h-4 w-4 mr-1" />
             <span>{formatNumber(scammer.bounty_amount)}</span>
           </div>
         </div>
         
         <div className="p-4">
-          <h3 className="text-lg font-serif font-bold text-icc-blue dark:text-white">{scammer.name}</h3>
+          <h3 className="text-lg font-gothic font-bold text-icc-blue dark:text-white">{scammer.name}</h3>
           <p className="text-sm text-icc-gray dark:text-gray-100">{truncateText(scammer.accused_of, 100)}</p>
           
           {creatorProfile && (

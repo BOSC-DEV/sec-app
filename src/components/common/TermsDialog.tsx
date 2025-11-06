@@ -14,7 +14,7 @@ const TermsDialog: React.FC<TermsDialogProps> = ({
   return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-serif text-icc-blue">Terms of Service</DialogTitle>
+          <DialogTitle className="text-2xl font-gothic text-icc-blue">Terms of Service</DialogTitle>
           <DialogDescription>
             Please read these terms carefully before using our platform.
           </DialogDescription>
