@@ -637,32 +637,32 @@ const ScammerDetailPage = () => {
                 <div className="relative">
                   <TabsList className="w-full justify-start overflow-x-auto bg-background/60 backdrop-blur-sm rounded-lg border p-1 mb-4" aria-label="Scammer information tabs">
                     <TabsTrigger value="comments" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                      <MessageSquare className="h-4 w-4 md:hidden" />
-                      <span className="hidden md:inline">Comments</span>
+                      <MessageSquare className="h-4 w-4 lg:hidden" />
+                      <span className="hidden lg:inline">Comments</span>
                     </TabsTrigger>
                     <TabsTrigger value="links" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                      <Link2 className="h-4 w-4 md:hidden" />
-                      <span className="hidden md:inline">Links</span>
+                      <Link2 className="h-4 w-4 lg:hidden" />
+                      <span className="hidden lg:inline">Links</span>
                     </TabsTrigger>
                     <TabsTrigger value="aliases" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                      <User className="h-4 w-4 md:hidden" />
-                      <span className="hidden md:inline">Aliases</span>
+                      <User className="h-4 w-4 lg:hidden" />
+                      <span className="hidden lg:inline">Aliases</span>
                     </TabsTrigger>
                     <TabsTrigger value="accomplices" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                      <Users className="h-4 w-4 md:hidden" />
-                      <span className="hidden md:inline">Accomplices</span>
+                      <Users className="h-4 w-4 lg:hidden" />
+                      <span className="hidden lg:inline">Accomplices</span>
                     </TabsTrigger>
                     <TabsTrigger value="evidence" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                      <FileText className="h-4 w-4 md:hidden" />
-                      <span className="hidden md:inline">Evidence</span>
+                      <FileText className="h-4 w-4 lg:hidden" />
+                      <span className="hidden lg:inline">Evidence</span>
                     </TabsTrigger>
                     <TabsTrigger value="wallet-addresses" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                      <Wallet2 className="h-4 w-4 md:hidden" />
-                      <span className="hidden md:inline">Wallets</span>
+                      <Wallet2 className="h-4 w-4 lg:hidden" />
+                      <span className="hidden lg:inline">Wallets</span>
                     </TabsTrigger>
                     <TabsTrigger value="official" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
-                      <ShieldCheck className="h-4 w-4 md:hidden" />
-                      <span className="hidden md:inline">Official Response</span>
+                      <ShieldCheck className="h-4 w-4 lg:hidden" />
+                      <span className="hidden lg:inline">Official Response</span>
                     </TabsTrigger>
                   </TabsList>
                   
