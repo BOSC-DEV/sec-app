@@ -90,16 +90,13 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
       console.log(`Final admin status for ${profile?.username}: ${adminStatus}`);
       setIsUserAdmin(adminStatus);
       
-      const isWhale = badgeInfo?.tier === BadgeTier.Whale;
-      console.log(`Whale badge status: ${isWhale}, Badge tier: ${badgeInfo?.tier}`);
-      
-      const hasCreatePermission = adminStatus || isWhale;
+      const hasCreatePermission = adminStatus;
       console.log(`Setting can create announcements to: ${hasCreatePermission}`);
       setCanCreateAnnouncements(hasCreatePermission);
     };
     
     checkAdminStatus();
-  }, [profile?.username, badgeInfo?.tier]);
+  }, [profile?.username]);
   
   const { data: announcements = [], refetch, isLoading } = useQuery({
     queryKey: ['announcements'],
