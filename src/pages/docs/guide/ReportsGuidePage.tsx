@@ -206,7 +206,7 @@ const ReportsGuidePage = () => {
           <h2 className="text-2xl font-bold mb-4">Ready to Report a Scammer?</h2>
           <p className="mb-6">Help protect the crypto community by reporting bad actors and sharing your evidence.</p>
           <Button variant="gold" size="lg" asChild>
-            <Link to="/report">Create Report</Link>
+            <Link to="/new-report">Create Report</Link>
           </Button>
         </section>
       </div>

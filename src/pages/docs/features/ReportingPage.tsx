@@ -135,7 +135,7 @@ const ReportingPage = () => {
           <h2 className="text-2xl font-bold mb-4">Ready to Make a Report?</h2>
           <p className="mb-6">Help protect the community by reporting known scammers and fraudulent activities.</p>
           <Button variant="gold" size="lg" asChild>
-            <Link to="/report">Submit a Report</Link>
+            <Link to="/new-report">Submit a Report</Link>
           </Button>
         </section>
       </div>

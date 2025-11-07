@@ -85,7 +85,7 @@ const QuickStartPage = () => {
                   with as much detail as possible.
                 </p>
                 <Button variant="iccblue" asChild>
-                  <Link to="/report">Start Reporting</Link>
+                  <Link to="/new-report">Start Reporting</Link>
                 </Button>
               </div>
             </div>
