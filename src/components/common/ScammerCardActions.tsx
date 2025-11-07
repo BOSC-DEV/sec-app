@@ -25,6 +25,7 @@ import {
 import BountyForm from '@/components/scammer/BountyForm';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
 import { formatNumber } from '@/lib/utils';
+import { formatCurrency } from '@/utils/formatCurrency';
 
 interface ScammerActionButtonProps {
   icon: React.ReactNode;
@@ -262,7 +263,7 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
               title="Add Bounty"
             >
               <CurrencyIcon size="sm" />
-              <span>{scammer.bounty_amount || 0}</span>
+              <span>{formatCurrency(scammer.bounty_amount || 0)}</span>
             </Button>
           </DialogTrigger>
           {showBountyDialog && (

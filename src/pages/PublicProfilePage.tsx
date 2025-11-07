@@ -303,7 +303,7 @@ const PublicProfilePage = () => {
                                 </div>
                                 <Badge variant="secondary" className="flex items-center gap-1">
                                   <CurrencyIcon size="sm" />
-                                  {scammer.bounty_amount}
+                                  {formatCurrency(scammer.bounty_amount)}
                                 </Badge>
                               </div>
                             </CardContent>
