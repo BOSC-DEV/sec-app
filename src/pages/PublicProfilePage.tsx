@@ -23,6 +23,7 @@ import { useBadgeTier } from '@/hooks/useBadgeTier';
 import BadgeTier from '@/components/profile/BadgeTier';
 import { useIsMobile } from '@/hooks/use-mobile';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
+import { formatCurrency } from '@/utils/formatCurrency';
 
 const PublicProfilePage = () => {
   const {
@@ -163,12 +164,6 @@ const PublicProfilePage = () => {
   const formatDate = (dateString: string) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString();
-  };
-  const formatCurrency = (amount: number) => {
-    return amount.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
   };
   return <HelmetProvider>
       <>

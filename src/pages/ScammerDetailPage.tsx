@@ -624,8 +624,8 @@ const ScammerDetailPage = () => {
             <div className="md:col-span-2">
               <div className="relative aspect-square overflow-hidden rounded-lg shadow-md mb-6">
                 <img src={scammer.photo_url || '/placeholder.svg'} alt={`Photo of ${scammer.name}`} className="w-full h-full object-cover" />
-                <div className="absolute top-0 left-0 bg-icc-gold text-icc-blue-dark px-4 py-2 text-sm font-bold rounded-br-lg flex items-center gap-1" aria-label={`Bounty amount: ${scammer.bounty_amount.toLocaleString()} SEC`}>
-                  {scammer.bounty_amount.toLocaleString()} <CurrencyIcon size="sm" />
+                <div className="absolute top-0 left-0 bg-icc-gold text-icc-blue-dark px-4 py-2 text-sm font-bold rounded-br-lg flex items-center gap-1" aria-label={`Bounty amount: ${formatCurrency(scammer.bounty_amount)} SEC`}>
+                  {formatCurrency(scammer.bounty_amount)} <CurrencyIcon size="sm" />
                 </div>
               </div>
 
