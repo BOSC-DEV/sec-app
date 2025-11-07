@@ -90,7 +90,7 @@ const Header = () => {
     path: '/most-wanted'
   }, {
     label: 'Report',
-    path: '/report'
+    path: '/new-report'
   }, {
     label: 'Leaderboard',
     path: '/leaderboard'
