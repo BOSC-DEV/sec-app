@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getScammers } from '@/services/scammerService';
-import { getProfileByWallet } from '@/services/profileService';
+import { getProfileById } from '@/services/profileService';
 import { Grid, List, Search, SlidersHorizontal, Globe, ThumbsUp, Eye, ChevronUp, ChevronDown } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
@@ -40,15 +40,15 @@ const MostWantedPage = () => {
     const fetchReporterProfiles = async () => {
       const uniqueReporterIds = [...new Set(scammers.map(scammer => scammer.added_by).filter(Boolean))];
       const profilesMap: Record<string, Profile> = {};
-      await Promise.all(uniqueReporterIds.map(async walletAddress => {
-        if (walletAddress) {
+      await Promise.all(uniqueReporterIds.map(async profileId => {
+        if (profileId) {
           try {
-            const profile = await getProfileByWallet(walletAddress);
+            const profile = await getProfileById(profileId);
             if (profile) {
-              profilesMap[walletAddress] = profile;
+              profilesMap[profileId] = profile;
             }
           } catch (err) {
-            console.error(`Error fetching profile for ${walletAddress}:`, err);
+            console.error(`Error fetching profile for ${profileId}:`, err);
           }
         }
       }));
@@ -114,9 +114,9 @@ const MostWantedPage = () => {
     }
     return null;
   };
-  const getReporterProfile = (walletAddress: string | undefined) => {
-    if (!walletAddress) return null;
-    return reporterProfiles[walletAddress] || null;
+  const getReporterProfile = (profileId: string | undefined) => {
+    if (!profileId) return null;
+    return reporterProfiles[profileId] || null;
   };
   return <div>
       <CompactHero title="Most Wanted" subtitle="Browse the database of reported crimes." />

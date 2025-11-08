@@ -23,7 +23,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDate } from '@/lib/utils';
 import { formatCurrency } from '@/utils/formatCurrency';
 import { useProfile } from '@/contexts/ProfileContext';
-import { getProfileByWallet } from '@/services/profileService';
+import { getProfileById } from '@/services/profileService';
 import { Scammer, Comment, Profile, BountyContribution } from '@/types/dataTypes';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -226,7 +226,7 @@ const ScammerDetailPage = () => {
     const fetchCreatorProfile = async () => {
       if (scammer?.added_by) {
         try {
-          const profile = await getProfileByWallet(scammer.added_by);
+          const profile = await getProfileById(scammer.added_by);
           setCreatorProfile(profile);
         } catch (error) {
           handleError(error, {

@@ -127,6 +127,53 @@ export const getProfileByUsername = async (username: string): Promise<Profile | 
   }
 };
 
+// Get profile by profile ID (UUID)
+export const getProfileById = async (profileId: string): Promise<Profile | null> => {
+  try {
+    if (!profileId) {
+      throw new Error('No profile ID provided');
+    }
+    
+    const sanitizedId = sanitizeInput(profileId);
+    
+    // Check if user is authenticated
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (session) {
+      // Authenticated: use full profiles table
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', sanitizedId)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    } else {
+      // Anonymous: use public view
+      const { data, error } = await supabase
+        .from('profiles_public' as any)
+        .select('*')
+        .eq('id', sanitizedId)
+        .maybeSingle();
+
+      if (error) throw error;
+      
+      // Add empty wallet_address for type compatibility
+      if (!data) return null;
+      const publicProfile: any = data;
+      return { ...publicProfile, wallet_address: '' } as Profile;
+    }
+  } catch (error) {
+    handleError(error, {
+      fallbackMessage: 'Error fetching profile by ID',
+      severity: ErrorSeverity.MEDIUM,
+      context: 'getProfileById'
+    });
+    return null;
+  }
+};
+
 // Get profiles by display name - used in bounty components
 export const getProfilesByDisplayName = async (displayName: string): Promise<Profile[]> => {
   try {

@@ -8,7 +8,7 @@ import { formatCurrency } from '@/utils/formatCurrency';
 import { Scammer } from '@/types/dataTypes';
 import { useProfile } from '@/contexts/ProfileContext';
 import { likeScammer, dislikeScammer, getUserScammerInteraction } from '@/services/interactionService';
-import { getProfileByWallet } from '@/services/profileService';
+import { getProfileById } from '@/services/profileService';
 import { toast } from '@/hooks/use-toast';
 import { Profile } from '@/types/dataTypes';
 import { supabase } from '@/integrations/supabase/client';
@@ -36,7 +36,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
     const fetchCreatorProfile = async () => {
       if (scammer.added_by) {
         try {
-          const profile = await getProfileByWallet(scammer.added_by);
+          const profile = await getProfileById(scammer.added_by);
           setCreatorProfile(profile);
         } catch (error) {
           console.error("Error fetching creator profile:", error);
