@@ -22,7 +22,7 @@ const CurrencyIcon: React.FC<CurrencyIconProps> = ({
     <img 
       src="/lovable-uploads/9a333e8e-a34b-4dfe-95fb-d1be3b6d56ca.png" 
       alt="SEC" 
-      className={cn(sizeClasses[size], 'inline-block', className)}
+      className={cn(sizeClasses[size], 'inline-block align-middle', className)}
     />
   );
 };
