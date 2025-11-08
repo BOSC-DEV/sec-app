@@ -351,8 +351,8 @@ const PublicProfilePage = () => {
                                     <span className="font-medium">{contribution.scammers.name}</span>
                                   </Link> : <span>Unknown Scammer</span>}
                               </TableCell>
-                              <TableCell className="font-mono font-medium text-icc-blue dark:text-white">
-                                {formatCurrency(contribution.amount)} $SEC
+                              <TableCell className="font-mono font-medium text-icc-blue dark:text-white flex items-center gap-1">
+                                <CurrencyIcon size="sm" /> {formatCurrency(contribution.amount)} SEC
                               </TableCell>
                               <TableCell className="max-w-[200px] truncate">
                                 {contribution.comment || "-"}

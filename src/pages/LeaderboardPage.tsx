@@ -417,11 +417,11 @@ const LeaderboardPage = () => {
                             <Link to={`/profile/${profile.username || profile.wallet_address}`} className="hover:underline">
                               {profile.bounty_amount ? (
                                 <span className="flex items-center justify-center">
-                                  {formatCurrency(profile.bounty_amount)} <CurrencyIcon size="sm" className="ml-1" />
+                                  <CurrencyIcon size="sm" className="mr-1" /> {formatCurrency(profile.bounty_amount)}
                                 </span>
                               ) : (
                                 <span className="flex items-center justify-center">
-                                  0 <CurrencyIcon size="sm" className="ml-1" />
+                                  <CurrencyIcon size="sm" className="mr-1" /> 0
                                 </span>
                               )}
                             </Link>
@@ -431,11 +431,11 @@ const LeaderboardPage = () => {
                             <Link to={`/profile/${profile.username || profile.wallet_address}`} className="hover:underline">
                               {profile.bounties_raised ? (
                                 <span className="flex items-center justify-center">
-                                  {formatNumber(profile.bounties_raised)} <CurrencyIcon size="sm" className="ml-1" />
+                                  <CurrencyIcon size="sm" className="mr-1" /> {formatNumber(profile.bounties_raised)}
                                 </span>
                               ) : (
                                 <span className="flex items-center justify-center">
-                                  0 <CurrencyIcon size="sm" className="ml-1" />
+                                  <CurrencyIcon size="sm" className="mr-1" /> 0
                                 </span>
                               )}
                             </Link>
@@ -445,7 +445,7 @@ const LeaderboardPage = () => {
                             <Link to={`/profile/${profile.username || profile.wallet_address}`} className="hover:underline">
                               {profile.sec_balance !== undefined ? (
                                 <span className="flex items-center justify-center">
-                                  {formatNumber(profile.sec_balance)} <CurrencyIcon size="sm" className="ml-1" />
+                                  <CurrencyIcon size="sm" className="mr-1" /> {formatNumber(profile.sec_balance)}
                                 </span>
                               ) : (
                                 <span className="text-gray-400 dark:text-gray-500">-</span>

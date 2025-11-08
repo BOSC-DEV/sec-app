@@ -71,8 +71,8 @@ const ScammerCardContent: React.FC<ScammerCardContentProps> = ({
             label="Bounty"
             value={
               <div className="flex items-center gap-1">
-                <span>{scammer.bounty_amount ? formatCurrency(scammer.bounty_amount) : "0"}</span>
                 <CurrencyIcon size="sm" />
+                <span>{scammer.bounty_amount ? formatCurrency(scammer.bounty_amount) : "0"}</span>
               </div>
             }
           />

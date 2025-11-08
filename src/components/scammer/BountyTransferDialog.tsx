@@ -219,7 +219,7 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
                               </AvatarFallback>
                             </Avatar>
                             <span>
-                              {contribution.scammers?.name} ({formatCurrency(contribution.amount)} <CurrencyIcon size="sm" />)
+                              {contribution.scammers?.name} (<CurrencyIcon size="sm" className="inline" /> {formatCurrency(contribution.amount)})
                             </span>
                           </div>
                         </SelectItem>
@@ -234,7 +234,7 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
                       <div className="flex justify-between items-center">
                         <Label htmlFor="transfer-amount">Transfer Amount</Label>
                         <span className="text-sm text-gray-500">
-                          Available: {formatCurrency(maxTransferAmount)} <CurrencyIcon size="sm" />
+                          Available: <CurrencyIcon size="sm" className="inline" /> {formatCurrency(maxTransferAmount)}
                         </span>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -270,7 +270,7 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
                       <div className="flex justify-between text-sm">
                         <span>Remaining amount at original scammer:</span>
                         <span className="flex items-center">
-                          {selectedContribution && formatCurrency(selectedContribution.amount - parseFloat(transferAmount || '0'))} <CurrencyIcon size="sm" className="ml-1" />
+                          <CurrencyIcon size="sm" className="mr-1" /> {selectedContribution && formatCurrency(selectedContribution.amount - parseFloat(transferAmount || '0'))}
                         </span>
                       </div>
                       <Progress 
@@ -309,7 +309,7 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Bounty Transfer</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to transfer {formatCurrency(parseFloat(transferAmount))} <CurrencyIcon size="sm" /> from 
+              Are you sure you want to transfer <CurrencyIcon size="sm" className="inline" /> {formatCurrency(parseFloat(transferAmount))} from 
               {selectedContribution?.scammers?.name ? ` ${selectedContribution.scammers.name}` : ' the original scammer'} to {scammerName}?
               {transferComment && (
                 <div className="mt-2">

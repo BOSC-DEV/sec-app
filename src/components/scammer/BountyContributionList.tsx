@@ -88,7 +88,7 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
   return <div className="space-y-4">
       {userContributionAmount > 0 && (
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 text-green-800 dark:text-green-300 text-sm">
-          You've contributed {userContributionAmount.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 3 })} <CurrencyIcon size="sm" /> to this bounty
+          You've contributed <CurrencyIcon size="sm" className="inline" /> {userContributionAmount.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 3 })} to this bounty
         </div>
       )}
 
@@ -117,8 +117,8 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
                 </div>
                 <div className="flex items-center text-icc-gold-dark font-medium text-sm" aria-label={`Contributed ${contribution.amount.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 3 })} SEC`}>
                   <span className="flex items-center gap-1">
-                    {contribution.amount.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 3 })} 
                     <CurrencyIcon size="sm" />
+                    {contribution.amount.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 3 })} 
                   </span>
                 </div>
               </div>

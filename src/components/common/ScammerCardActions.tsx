@@ -262,7 +262,7 @@ const ScammerCardActions: React.FC<ScammerCardActionsProps> = ({
               onClick={handleBountyClick}
               title="Add Bounty"
             >
-              <CurrencyIcon size="sm" />
+              <CurrencyIcon size="sm" className="mr-1" />
               <span>{formatCurrency(scammer.bounty_amount || 0)}</span>
             </Button>
           </DialogTrigger>

@@ -368,9 +368,9 @@ const MostWantedPage = () => {
                           </TableCell>
                           <TableCell className="text-center font-semibold text-icc-primary dark:text-white">
                             {scammer.bounty_amount ? <span className="flex items-center justify-center">
-                                {formatCurrency(scammer.bounty_amount)} <CurrencyIcon size="sm" className="ml-1" />
+                                <CurrencyIcon size="sm" className="mr-1" /> {formatCurrency(scammer.bounty_amount)}
                               </span> : <span className="flex items-center justify-center">
-                                0 <CurrencyIcon size="sm" className="ml-1" />
+                                <CurrencyIcon size="sm" className="mr-1" /> 0
                               </span>}
                           </TableCell>
                           <TableCell className="max-w-[200px] truncate dark:text-white">

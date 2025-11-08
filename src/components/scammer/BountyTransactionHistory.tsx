@@ -218,7 +218,7 @@ const BountyTransactionHistory: React.FC<BountyTransactionHistoryProps> = ({
                   
                   <TableCell>
                     <Badge className="bg-green-100 text-green-800 hover:bg-green-200 flex items-center gap-1">
-                      {formatAmount(contribution.amount)} <CurrencyIcon size="sm" />
+                      <CurrencyIcon size="sm" /> {formatAmount(contribution.amount)}
                     </Badge>
                   </TableCell>
                   

@@ -148,7 +148,7 @@ const Index = () => {
                     className="text-4xl font-bold text-icc-blue dark:text-white mb-2 flex items-center justify-center"
                     formatter={(value) => formatNumber(value)}
                   >
-                    <CurrencyIcon size="lg" className="ml-1" />
+                    <CurrencyIcon size="lg" className="mr-1" />
                   </AnimatedCounter>
                   <div className="text-sm text-icc-gray dark:text-gray-400">Total Bounties</div>
                 </div>
