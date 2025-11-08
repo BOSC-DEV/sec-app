@@ -210,7 +210,7 @@ const MostWantedPage = () => {
                       <TableHead className="font-bold text-icc-blue">Outlaw</TableHead>
                       <TableHead className="font-bold text-icc-blue text-center">
                         <div className="flex items-center justify-center">
-                          Bounties
+                          Bounty
                         </div>
                       </TableHead>
                       <TableHead className="font-bold text-icc-blue">Accused Of</TableHead>
@@ -281,7 +281,7 @@ const MostWantedPage = () => {
                       </TableHead>
                       <TableHead className="font-bold text-icc-blue text-center dark:text-white cursor-pointer" onClick={() => handleSort('bounty')}>
                         <div className="flex items-center justify-center cursor-pointer">
-                          <span>Bounties</span>
+                          <span>Bounty</span>
                           {renderSortIndicator('bounty')}
                         </div>
                       </TableHead>
