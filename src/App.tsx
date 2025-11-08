@@ -32,7 +32,6 @@ import { handleError, ErrorSeverity } from "./utils/errorHandling";
 import environmentUtils from "./utils/environmentUtils";
 import { HelmetProvider } from "react-helmet-async";
 import { supabase } from "./integrations/supabase/client";
-import ScrollToTop from "./components/common/ScrollToTop";
 
 // Initialize analytics service
 analyticsService.initAnalytics();
@@ -177,7 +176,6 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <BrowserRouter>
-          <ScrollToTop />
           <ProfileProvider>
             <HelmetProvider>
               <Toaster />
