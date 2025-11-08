@@ -210,7 +210,7 @@ const MostWantedPage = () => {
                       <TableHead className="font-bold text-icc-blue">Outlaw</TableHead>
                       <TableHead className="font-bold text-icc-blue text-center">
                         <div className="flex items-center justify-center">
-                          <CurrencyIcon className="h-4 w-4 text-gray-500 dark:text-gray-300" />
+                          Bounties
                         </div>
                       </TableHead>
                       <TableHead className="font-bold text-icc-blue">Accused Of</TableHead>
@@ -280,17 +280,10 @@ const MostWantedPage = () => {
                         </div>
                       </TableHead>
                       <TableHead className="font-bold text-icc-blue text-center dark:text-white cursor-pointer" onClick={() => handleSort('bounty')}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="flex items-center justify-center cursor-pointer">
-                              <CurrencyIcon className="h-4 w-4 text-gray-500 dark:text-gray-300" />
-                              {renderSortIndicator('bounty')}
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Bounty Amount</p>
-                          </TooltipContent>
-                        </Tooltip>
+                        <div className="flex items-center justify-center cursor-pointer">
+                          <span>Bounties</span>
+                          {renderSortIndicator('bounty')}
+                        </div>
                       </TableHead>
                       <TableHead className="font-bold text-icc-blue dark:text-white cursor-pointer" onClick={() => handleSort('accused_of')}>
                         <div className="flex items-center">
