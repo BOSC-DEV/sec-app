@@ -242,7 +242,7 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
           )}
           <div className="absolute top-0 right-0 bg-icc-gold text-icc-blue-dark px-3 py-1 text-sm font-gothic font-bold flex items-center rounded-bl-lg">
             <CurrencyIcon className="h-4 w-4 mr-1" />
-            <span>{formatCurrency(scammer.bounty_amount)}</span>
+            <span>{formatCurrency(scammer.bounty_amount, 0)}</span>
           </div>
         </div>
         
