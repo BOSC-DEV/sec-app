@@ -88,7 +88,7 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
   return <div className="space-y-4">
       {userContributionAmount > 0 && (
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 text-green-800 dark:text-green-300 text-sm">
-          You've contributed {userContributionAmount.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 3 })} SEC tokens to this bounty
+          You've contributed {userContributionAmount.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 3 })} $SEC tokens to this bounty
         </div>
       )}
 
