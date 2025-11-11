@@ -13,10 +13,12 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const heliusRpcUrl = Deno.env.get('VITE_SOLANA_RPC_URL');
+    const heliusRpcUrl = Deno.env.get('SOLANA_RPC_URL');
+    
+    console.log('Received RPC proxy request');
     
     if (!heliusRpcUrl) {
-      console.error('VITE_SOLANA_RPC_URL not configured');
+      console.error('SOLANA_RPC_URL not configured in edge function environment');
       return new Response(
         JSON.stringify({ error: 'RPC endpoint not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -26,7 +28,7 @@ Deno.serve(async (req) => {
     // Forward the RPC request to Helius
     const body = await req.text();
     
-    console.log('Proxying RPC request to Helius');
+    console.log('Proxying RPC request to Helius:', heliusRpcUrl.substring(0, 40) + '...');
     
     const response = await fetch(heliusRpcUrl, {
       method: 'POST',
@@ -36,7 +38,13 @@ Deno.serve(async (req) => {
       body: body,
     });
 
+    console.log('Helius response status:', response.status);
+    
     const data = await response.text();
+    
+    if (!response.ok) {
+      console.error('Helius API error:', response.status, data.substring(0, 200));
+    }
     
     return new Response(data, {
       status: response.status,
