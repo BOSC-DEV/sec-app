@@ -44,11 +44,7 @@ export type WindowWithPhantom = Window & {
   };
 };
 
-// Secure RPC proxy configuration - API key protected via Supabase Edge Function
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SECURE_RPC_PROXY = `${SUPABASE_URL}/functions/v1/solana-rpc-proxy`;
-
-// Fallback to public Solana RPC (no API key, lower rate limits)
+// Use custom RPC endpoint from environment variable
 const FALLBACK_RPC_URL = 'https://api.mainnet-beta.solana.com';
 
 const TRANSACTION_TIMEOUT = 90 * 1000; // 90 seconds in milliseconds
@@ -70,18 +66,19 @@ const connectionConfig = {
 let connection: Connection | null = null;
 let fallbackConnection: Connection | null = null;
 
-// Export these utility functions - now using secure proxy
+// Export these utility functions
 export const getConnection = (): Connection => {
   if (!connection) {
-    console.log('Initializing Solana connection via secure RPC proxy...');
-    connection = new Connection(SECURE_RPC_PROXY, connectionConfig);
+    const PRIMARY_RPC_URL = import.meta.env.VITE_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
+    console.log('Initializing Solana connection with RPC:', PRIMARY_RPC_URL);
+    connection = new Connection(PRIMARY_RPC_URL, connectionConfig);
   }
   return connection;
 };
 
 export const getFallbackConnection = (): Connection => {
   if (!fallbackConnection) {
-    console.log('Initializing fallback Solana connection (public RPC)');
+    console.log('Initializing fallback Solana connection');
     fallbackConnection = new Connection(FALLBACK_RPC_URL, {
       commitment: 'confirmed',
       confirmTransactionInitialTimeout: TRANSACTION_TIMEOUT

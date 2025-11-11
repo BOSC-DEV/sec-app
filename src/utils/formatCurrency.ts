@@ -1,6 +1,8 @@
-export const formatCurrency = (amount: number, maxDecimals: number = 3): string => {
+
+export const formatCurrency = (amount: number): string => {
+  // Always show up to 3 decimal places universally
   return new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 0,
-    maximumFractionDigits: maxDecimals
+    maximumFractionDigits: 3
   }).format(amount);
 };

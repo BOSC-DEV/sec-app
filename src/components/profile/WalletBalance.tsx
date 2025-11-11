@@ -6,13 +6,12 @@ import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
-import { getAssociatedTokenAddress } from '@solana/spl-token';
+import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 import BadgeTier from './BadgeTier';
 import { useBadgeTier } from '@/hooks/useBadgeTier';
 
 // Import from phantomWallet utility
 import { getConnection, getFallbackConnection } from '@/utils/phantomWallet';
-import { fetchBalanceWithCache, clearBalanceCache } from '@/services/balanceCacheService';
 
 // SEC token mint address
 const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump');
@@ -25,52 +24,63 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
   const [solBalance, setSolBalance] = useState<number | null>(null);
   const [secBalance, setSecBalance] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isFromCache, setIsFromCache] = useState(false);
   
   const badgeInfo = useBadgeTier(secBalance);
 
-  const fetchBalances = async (forceRefresh = false) => {
-    if (!walletAddress) return;
-    setIsLoading(true);
-    
+  const fetchSolBalance = async (address: string): Promise<number> => {
     try {
       const connection = getConnection();
       const fallbackConn = getFallbackConnection();
-      const publicKey = new PublicKey(walletAddress);
+      const publicKey = new PublicKey(address);
       
-      // Clear cache if force refresh
-      if (forceRefresh) {
-        clearBalanceCache(walletAddress);
-      }
-      
-      // Get SEC token account address
-      let secTokenAccount: PublicKey | null = null;
+      // Fallback to secondary RPC if primary fails
       try {
-        secTokenAccount = await getAssociatedTokenAddress(SEC_TOKEN_MINT, publicKey);
+        const balance = await connection.getBalance(publicKey, 'confirmed');
+        return balance / LAMPORTS_PER_SOL;
+      } catch (primaryError) {
+        console.warn("Primary RPC failed, trying fallback...");
+        const balance = await fallbackConn.getBalance(publicKey, 'confirmed');
+        return balance / LAMPORTS_PER_SOL;
+      }
+    } catch (error) {
+      console.error('Error fetching SOL balance:', error);
+      return 0;
+    }
+  };
+
+  const fetchSecBalance = async (address: string) => {
+    try {
+      const connection = getConnection();
+      const publicKey = new PublicKey(address);
+
+      // Get the associated token account address
+      const tokenAccountAddress = await getAssociatedTokenAddress(SEC_TOKEN_MINT, publicKey);
+      try {
+        // Get the token account info
+        const tokenAccount = await getAccount(connection, tokenAccountAddress);
+
+        // Convert amount (BigInt) to human-readable format with 6 decimals
+        const balance = Number(tokenAccount.amount) / Math.pow(10, 6);
+        return balance;
       } catch (error) {
-        console.log('Could not get token account address:', error);
+        // Token account might not exist yet
+        console.log('Token account not found, likely zero balance');
+        return 0;
       }
-      
-      // Fetch with caching (1 hour cache)
-      const result = await fetchBalanceWithCache(
-        connection,
-        fallbackConn,
-        walletAddress,
-        secTokenAccount
-      );
-      
-      // Convert lamports to SOL
-      const solBal = result.solBalance / LAMPORTS_PER_SOL;
-      
+    } catch (error) {
+      console.error('Error fetching SEC balance:', error);
+      return 0;
+    }
+  };
+
+  const fetchBalances = async () => {
+    if (!walletAddress) return;
+    setIsLoading(true);
+    try {
+      const solBal = await fetchSolBalance(walletAddress);
       setSolBalance(solBal);
-      setSecBalance(result.secBalance);
-      setIsFromCache(result.fromCache);
-      
-      if (result.fromCache) {
-        console.log('✅ Loaded balances from cache (1 hour cache)');
-      } else {
-        console.log('🔄 Fetched fresh balances from RPC');
-      }
+      const secBal = await fetchSecBalance(walletAddress);
+      setSecBalance(secBal);
     } catch (error) {
       console.error('Error fetching balances:', error);
       toast({
@@ -90,10 +100,10 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
   }, [walletAddress]);
 
   const handleRefresh = () => {
-    fetchBalances(true); // Force refresh bypasses cache
+    fetchBalances();
     toast({
       title: 'Refreshing',
-      description: 'Fetching latest wallet balances...'
+      description: 'Updating wallet balances...'
     });
   };
 
@@ -137,16 +147,11 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
               </div>
             </div>
 
-            <div className="flex justify-center items-center gap-2">
+            <div className="flex justify-center">
               <Button variant="outline" size="sm" className="text-xs flex items-center gap-1 dark:border-gray-700 dark:text-gray-200" onClick={handleRefresh} disabled={isLoading}>
                 <RefreshCw className="h-3 w-3 dark:text-gray-300" />
                 {isLoading ? 'Refreshing...' : 'Refresh Balances'}
               </Button>
-              {isFromCache && !isLoading && (
-                <span className="text-xs text-muted-foreground">
-                  (cached)
-                </span>
-              )}
             </div>
           </div> : <div className="text-center py-6 text-gray-500 dark:text-gray-200">
             No wallet connected

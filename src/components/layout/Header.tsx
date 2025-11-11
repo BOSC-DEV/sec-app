@@ -136,7 +136,7 @@ const Header = () => {
                     {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                   </Button>}
               </div> : <div className="flex items-center space-x-3">
-                <Button variant="ghost" size="sm" className="text-white hover:bg-icc-blue-light" onClick={copyToClipboard} aria-label="Copy Contract Address">
+                <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light" onClick={copyToClipboard} aria-label="Copy Contract Address">
                   <Copy className="h-5 w-5" />
                 </Button>
                 <Button variant="gold" size="sm" className="flex items-center gap-2" onClick={handleWalletButtonClick}>
