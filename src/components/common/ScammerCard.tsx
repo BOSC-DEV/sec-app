@@ -246,7 +246,26 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
           </div>
         </div>
         
-        <div className="p-4">
+        <div className="p-4 relative">
+          {rank !== undefined && rank < 3 && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="absolute top-2 right-2 h-8 w-8 p-0 dark:bg-transparent dark:border-gray-600 dark:hover:bg-gray-800 dark:text-white"
+                    onClick={handleBountyClick}
+                  >
+                    <Info className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>View details</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
           <h3 className="text-lg font-gothic font-bold text-icc-blue dark:text-white">{scammer.name}</h3>
           <p className="text-sm text-icc-gray dark:text-gray-100">{truncateText(scammer.accused_of, 100)}</p>
           
@@ -292,57 +311,59 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
         </div>
       </Link>
       
-      <div className="p-4 pt-0 mt-2 flex gap-2 justify-between lg:gap-0 w-full">
-        <Toggle
-          pressed={isLiked}
-          onPressedChange={() => {}}
-          onClick={handleLike}
-          className={`flex-1 lg:flex-initial ${isLiked ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200' : 'dark:text-white'} border border-gray-200 text-xs`}
-          size="sm"
-        >
-          <ThumbsUp className="h-3.5 w-3.5 lg:mr-1" />
-          <span className="hidden lg:inline">Agree</span>
-        </Toggle>
-        
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="flex-1 lg:flex-initial text-xs px-2 lg:mx-1 dark:bg-transparent dark:border-transparent dark:hover:bg-transparent dark:text-white"
-                onClick={handleBountyClick}
-              >
-                <Info className="h-3.5 w-3.5 lg:mr-1" />
-                <span className="hidden lg:inline">More</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>View details</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        
-        {isCreator ? (
-          <Link to={`/report/${scammer.id}`} onClick={(e) => e.stopPropagation()} className="flex-1 lg:flex-initial">
-            <Button variant="outline" size="sm" className="w-full text-xs dark:text-white">
-              <Edit className="h-3.5 w-3.5 mr-1" />
-              Edit
-            </Button>
-          </Link>
-        ) : (
+      {rank === undefined || rank >= 3 ? (
+        <div className="p-4 pt-0 mt-2 flex gap-2 justify-between lg:gap-0 w-full">
           <Toggle
-            pressed={isDisliked}
+            pressed={isLiked}
             onPressedChange={() => {}}
-            onClick={handleDislike}
-            className={`flex-1 lg:flex-initial ${isDisliked ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200' : 'dark:text-white'} border border-gray-200 text-xs`}
+            onClick={handleLike}
+            className={`flex-1 lg:flex-initial ${isLiked ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200' : 'dark:text-white'} border border-gray-200 text-xs`}
             size="sm"
           >
-            <ThumbsDown className="h-3.5 w-3.5 lg:mr-1" />
-            <span className="hidden lg:inline">Disagree</span>
+            <ThumbsUp className="h-3.5 w-3.5 lg:mr-1" />
+            <span className="hidden lg:inline">Agree</span>
           </Toggle>
-        )}
-      </div>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1 lg:flex-initial text-xs px-2 lg:mx-1 dark:bg-transparent dark:border-transparent dark:hover:bg-transparent dark:text-white"
+                  onClick={handleBountyClick}
+                >
+                  <Info className="h-3.5 w-3.5 lg:mr-1" />
+                  <span className="hidden lg:inline">More</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>View details</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          {isCreator ? (
+            <Link to={`/report/${scammer.id}`} onClick={(e) => e.stopPropagation()} className="flex-1 lg:flex-initial">
+              <Button variant="outline" size="sm" className="w-full text-xs dark:text-white">
+                <Edit className="h-3.5 w-3.5 mr-1" />
+                Edit
+              </Button>
+            </Link>
+          ) : (
+            <Toggle
+              pressed={isDisliked}
+              onPressedChange={() => {}}
+              onClick={handleDislike}
+              className={`flex-1 lg:flex-initial ${isDisliked ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200' : 'dark:text-white'} border border-gray-200 text-xs`}
+              size="sm"
+            >
+              <ThumbsDown className="h-3.5 w-3.5 lg:mr-1" />
+              <span className="hidden lg:inline">Disagree</span>
+            </Toggle>
+          )}
+        </div>
+      ) : null}
     </div>
   );
 };
