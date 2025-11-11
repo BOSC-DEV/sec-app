@@ -236,12 +236,12 @@ const ScammerCard: React.FC<ScammerCardProps> = ({ scammer, rank }) => {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
           {rank !== undefined && rank < 3 && (
-            <div className="absolute top-0 left-0 bg-icc-red text-white px-3 py-1 text-sm md:px-2 md:py-0.5 md:text-xs font-gothic font-bold rounded-br-lg">
+            <div className="absolute top-0 left-0 bg-icc-red text-white px-3 py-1 text-sm md:px-2 md:py-0.5 md:text-xs lg:px-3 lg:py-1 lg:text-sm font-gothic font-bold rounded-br-lg">
               #{rank + 1} Most Wanted
             </div>
           )}
-          <div className="absolute top-0 right-0 bg-icc-gold text-icc-blue-dark px-3 py-1 text-sm md:px-2 md:py-0.5 md:text-xs font-gothic font-bold flex items-center rounded-bl-lg">
-            <CurrencyIcon className="h-4 w-4 mr-1 md:h-3 md:w-3" />
+          <div className="absolute top-0 right-0 bg-icc-gold text-icc-blue-dark px-3 py-1 text-sm md:px-2 md:py-0.5 md:text-xs lg:px-3 lg:py-1 lg:text-sm font-gothic font-bold flex items-center rounded-bl-lg">
+            <CurrencyIcon className="h-4 w-4 mr-1 md:h-3 md:w-3 lg:h-4 lg:w-4" />
             <span>{formatCurrency(scammer.bounty_amount, 0)}</span>
           </div>
         </div>
