@@ -169,9 +169,21 @@ const BountyTransferDialog: React.FC<BountyTransferDialogProps> = ({
     }
   };
 
+  const handleDialogOpen = (open: boolean) => {
+    if (open && !profile) {
+      toast({
+        title: "Authentication required",
+        description: "Please connect your wallet to transfer bounties.",
+        variant: "destructive"
+      });
+      return;
+    }
+    setIsOpen(open);
+  };
+
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog open={isOpen} onOpenChange={handleDialogOpen}>
         <DialogTrigger asChild>
           <Button variant="outline" size="sm" className="w-full">
             <ArrowRightIcon className="h-4 w-4 mr-2" /> 
