@@ -35,11 +35,29 @@ export const isUserAdmin = async (username: string): Promise<boolean> => {
     return true;
   }
   
-  // Otherwise check the database if needed (for dynamic admin management)
+  // Check the database for dynamic admin management
   try {
-    // You could implement database check here if needed
-    // For now, just return false as all admins are in the hardcoded list
-    return false;
+    // Get the current authenticated user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
+    if (userError || !user) {
+      return false;
+    }
+    
+    // Check if this user has admin role in user_roles table
+    const { data: roleData, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('role', 'admin')
+      .maybeSingle();
+    
+    if (roleError) {
+      console.error('Error checking user role:', roleError);
+      return false;
+    }
+    
+    return !!roleData;
   } catch (error) {
     console.error('Error checking if user is admin:', error);
     return false;
