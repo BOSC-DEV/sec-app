@@ -13,6 +13,11 @@ import UserManagementSection from '@/components/admin/UserManagementSection';
 import ReportManagementSection from '@/components/admin/ReportManagementSection';
 import ModerationSection from '@/components/admin/ModerationSection';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Textarea } from '@/components/ui/textarea';
+import { createAnnouncement } from '@/services/communityService';
+import { toast } from '@/hooks/use-toast';
+import { Megaphone } from 'lucide-react';
+import { useProfile } from '@/contexts/ProfileContext';
 
 export type AdminTab = 'overview' | 'analytics' | 'users' | 'reports' | 'moderation';
 
@@ -121,6 +126,9 @@ export default function AdminDashboard() {
 function OverviewSection() {
   const [stats, setStats] = React.useState<Record<string, number>>({});
   const [loading, setLoading] = React.useState(true);
+  const [announcementContent, setAnnouncementContent] = React.useState('');
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const { profile } = useProfile();
 
   React.useEffect(() => {
     const fetchStats = async () => {
@@ -153,6 +161,52 @@ function OverviewSection() {
 
     fetchStats();
   }, []);
+
+  const handleCreateAnnouncement = async () => {
+    if (!announcementContent.trim()) {
+      toast({
+        title: "Error",
+        description: "Announcement content cannot be empty",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!profile?.id) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to create announcements",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await createAnnouncement({
+        content: announcementContent,
+        author_id: profile.id,
+        author_name: profile.display_name || profile.username || 'Anonymous',
+        author_username: profile.username || '',
+        author_profile_pic: profile.profile_pic_url || '',
+        likes: 0,
+        dislikes: 0
+      });
+      toast({
+        title: "Success",
+        description: "Announcement created successfully"
+      });
+      setAnnouncementContent('');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create announcement",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -193,6 +247,27 @@ function OverviewSection() {
           trend="+8% from yesterday"
         />
       </div>
+
+      <Card className="p-6">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Megaphone className="h-5 w-5" />
+          Create Announcement
+        </h3>
+        <div className="space-y-4">
+          <Textarea
+            placeholder="Write your announcement here..."
+            value={announcementContent}
+            onChange={(e) => setAnnouncementContent(e.target.value)}
+            className="min-h-[120px]"
+          />
+          <Button 
+            onClick={handleCreateAnnouncement}
+            disabled={isSubmitting || !announcementContent.trim()}
+          >
+            {isSubmitting ? 'Creating...' : 'Create Announcement'}
+          </Button>
+        </div>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="p-6">
