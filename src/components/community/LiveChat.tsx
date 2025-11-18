@@ -284,7 +284,16 @@ const LiveChat = () => {
       <CardContent className="p-0 flex-grow overflow-hidden">
         <ScrollArea className="h-[calc(100%-1rem)]" onScroll={handleScroll}>
           <div className={`space-y-0 p-${isMobile ? '2' : '4'}`}>
-            {messages.length === 0 ? (
+            {isLoading && messages.length === 0 ? (
+              <div className="flex items-center justify-center h-full py-10">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : hasMore && messages.length > 0 ? (
+              <div className="flex items-center justify-center py-2">
+                <p className="text-sm text-muted-foreground">Scroll up to load more messages</p>
+              </div>
+            ) : null}
+            {messages.length === 0 && !isLoading ? (
               <div className="flex flex-col items-center justify-center h-full py-10">
                 <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
                 <h3 className="text-xl font-medium text-center">No Messages Yet</h3>

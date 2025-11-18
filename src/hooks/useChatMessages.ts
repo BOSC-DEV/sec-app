@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { sanitizeHtml, sanitizeInput, detectMaliciousPattern, sanitizeFormData } from '@/utils/securityUtils';
 import { toast } from '@/hooks/use-toast';
 
-const MESSAGES_PER_PAGE = 50;
+const MESSAGES_PER_PAGE = 10;
 
 export const useChatMessages = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
