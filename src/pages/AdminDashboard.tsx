@@ -13,11 +13,13 @@ import UserManagementSection from '@/components/admin/UserManagementSection';
 import ReportManagementSection from '@/components/admin/ReportManagementSection';
 import ModerationSection from '@/components/admin/ModerationSection';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Textarea } from '@/components/ui/textarea';
-import { createAnnouncement } from '@/services/communityService';
+import { createAnnouncement, createSurveyAnnouncement } from '@/services/communityService';
 import { toast } from '@/hooks/use-toast';
 import { Megaphone } from 'lucide-react';
 import { useProfile } from '@/contexts/ProfileContext';
+import RichTextEditor from '@/components/community/RichTextEditor';
+import SurveyCreator from '@/components/community/SurveyCreator';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 export type AdminTab = 'overview' | 'analytics' | 'users' | 'reports' | 'moderation';
 
@@ -128,6 +130,7 @@ function OverviewSection() {
   const [loading, setLoading] = React.useState(true);
   const [announcementContent, setAnnouncementContent] = React.useState('');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [activeTab, setActiveTab] = React.useState('post');
   const { profile } = useProfile();
 
   React.useEffect(() => {
@@ -208,6 +211,45 @@ function OverviewSection() {
     }
   };
 
+  const handleCreateSurvey = async (title: string, options: string[]) => {
+    if (!profile?.id) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to create surveys",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await createSurveyAnnouncement(
+        title,
+        options,
+        {
+          author_id: profile.id,
+          author_name: profile.display_name || profile.username || 'Anonymous',
+          author_username: profile.username || '',
+          author_profile_pic: profile.profile_pic_url || '',
+          likes: 0,
+          dislikes: 0
+        }
+      );
+      toast({
+        title: "Success",
+        description: "Poll created successfully"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create poll",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div>
@@ -253,20 +295,35 @@ function OverviewSection() {
           <Megaphone className="h-5 w-5" />
           Create Announcement
         </h3>
-        <div className="space-y-4">
-          <Textarea
-            placeholder="Write your announcement here..."
-            value={announcementContent}
-            onChange={(e) => setAnnouncementContent(e.target.value)}
-            className="min-h-[120px]"
-          />
-          <Button 
-            onClick={handleCreateAnnouncement}
-            disabled={isSubmitting || !announcementContent.trim()}
-          >
-            {isSubmitting ? 'Creating...' : 'Create Announcement'}
-          </Button>
-        </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="post">Post Announcement</TabsTrigger>
+            <TabsTrigger value="survey">Create Poll</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="post" className="space-y-4">
+            <RichTextEditor
+              value={announcementContent}
+              onChange={setAnnouncementContent}
+              placeholder="Write your announcement here..."
+              minHeight="200px"
+            />
+            <Button 
+              onClick={handleCreateAnnouncement}
+              disabled={isSubmitting || !announcementContent.trim()}
+              className="w-full"
+            >
+              {isSubmitting ? 'Creating...' : 'Post Announcement'}
+            </Button>
+          </TabsContent>
+          
+          <TabsContent value="survey">
+            <SurveyCreator
+              onCreateSurvey={handleCreateSurvey}
+              isSubmitting={isSubmitting}
+            />
+          </TabsContent>
+        </Tabs>
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
