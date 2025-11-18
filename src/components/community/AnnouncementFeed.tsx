@@ -260,7 +260,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         author_username: profile?.username
       });
       
-      let imageUrl: string | undefined;
+      let imageUrl: string | null = null;
       if (imageFile) {
         const timestamp = Date.now();
         const fileName = `announcement-${profile?.id}-${timestamp}.${imageFile.name.split('.').pop()}`;
