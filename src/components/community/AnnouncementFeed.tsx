@@ -650,7 +650,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
           <AnnouncementReplies 
             announcementId={announcement.id} 
             isAdmin={isUserAdminState} 
-            refetch={refetch}
+            refetch={() => queryClient.invalidateQueries({ queryKey: ['announcements'] })}
           />
         </CardFooter>
       </Card>
