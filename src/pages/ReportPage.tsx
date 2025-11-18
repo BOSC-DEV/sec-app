@@ -31,11 +31,15 @@ const ReportPage = () => {
 
   useEffect(() => {
     const checkEditPermission = async () => {
+      console.log('🔍 Checking edit permission:', { id, profileId: profile?.id });
+      
       if (id && profile?.id) {
         try {
           const hasPermission = await isScammerCreator(id, profile.id);
+          console.log('✅ Permission check result:', hasPermission);
           
           if (!hasPermission) {
+            console.warn('⛔ User does not have permission to edit');
             toast({
               title: "Permission denied",
               description: "You do not have permission to edit this scammer report.",
@@ -47,7 +51,7 @@ const ReportPage = () => {
           
           setHasEditPermission(true);
         } catch (error) {
-          console.error('Error checking edit permission:', error);
+          console.error('❌ Error checking edit permission:', error);
           toast({
             title: "Error",
             description: "Failed to verify edit permission. Please try again.",
@@ -58,12 +62,13 @@ const ReportPage = () => {
           setCheckingPermission(false);
         }
       } else {
+        console.log('⏭️ Skipping permission check - no edit mode');
         setCheckingPermission(false);
       }
     };
     
     checkEditPermission();
-  }, [id, profile?.wallet_address, navigate]);
+  }, [id, profile?.id, navigate]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
