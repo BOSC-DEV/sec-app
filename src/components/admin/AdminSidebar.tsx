@@ -55,25 +55,25 @@ export default function AdminSidebar({ activeTab, setActiveTab, isMobileOpen, on
   return (
     <aside className={cn(
       "border-r border-border bg-card min-h-screen relative",
-      "w-64 lg:w-64",
+      "w-[230px] lg:w-[230px]",
       "md:w-32"
     )}>
       <div className="p-6 pb-24 md:p-3 md:pb-16">
         <div className="mb-8 md:mb-4">
-          <h2 className="text-2xl font-bold text-primary md:text-sm md:text-center">Admin Panel</h2>
-          <p className="text-xs text-muted-foreground mt-1 md:text-[0.6rem] md:text-center">Management Console</p>
+          <h2 className="text-3xl font-bold text-primary md:text-sm md:text-center">Admin Panel</h2>
+          <p className="text-sm text-muted-foreground mt-1 md:text-[0.6rem] md:text-center">Management Console</p>
         </div>
 
         <nav className="space-y-2 md:space-y-1">
           <button
             onClick={() => navigate('/')}
             className={cn(
-              'w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all',
+              'w-full flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium transition-all',
               'hover:bg-muted/50 text-muted-foreground',
               'md:gap-2 md:px-2 md:py-2 md:text-[0.6rem]'
             )}
           >
-            <Home className="h-5 w-5 md:h-3 md:w-3 flex-shrink-0" />
+            <Home className="h-6 w-6 md:h-3 md:w-3 flex-shrink-0" />
             <span className="md:text-[0.6rem] truncate">Home</span>
           </button>
           
@@ -82,7 +82,7 @@ export default function AdminSidebar({ activeTab, setActiveTab, isMobileOpen, on
               key={item.id}
               onClick={() => handleItemClick(item.id)}
               className={cn(
-                'w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all',
+                'w-full flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium transition-all',
                 'hover:bg-muted/50',
                 'md:gap-2 md:px-2 md:py-2 md:text-[0.6rem]',
                 activeTab === item.id
@@ -90,7 +90,7 @@ export default function AdminSidebar({ activeTab, setActiveTab, isMobileOpen, on
                   : 'text-muted-foreground'
               )}
             >
-              <item.icon className="h-5 w-5 md:h-3 md:w-3 flex-shrink-0" />
+              <item.icon className="h-6 w-6 md:h-3 md:w-3 flex-shrink-0" />
               <span className="md:text-[0.6rem] truncate">{item.label}</span>
             </button>
           ))}
@@ -100,9 +100,9 @@ export default function AdminSidebar({ activeTab, setActiveTab, isMobileOpen, on
           <Button
             onClick={handleLogout}
             variant="outline"
-            className="w-full flex items-center gap-3 justify-start md:gap-1 md:text-[0.6rem] md:py-1 md:px-2"
+            className="w-full flex items-center gap-3 justify-start text-base md:gap-1 md:text-[0.6rem] md:py-1 md:px-2"
           >
-            <LogOut className="h-5 w-5 md:h-3 md:w-3" />
+            <LogOut className="h-6 w-6 md:h-3 md:w-3" />
             <span>Logout</span>
           </Button>
         </div>
