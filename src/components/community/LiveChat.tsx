@@ -36,6 +36,8 @@ const LiveChat = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isUserAdmin, setIsUserAdmin] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const hasScrolledToBottom = useRef(false);
   const isMobile = useIsMobile();
   const onlineCount = useOnlineUsers();
   const { messages, isLoading, hasMore, loadMore, sendChatMessage, deleteChatMessage } = useChatMessages();
@@ -49,6 +51,17 @@ const LiveChat = () => {
       setIsUserAdmin(false);
     }
   }, [profile?.username]);
+
+  // Scroll to bottom only once on initial load
+  useEffect(() => {
+    if (!isLoading && messages.length > 0 && !hasScrolledToBottom.current) {
+      const viewport = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
+      if (viewport) {
+        viewport.scrollTop = viewport.scrollHeight;
+        hasScrolledToBottom.current = true;
+      }
+    }
+  }, [isLoading, messages.length]);
 
   const handleBanUser = (username: string | undefined) => {
     if (!username) return;
@@ -282,7 +295,7 @@ const LiveChat = () => {
       <Separator />
       
       <CardContent className="p-0 flex-grow overflow-hidden">
-        <ScrollArea className="h-[calc(100%-1rem)]" onScroll={handleScroll}>
+        <ScrollArea ref={scrollAreaRef} className="h-[calc(100%-1rem)]" onScroll={handleScroll}>
           <div className={`space-y-0 p-${isMobile ? '2' : '4'}`}>
             {isLoading && messages.length === 0 ? (
               <div className="flex items-center justify-center h-full py-10">
