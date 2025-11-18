@@ -14,7 +14,7 @@ const DocsPage = () => {
           <p className="text-lg mb-6 opacity-90">
             A decentralized crime registry focused on the cryptocurrency and blockchain ecosystem. 
             SEC serves as a community-governed platform where users can report, track, and combat scams, 
-            bringing much-needed accountability and transparency to the digital financial landscape.
+            bringing much-needed accountability and transparency to the digital finance landscape.
           </p>
           <div className="flex gap-4">
             <Button variant="gold" asChild>
