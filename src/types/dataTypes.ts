@@ -84,6 +84,7 @@ export interface Announcement {
   dislikes: number;
   views: number;
   survey_data?: SurveyData | null;
+  image_url?: string;
 }
 
 export interface SurveyData {

@@ -70,6 +70,7 @@ export type Database = {
           created_at: string | null
           dislikes: number | null
           id: string
+          image_url: string | null
           likes: number | null
           survey_data: Json | null
           updated_at: string | null
@@ -84,6 +85,7 @@ export type Database = {
           created_at?: string | null
           dislikes?: number | null
           id?: string
+          image_url?: string | null
           likes?: number | null
           survey_data?: Json | null
           updated_at?: string | null
@@ -98,6 +100,7 @@ export type Database = {
           created_at?: string | null
           dislikes?: number | null
           id?: string
+          image_url?: string | null
           likes?: number | null
           survey_data?: Json | null
           updated_at?: string | null

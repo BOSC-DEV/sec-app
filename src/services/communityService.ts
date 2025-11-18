@@ -78,6 +78,7 @@ export const createAnnouncement = async (announcement: {
   author_profile_pic?: string;
   likes: number;
   dislikes: number;
+  image_url?: string;
 }): Promise<Announcement | null> => {
   try {
     // Create a modified announcement object ensuring author_username is present
@@ -159,6 +160,7 @@ export const createSurveyAnnouncement = async (
     author_profile_pic?: string;
     likes: number;
     dislikes: number;
+    image_url?: string;
   }
 ): Promise<Announcement | null> => {
   try {
