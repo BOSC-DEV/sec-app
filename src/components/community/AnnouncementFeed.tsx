@@ -48,6 +48,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false }) => {
   const { profile, isConnected, session } = useProfile();
+  const queryClient = useQueryClient();
   const [newAnnouncement, setNewAnnouncement] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSurveySubmitting, setIsSurveySubmitting] = useState(false);
@@ -109,9 +110,11 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
     checkAdminStatus();
   }, [profile?.username, session]);
   
-  const { data: announcements = [], refetch, isLoading } = useQuery({
+  const { data: announcements = [], isLoading, isRefetching } = useQuery({
     queryKey: ['announcements'],
     queryFn: getAnnouncements,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
   });
   
   useEffect(() => {
@@ -309,7 +312,8 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
       
       setNewAnnouncement('');
       removeImage(false);
-      refetch();
+      setSearchQuery('');
+      await queryClient.invalidateQueries({ queryKey: ['announcements'] });
     } catch (error) {
       console.error('Error posting announcement:', error);
       toast({
@@ -364,7 +368,8 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
           variant: "default",
         });
         
-        refetch();
+        setSearchQuery('');
+        await queryClient.invalidateQueries({ queryKey: ['announcements'] });
       } else {
         throw new Error("Failed to create survey");
       }
@@ -414,7 +419,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
           console.error("Error storing vote in localStorage:", error);
         }
         
-        await refetch();
+        await queryClient.invalidateQueries({ queryKey: ['announcements'] });
         return true;
       }
       
@@ -441,7 +446,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
           description: "The announcement has been deleted successfully",
           variant: "default",
         });
-        refetch();
+        await queryClient.invalidateQueries({ queryKey: ['announcements'] });
       } else {
         throw new Error("Failed to delete announcement");
       }
@@ -473,7 +478,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
           variant: "default",
         });
         setEditDialogOpen(false);
-        refetch();
+        await queryClient.invalidateQueries({ queryKey: ['announcements'] });
       } else {
         throw new Error("Failed to update announcement");
       }
