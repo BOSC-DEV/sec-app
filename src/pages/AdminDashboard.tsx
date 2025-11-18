@@ -76,7 +76,7 @@ export default function AdminDashboard() {
               <Button
                 variant="outline"
                 size="icon"
-                className="fixed top-4 left-4 z-50 md:hidden"
+                className="fixed top-4 right-4 z-50 md:hidden"
               >
                 <Menu className="h-4 w-4" />
               </Button>
