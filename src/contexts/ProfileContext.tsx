@@ -276,9 +276,10 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
               localStorage.setItem('walletAddress', publicKey);
               await fetchProfile(publicKey);
             } else {
+              console.error('Authentication failed - no session returned');
               toast({
                 title: 'Authentication Failed',
-                description: 'Could not authenticate with your wallet',
+                description: 'Could not authenticate with your wallet. Please try disconnecting and reconnecting.',
                 variant: 'destructive',
               });
               disconnectWallet();
@@ -287,9 +288,10 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
             console.error('Error during wallet authentication:', error);
             toast({
               title: 'Authentication Error',
-              description: 'Failed to authenticate wallet signature',
+              description: 'Failed to authenticate wallet signature. Please try again.',
               variant: 'destructive',
             });
+            disconnectWallet();
           } finally {
             setIsLoading(false);
           }

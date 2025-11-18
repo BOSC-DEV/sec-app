@@ -40,7 +40,13 @@ export const isUserAdmin = async (username: string): Promise<boolean> => {
     // Get the current authenticated user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
-    if (userError || !user) {
+    if (userError) {
+      console.error('Error getting user session:', userError);
+      return false;
+    }
+    
+    if (!user) {
+      console.warn('No backend session found - user needs to reconnect wallet to authenticate');
       return false;
     }
     

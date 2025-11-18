@@ -46,7 +46,7 @@ import { isAdmin } from '@/utils/adminUtils';
 import { BadgeTier } from '@/utils/badgeUtils';
 
 const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false }) => {
-  const { profile, isConnected } = useProfile();
+  const { profile, isConnected, session } = useProfile();
   const [newAnnouncement, setNewAnnouncement] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSurveySubmitting, setIsSurveySubmitting] = useState(false);
@@ -70,6 +70,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   useEffect(() => {
     const checkAdminStatus = async () => {
       console.log("Checking admin status for:", profile?.username);
+      console.log("Session exists:", !!session);
       let adminStatus = false;
       
       if (profile?.username) {
@@ -77,12 +78,17 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         console.log(`Admin check from hardcoded list for ${profile.username}: ${adminStatus}`);
         
         if (!adminStatus) {
-          try {
-            const serverAdminStatus = await isUserAdmin(profile.username);
-            console.log(`Server admin check for ${profile.username}: ${serverAdminStatus}`);
-            adminStatus = serverAdminStatus;
-          } catch (error) {
-            console.error('Error checking admin status:', error);
+          // Only check server if we have a valid session
+          if (session) {
+            try {
+              const serverAdminStatus = await isUserAdmin(profile.username);
+              console.log(`Server admin check for ${profile.username}: ${serverAdminStatus}`);
+              adminStatus = serverAdminStatus;
+            } catch (error) {
+              console.error('Error checking admin status:', error);
+            }
+          } else {
+            console.warn('No backend session - skipping server admin check');
           }
         }
       }
@@ -96,7 +102,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
     };
     
     checkAdminStatus();
-  }, [profile?.username]);
+  }, [profile?.username, session]);
   
   const { data: announcements = [], refetch, isLoading } = useQuery({
     queryKey: ['announcements'],
@@ -581,6 +587,23 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   
   return (
     <div className="space-y-6">
+      {/* Show session warning if user is connected but has no backend session */}
+      {isConnected && !session && profile?.username && isAdmin(profile.username) && (
+        <Card className="border-yellow-500/50 bg-yellow-500/5">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-yellow-500 mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-yellow-500">Backend Session Expired</p>
+                <p className="text-sm text-muted-foreground">
+                  Your wallet is connected but your backend session has expired. Please disconnect and reconnect your wallet to use admin features.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
       {(isUserAdminState || badgeInfo?.tier === BadgeTier.Whale) && (
         <Card>
           <CardHeader className="pb-3">

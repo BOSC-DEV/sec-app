@@ -7,6 +7,7 @@ export const authenticateWallet = async (
 ): Promise<boolean> => {
   try {
     console.log('Calling auth-phantom edge function...');
+    console.log('Wallet address:', walletAddress);
     
     // Call the edge function to handle all authentication logic
     const { data, error } = await supabase.functions.invoke('auth-phantom', {
@@ -27,6 +28,8 @@ export const authenticateWallet = async (
       return false;
     }
 
+    console.log('Session received from edge function');
+
     // Set the session in Supabase client
     const { error: sessionError } = await supabase.auth.setSession({
       access_token: data.session.access_token,
@@ -38,7 +41,7 @@ export const authenticateWallet = async (
       return false;
     }
 
-    console.log('Authentication successful!');
+    console.log('Authentication successful! Session set in client.');
     return true;
   } catch (error) {
     console.error('Authentication error:', error);
