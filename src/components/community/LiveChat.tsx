@@ -35,7 +35,6 @@ const LiveChat = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isUserAdmin, setIsUserAdmin] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
   const onlineCount = useOnlineUsers();
@@ -50,24 +49,6 @@ const LiveChat = () => {
       setIsUserAdmin(false);
     }
   }, [profile?.username]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const scrollToBottom = () => {
-    if (messagesEndRef.current) {
-      const scrollContainer = messagesEndRef.current.closest('.scroll-area-viewport');
-      if (scrollContainer) {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight;
-      } else {
-        messagesEndRef.current.scrollIntoView({
-          behavior: 'smooth',
-          block: 'end'
-        });
-      }
-    }
-  };
 
   const handleBanUser = (username: string | undefined) => {
     if (!username) return;
@@ -314,7 +295,6 @@ const LiveChat = () => {
             ) : (
               messages.map((message, index) => renderMessage(message, index))
             )}
-            <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
       </CardContent>
