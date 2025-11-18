@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, BarChart3, Users, FileText, AlertCircle, LogOut } from 'lucide-react';
+import { LayoutDashboard, BarChart3, Users, FileText, AlertCircle, LogOut, Home } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -65,6 +65,18 @@ export default function AdminSidebar({ activeTab, setActiveTab, isMobileOpen, on
         </div>
 
         <nav className="space-y-2 md:space-y-1">
+          <button
+            onClick={() => navigate('/')}
+            className={cn(
+              'w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all',
+              'hover:bg-muted/50 text-muted-foreground',
+              'md:gap-2 md:px-2 md:py-2 md:text-[0.6rem]'
+            )}
+          >
+            <Home className="h-5 w-5 md:h-3 md:w-3 flex-shrink-0" />
+            <span className="md:text-[0.6rem] truncate">Home</span>
+          </button>
+          
           {navItems.map((item) => (
             <button
               key={item.id}
