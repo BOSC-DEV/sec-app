@@ -125,7 +125,7 @@ const Header = () => {
                 <NotificationIndicator onClick={toggleNotifications} />
                 
                 {isAdmin && (
-                  <Button variant="ghost" size="sm" className="text-white hover:bg-icc-blue-light" onClick={() => navigate('/admin')}>
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-icc-blue-light hover:text-white" onClick={() => navigate('/admin')}>
                     Admin
                   </Button>
                 )}
