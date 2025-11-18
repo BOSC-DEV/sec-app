@@ -312,11 +312,23 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
       refetch();
     } catch (error) {
       console.error('Error posting announcement:', error);
-      toast({
-        title: "Error",
-        description: "Failed to post announcement. Please try again.",
-        variant: "destructive",
-      });
+      const errorMessage = error && typeof error === 'object' && 'message' in error 
+        ? String(error.message) 
+        : '';
+      
+      if (errorMessage.toLowerCase().includes('rate limit')) {
+        toast({
+          title: "Announcement limit reached",
+          description: "You can only post 3 announcements per day. Please try again tomorrow.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to post announcement. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -370,11 +382,23 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
       }
     } catch (error) {
       console.error('Error creating survey:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create survey. Please try again.",
-        variant: "destructive",
-      });
+      const errorMessage = error && typeof error === 'object' && 'message' in error 
+        ? String(error.message) 
+        : '';
+      
+      if (errorMessage.toLowerCase().includes('rate limit')) {
+        toast({
+          title: "Survey limit reached",
+          description: "You can only post 3 announcements per day. Please try again tomorrow.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to create survey. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsSurveySubmitting(false);
     }
