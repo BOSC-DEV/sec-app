@@ -179,7 +179,7 @@ function OverviewSection() {
           trend="3 new today"
         />
         <StatCard
-          title="Bounty Hunters"
+          title="Bounty Posters"
           value={loading ? 'Loading...' : stats.bounty_hunters || 0}
           icon={Users}
           description="Active contributors"
