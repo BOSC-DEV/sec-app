@@ -166,7 +166,7 @@ const Index = () => {
                     className="text-4xl font-bold text-icc-blue dark:text-white mb-2"
                     formatter={(value) => formatNumber(value)}
                   />
-                  <div className="text-sm text-icc-gray dark:text-gray-400">Active Hunters</div>
+                  <div className="text-sm text-icc-gray dark:text-gray-400">Bounty Hunters</div>
                 </div>
                 <div className="text-center p-6">
                   <AnimatedCounter 
