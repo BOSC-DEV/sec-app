@@ -10,9 +10,11 @@ import { AdminTab } from '@/pages/AdminDashboard';
 interface AdminSidebarProps {
   activeTab: AdminTab;
   setActiveTab: (tab: AdminTab) => void;
+  isMobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
-export default function AdminSidebar({ activeTab, setActiveTab }: AdminSidebarProps) {
+export default function AdminSidebar({ activeTab, setActiveTab, isMobileOpen, onMobileClose }: AdminSidebarProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -45,40 +47,50 @@ export default function AdminSidebar({ activeTab, setActiveTab }: AdminSidebarPr
     }
   };
 
+  const handleItemClick = (tab: AdminTab) => {
+    setActiveTab(tab);
+    onMobileClose?.();
+  };
+
   return (
-    <aside className="w-64 border-r border-border bg-card min-h-screen relative">
-      <div className="p-6 pb-24">
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-primary">Admin Panel</h2>
-          <p className="text-xs text-muted-foreground mt-1">Management Console</p>
+    <aside className={cn(
+      "border-r border-border bg-card min-h-screen relative",
+      "w-64 lg:w-64",
+      "md:w-32"
+    )}>
+      <div className="p-6 pb-24 md:p-3 md:pb-16">
+        <div className="mb-8 md:mb-4">
+          <h2 className="text-2xl font-bold text-primary md:text-sm md:text-center">Admin Panel</h2>
+          <p className="text-xs text-muted-foreground mt-1 md:text-[0.6rem] md:text-center">Management Console</p>
         </div>
 
-        <nav className="space-y-2">
+        <nav className="space-y-2 md:space-y-1">
           {navItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => handleItemClick(item.id)}
               className={cn(
                 'w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all',
                 'hover:bg-muted/50',
+                'md:gap-2 md:px-2 md:py-2 md:text-[0.6rem]',
                 activeTab === item.id
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground'
               )}
             >
-              <item.icon className="h-5 w-5" />
-              <span>{item.label}</span>
+              <item.icon className="h-5 w-5 md:h-3 md:w-3 flex-shrink-0" />
+              <span className="md:text-[0.6rem] truncate">{item.label}</span>
             </button>
           ))}
         </nav>
 
-        <div className="absolute bottom-6 left-6 right-6">
+        <div className="absolute bottom-6 left-6 right-6 md:bottom-3 md:left-2 md:right-2">
           <Button
             onClick={handleLogout}
             variant="outline"
-            className="w-full flex items-center gap-3 justify-start"
+            className="w-full flex items-center gap-3 justify-start md:gap-1 md:text-[0.6rem] md:py-1 md:px-2"
           >
-            <LogOut className="h-5 w-5" />
+            <LogOut className="h-5 w-5 md:h-3 md:w-3" />
             <span>Logout</span>
           </Button>
         </div>

@@ -1,20 +1,25 @@
 import React, { useState } from 'react';
 import { useAdminGuard } from '@/hooks/useAdminGuard';
-import { LayoutDashboard, Users, FileText, AlertCircle, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, AlertCircle, BarChart3, Menu } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { supabase } from '@/integrations/supabase/client';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AnalyticsSection from '@/components/admin/AnalyticsSection';
 import UserManagementSection from '@/components/admin/UserManagementSection';
 import ReportManagementSection from '@/components/admin/ReportManagementSection';
 import ModerationSection from '@/components/admin/ModerationSection';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export type AdminTab = 'overview' | 'analytics' | 'users' | 'reports' | 'moderation';
 
 export default function AdminDashboard() {
   const { loading, isAdmin } = useAdminGuard();
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   if (loading) {
     return (
@@ -59,10 +64,35 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-background">
       <div className="flex">
-        <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+        {/* Desktop Sidebar */}
+        <div className="hidden md:block">
+          <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+        </div>
+        
+        {/* Mobile Menu Button & Drawer */}
+        {isMobile && (
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="fixed top-4 left-4 z-50 md:hidden"
+              >
+                <Menu className="h-4 w-4" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-0 w-32">
+              <AdminSidebar 
+                activeTab={activeTab} 
+                setActiveTab={setActiveTab}
+                onMobileClose={() => setMobileMenuOpen(false)}
+              />
+            </SheetContent>
+          </Sheet>
+        )}
         
         <main className="flex-1 overflow-auto">
-          <div className="p-8">
+          <div className="p-8 md:p-4">
             {activeTab === 'overview' && <OverviewSection />}
             {activeTab === 'analytics' && <AnalyticsSection />}
             {activeTab === 'users' && <UserManagementSection />}
