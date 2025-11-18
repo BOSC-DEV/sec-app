@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useAdminGuard } from '@/hooks/useAdminGuard';
-import { LayoutDashboard, Users, FileText, AlertCircle, BarChart3, Menu } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, AlertCircle, BarChart3, Menu, Home } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AnalyticsSection from '@/components/admin/AnalyticsSection';
 import UserManagementSection from '@/components/admin/UserManagementSection';
@@ -20,6 +21,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
 
   if (loading) {
     return (
@@ -69,26 +71,37 @@ export default function AdminDashboard() {
           <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
         </div>
         
-        {/* Mobile Menu Button & Drawer */}
+        {/* Mobile Home & Menu Buttons */}
         {isMobile && (
-          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="fixed top-4 right-4 z-50 md:hidden"
-              >
-                <Menu className="h-4 w-4" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="p-0 w-32">
-              <AdminSidebar 
-                activeTab={activeTab} 
-                setActiveTab={setActiveTab}
-                onMobileClose={() => setMobileMenuOpen(false)}
-              />
-            </SheetContent>
-          </Sheet>
+          <>
+            <Button
+              variant="outline"
+              size="icon"
+              className="fixed top-4 right-16 z-50 md:hidden"
+              onClick={() => navigate('/')}
+            >
+              <Home className="h-4 w-4" />
+            </Button>
+            
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="fixed top-4 right-4 z-50 md:hidden"
+                >
+                  <Menu className="h-4 w-4" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="p-0 w-32">
+                <AdminSidebar 
+                  activeTab={activeTab} 
+                  setActiveTab={setActiveTab}
+                  onMobileClose={() => setMobileMenuOpen(false)}
+                />
+              </SheetContent>
+            </Sheet>
+          </>
         )}
         
         <main className="flex-1 overflow-auto">
