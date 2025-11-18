@@ -104,7 +104,7 @@ export const createAnnouncement = async (announcement: {
     return result;
   } catch (error) {
     console.error('Error creating announcement:', error);
-    return null;
+    throw error;
   }
 };
 
@@ -198,7 +198,7 @@ export const createSurveyAnnouncement = async (
     } as Announcement;
   } catch (error) {
     console.error('Error creating survey announcement:', error);
-    return null;
+    throw error;
   }
 };
 
