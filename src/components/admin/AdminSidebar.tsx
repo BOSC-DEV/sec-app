@@ -83,11 +83,10 @@ export default function AdminSidebar({ activeTab, setActiveTab, isMobileOpen, on
               onClick={() => handleItemClick(item.id)}
               className={cn(
                 'w-full flex items-center gap-3 px-4 py-3 rounded-lg text-lg font-medium transition-all',
-                'hover:bg-muted/50',
                 'md:gap-2 md:px-2 md:py-2 md:text-[0.6rem]',
                 activeTab === item.id
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground'
+                  ? 'bg-primary text-primary-foreground shadow-sm hover:bg-primary/90'
+                  : 'text-muted-foreground hover:bg-muted/50'
               )}
             >
               <item.icon className="h-7 w-7 md:h-3 md:w-3 flex-shrink-0" />
