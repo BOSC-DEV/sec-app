@@ -208,14 +208,14 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
     
     try {
       console.log("Creating announcement with data:", {
-        author_id: profile?.wallet_address,
+        author_id: profile?.id,
         author_name: profile?.display_name,
         author_username: profile?.username
       });
       
       const createdAnnouncement = await createAnnouncement({
         content: newAnnouncement,
-        author_id: profile?.wallet_address || '',
+        author_id: profile?.id || '',
         author_name: profile?.display_name || '',
         author_username: profile?.username || '',
         author_profile_pic: profile?.profile_pic_url || '',
@@ -227,7 +227,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         await notifyAllUsersAboutAnnouncement(
           createdAnnouncement.id,
           createdAnnouncement.content,
-          profile?.wallet_address || '',
+          profile?.id || '',
           profile?.display_name || '',
           profile?.username,
           profile?.profile_pic_url
@@ -273,7 +273,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         title,
         options,
         {
-          author_id: profile?.wallet_address || '',
+          author_id: profile?.id || '',
           author_name: profile?.display_name || '',
           author_username: profile?.username || '',
           author_profile_pic: profile?.profile_pic_url || '',
@@ -286,7 +286,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         await notifyAllUsersAboutAnnouncement(
           createdSurvey.id,
           `New survey: ${title}`,
-          profile?.wallet_address || '',
+          profile?.id || '',
           profile?.display_name || '',
           profile?.username,
           profile?.profile_pic_url
