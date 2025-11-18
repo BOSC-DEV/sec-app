@@ -125,7 +125,7 @@ function OverviewSection() {
   React.useEffect(() => {
     const fetchStats = async () => {
       try {
-        const tables = ['profiles', 'report_submissions', 'scammers', 'chat_messages'];
+        const tables = ['profiles', 'report_submissions', 'chat_messages'];
         const entries: [string, number][] = [];
         
         for (const table of tables) {
@@ -134,6 +134,14 @@ function OverviewSection() {
             .select('*', { count: 'exact', head: true });
           entries.push([table, count || 0]);
         }
+        
+        // Count unique bounty contributors
+        const { data: contributors } = await supabase
+          .from('bounty_contributions')
+          .select('contributor_id');
+        
+        const uniqueContributors = new Set(contributors?.map(c => c.contributor_id).filter(Boolean));
+        entries.push(['bounty_hunters', uniqueContributors.size]);
         
         setStats(Object.fromEntries(entries));
       } catch (error) {
@@ -171,11 +179,11 @@ function OverviewSection() {
           trend="3 new today"
         />
         <StatCard
-          title="Total Scammers"
-          value={loading ? 'Loading...' : stats.scammers || 0}
-          icon={AlertCircle}
-          description="In database"
-          trend="+5 this week"
+          title="Bounty Hunters"
+          value={loading ? 'Loading...' : stats.bounty_hunters || 0}
+          icon={Users}
+          description="Active contributors"
+          trend="Contributors to bounties"
         />
         <StatCard
           title="Platform Activity"
