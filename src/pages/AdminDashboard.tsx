@@ -165,6 +165,53 @@ function OverviewSection() {
     fetchStats();
   }, []);
 
+  const [imageFile, setImageFile] = React.useState<File | null>(null);
+  const [imagePreview, setImagePreview] = React.useState<string | null>(null);
+  const [surveyImageFile, setSurveyImageFile] = React.useState<File | null>(null);
+  const [surveyImagePreview, setSurveyImagePreview] = React.useState<string | null>(null);
+
+  const handleImageUpload = (file: File, isSurvey = false) => {
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Image must be less than 5MB",
+      });
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Only image files are allowed",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (isSurvey) {
+        setSurveyImageFile(file);
+        setSurveyImagePreview(reader.result as string);
+      } else {
+        setImageFile(file);
+        setImagePreview(reader.result as string);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeImage = (isSurvey = false) => {
+    if (isSurvey) {
+      setSurveyImageFile(null);
+      setSurveyImagePreview(null);
+    } else {
+      setImageFile(null);
+      setImagePreview(null);
+    }
+  };
+
   const handleCreateAnnouncement = async () => {
     if (!announcementContent.trim()) {
       toast({
@@ -186,6 +233,23 @@ function OverviewSection() {
 
     setIsSubmitting(true);
     try {
+      let imageUrl: string | undefined;
+      if (imageFile) {
+        const timestamp = Date.now();
+        const fileName = `announcement-${profile.id}-${timestamp}.${imageFile.name.split('.').pop()}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('media')
+          .upload(fileName, imageFile);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('media')
+          .getPublicUrl(fileName);
+
+        imageUrl = publicUrl;
+      }
+
       await createAnnouncement({
         content: announcementContent,
         author_id: profile.id,
@@ -193,13 +257,15 @@ function OverviewSection() {
         author_username: profile.username || '',
         author_profile_pic: profile.profile_pic_url || '',
         likes: 0,
-        dislikes: 0
+        dislikes: 0,
+        image_url: imageUrl,
       });
       toast({
         title: "Success",
         description: "Announcement created successfully"
       });
       setAnnouncementContent('');
+      removeImage(false);
     } catch (error) {
       toast({
         title: "Error",
@@ -223,6 +289,23 @@ function OverviewSection() {
 
     setIsSubmitting(true);
     try {
+      let imageUrl: string | undefined;
+      if (surveyImageFile) {
+        const timestamp = Date.now();
+        const fileName = `survey-${profile.id}-${timestamp}.${surveyImageFile.name.split('.').pop()}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('media')
+          .upload(fileName, surveyImageFile);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('media')
+          .getPublicUrl(fileName);
+
+        imageUrl = publicUrl;
+      }
+
       await createSurveyAnnouncement(
         title,
         options,
@@ -232,13 +315,15 @@ function OverviewSection() {
           author_username: profile.username || '',
           author_profile_pic: profile.profile_pic_url || '',
           likes: 0,
-          dislikes: 0
+          dislikes: 0,
+          image_url: imageUrl,
         }
       );
       toast({
         title: "Success",
         description: "Poll created successfully"
       });
+      removeImage(true);
     } catch (error) {
       toast({
         title: "Error",

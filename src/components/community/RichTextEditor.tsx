@@ -11,7 +11,9 @@ import {
   ListOrdered, 
   Heading1, 
   Heading2, 
-  Heading3 
+  Heading3,
+  Paperclip,
+  X
 } from 'lucide-react';
 import { Toggle } from '@/components/ui/toggle';
 import { Separator } from '@/components/ui/separator';
@@ -19,21 +21,29 @@ import {
   ToggleGroup, 
   ToggleGroupItem 
 } from '@/components/ui/toggle-group';
+import { Button } from '@/components/ui/button';
 
 export interface RichTextEditorProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   minHeight?: string;
+  onImageSelect?: (file: File) => void;
+  imagePreview?: string | null;
+  onRemoveImage?: () => void;
 }
 
 const RichTextEditor: React.FC<RichTextEditorProps> = ({ 
   value, 
   onChange,
   placeholder = 'Write something...',
-  minHeight = '120px'
+  minHeight = '120px',
+  onImageSelect,
+  imagePreview,
+  onRemoveImage
 }) => {
   const editorRef = React.useRef<HTMLDivElement>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Format handlers
   const handleFormat = (command: string, value?: string) => {
@@ -59,6 +69,18 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   };
 
+  // Handle image selection
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onImageSelect) {
+      onImageSelect(file);
+    }
+  };
+
   return (
     <div className="border rounded-md">
       <div className="p-2 bg-muted/30 border-b flex flex-wrap gap-1">
@@ -73,6 +95,28 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             <Underline className="h-4 w-4" />
           </ToggleGroupItem>
         </ToggleGroup>
+        
+        {onImageSelect && (
+          <>
+            <Separator orientation="vertical" className="mx-1 h-8" />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleImageClick}
+              className="h-8 px-2"
+            >
+              <Paperclip className="h-4 w-4" />
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </>
+        )}
         
         <Separator orientation="vertical" className="mx-1 h-8" />
         
@@ -126,6 +170,29 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         onBlur={handleInput}
         data-placeholder={placeholder}
       />
+      
+      {imagePreview && (
+        <div className="p-3 border-t">
+          <div className="relative inline-block">
+            <img 
+              src={imagePreview} 
+              alt="Preview" 
+              className="max-w-xs max-h-48 rounded-md object-cover"
+            />
+            {onRemoveImage && (
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                onClick={onRemoveImage}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

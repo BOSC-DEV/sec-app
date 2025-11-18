@@ -44,6 +44,7 @@ import { formatTimeAgo } from '@/utils/formatTime';
 import { useBadgeTier } from '@/hooks/useBadgeTier';
 import { isAdmin } from '@/utils/adminUtils';
 import { BadgeTier } from '@/utils/badgeUtils';
+import { supabase } from '@/integrations/supabase/client';
 
 const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false }) => {
   const { profile, isConnected, session } = useProfile();
@@ -58,6 +59,10 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   const [announcementTab, setAnnouncementTab] = useState<'post' | 'survey'>('post');
   const [userSurveyVotes, setUserSurveyVotes] = useState<Record<string, number>>({});
   const [loadingVotes, setLoadingVotes] = useState(true);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [surveyImageFile, setSurveyImageFile] = useState<File | null>(null);
+  const [surveyImagePreview, setSurveyImagePreview] = useState<string | null>(null);
   const badgeInfo = useBadgeTier(profile?.sec_balance || 0);
   
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -181,6 +186,48 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
     }
   }, [filteredAnnouncements.length, currentIndex]);
   
+  const handleImageUpload = (file: File, isSurvey = false) => {
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Image must be less than 5MB",
+      });
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Only image files are allowed",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (isSurvey) {
+        setSurveyImageFile(file);
+        setSurveyImagePreview(reader.result as string);
+      } else {
+        setImageFile(file);
+        setImagePreview(reader.result as string);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeImage = (isSurvey = false) => {
+    if (isSurvey) {
+      setSurveyImageFile(null);
+      setSurveyImagePreview(null);
+    } else {
+      setImageFile(null);
+      setImagePreview(null);
+    }
+  };
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -213,6 +260,23 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         author_username: profile?.username
       });
       
+      let imageUrl: string | undefined;
+      if (imageFile) {
+        const timestamp = Date.now();
+        const fileName = `announcement-${profile?.id}-${timestamp}.${imageFile.name.split('.').pop()}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('media')
+          .upload(fileName, imageFile);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('media')
+          .getPublicUrl(fileName);
+
+        imageUrl = publicUrl;
+      }
+      
       const createdAnnouncement = await createAnnouncement({
         content: newAnnouncement,
         author_id: profile?.id || '',
@@ -220,7 +284,8 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         author_username: profile?.username || '',
         author_profile_pic: profile?.profile_pic_url || '',
         likes: 0,
-        dislikes: 0
+        dislikes: 0,
+        image_url: imageUrl,
       });
       
       if (createdAnnouncement) {
@@ -243,6 +308,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
       }
       
       setNewAnnouncement('');
+      removeImage(false);
       refetch();
     } catch (error) {
       console.error('Error posting announcement:', error);
@@ -541,6 +607,17 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
         <CardContent className="py-4">
           <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: announcement.content }} />
           
+          {announcement.image_url && (
+            <div className="mt-4">
+              <img 
+                src={announcement.image_url} 
+                alt="Announcement" 
+                className="max-w-full max-h-96 rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => window.open(announcement.image_url, '_blank')}
+              />
+            </div>
+          )}
+          
           {surveyData && (
             <SurveyDisplay 
               survey={surveyData}
@@ -638,6 +715,9 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
                     <RichTextEditor 
                       value={newAnnouncement}
                       onChange={setNewAnnouncement}
+                      onImageSelect={(file) => handleImageUpload(file, false)}
+                      imagePreview={imagePreview}
+                      onRemoveImage={() => removeImage(false)}
                     />
                   </div>
                   <div className="mt-3 flex justify-end">
@@ -653,10 +733,21 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
               </TabsContent>
               
               <TabsContent value="survey" className="mt-4">
-                <SurveyCreator 
-                  onCreateSurvey={handleCreateSurvey}
-                  isSubmitting={isSurveySubmitting}
-                />
+                <div className="space-y-4">
+                  <RichTextEditor 
+                    value=""
+                    onChange={() => {}}
+                    placeholder="Attach an image to your survey (optional)..."
+                    minHeight="80px"
+                    onImageSelect={(file) => handleImageUpload(file, true)}
+                    imagePreview={surveyImagePreview}
+                    onRemoveImage={() => removeImage(true)}
+                  />
+                  <SurveyCreator 
+                    onCreateSurvey={handleCreateSurvey}
+                    isSubmitting={isSurveySubmitting}
+                  />
+                </div>
               </TabsContent>
             </Tabs>
           </CardHeader>
