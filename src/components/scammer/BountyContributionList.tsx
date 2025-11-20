@@ -144,7 +144,7 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
           </Button>
           
           <span className="text-sm text-icc-gray" aria-live="polite">
-            Page {currentPage} of {totalPages}
+            {currentPage}/{totalPages}
           </span>
           
           <Button variant="outline" size="sm" onClick={() => handlePageChange(currentPage + 1)} disabled={!hasNextPage} aria-label="Next page">
