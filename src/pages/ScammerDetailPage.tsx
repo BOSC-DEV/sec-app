@@ -248,7 +248,7 @@ const ScammerDetailPage = () => {
 
   const handleEditScammer = () => {
     if (!id) return;
-    navigate(`/report/${id}`);
+    navigate(`/edit-report/${id}`);
   };
 
   const copyToClipboard = (text: string) => {
