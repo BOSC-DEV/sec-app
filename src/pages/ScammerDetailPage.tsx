@@ -17,6 +17,14 @@ import { Toggle } from '@/components/ui/toggle';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from '@/hooks/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -68,6 +76,19 @@ const ScammerDetailPage = () => {
   const contributionsPerPage = 5;
   const [profileChangeCounter, setProfileChangeCounter] = useState(0);
   const isMobile = useIsMobile();
+  
+  // Comment pagination state
+  const [currentCommentPage, setCurrentCommentPage] = useState(1);
+  const COMMENTS_PER_PAGE = 5;
+  
+  // Touch gesture state for swipe
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  // Reset comment pagination when scammer changes
+  useEffect(() => {
+    setCurrentCommentPage(1);
+  }, [id]);
 
   useEffect(() => {
     const handleProfileUpdated = () => {
@@ -249,6 +270,35 @@ const ScammerDetailPage = () => {
   const handleEditScammer = () => {
     if (!id) return;
     navigate(`/edit-report/${id}`);
+  };
+
+  // Touch event handlers for swipe gestures
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    const totalCommentPages = Math.ceil((comments?.length || 0) / COMMENTS_PER_PAGE);
+    
+    if (isLeftSwipe && currentCommentPage < totalCommentPages) {
+      setCurrentCommentPage(prev => prev + 1);
+    }
+    if (isRightSwipe && currentCommentPage > 1) {
+      setCurrentCommentPage(prev => prev - 1);
+    }
   };
 
   const copyToClipboard = (text: string) => {
@@ -692,19 +742,70 @@ const ScammerDetailPage = () => {
                           </div>
                         </div>)}
                       <span className="sr-only">Loading comments...</span>
-                    </div> : errorComments ? <div className="text-red-500">Error loading comments.</div> : comments && comments.length > 0 ? <div aria-label="Comments section">
-                        {comments.map(comment => <div key={comment.id} className="flex items-start space-x-4 py-4 border-b">
-                          <Avatar>
-                            <AvatarImage src={comment.author_profile_pic || '/placeholder.svg'} alt={`${comment.author_name}'s profile`} />
-                            <AvatarFallback>{comment.author_name.substring(0, 2)}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="font-medium">{comment.author_name}</div>
-                            <div className="text-sm text-gray-500">{formatDate(comment.created_at)}</div>
-                            <p className="mt-1">{comment.content}</p>
-                          </div>
-                        </div>)}
-                      </div> : <div aria-live="polite">No comments yet. Be the first to comment!</div>}
+                    </div> : errorComments ? <div className="text-red-500">Error loading comments.</div> : comments && comments.length > 0 ? (() => {
+                      const totalCommentPages = Math.ceil(comments.length / COMMENTS_PER_PAGE);
+                      const startIndex = (currentCommentPage - 1) * COMMENTS_PER_PAGE;
+                      const endIndex = startIndex + COMMENTS_PER_PAGE;
+                      const paginatedComments = comments.slice(startIndex, endIndex);
+                      
+                      return (
+                        <div 
+                          aria-label="Comments section"
+                          onTouchStart={onTouchStart}
+                          onTouchMove={onTouchMove}
+                          onTouchEnd={onTouchEnd}
+                          className="select-none"
+                        >
+                          {paginatedComments.map(comment => (
+                            <div key={comment.id} className="flex items-start space-x-4 py-4 border-b">
+                              <Avatar>
+                                <AvatarImage src={comment.author_profile_pic || '/placeholder.svg'} alt={`${comment.author_name}'s profile`} />
+                                <AvatarFallback>{comment.author_name.substring(0, 2)}</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <div className="font-medium">{comment.author_name}</div>
+                                <div className="text-sm text-gray-500">{formatDate(comment.created_at)}</div>
+                                <p className="mt-1">{comment.content}</p>
+                              </div>
+                            </div>
+                          ))}
+                          
+                          {/* Pagination Controls */}
+                          {totalCommentPages > 1 && (
+                            <Pagination className="mt-6">
+                              <PaginationContent>
+                                <PaginationItem>
+                                  <PaginationPrevious 
+                                    onClick={() => setCurrentCommentPage(prev => Math.max(1, prev - 1))}
+                                    className={currentCommentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                                  />
+                                </PaginationItem>
+                                
+                                {/* Page numbers */}
+                                {Array.from({ length: totalCommentPages }, (_, i) => i + 1).map(pageNum => (
+                                  <PaginationItem key={pageNum}>
+                                    <PaginationLink
+                                      onClick={() => setCurrentCommentPage(pageNum)}
+                                      isActive={currentCommentPage === pageNum}
+                                      className="cursor-pointer"
+                                    >
+                                      {pageNum}
+                                    </PaginationLink>
+                                  </PaginationItem>
+                                ))}
+                                
+                                <PaginationItem>
+                                  <PaginationNext 
+                                    onClick={() => setCurrentCommentPage(prev => Math.min(totalCommentPages, prev + 1))}
+                                    className={currentCommentPage === totalCommentPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                                  />
+                                </PaginationItem>
+                              </PaginationContent>
+                            </Pagination>
+                          )}
+                        </div>
+                      );
+                    })() : <div aria-live="polite">No comments yet. Be the first to comment!</div>}
                 </TabsContent>
                 
                 <TabsContent value="links" className="mt-2">
