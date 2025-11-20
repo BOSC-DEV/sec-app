@@ -79,7 +79,24 @@ const ScammerDetailPage = () => {
   
   // Comment pagination state
   const [currentCommentPage, setCurrentCommentPage] = useState(1);
-  const COMMENTS_PER_PAGE = 5;
+  const [commentsPerPage, setCommentsPerPage] = useState(5);
+  
+  // Adjust comments per page based on screen size (10 for iPad, 5 for mobile/desktop)
+  useEffect(() => {
+    const updateCommentsPerPage = () => {
+      const width = window.innerWidth;
+      // iPad/tablet range: 768px - 1024px
+      if (width >= 768 && width < 1024) {
+        setCommentsPerPage(10);
+      } else {
+        setCommentsPerPage(5);
+      }
+    };
+    
+    updateCommentsPerPage();
+    window.addEventListener('resize', updateCommentsPerPage);
+    return () => window.removeEventListener('resize', updateCommentsPerPage);
+  }, []);
   
   // Touch gesture state for swipe
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -291,7 +308,7 @@ const ScammerDetailPage = () => {
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
     
-    const totalCommentPages = Math.ceil((comments?.length || 0) / COMMENTS_PER_PAGE);
+    const totalCommentPages = Math.ceil((comments?.length || 0) / commentsPerPage);
     
     if (isLeftSwipe && currentCommentPage < totalCommentPages) {
       setCurrentCommentPage(prev => prev + 1);
@@ -743,9 +760,9 @@ const ScammerDetailPage = () => {
                         </div>)}
                       <span className="sr-only">Loading comments...</span>
                     </div> : errorComments ? <div className="text-red-500">Error loading comments.</div> : comments && comments.length > 0 ? (() => {
-                      const totalCommentPages = Math.ceil(comments.length / COMMENTS_PER_PAGE);
-                      const startIndex = (currentCommentPage - 1) * COMMENTS_PER_PAGE;
-                      const endIndex = startIndex + COMMENTS_PER_PAGE;
+                      const totalCommentPages = Math.ceil(comments.length / commentsPerPage);
+                      const startIndex = (currentCommentPage - 1) * commentsPerPage;
+                      const endIndex = startIndex + commentsPerPage;
                       const paginatedComments = comments.slice(startIndex, endIndex);
                       
                       return (
