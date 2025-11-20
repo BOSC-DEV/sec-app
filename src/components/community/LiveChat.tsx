@@ -356,7 +356,7 @@ const LiveChat = () => {
                 </Popover>
               </div>
               
-              <Input type="text" placeholder="Type your message..." value={newMessage} onChange={e => setNewMessage(e.target.value)} disabled={isSubmitting} className="flex-1" />
+              <Input type="text" placeholder="Type your message..." value={newMessage} onChange={e => setNewMessage(e.target.value)} disabled={isSubmitting} className="flex-1 focus-visible:ring-0 focus-visible:ring-offset-0" />
               
               <Button type="submit" size="icon" className="h-9 w-9" disabled={isSubmitting || !newMessage.trim() && !imageFile}>
                 {isSubmitting ? <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" /> : <Send className="h-4 w-4" />}
