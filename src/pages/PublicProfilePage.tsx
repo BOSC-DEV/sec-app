@@ -323,12 +323,9 @@ const PublicProfilePage = () => {
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold text-icc-gold">Bounties</h2>
                     {bountyContributions && bountyContributions.totalBountyAmount > 0 && (
-                      <div className="flex items-center gap-2 text-lg font-semibold">
-                        <span className="text-muted-foreground">Total:</span>
-                        <span className="flex items-center gap-1 text-icc-blue dark:text-white">
-                          <CurrencyIcon size="sm" />
-                          {formatCurrency(bountyContributions.totalBountyAmount)} SEC
-                        </span>
+                      <div className="flex items-center gap-1 text-lg font-semibold text-icc-blue dark:text-white">
+                        <CurrencyIcon size="sm" />
+                        {formatCurrency(bountyContributions.totalBountyAmount)} SEC
                       </div>
                     )}
                   </div>
