@@ -320,7 +320,18 @@ const PublicProfilePage = () => {
               
               <TabsContent value="bounties" className="mt-0">
                 <div className="bg-background/60 backdrop-blur-sm rounded-lg p-6 border">
-                  <h2 className="text-2xl font-bold text-icc-gold mb-6">Bounties</h2>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-icc-gold">Bounties</h2>
+                    {bountyContributions && bountyContributions.totalBountyAmount > 0 && (
+                      <div className="flex items-center gap-2 text-lg font-semibold">
+                        <span className="text-muted-foreground">Total:</span>
+                        <span className="flex items-center gap-1 text-icc-blue dark:text-white">
+                          <CurrencyIcon size="sm" />
+                          {formatCurrency(bountyContributions.totalBountyAmount)} SEC
+                        </span>
+                      </div>
+                    )}
+                  </div>
                   
                   {isLoadingBounties ? <div className="space-y-4">
                       {[1, 2, 3].map(i => <Skeleton key={i} className="h-20 w-full" />)}
