@@ -81,13 +81,13 @@ const ScammerDetailPage = () => {
   const [currentCommentPage, setCurrentCommentPage] = useState(1);
   const [commentsPerPage, setCommentsPerPage] = useState(5);
   
-  // Adjust comments per page based on screen size (10 for iPad, 5 for mobile/desktop)
+  // Adjust comments per page based on screen size (9 for iPad, 5 for mobile/desktop)
   useEffect(() => {
     const updateCommentsPerPage = () => {
       const width = window.innerWidth;
       // iPad/tablet range: 768px - 1024px
       if (width >= 768 && width < 1024) {
-        setCommentsPerPage(10);
+        setCommentsPerPage(9);
       } else {
         setCommentsPerPage(5);
       }
