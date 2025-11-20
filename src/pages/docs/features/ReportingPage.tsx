@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button';
 const ReportingPage = () => {
   return (
     <DocsContent 
-      title="Scammer Reporting System" 
-      description="Learn how to effectively report scammers and contribute to community safety"
+      title="Reporting System" 
+      description="Learn how to effectively submit reports and contribute to community safety"
     >
       <div className="space-y-8">
         {/* Overview */}
@@ -19,7 +19,7 @@ const ReportingPage = () => {
             <p className="text-lg">
               The SEC reporting system is the cornerstone of our platform, allowing community members 
               to document and expose fraudulent activities. Every report contributes to building a 
-              comprehensive database of known scammers and their tactics.
+              comprehensive database of known threats and their tactics.
             </p>
           </div>
         </section>
@@ -39,14 +39,14 @@ const ReportingPage = () => {
               <div className="bg-icc-gold text-icc-blue-dark rounded-full w-8 h-8 flex items-center justify-center font-bold">2</div>
               <div>
                 <h3 className="text-xl font-semibold mb-2">Gather Evidence</h3>
-                <p>Collect screenshots, transaction IDs, wallet addresses, and any other relevant documentation.</p>
+                <p>Collect screenshots, transaction IDs, wallet addresses, and any other relevant documentation about the subject.</p>
               </div>
             </div>
             <div className="flex items-start gap-4 p-6 border rounded-lg">
               <div className="bg-icc-gold text-icc-blue-dark rounded-full w-8 h-8 flex items-center justify-center font-bold">3</div>
               <div>
                 <h3 className="text-xl font-semibold mb-2">Fill the Report Form</h3>
-                <p>Provide detailed information about the scammer, including names, aliases, and methods used.</p>
+                <p>Provide detailed information about the subject, including names, aliases, and methods used.</p>
               </div>
             </div>
             <div className="flex items-start gap-4 p-6 border rounded-lg">
@@ -67,9 +67,9 @@ const ReportingPage = () => {
               <FileText className="h-8 w-8 text-icc-gold mb-4" />
               <h3 className="text-xl font-semibold mb-3">Basic Details</h3>
               <ul className="space-y-2">
-                <li>• Scammer's name or pseudonym</li>
+                <li>• Subject's name or pseudonym</li>
                 <li>• Known aliases</li>
-                <li>• Description of the scam</li>
+                <li>• Description of the incident</li>
                 <li>• Date of incident</li>
               </ul>
             </div>
@@ -133,7 +133,7 @@ const ReportingPage = () => {
         {/* Call to Action */}
         <section className="text-center p-8 bg-muted rounded-lg">
           <h2 className="text-2xl font-bold mb-4">Ready to Make a Report?</h2>
-          <p className="mb-6">Help protect the community by reporting known scammers and fraudulent activities.</p>
+          <p className="mb-6">Help protect the community by reporting fraudulent activities and threats.</p>
           <Button variant="gold" size="lg" asChild>
             <Link to="/new-report">Submit a Report</Link>
           </Button>

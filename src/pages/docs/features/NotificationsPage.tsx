@@ -62,7 +62,7 @@ const NotificationsPage = () => {
                 information relevant to the crypto community.
               </p>
               <ul className="space-y-2 text-sm">
-                <li>• New high-priority scammer reports</li>
+                <li>• New high-priority reports</li>
                 <li>• Trending scam techniques</li>
                 <li>• Wallet security warnings</li>
                 <li>• Emergency community alerts</li>

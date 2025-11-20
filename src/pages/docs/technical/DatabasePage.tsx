@@ -30,7 +30,7 @@ const DatabasePage = () => {
             <div className="p-6 bg-muted rounded-lg">
               <Table className="h-8 w-8 text-icc-gold mb-4" />
               <h3 className="text-xl font-semibold mb-3">scammers</h3>
-              <p className="mb-4">Primary table storing scammer information and reports.</p>
+              <p className="mb-4">Primary table storing report information and evidence.</p>
               <ul className="space-y-2 text-sm">
                 <li>• id (text) - Primary key</li>
                 <li>• name, aliases, wallet_addresses</li>

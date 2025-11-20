@@ -19,7 +19,7 @@ const BountiesGuidePage = () => {
             <Coins className="h-12 w-12 mb-4" />
             <p className="text-xl leading-relaxed">
               The bounty system incentivizes community participation by allowing users to 
-              contribute SEC tokens to scammer reports. Higher bounties increase visibility 
+              contribute SEC tokens to reports. Higher bounties increase visibility 
               and encourage more thorough investigations and evidence gathering.
             </p>
           </div>
@@ -33,7 +33,7 @@ const BountiesGuidePage = () => {
               <Target className="h-8 w-8 text-icc-gold mb-4" />
               <h3 className="text-xl font-semibold mb-3">Contributing Bounties</h3>
               <p className="mb-4">
-                Add SEC tokens to any scammer report to increase its bounty pool.
+                Add SEC tokens to any report to increase its bounty pool.
               </p>
               <ul className="space-y-2 text-sm">
                 <li>• Connect your Phantom wallet</li>
@@ -66,14 +66,14 @@ const BountiesGuidePage = () => {
               <div className="bg-icc-gold text-icc-blue-dark rounded-full w-8 h-8 flex items-center justify-center font-bold">1</div>
               <div>
                 <h3 className="text-xl font-semibold mb-2">Find a Report</h3>
-                <p>Browse the scammer database and find a report you want to support with additional bounty.</p>
+                <p>Browse the database and find a report you want to support with additional bounty.</p>
               </div>
             </div>
             <div className="flex items-start gap-4 p-6 border rounded-lg">
               <div className="bg-icc-gold text-icc-blue-dark rounded-full w-8 h-8 flex items-center justify-center font-bold">2</div>
               <div>
                 <h3 className="text-xl font-semibold mb-2">Choose Contribution Amount</h3>
-                <p>Decide how many SEC tokens you want to contribute. Consider the severity of the scam and current bounty amount.</p>
+                <p>Decide how many SEC tokens you want to contribute. Consider the severity of the incident and current bounty amount.</p>
               </div>
             </div>
             <div className="flex items-start gap-4 p-6 border rounded-lg">

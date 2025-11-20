@@ -64,7 +64,7 @@ const QuickStartPage = () => {
                 <div className="bg-muted p-4 rounded-lg">
                   <p className="text-sm">
                     <strong>Note:</strong> You can browse the platform without connecting a wallet, 
-                    but you'll need to connect to report scammers or participate in bounties.
+                    but you'll need to connect to submit reports or participate in bounties.
                   </p>
                 </div>
               </div>
@@ -81,7 +81,7 @@ const QuickStartPage = () => {
                   Create Your First Report
                 </h3>
                 <p className="mb-3">
-                  Ready to report a scammer? Navigate to the Report page and fill out the form 
+                  Ready to submit a report? Navigate to the Report page and fill out the form 
                   with as much detail as possible.
                 </p>
                 <Button variant="iccblue" asChild>
@@ -117,16 +117,16 @@ const QuickStartPage = () => {
           <h2 id="key-concepts">Key Concepts</h2>
           <div className="grid md:grid-cols-2 gap-6 mt-4">
             <div className="p-4 bg-muted rounded-lg">
-              <h3 className="font-semibold mb-2">Scammer Reports</h3>
+              <h3 className="font-semibold mb-2">Reports</h3>
               <p className="text-sm">
-                Detailed submissions containing information about known scammers, 
+                Detailed submissions containing information about fraudulent activities, 
                 including wallet addresses, accusations, and supporting evidence.
               </p>
             </div>
             <div className="p-4 bg-muted rounded-lg">
               <h3 className="font-semibold mb-2">Bounties</h3>
               <p className="text-sm">
-                SEC token rewards placed on scammer reports to incentivize 
+                SEC token rewards placed on reports to incentivize 
                 information gathering and community participation.
               </p>
             </div>
@@ -153,7 +153,7 @@ const QuickStartPage = () => {
           <div className="space-y-4 mt-4">
             <details className="border rounded-lg">
               <summary className="p-4 cursor-pointer font-medium hover:bg-muted">
-                How to submit a high-quality scammer report
+                How to submit a high-quality report
               </summary>
               <div className="p-4 pt-0 space-y-3">
                 <p>Follow these guidelines for effective reporting:</p>
@@ -174,7 +174,7 @@ const QuickStartPage = () => {
               <div className="p-4 pt-0 space-y-3">
                 <p>To contribute SEC tokens to a bounty:</p>
                 <ol className="list-decimal list-inside space-y-1 ml-4">
-                  <li>Navigate to a scammer's detail page</li>
+                  <li>Navigate to a report's detail page</li>
                   <li>Click "Contribute to Bounty"</li>
                   <li>Enter the amount of SEC tokens</li>
                   <li>Confirm the transaction in your Phantom wallet</li>

@@ -125,11 +125,11 @@ const CommunityGuidePage = () => {
           <div className="bg-muted rounded-lg p-6">
             <h3 className="text-xl font-semibold mb-3">Adding Value Through Comments</h3>
             <p className="mb-4">
-              Comments on scammer reports are a crucial way to add context, evidence, and warnings.
+              Comments on reports are a crucial way to add context, evidence, and warnings.
             </p>
             <ul className="space-y-2">
               <li>• Provide additional evidence or documentation</li>
-              <li>• Share personal experiences with the scammer</li>
+              <li>• Share personal experiences with the subject</li>
               <li>• Add context about tactics or methods used</li>
               <li>• Warn about related accounts or associates</li>
               <li>• Correct or update outdated information</li>
@@ -219,7 +219,7 @@ const CommunityGuidePage = () => {
             <div className="p-4 border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-950">
               <h4 className="font-semibold text-blue-800 dark:text-blue-200">Content Creation</h4>
               <p className="text-blue-700 dark:text-blue-300">
-                Create comprehensive scammer reports, share educational content, and document new scam tactics
+                Create comprehensive reports, share educational content, and document new scam tactics
               </p>
             </div>
             <div className="p-4 border-l-4 border-purple-500 bg-purple-50 dark:bg-purple-950">
