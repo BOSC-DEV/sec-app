@@ -50,7 +50,7 @@ const PrivacyPage = () => {
               <h3 className="text-xl font-semibold mb-3">User-Provided</h3>
               <ul className="space-y-2 text-sm">
                 <li>• Profile information (display name, bio)</li>
-                <li>• Scammer reports and evidence</li>
+                <li>• Reports and evidence</li>
                 <li>• Comments and community interactions</li>
                 <li>• Uploaded images and files</li>
                 <li>• Social media links (optional)</li>

@@ -288,7 +288,7 @@ const PublicProfilePage = () => {
                 
               <TabsContent value="reports" className="mt-0">
                 <div className="bg-background/60 backdrop-blur-sm rounded-lg p-6 border">
-                  <h2 className="text-2xl font-bold text-icc-gold mb-6">Scammer Reports</h2>
+                  <h2 className="text-2xl font-bold text-icc-gold mb-6">Reports</h2>
                   
                   {isLoadingReports ? <div className="space-y-4">
                       {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full" />)}
@@ -310,7 +310,7 @@ const PublicProfilePage = () => {
                           </Link>
                         </Card>)}
                     </div> : <div className="text-center py-12">
-                      <p className="text-muted-foreground text-lg mb-6">No scammer reports yet</p>
+                      <p className="text-muted-foreground text-lg mb-6">No reports yet</p>
                       <Button asChild>
                         
                       </Button>
@@ -450,7 +450,7 @@ const PublicProfilePage = () => {
                     </div> : likedScammers && likedScammers.length > 0 ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {likedScammers.map(scammer => <ScammerCard key={scammer.id} scammer={scammer} />)}
                     </div> : <div className="text-center py-12">
-                      <p className="text-muted-foreground text-lg mb-6">No liked scammer reports yet</p>
+                      <p className="text-muted-foreground text-lg mb-6">No liked reports yet</p>
                       <Button asChild>
                         <Link to="/most-wanted">Browse Scammers <ExternalLink className="ml-2" size={16} /></Link>
                       </Button>

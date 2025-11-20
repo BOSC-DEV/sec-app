@@ -17,7 +17,7 @@ const APIPage = () => {
             <Code className="h-12 w-12 mb-4" />
             <p className="text-xl leading-relaxed">
               The SEC platform provides a comprehensive REST API built on Supabase, 
-              enabling developers to integrate scammer reporting, bounty management, 
+              enabling developers to integrate report submission, bounty management, 
               and community features into their own applications.
             </p>
           </div>
@@ -94,7 +94,7 @@ const APIPage = () => {
 
             <div className="border rounded-lg p-6">
               <h3 className="text-xl font-semibold mb-3 text-red-600">POST /reports/scammer</h3>
-              <p className="mb-4">Report a scammer with comprehensive details including evidence, wallet addresses, and supporting documentation.</p>
+              <p className="mb-4">Submit a report with comprehensive details including evidence, wallet addresses, and supporting documentation.</p>
               <div className="bg-muted p-4 rounded">
                 <pre className="text-sm">
 {`{
@@ -216,7 +216,7 @@ const { data, error } = await supabase
             <div className="p-6 bg-muted rounded-lg text-center">
               <Database className="h-8 w-8 mx-auto mb-3 text-icc-gold" />
               <h3 className="font-semibold mb-2">New Reports</h3>
-              <p className="text-sm">Triggered when new scammer reports are submitted</p>
+              <p className="text-sm">Triggered when new reports are submitted</p>
             </div>
             <div className="p-6 bg-muted rounded-lg text-center">
               <Zap className="h-8 w-8 mx-auto mb-3 text-icc-gold" />

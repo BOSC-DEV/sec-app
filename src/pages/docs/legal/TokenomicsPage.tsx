@@ -31,7 +31,7 @@ const TokenomicsPage = () => {
               <Target className="h-8 w-8 text-icc-gold mb-4" />
               <h3 className="text-xl font-semibold mb-3">Primary Functions</h3>
               <ul className="space-y-2 text-sm">
-                <li>• Bounty contributions to scammer reports</li>
+                <li>• Bounty contributions to reports</li>
                 <li>• Incentivizing high-quality content</li>
                 <li>• Community governance participation</li>
                 <li>• Badge tier progression rewards</li>
@@ -43,7 +43,7 @@ const TokenomicsPage = () => {
               <h3 className="text-xl font-semibold mb-3">Value Drivers</h3>
               <ul className="space-y-2 text-sm">
                 <li>• Increased platform adoption</li>
-                <li>• Higher quality scammer reports</li>
+                <li>• Higher quality reports</li>
                 <li>• Community engagement growth</li>
                 <li>• Deflationary mechanisms</li>
                 <li>• Utility expansion</li>
@@ -102,7 +102,7 @@ const TokenomicsPage = () => {
               <div className="bg-icc-gold text-icc-blue-dark rounded-full w-8 h-8 flex items-center justify-center font-bold">1</div>
               <div>
                 <h3 className="text-xl font-semibold mb-2">Contribution Mechanics</h3>
-                <p>Users contribute SEC tokens to specific scammer reports, increasing the bounty pool and incentivizing community engagement.</p>
+                <p>Users contribute SEC tokens to specific reports, increasing the bounty pool and incentivizing community engagement.</p>
               </div>
             </div>
             <div className="flex items-start gap-4 p-6 border rounded-lg">
@@ -185,7 +185,7 @@ const TokenomicsPage = () => {
             <div className="p-4 border-l-4 border-green-500 bg-green-50 dark:bg-green-950">
               <h4 className="font-semibold text-green-800 dark:text-green-200">Quality Reporting Rewards</h4>
               <p className="text-green-700 dark:text-green-300">
-                Users receive SEC tokens for creating comprehensive, well-evidenced scammer reports that benefit the community
+                Users receive SEC tokens for creating comprehensive, well-evidenced reports that benefit the community
               </p>
             </div>
             <div className="p-4 border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-950">

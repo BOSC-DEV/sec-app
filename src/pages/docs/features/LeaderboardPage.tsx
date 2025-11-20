@@ -9,7 +9,7 @@ const LeaderboardPage = () => {
   return (
     <DocsContent 
       title="Leaderboard System" 
-      description="Track top contributors and compete to become a leading scammer hunter in the SEC community"
+      description="Track top contributors and compete to become a leading contributor in the SEC community"
     >
       <div className="space-y-8">
         {/* Overview */}
@@ -19,7 +19,7 @@ const LeaderboardPage = () => {
             <Trophy className="h-12 w-12 mb-4" />
             <p className="text-xl leading-relaxed">
               The SEC Leaderboard recognizes and celebrates our most active community members. 
-              Climb the ranks by reporting scammers, contributing bounties, and engaging with 
+              Climb the ranks by submitting reports, contributing bounties, and engaging with 
               the community to help create a safer crypto ecosystem.
             </p>
           </div>
@@ -33,8 +33,8 @@ const LeaderboardPage = () => {
               <Target className="h-8 w-8 text-icc-gold mb-4" />
               <h3 className="text-xl font-semibold mb-3">Top Reporters</h3>
               <p className="mb-4">
-                Users who have submitted the most verified scammer reports, helping to build 
-                our comprehensive database of bad actors.
+                Users who have submitted the most verified reports, helping to build 
+                our comprehensive database of threats.
               </p>
               <ul className="space-y-2 text-sm">
                 <li>• Total number of reports submitted</li>
@@ -96,7 +96,7 @@ const LeaderboardPage = () => {
               <div className="bg-icc-gold text-icc-blue-dark rounded-full w-8 h-8 flex items-center justify-center font-bold">1</div>
               <div>
                 <h3 className="text-xl font-semibold mb-2">Report Submissions</h3>
-                <p>Each verified scammer report earns base points, with bonuses for detailed evidence, photos, and comprehensive information.</p>
+                <p>Each verified report earns base points, with bonuses for detailed evidence, photos, and comprehensive information.</p>
               </div>
             </div>
             <div className="flex items-start gap-4 p-6 border rounded-lg">

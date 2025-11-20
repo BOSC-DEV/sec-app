@@ -9,7 +9,7 @@ const ReportsGuidePage = () => {
   return (
     <DocsContent 
       title="Creating Reports" 
-      description="Step-by-step guide to reporting scammers and contributing to the SEC database"
+      description="Step-by-step guide to submitting reports and contributing to the SEC database"
     >
       <div className="space-y-8">
         {/* Overview */}
@@ -18,7 +18,7 @@ const ReportsGuidePage = () => {
           <div className="bg-gradient-to-r from-icc-blue to-icc-blue-light rounded-lg p-8 text-white mb-6">
             <FileText className="h-12 w-12 mb-4" />
             <p className="text-xl leading-relaxed">
-              Reporting scammers is the core mission of the SEC platform. Your reports help 
+              Creating reports is the core mission of the SEC platform. Your reports help 
               protect the crypto community by exposing bad actors and preventing future victims. 
               Follow this guide to create effective, well-documented reports.
             </p>
@@ -40,7 +40,7 @@ const ReportsGuidePage = () => {
               <div className="bg-icc-gold text-icc-blue-dark rounded-full w-8 h-8 flex items-center justify-center font-bold">2</div>
               <div>
                 <h3 className="text-xl font-semibold mb-2">Check for Existing Reports</h3>
-                <p>Search the database to ensure the scammer hasn't already been reported. If they have, consider adding additional information or contributing to their bounty.</p>
+                <p>Search the database to ensure the subject hasn't already been reported. If they have, consider adding additional information or contributing to their bounty.</p>
               </div>
             </div>
             <div className="flex items-start gap-4 p-6 border rounded-lg">
@@ -61,8 +61,8 @@ const ReportsGuidePage = () => {
               <AlertTriangle className="h-8 w-8 text-icc-gold mb-4" />
               <h3 className="text-xl font-semibold mb-3">Required Information</h3>
               <ul className="space-y-2 text-sm">
-                <li>• <strong>Scammer Name:</strong> Primary name or alias</li>
-                <li>• <strong>Accusation:</strong> Detailed description of the scam</li>
+                <li>• <strong>Subject Name:</strong> Primary name or alias</li>
+                <li>• <strong>Accusation:</strong> Detailed description of the incident</li>
                 <li>• <strong>Evidence:</strong> Supporting documentation or photos</li>
                 <li>• <strong>Impact:</strong> Financial or other damages caused</li>
               </ul>
