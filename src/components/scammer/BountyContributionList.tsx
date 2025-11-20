@@ -4,10 +4,10 @@ import { BountyContribution } from '@/types/dataTypes';
 import { formatDate } from '@/lib/utils';
 import { formatCurrency } from '@/utils/formatCurrency';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Calendar, ArrowLeftIcon, ArrowRightIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Calendar } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Link } from 'react-router-dom';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { getProfilesByDisplayName } from '@/services/profileService';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
 
@@ -137,19 +137,36 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
       })}
       </div>
       
-      {totalPages > 1 && onPageChange && <div className="flex justify-between items-center pt-3">
-          <Button variant="outline" size="sm" onClick={() => handlePageChange(currentPage - 1)} disabled={!hasPreviousPage} aria-label="Previous page">
-            <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
-          </Button>
-          
-          <span className="text-sm text-icc-gray" aria-live="polite">
-            {currentPage}/{totalPages}
-          </span>
-          
-          <Button variant="outline" size="sm" onClick={() => handlePageChange(currentPage + 1)} disabled={!hasNextPage} aria-label="Next page">
-            <ArrowRightIcon className="h-4 w-4" aria-hidden="true" />
-          </Button>
-        </div>}
+      {totalPages > 1 && onPageChange && <Pagination className="mt-6">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious 
+                onClick={() => handlePageChange(currentPage - 1)} 
+                className={!hasPreviousPage ? "pointer-events-none opacity-50" : "cursor-pointer"} 
+              />
+            </PaginationItem>
+            
+            {/* Page numbers */}
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
+              <PaginationItem key={pageNum}>
+                <PaginationLink 
+                  onClick={() => handlePageChange(pageNum)} 
+                  isActive={currentPage === pageNum} 
+                  className="cursor-pointer"
+                >
+                  {pageNum}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            
+            <PaginationItem>
+              <PaginationNext 
+                onClick={() => handlePageChange(currentPage + 1)} 
+                className={!hasNextPage ? "pointer-events-none opacity-50" : "cursor-pointer"} 
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>}
     </div>;
 };
 
