@@ -17,14 +17,7 @@ import { Toggle } from '@/components/ui/toggle';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from '@/hooks/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -46,7 +39,6 @@ import BountyForm from '@/components/scammer/BountyForm';
 import { ArrowLeftRight } from 'lucide-react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-
 const ScammerDetailPage = () => {
   const {
     id
@@ -76,11 +68,11 @@ const ScammerDetailPage = () => {
   const contributionsPerPage = 5;
   const [profileChangeCounter, setProfileChangeCounter] = useState(0);
   const isMobile = useIsMobile();
-  
+
   // Comment pagination state
   const [currentCommentPage, setCurrentCommentPage] = useState(1);
   const [commentsPerPage, setCommentsPerPage] = useState(5);
-  
+
   // Adjust comments per page based on screen size (9 for iPad, 5 for mobile/desktop)
   useEffect(() => {
     const updateCommentsPerPage = () => {
@@ -92,12 +84,11 @@ const ScammerDetailPage = () => {
         setCommentsPerPage(5);
       }
     };
-    
     updateCommentsPerPage();
     window.addEventListener('resize', updateCommentsPerPage);
     return () => window.removeEventListener('resize', updateCommentsPerPage);
   }, []);
-  
+
   // Touch gesture state for swipe
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -106,7 +97,6 @@ const ScammerDetailPage = () => {
   useEffect(() => {
     setCurrentCommentPage(1);
   }, [id]);
-
   useEffect(() => {
     const handleProfileUpdated = () => {
       console.log("Profile updated event received, refreshing contributions");
@@ -120,7 +110,6 @@ const ScammerDetailPage = () => {
       window.removeEventListener(PROFILE_UPDATED_EVENT, handleProfileUpdated);
     };
   }, [id, queryClient]);
-
   const deleteScammerMutation = useMutation({
     mutationFn: () => {
       if (!id) throw new Error("Scammer ID is required");
@@ -141,7 +130,6 @@ const ScammerDetailPage = () => {
       });
     }
   });
-
   const unarchiveScammerMutation = useMutation({
     mutationFn: () => {
       if (!id) throw new Error("Scammer ID is required");
@@ -164,7 +152,6 @@ const ScammerDetailPage = () => {
       });
     }
   });
-
   const {
     data: scammer,
     isLoading: isLoadingScammer,
@@ -174,7 +161,6 @@ const ScammerDetailPage = () => {
     queryFn: () => getScammerById(id || ''),
     enabled: !!id
   });
-
   const {
     data: comments,
     isLoading: isLoadingComments,
@@ -184,7 +170,6 @@ const ScammerDetailPage = () => {
     queryFn: () => getScammerComments(id || ''),
     enabled: !!id
   });
-
   const {
     data: bountyContributionsData,
     isLoading: isLoadingBountyContributions
@@ -194,7 +179,6 @@ const ScammerDetailPage = () => {
     enabled: !!id,
     placeholderData: previousData => previousData
   });
-
   const {
     data: userContributionAmount = 0,
     isLoading: isLoadingUserContribution
@@ -203,10 +187,8 @@ const ScammerDetailPage = () => {
     queryFn: () => getUserContributionAmountForScammer(id || '', profile?.id || ''),
     enabled: !!id && !!profile?.id
   });
-
   const bountyContributions = bountyContributionsData?.contributions || [];
   const totalContributions = bountyContributionsData?.totalCount || 0;
-
   useEffect(() => {
     const checkIsCreator = async () => {
       if (!profile?.id || !id) return;
@@ -223,7 +205,6 @@ const ScammerDetailPage = () => {
     };
     checkIsCreator();
   }, [id, profile?.wallet_address]);
-
   useEffect(() => {
     const fetchUserInteraction = async () => {
       if (!profile?.id || !scammer?.id) return;
@@ -246,7 +227,6 @@ const ScammerDetailPage = () => {
     };
     fetchUserInteraction();
   }, [scammer?.id, profile?.wallet_address]);
-
   useEffect(() => {
     if (scammer) {
       setLikes(scammer.likes || 0);
@@ -259,7 +239,6 @@ const ScammerDetailPage = () => {
       }
     }
   }, [scammer]);
-
   useEffect(() => {
     const fetchCreatorProfile = async () => {
       if (scammer?.added_by) {
@@ -277,13 +256,11 @@ const ScammerDetailPage = () => {
     };
     fetchCreatorProfile();
   }, [scammer?.added_by]);
-
   useEffect(() => {
     if (profile) {
       setProfileChangeCounter(prev => prev + 1);
     }
   }, [profile?.display_name, profile?.profile_pic_url]);
-
   const handleEditScammer = () => {
     if (!id) return;
     navigate(`/edit-report/${id}`);
@@ -291,25 +268,19 @@ const ScammerDetailPage = () => {
 
   // Touch event handlers for swipe gestures
   const minSwipeDistance = 50;
-
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
   };
-
   const onTouchMove = (e: React.TouchEvent) => {
     setTouchEnd(e.targetTouches[0].clientX);
   };
-
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-    
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
-    
     const totalCommentPages = Math.ceil((comments?.length || 0) / commentsPerPage);
-    
     if (isLeftSwipe && currentCommentPage < totalCommentPages) {
       setCurrentCommentPage(prev => prev + 1);
     }
@@ -317,7 +288,6 @@ const ScammerDetailPage = () => {
       setCurrentCommentPage(prev => prev - 1);
     }
   };
-
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
       toast({
@@ -326,7 +296,6 @@ const ScammerDetailPage = () => {
       });
     });
   };
-
   const addCommentMutation = useMutation({
     mutationFn: (newComment: {
       scammer_id: string;
@@ -353,7 +322,6 @@ const ScammerDetailPage = () => {
       });
     }
   });
-
   const addBountyContributionMutation = useMutation({
     mutationFn: (contribution: {
       scammer_id: string;
@@ -386,7 +354,6 @@ const ScammerDetailPage = () => {
       });
     }
   });
-
   const handleLike = async () => {
     if (!profile?.wallet_address) {
       toast({
@@ -433,7 +400,6 @@ const ScammerDetailPage = () => {
       setIsLoading(false);
     }
   };
-
   const handleDislike = async () => {
     if (!profile?.wallet_address) {
       toast({
@@ -477,7 +443,6 @@ const ScammerDetailPage = () => {
       setIsLoading(false);
     }
   };
-
   const handleAddComment = () => {
     if (!profile) {
       toast({
@@ -503,7 +468,6 @@ const ScammerDetailPage = () => {
       author_profile_pic: profile.profile_pic_url
     });
   };
-
   const handleAddBounty = async () => {
     if (!profile) {
       await connectPhantomWallet();
@@ -552,27 +516,21 @@ const ScammerDetailPage = () => {
       setIsLoading(false);
     }
   };
-
   const handlePageChange = (page: number) => {
     setContributionsPage(page);
   };
-
   const handleDeleteScammer = () => {
     setShowDeleteDialog(true);
   };
-
   const handleUnarchiveScammer = () => {
     setShowUnarchiveDialog(true);
   };
-
   const confirmDelete = () => {
     deleteScammerMutation.mutate();
   };
-
   const confirmUnarchive = () => {
     unarchiveScammerMutation.mutate();
   };
-
   const handleShare = async () => {
     try {
       const url = `${window.location.origin}/report/${scammer?.report_number || id}`;
@@ -589,7 +547,6 @@ const ScammerDetailPage = () => {
       });
     }
   };
-
   const handleTransferComplete = () => {
     queryClient.invalidateQueries({
       queryKey: ['bountyContributions', id]
@@ -598,9 +555,7 @@ const ScammerDetailPage = () => {
       queryKey: ['scammer', id]
     });
   };
-
   const developerWallet = `${developerWalletAddress.substring(0, 4)}...${developerWalletAddress.substring(developerWalletAddress.length - 4)}`;
-
   if (isLoadingScammer) {
     return <div>
         <CompactHero title="Loading..." />
@@ -614,7 +569,6 @@ const ScammerDetailPage = () => {
         </section>
       </div>;
   }
-
   if (errorScammer || !scammer) {
     return <div>
         <CompactHero title="Error" />
@@ -631,42 +585,30 @@ const ScammerDetailPage = () => {
         </section>
       </div>;
   }
-
-  return (
-    <div>
+  return <div>
       <CompactHero title={scammer?.name} />
 
       <section className="icc-section bg-white">
         <div className="icc-container">
-          {scammer.deleted_at && (
-            <Alert variant="destructive" className="mb-6">
+          {scammer.deleted_at && <Alert variant="destructive" className="mb-6">
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>Archived Report</AlertTitle>
               <AlertDescription>
                 This scammer report has been archived and is no longer visible in search results.
               </AlertDescription>
-            </Alert>
-          )}
+            </Alert>}
           
           <div className="flex items-center justify-between mb-6">
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate('/most-wanted')} 
-              aria-label="Back to Most Wanted list"
-            >
+            <Button variant="ghost" onClick={() => navigate('/most-wanted')} aria-label="Back to Most Wanted list">
               <ArrowLeft className="h-4 w-4 mr-2" aria-hidden="true" />
               {isMobile ? 'Back' : 'Back to Most Wanted'}
             </Button>
             <div className="flex items-center space-x-2 md:space-x-3">
-              {isCreator && (
-                <>
-                  {scammer.deleted_at ? (
-                    <Button variant="gold" size="sm" onClick={handleUnarchiveScammer} aria-label="Unarchive this report">
+              {isCreator && <>
+                  {scammer.deleted_at ? <Button variant="gold" size="sm" onClick={handleUnarchiveScammer} aria-label="Unarchive this report">
                       <ArchiveRestore className="h-3.5 w-3.5" aria-hidden="true" />
                       {!isMobile && <span className="ml-1">Unarchive Report</span>}
-                    </Button>
-                  ) : (
-                    <>
+                    </Button> : <>
                       <Button variant="outline" size="sm" onClick={handleEditScammer} aria-label="Edit this report">
                         <Edit className="h-3.5 w-3.5" aria-hidden="true" />
                         {!isMobile && <span className="ml-1">Edit Report</span>}
@@ -675,10 +617,8 @@ const ScammerDetailPage = () => {
                         <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                         {!isMobile && <span className="ml-1">Archive Report</span>}
                       </Button>
-                    </>
-                  )}
-                </>
-              )}
+                    </>}
+                </>}
               
               <Button variant="outline" size="sm" onClick={handleShare} aria-label="Share this scammer report">
                 <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
@@ -737,15 +677,10 @@ const ScammerDetailPage = () => {
                 </div>
                 
                 <TabsContent value="comments" className="mt-2">
-                  <h2 className="text-2xl font-gothic font-bold text-icc-blue mb-4" id="comments-section">Comments</h2>
+                  
                   <div className="mb-4">
                     <Textarea placeholder="Write your comment here..." value={commentText} onChange={e => setCommentText(e.target.value)} aria-label="Comment text" />
-                    <Button 
-                      className="mt-2 w-full" 
-                      onClick={handleAddComment} 
-                      disabled={addCommentMutation.isPending} 
-                      aria-label="Add comment"
-                    >
+                    <Button className="mt-2 w-full" onClick={handleAddComment} disabled={addCommentMutation.isPending} aria-label="Add comment">
                       {addCommentMutation.isPending ? 'Adding...' : 'Add Comment'}
                     </Button>
                   </div>
@@ -760,22 +695,13 @@ const ScammerDetailPage = () => {
                         </div>)}
                       <span className="sr-only">Loading comments...</span>
                     </div> : errorComments ? <div className="text-red-500">Error loading comments.</div> : comments && comments.length > 0 ? (() => {
-                      const totalCommentPages = Math.ceil(comments.length / commentsPerPage);
-                      const startIndex = (currentCommentPage - 1) * commentsPerPage;
-                      const endIndex = startIndex + commentsPerPage;
-                      const paginatedComments = comments.slice(startIndex, endIndex);
-                      
-                      return (
-                        <div 
-                          aria-label="Comments section"
-                          onTouchStart={onTouchStart}
-                          onTouchMove={onTouchMove}
-                          onTouchEnd={onTouchEnd}
-                          className="select-none"
-                        >
+                  const totalCommentPages = Math.ceil(comments.length / commentsPerPage);
+                  const startIndex = (currentCommentPage - 1) * commentsPerPage;
+                  const endIndex = startIndex + commentsPerPage;
+                  const paginatedComments = comments.slice(startIndex, endIndex);
+                  return <div aria-label="Comments section" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} className="select-none">
                           <div className="min-h-[500px]">
-                            {paginatedComments.map(comment => (
-                            <div key={comment.id} className="flex items-start space-x-4 py-4 border-b">
+                            {paginatedComments.map(comment => <div key={comment.id} className="flex items-start space-x-4 py-4 border-b">
                               <Avatar>
                                 <AvatarImage src={comment.author_profile_pic || '/placeholder.svg'} alt={`${comment.author_name}'s profile`} />
                                 <AvatarFallback>{comment.author_name.substring(0, 2)}</AvatarFallback>
@@ -785,46 +711,32 @@ const ScammerDetailPage = () => {
                                 <div className="text-sm text-gray-500">{formatDate(comment.created_at)}</div>
                                 <p className="mt-1">{comment.content}</p>
                               </div>
-                            </div>
-                            ))}
+                            </div>)}
                           </div>
                           
                           {/* Pagination Controls */}
-                          {totalCommentPages > 1 && (
-                            <Pagination className="mt-6">
+                          {totalCommentPages > 1 && <Pagination className="mt-6">
                               <PaginationContent>
                                 <PaginationItem>
-                                  <PaginationPrevious 
-                                    onClick={() => setCurrentCommentPage(prev => Math.max(1, prev - 1))}
-                                    className={currentCommentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                                  />
+                                  <PaginationPrevious onClick={() => setCurrentCommentPage(prev => Math.max(1, prev - 1))} className={currentCommentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"} />
                                 </PaginationItem>
                                 
                                 {/* Page numbers */}
-                                {Array.from({ length: totalCommentPages }, (_, i) => i + 1).map(pageNum => (
-                                  <PaginationItem key={pageNum}>
-                                    <PaginationLink
-                                      onClick={() => setCurrentCommentPage(pageNum)}
-                                      isActive={currentCommentPage === pageNum}
-                                      className="cursor-pointer"
-                                    >
+                                {Array.from({
+                          length: totalCommentPages
+                        }, (_, i) => i + 1).map(pageNum => <PaginationItem key={pageNum}>
+                                    <PaginationLink onClick={() => setCurrentCommentPage(pageNum)} isActive={currentCommentPage === pageNum} className="cursor-pointer">
                                       {pageNum}
                                     </PaginationLink>
-                                  </PaginationItem>
-                                ))}
+                                  </PaginationItem>)}
                                 
                                 <PaginationItem>
-                                  <PaginationNext 
-                                    onClick={() => setCurrentCommentPage(prev => Math.min(totalCommentPages, prev + 1))}
-                                    className={currentCommentPage === totalCommentPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                                  />
+                                  <PaginationNext onClick={() => setCurrentCommentPage(prev => Math.min(totalCommentPages, prev + 1))} className={currentCommentPage === totalCommentPages ? "pointer-events-none opacity-50" : "cursor-pointer"} />
                                 </PaginationItem>
                               </PaginationContent>
-                            </Pagination>
-                          )}
-                        </div>
-                      );
-                    })() : <div aria-live="polite">No comments yet. Be the first to comment!</div>}
+                            </Pagination>}
+                        </div>;
+                })() : <div aria-live="polite">No comments yet. Be the first to comment!</div>}
                 </TabsContent>
                 
                 <TabsContent value="links" className="mt-2">
@@ -924,27 +836,11 @@ const ScammerDetailPage = () => {
                 <h3 className="text-lg font-semibold text-icc-blue dark:text-white mb-3 text-center md:text-left">Take Action</h3>
                 
                 <div className="flex space-x-2 mb-4">
-                  <Button 
-                    variant={isLiked ? "gold" : "outline"} 
-                    size="sm" 
-                    className={`flex-1 ${isLiked ? 'hover:bg-icc-gold-dark' : ''}`} 
-                    onClick={handleLike} 
-                    disabled={isLoading} 
-                    aria-pressed={isLiked} 
-                    aria-label="Like this report"
-                  >
+                  <Button variant={isLiked ? "gold" : "outline"} size="sm" className={`flex-1 ${isLiked ? 'hover:bg-icc-gold-dark' : ''}`} onClick={handleLike} disabled={isLoading} aria-pressed={isLiked} aria-label="Like this report">
                     <ThumbsUp className="h-4 w-4 mr-1" aria-hidden="true" />
                     <span>{likes}</span>
                   </Button>
-                  <Button 
-                    variant={isDisliked ? "gold" : "outline"} 
-                    size="sm" 
-                    className={`flex-1 ${isDisliked ? 'hover:bg-icc-gold-dark' : ''}`} 
-                    onClick={handleDislike} 
-                    disabled={isLoading} 
-                    aria-pressed={isDisliked} 
-                    aria-label="Dislike this report"
-                  >
+                  <Button variant={isDisliked ? "gold" : "outline"} size="sm" className={`flex-1 ${isDisliked ? 'hover:bg-icc-gold-dark' : ''}`} onClick={handleDislike} disabled={isLoading} aria-pressed={isDisliked} aria-label="Dislike this report">
                     <ThumbsDown className="h-4 w-4 mr-1" aria-hidden="true" />
                     <span>{dislikes}</span>
                   </Button>
@@ -970,41 +866,17 @@ const ScammerDetailPage = () => {
                   </Tooltip>
                 </TooltipProvider>
                 
-                {isMobile && (
-                  <div className="mt-6">
+                {isMobile && <div className="mt-6">
                     <BountyForm scammerId={scammer.id} scammerName={scammer.name} developerWalletAddress={developerWalletAddress} />
-                    
-                    <div className="mt-6">
-                      <BountyContributionList 
-                        contributions={bountyContributions} 
-                        isLoading={isLoadingBountyContributions} 
-                        totalCount={totalContributions} 
-                        onPageChange={handlePageChange} 
-                        currentPage={contributionsPage} 
-                        itemsPerPage={contributionsPerPage} 
-                        userContributionAmount={userContributionAmount}
-                      />
-                    </div>
-                  </div>
-                )}
+                  </div>}
                 
-                {!isMobile && (
-                  <div className="mt-6">
+                {!isMobile && <div className="mt-6">
                     <BountyForm scammerId={scammer.id} scammerName={scammer.name} developerWalletAddress={developerWalletAddress} />
                     
                     <div className="mt-6">
-                      <BountyContributionList 
-                        contributions={bountyContributions} 
-                        isLoading={isLoadingBountyContributions} 
-                        totalCount={totalContributions} 
-                        onPageChange={handlePageChange} 
-                        currentPage={contributionsPage} 
-                        itemsPerPage={contributionsPerPage} 
-                        userContributionAmount={userContributionAmount}
-                      />
+                      <BountyContributionList contributions={bountyContributions} isLoading={isLoadingBountyContributions} totalCount={totalContributions} onPageChange={handlePageChange} currentPage={contributionsPage} itemsPerPage={contributionsPerPage} userContributionAmount={userContributionAmount} />
                     </div>
-                  </div>
-                )}
+                  </div>}
               </div>
             </div>
           </div>
@@ -1044,8 +916,6 @@ const ScammerDetailPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
-  );
+    </div>;
 };
-
 export default ScammerDetailPage;
