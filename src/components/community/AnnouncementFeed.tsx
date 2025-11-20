@@ -744,11 +744,12 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
                       onRemoveImage={() => removeImage(false)}
                     />
                   </div>
-                  <div className="mt-3 flex justify-end">
+                  <div className="mt-3">
                     <Button 
                       type="submit" 
                       disabled={isSubmitting || !newAnnouncement.trim()}
                       onClick={() => console.log("Submit button clicked in form")}
+                      className="w-full"
                     >
                       {isSubmitting ? "Posting..." : "Post Announcement"}
                     </Button>
