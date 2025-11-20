@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { useProfile } from '@/contexts/ProfileContext';
+import { useQueryClient } from '@tanstack/react-query';
 import { 
   uploadScammerPhoto, 
   updateScammerReport, 
@@ -28,6 +29,7 @@ export type ReportFormValues = z.infer<typeof reportSchema>;
 
 export const useReportForm = (id?: string) => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [isEditMode] = useState(!!id);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -137,6 +139,17 @@ export const useReportForm = (id?: string) => {
         formData.photo_url = photoUrl;
         // Pass only the formData to updateScammerReport
         scammerId = await updateScammerReport(id, formData);
+        
+        // Invalidate relevant queries to refresh the data instantly
+        await queryClient.invalidateQueries({
+          queryKey: ['scammer', scammerId]
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ['comments', scammerId]
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ['bountyContributions', scammerId]
+        });
         
         toast({
           title: "Scammer updated",
