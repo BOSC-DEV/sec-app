@@ -139,8 +139,7 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
       
       {totalPages > 1 && onPageChange && <div className="flex justify-between items-center pt-3">
           <Button variant="outline" size="sm" onClick={() => handlePageChange(currentPage - 1)} disabled={!hasPreviousPage} aria-label="Previous page">
-            <ArrowLeftIcon className="h-4 w-4 mr-1" aria-hidden="true" />
-            Prev
+            <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
           </Button>
           
           <span className="text-sm text-icc-gray" aria-live="polite">
@@ -148,8 +147,7 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
           </span>
           
           <Button variant="outline" size="sm" onClick={() => handlePageChange(currentPage + 1)} disabled={!hasNextPage} aria-label="Next page">
-            Next
-            <ArrowRightIcon className="h-4 w-4 ml-1" aria-hidden="true" />
+            <ArrowRightIcon className="h-4 w-4" aria-hidden="true" />
           </Button>
         </div>}
     </div>;
