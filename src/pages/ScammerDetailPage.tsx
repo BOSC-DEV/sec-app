@@ -756,7 +756,8 @@ const ScammerDetailPage = () => {
                           onTouchEnd={onTouchEnd}
                           className="select-none"
                         >
-                          {paginatedComments.map(comment => (
+                          <div className="min-h-[500px]">
+                            {paginatedComments.map(comment => (
                             <div key={comment.id} className="flex items-start space-x-4 py-4 border-b">
                               <Avatar>
                                 <AvatarImage src={comment.author_profile_pic || '/placeholder.svg'} alt={`${comment.author_name}'s profile`} />
@@ -768,7 +769,8 @@ const ScammerDetailPage = () => {
                                 <p className="mt-1">{comment.content}</p>
                               </div>
                             </div>
-                          ))}
+                            ))}
+                          </div>
                           
                           {/* Pagination Controls */}
                           {totalCommentPages > 1 && (

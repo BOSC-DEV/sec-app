@@ -94,7 +94,7 @@ const BountyContributionList: React.FC<BountyContributionListProps> = ({
 
       <h4 id="contributions-heading" className="font-gothic font-bold text-icc-blue text-lg text-center">Recent Contributors:</h4>
       
-      <div aria-labelledby="contributions-heading" className="space-y-3">
+      <div aria-labelledby="contributions-heading" className="space-y-3 min-h-[600px]">
         {contributions.map(contribution => {
         const stableKey = `contribution-${contribution.id}`;
         const profilePicUrl = contribution.contributor_profile_pic ? `${contribution.contributor_profile_pic}${contribution.contributor_profile_pic.includes('?') ? '&' : '?'}t=${renderTimestamp}` : '/placeholder.svg';
