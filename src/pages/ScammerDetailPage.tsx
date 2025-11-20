@@ -754,56 +754,58 @@ const ScammerDetailPage = () => {
                           onTouchStart={onTouchStart}
                           onTouchMove={onTouchMove}
                           onTouchEnd={onTouchEnd}
-                          className="select-none"
+                          className="select-none min-h-[420px] flex flex-col justify-between"
                         >
-                          <div className="min-h-[500px]">
+                          <div>
                             {paginatedComments.map(comment => (
-                            <div key={comment.id} className="flex items-start space-x-4 py-4 border-b">
-                              <Avatar>
-                                <AvatarImage src={comment.author_profile_pic || '/placeholder.svg'} alt={`${comment.author_name}'s profile`} />
-                                <AvatarFallback>{comment.author_name.substring(0, 2)}</AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <div className="font-medium">{comment.author_name}</div>
-                                <div className="text-sm text-gray-500">{formatDate(comment.created_at)}</div>
-                                <p className="mt-1">{comment.content}</p>
+                              <div key={comment.id} className="flex items-start space-x-4 py-4 border-b">
+                                <Avatar>
+                                  <AvatarImage src={comment.author_profile_pic || '/placeholder.svg'} alt={`${comment.author_name}'s profile`} />
+                                  <AvatarFallback>{comment.author_name.substring(0, 2)}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <div className="font-medium">{comment.author_name}</div>
+                                  <div className="text-sm text-gray-500">{formatDate(comment.created_at)}</div>
+                                  <p className="mt-1">{comment.content}</p>
+                                </div>
                               </div>
-                            </div>
                             ))}
                           </div>
                           
                           {/* Pagination Controls */}
                           {totalCommentPages > 1 && (
-                            <Pagination className="mt-6">
-                              <PaginationContent>
-                                <PaginationItem>
-                                  <PaginationPrevious 
-                                    onClick={() => setCurrentCommentPage(prev => Math.max(1, prev - 1))}
-                                    className={currentCommentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                                  />
-                                </PaginationItem>
-                                
-                                {/* Page numbers */}
-                                {Array.from({ length: totalCommentPages }, (_, i) => i + 1).map(pageNum => (
-                                  <PaginationItem key={pageNum}>
-                                    <PaginationLink
-                                      onClick={() => setCurrentCommentPage(pageNum)}
-                                      isActive={currentCommentPage === pageNum}
-                                      className="cursor-pointer"
-                                    >
-                                      {pageNum}
-                                    </PaginationLink>
+                            <div className="mt-6">
+                              <Pagination>
+                                <PaginationContent>
+                                  <PaginationItem>
+                                    <PaginationPrevious 
+                                      onClick={() => setCurrentCommentPage(prev => Math.max(1, prev - 1))}
+                                      className={currentCommentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                                    />
                                   </PaginationItem>
-                                ))}
-                                
-                                <PaginationItem>
-                                  <PaginationNext 
-                                    onClick={() => setCurrentCommentPage(prev => Math.min(totalCommentPages, prev + 1))}
-                                    className={currentCommentPage === totalCommentPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                                  />
-                                </PaginationItem>
-                              </PaginationContent>
-                            </Pagination>
+                                  
+                                  {/* Page numbers */}
+                                  {Array.from({ length: totalCommentPages }, (_, i) => i + 1).map(pageNum => (
+                                    <PaginationItem key={pageNum}>
+                                      <PaginationLink
+                                        onClick={() => setCurrentCommentPage(pageNum)}
+                                        isActive={currentCommentPage === pageNum}
+                                        className="cursor-pointer"
+                                      >
+                                        {pageNum}
+                                      </PaginationLink>
+                                    </PaginationItem>
+                                  ))}
+                                  
+                                  <PaginationItem>
+                                    <PaginationNext 
+                                      onClick={() => setCurrentCommentPage(prev => Math.min(totalCommentPages, prev + 1))}
+                                      className={currentCommentPage === totalCommentPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                                    />
+                                  </PaginationItem>
+                                </PaginationContent>
+                              </Pagination>
+                            </div>
                           )}
                         </div>
                       );
