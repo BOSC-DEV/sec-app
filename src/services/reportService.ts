@@ -147,6 +147,9 @@ export const updateScammerReport = async (
     
     const sanitizedId = sanitizeInput(id);
     
+    // Check if id is a number (report_number) or UUID
+    const isNumeric = /^\d+$/.test(sanitizedId);
+    
     // Filter out empty values and sanitize arrays
     const aliases = data.aliases?.filter(item => item !== '').map(sanitizeInput) || [];
     const links = data.links?.filter(item => item !== '').map(sanitizeInput) || [];
@@ -165,7 +168,7 @@ export const updateScammerReport = async (
     const { data: existing, error: selectError } = await supabase
       .from('scammers')
       .select('id')
-      .eq('id', sanitizedId)
+      .eq(isNumeric ? 'report_number' : 'id', isNumeric ? parseInt(sanitizedId) : sanitizedId)
       .maybeSingle();
 
     if (selectError) throw selectError;
@@ -187,7 +190,7 @@ export const updateScammerReport = async (
     const { data: updatedData, error } = await supabase
       .from('scammers')
       .update(updateData)
-      .eq('id', sanitizedId)
+      .eq(isNumeric ? 'report_number' : 'id', isNumeric ? parseInt(sanitizedId) : sanitizedId)
       .select() // Request the updated record
       .single(); // Expect a single record
     
