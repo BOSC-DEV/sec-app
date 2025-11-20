@@ -868,6 +868,10 @@ const ScammerDetailPage = () => {
                 
                 {isMobile && <div className="mt-6">
                     <BountyForm scammerId={scammer.id} scammerName={scammer.name} developerWalletAddress={developerWalletAddress} />
+                    
+                    <div className="mt-6">
+                      <BountyContributionList contributions={bountyContributions} isLoading={isLoadingBountyContributions} totalCount={totalContributions} onPageChange={handlePageChange} currentPage={contributionsPage} itemsPerPage={contributionsPerPage} userContributionAmount={userContributionAmount} />
+                    </div>
                   </div>}
                 
                 {!isMobile && <div className="mt-6">
