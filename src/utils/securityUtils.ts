@@ -50,6 +50,11 @@ export const sanitizeUrl = (url: string): string => {
     // Remove any leading/trailing whitespace
     url = url.trim();
     
+    // Auto-prepend https:// if no protocol is provided
+    if (!url.match(/^https?:\/\//i)) {
+      url = 'https://' + url;
+    }
+    
     // Check if URL is valid
     const parsedUrl = new URL(url);
     

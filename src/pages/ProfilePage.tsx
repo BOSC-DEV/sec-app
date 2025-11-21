@@ -254,7 +254,7 @@ const ProfilePage = () => {
                       <div className="flex items-center">
                         <Twitter className="mr-2 h-5 w-5 text-muted-foreground" />
                         <FormControl>
-                          <Input placeholder="X (Twitter) URL" {...field} />
+                          <Input placeholder="https://x.com/username or x.com/username" {...field} />
                         </FormControl>
                       </div>
                     </FormItem>} />
@@ -265,7 +265,7 @@ const ProfilePage = () => {
                       <div className="flex items-center">
                         <Globe className="mr-2 h-5 w-5 text-muted-foreground" />
                         <FormControl>
-                          <Input placeholder="Website URL" {...field} />
+                          <Input placeholder="https://example.com or example.com" {...field} />
                         </FormControl>
                       </div>
                     </FormItem>} />
