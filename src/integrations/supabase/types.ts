@@ -356,6 +356,110 @@ export type Database = {
           },
         ]
       }
+      comment_replies: {
+        Row: {
+          author: string
+          author_name: string | null
+          author_profile_pic: string | null
+          comment_id: string
+          content: string
+          created_at: string | null
+          dislikes: number | null
+          id: string
+          likes: number | null
+        }
+        Insert: {
+          author: string
+          author_name?: string | null
+          author_profile_pic?: string | null
+          comment_id: string
+          content: string
+          created_at?: string | null
+          dislikes?: number | null
+          id?: string
+          likes?: number | null
+        }
+        Update: {
+          author?: string
+          author_name?: string | null
+          author_profile_pic?: string | null
+          comment_id?: string
+          content?: string
+          created_at?: string | null
+          dislikes?: number | null
+          id?: string
+          likes?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comment_replies_author_fkey"
+            columns: ["author"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comment_replies_author_fkey"
+            columns: ["author"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comment_replies_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comment_reply_reactions: {
+        Row: {
+          created_at: string | null
+          id: string
+          reaction_type: string
+          reply_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          reaction_type: string
+          reply_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          reaction_type?: string
+          reply_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comment_reply_reactions_reply_id_fkey"
+            columns: ["reply_id"]
+            isOneToOne: false
+            referencedRelation: "comment_replies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comment_reply_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comment_reply_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comments: {
         Row: {
           author: string
@@ -1011,6 +1115,10 @@ export type Database = {
           p_reaction_type: string
           p_user_id: string
         }
+        Returns: Json
+      }
+      toggle_comment_reply_reaction: {
+        Args: { p_reaction_type: string; p_reply_id: string; p_user_id: string }
         Returns: Json
       }
       toggle_reply_reaction: {
