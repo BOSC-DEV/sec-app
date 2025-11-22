@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
+import { useSearchParams } from 'react-router-dom';
 import SEO from '@/components/common/SEO';
 import CompactHero from '@/components/common/CompactHero';
 import AnnouncementFeed from '@/components/community/AnnouncementFeed';
@@ -18,7 +19,9 @@ const CommunityPage = () => {
     profile,
     isConnected
   } = useProfile();
-  const [activeTab, setActiveTab] = useState("announcements");
+  const [searchParams] = useSearchParams();
+  const tabFromUrl = searchParams.get('tab') || 'announcements';
+  const [activeTab, setActiveTab] = useState(tabFromUrl);
   const [splitScreen, setSplitScreen] = useState(true);
   const isMobile = useIsMobile();
 
