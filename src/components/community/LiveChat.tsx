@@ -37,7 +37,9 @@ const LiveChat = () => {
   const [isUserAdmin, setIsUserAdmin] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const loadMoreTriggerRef = useRef<HTMLDivElement>(null);
   const hasScrolledToBottom = useRef(false);
+  const isLoadingMore = useRef(false);
   const isMobile = useIsMobile();
   const onlineCount = useOnlineUsers();
   const { messages, isLoading, hasMore, loadMore, sendChatMessage, deleteChatMessage } = useChatMessages();
@@ -51,6 +53,36 @@ const LiveChat = () => {
       setIsUserAdmin(false);
     }
   }, [profile?.username]);
+
+  // Set up IntersectionObserver for infinite scroll
+  useEffect(() => {
+    if (!loadMoreTriggerRef.current || !hasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && hasMore && !isLoadingMore.current && !isLoading) {
+          console.log('Load more trigger visible, loading older messages...');
+          isLoadingMore.current = true;
+          loadMore();
+          // Reset the flag after a delay
+          setTimeout(() => {
+            isLoadingMore.current = false;
+          }, 1000);
+        }
+      },
+      {
+        root: scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]'),
+        threshold: 0.1,
+      }
+    );
+
+    observer.observe(loadMoreTriggerRef.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasMore, loadMore, isLoading]);
 
   // Scroll to bottom only once on initial load
   useEffect(() => {
@@ -200,13 +232,6 @@ const LiveChat = () => {
     setNewMessage(prev => prev + emoji);
   };
 
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const target = e.target as HTMLDivElement;
-    if (target.scrollTop === 0 && hasMore) {
-      loadMore();
-    }
-  };
-
   const renderMessage = (message: any, index: number) => {
     console.log("Rendering message:", message);
     // Get badge info based on SEC balance
@@ -295,15 +320,27 @@ const LiveChat = () => {
       <Separator />
       
       <CardContent className="p-0 flex-grow overflow-hidden">
-        <ScrollArea ref={scrollAreaRef} className="h-[calc(100%-1rem)]" onScroll={handleScroll}>
+        <ScrollArea ref={scrollAreaRef} className="h-[calc(100%-1rem)]">
           <div className={`space-y-0 p-${isMobile ? '2' : '4'}`}>
+            {/* Invisible trigger element for IntersectionObserver */}
+            {hasMore && messages.length > 0 && (
+              <div ref={loadMoreTriggerRef} className="h-1 w-full" />
+            )}
+            
             {isLoading && messages.length === 0 ? (
               <div className="flex items-center justify-center h-full py-10">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </div>
             ) : hasMore && messages.length > 0 ? (
               <div className="flex items-center justify-center py-2">
-                <p className="text-sm text-muted-foreground">Scroll up to load more messages</p>
+                {isLoading ? (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent"></div>
+                    <span>Loading older messages...</span>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Scroll up to load more messages</p>
+                )}
               </div>
             ) : null}
             {messages.length === 0 && !isLoading ? (
