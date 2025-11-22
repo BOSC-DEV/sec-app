@@ -129,7 +129,7 @@ const Header = () => {
                     Admin
                   </Button>
                 )}
-                <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light" onClick={handleProfileClick} aria-label="Profile">
+                <Button variant="ghost" size="icon" className="hidden md:flex text-white hover:bg-icc-blue-light" onClick={handleProfileClick} aria-label="Profile">
                   <User className="h-5 w-5" />
                 </Button>
                 {isMobile && <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light md:hidden" onClick={toggleMenu} aria-label="Menu">
