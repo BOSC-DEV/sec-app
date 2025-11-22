@@ -300,6 +300,7 @@ const CommentItem = ({ comment, profile }: { comment: Comment; profile: Profile 
               key={reply.id}
               reply={reply}
               onReplyUpdated={refreshReplies}
+              onReplyDeleted={refreshReplies}
             />
           ))}
         </div>

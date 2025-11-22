@@ -94,6 +94,19 @@ export const commentReplyService = {
     return data?.reaction_type || null;
   },
 
+  // Update a reply
+  async updateReply(replyId: string, content: string): Promise<void> {
+    const { error } = await supabase
+      .from('comment_replies')
+      .update({ content })
+      .eq('id', replyId);
+
+    if (error) {
+      console.error('Error updating reply:', error);
+      throw error;
+    }
+  },
+
   // Delete a reply
   async deleteReply(replyId: string): Promise<void> {
     const { error } = await supabase
