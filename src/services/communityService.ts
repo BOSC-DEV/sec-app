@@ -448,718 +448,78 @@ export const editAnnouncementReply = async (replyId: string, content: string): P
 };
 
 // Like/dislike functions for announcements
-export const likeAnnouncement = async (announcementId: string, userId: string): Promise<any> => {
-  try {
-    // First check for existing reaction with proper headers
-    const { data: existingReaction, error: fetchError } = await supabase
-      .from('announcement_reactions')
-      .select('*')
-      .eq('announcement_id', announcementId)
-      .eq('user_id', userId)
-      .eq('reaction_type', 'like')
-      .maybeSingle();
-
-    if (fetchError) throw fetchError;
-
-    // Get current announcement data first
-    const { data: currentAnnouncement, error: currentError } = await supabase
-      .from('announcements')
-      .select('likes, dislikes')
-      .eq('id', announcementId)
-      .single();
-    
-    if (currentError) throw currentError;
-    
-    // Initialize counts if they don't exist
-    const currentLikes = currentAnnouncement?.likes || 0;
-    const currentDislikes = currentAnnouncement?.dislikes || 0;
-
-    if (existingReaction) {
-      // Unlike if already liked
-      const { error: deleteError } = await supabase
-        .from('announcement_reactions')
-        .delete()
-        .eq('id', existingReaction.id);
-
-      if (deleteError) throw deleteError;
-
-      // Decrement likes count
-      const { data: updated, error: updateError } = await supabase
-        .from('announcements')
-        .update({ likes: Math.max(0, currentLikes - 1) })
-        .eq('id', announcementId)
-        .select('likes, dislikes')
-        .single();
-
-      if (updateError) throw updateError;
-      
-      return {
-        likes: updated?.likes ?? 0,
-        dislikes: updated?.dislikes ?? 0
-      };
-    } else {
-      // Remove dislike if exists
-      const { data: existingDislike, error: dislikeError } = await supabase
-        .from('announcement_reactions')
-        .select('id')
-        .eq('announcement_id', announcementId)
-        .eq('user_id', userId)
-        .eq('reaction_type', 'dislike')
-        .maybeSingle();
-
-      if (dislikeError) throw dislikeError;
-
-      if (existingDislike) {
-        const { error: deleteDislikeError } = await supabase
-          .from('announcement_reactions')
-          .delete()
-          .eq('id', existingDislike.id);
-
-        if (deleteDislikeError) throw deleteDislikeError;
-
-        // Update both likes and dislikes in one operation
-        const { data: updated, error: updateError } = await supabase
-          .from('announcements')
-          .update({ 
-            dislikes: Math.max(0, currentDislikes - 1),
-            likes: currentLikes + 1 
-          })
-          .eq('id', announcementId)
-          .select('likes, dislikes')
-          .single();
-
-        if (updateError) throw updateError;
-        
-        return {
-          likes: updated?.likes ?? 0,
-          dislikes: updated?.dislikes ?? 0
-        };
-      } else {
-        // Add new like
-        const { error: insertError } = await supabase
-          .from('announcement_reactions')
-          .insert({
-            announcement_id: announcementId,
-            user_id: userId,
-            reaction_type: 'like'
-          });
-
-        if (insertError) throw insertError;
-
-        // Increment likes count
-        const { data: updated, error: updateError } = await supabase
-          .from('announcements')
-          .update({ likes: currentLikes + 1 })
-          .eq('id', announcementId)
-          .select('likes, dislikes')
-          .single();
-
-        if (updateError) throw updateError;
-        
-        return {
-          likes: updated?.likes ?? 0,
-          dislikes: updated?.dislikes ?? 0
-        };
-      }
-    }
-  } catch (error) {
-    console.error('Error in likeAnnouncement:', error);
-    throw error; // Re-throw to let calling code handle it
-  }
+export const likeAnnouncement = async (announcementId: string, userId: string) => {
+  const { data, error } = await supabase
+    .rpc('toggle_announcement_reaction', {
+      p_announcement_id: announcementId,
+      p_user_id: userId,
+      p_reaction_type: 'like'
+    });
+  
+  if (error) throw error;
+  return data as { likes: number; dislikes: number };
 };
 
-export const dislikeAnnouncement = async (announcementId: string, userId: string): Promise<any> => {
-  try {
-    // First check for existing reaction with proper headers
-    const { data: existingReaction, error: fetchError } = await supabase
-      .from('announcement_reactions')
-      .select('*')
-      .eq('announcement_id', announcementId)
-      .eq('user_id', userId)
-      .eq('reaction_type', 'dislike')
-      .maybeSingle();
-
-    if (fetchError) throw fetchError;
-
-    // Get current announcement data first
-    const { data: currentAnnouncement, error: currentError } = await supabase
-      .from('announcements')
-      .select('likes, dislikes')
-      .eq('id', announcementId)
-      .single();
-    
-    if (currentError) throw currentError;
-    
-    // Initialize counts if they don't exist
-    const currentLikes = currentAnnouncement?.likes || 0;
-    const currentDislikes = currentAnnouncement?.dislikes || 0;
-
-    if (existingReaction) {
-      // Un-dislike if already disliked
-      const { error: deleteError } = await supabase
-        .from('announcement_reactions')
-        .delete()
-        .eq('id', existingReaction.id);
-
-      if (deleteError) throw deleteError;
-
-      // Decrement dislikes count
-      const { data: updated, error: updateError } = await supabase
-        .from('announcements')
-        .update({ dislikes: Math.max(0, currentDislikes - 1) })
-        .eq('id', announcementId)
-        .select('likes, dislikes')
-        .single();
-
-      if (updateError) throw updateError;
-      
-      return {
-        likes: updated?.likes ?? 0,
-        dislikes: updated?.dislikes ?? 0
-      };
-    } else {
-      // Remove like if exists
-      const { data: existingLike, error: likeError } = await supabase
-        .from('announcement_reactions')
-        .select('id')
-        .eq('announcement_id', announcementId)
-        .eq('user_id', userId)
-        .eq('reaction_type', 'like')
-        .maybeSingle();
-
-      if (likeError) throw likeError;
-
-      if (existingLike) {
-        const { error: deleteLikeError } = await supabase
-          .from('announcement_reactions')
-          .delete()
-          .eq('id', existingLike.id);
-
-        if (deleteLikeError) throw deleteLikeError;
-
-        // Update both likes and dislikes in one operation
-        const { data: updated, error: updateError } = await supabase
-          .from('announcements')
-          .update({ 
-            likes: Math.max(0, currentLikes - 1),
-            dislikes: currentDislikes + 1 
-          })
-          .eq('id', announcementId)
-          .select('likes, dislikes')
-          .single();
-
-        if (updateError) throw updateError;
-        
-        return {
-          likes: updated?.likes ?? 0,
-          dislikes: updated?.dislikes ?? 0
-        };
-      } else {
-        // Add new dislike
-        const { error: insertError } = await supabase
-          .from('announcement_reactions')
-          .insert({
-            announcement_id: announcementId,
-            user_id: userId,
-            reaction_type: 'dislike'
-          });
-
-        if (insertError) throw insertError;
-
-        // Increment dislikes count
-        const { data: updated, error: updateError } = await supabase
-          .from('announcements')
-          .update({ dislikes: currentDislikes + 1 })
-          .eq('id', announcementId)
-          .select('likes, dislikes')
-          .single();
-
-        if (updateError) throw updateError;
-        
-        return {
-          likes: updated?.likes ?? 0,
-          dislikes: updated?.dislikes ?? 0
-        };
-      }
-    }
-  } catch (error) {
-    console.error('Error in dislikeAnnouncement:', error);
-    throw error; // Re-throw to let calling code handle it
-  }
+export const dislikeAnnouncement = async (announcementId: string, userId: string) => {
+  const { data, error } = await supabase
+    .rpc('toggle_announcement_reaction', {
+      p_announcement_id: announcementId,
+      p_user_id: userId,
+      p_reaction_type: 'dislike'
+    });
+  
+  if (error) throw error;
+  return data as { likes: number; dislikes: number };
 };
 
 // Like/dislike functions for replies
-export const likeReply = async (replyId: string, userId: string): Promise<any> => {
-  try {
-    // First check for existing reaction with proper headers
-    const { data: existingReaction, error: fetchError } = await supabase
-      .from('reply_reactions')
-      .select('*')
-      .eq('reply_id', replyId)
-      .eq('user_id', userId)
-      .eq('reaction_type', 'like')
-      .maybeSingle();
-
-    if (fetchError) throw fetchError;
-
-    if (existingReaction) {
-      // Unlike if already liked
-      const { error: deleteError } = await supabase
-        .from('reply_reactions')
-        .delete()
-        .eq('id', existingReaction.id);
-
-      if (deleteError) throw deleteError;
-
-      // Decrement likes count
-      const { data: reply, error: replyError } = await supabase
-        .from('replies')
-        .select('likes')
-        .eq('id', replyId)
-        .single();
-
-      if (replyError) throw replyError;
-
-      const { error: updateError } = await supabase
-        .from('replies')
-        .update({ likes: Math.max(0, (reply?.likes || 0) - 1) })
-        .eq('id', replyId);
-
-      if (updateError) throw updateError;
-    } else {
-      // Remove dislike if exists
-      const { data: existingDislike, error: dislikeError } = await supabase
-        .from('reply_reactions')
-        .select('id')
-        .eq('reply_id', replyId)
-        .eq('user_id', userId)
-        .eq('reaction_type', 'dislike')
-        .maybeSingle();
-
-      if (dislikeError) throw dislikeError;
-
-      if (existingDislike) {
-        const { error: deleteDislikeError } = await supabase
-          .from('reply_reactions')
-          .delete()
-          .eq('id', existingDislike.id);
-
-        if (deleteDislikeError) throw deleteDislikeError;
-
-        // Decrement dislikes count
-        const { data: reply, error: replyError } = await supabase
-          .from('replies')
-          .select('dislikes')
-          .eq('id', replyId)
-          .single();
-
-        if (replyError) throw replyError;
-
-        const { error: updateError } = await supabase
-          .from('replies')
-          .update({ dislikes: Math.max(0, (reply?.dislikes || 0) - 1) })
-          .eq('id', replyId);
-
-        if (updateError) throw updateError;
-      }
-
-      // Add new like
-      const { error: insertError } = await supabase
-        .from('reply_reactions')
-        .insert({
-          reply_id: replyId,
-          user_id: userId,
-          reaction_type: 'like'
-        });
-
-      if (insertError) throw insertError;
-
-      // Increment likes count
-      const { data: reply, error: replyError } = await supabase
-        .from('replies')
-        .select('likes')
-        .eq('id', replyId)
-        .single();
-
-      if (replyError) throw replyError;
-
-      const { error: updateError } = await supabase
-        .from('replies')
-        .update({ likes: (reply?.likes || 0) + 1 })
-        .eq('id', replyId);
-
-      if (updateError) throw updateError;
-    }
-
-    // Get updated counts
-    const { data: updated, error: updatedError } = await supabase
-      .from('replies')
-      .select('likes, dislikes')
-      .eq('id', replyId)
-      .maybeSingle();
-
-    if (updatedError) throw updatedError;
-
-    return updated || { likes: 0, dislikes: 0 };
-  } catch (error) {
-    console.error('Error in likeReply:', error);
-    throw error; // Re-throw to let calling code handle it
-  }
+export const likeReply = async (replyId: string, userId: string) => {
+  const { data, error } = await supabase
+    .rpc('toggle_reply_reaction', {
+      p_reply_id: replyId,
+      p_user_id: userId,
+      p_reaction_type: 'like'
+    });
+  
+  if (error) throw error;
+  return data as { likes: number; dislikes: number };
 };
 
-export const dislikeReply = async (replyId: string, userId: string): Promise<any> => {
-  try {
-    // First check for existing reaction with proper headers
-    const { data: existingReaction, error: fetchError } = await supabase
-      .from('reply_reactions')
-      .select('*')
-      .eq('reply_id', replyId)
-      .eq('user_id', userId)
-      .eq('reaction_type', 'dislike')
-      .maybeSingle();
-
-    if (fetchError) throw fetchError;
-
-    if (existingReaction) {
-      // Un-dislike if already disliked
-      const { error: deleteError } = await supabase
-        .from('reply_reactions')
-        .delete()
-        .eq('id', existingReaction.id);
-
-      if (deleteError) throw deleteError;
-
-      // Decrement dislikes count
-      const { data: reply, error: replyError } = await supabase
-        .from('replies')
-        .select('dislikes')
-        .eq('id', replyId)
-        .single();
-
-      if (replyError) throw replyError;
-
-      const { error: updateError } = await supabase
-        .from('replies')
-        .update({ dislikes: Math.max(0, (reply?.dislikes || 0) - 1) })
-        .eq('id', replyId);
-
-      if (updateError) throw updateError;
-    } else {
-      // Remove like if exists
-      const { data: existingLike, error: likeError } = await supabase
-        .from('reply_reactions')
-        .select('id')
-        .eq('reply_id', replyId)
-        .eq('user_id', userId)
-        .eq('reaction_type', 'like')
-        .maybeSingle();
-
-      if (likeError) throw likeError;
-
-      if (existingLike) {
-        const { error: deleteLikeError } = await supabase
-          .from('reply_reactions')
-          .delete()
-          .eq('id', existingLike.id);
-
-        if (deleteLikeError) throw deleteLikeError;
-
-        // Decrement likes count
-        const { data: reply, error: replyError } = await supabase
-          .from('replies')
-          .select('likes')
-          .eq('id', replyId)
-          .single();
-
-        if (replyError) throw replyError;
-
-        const { error: updateError } = await supabase
-          .from('replies')
-          .update({ likes: Math.max(0, (reply?.likes || 0) - 1) })
-          .eq('id', replyId);
-
-        if (updateError) throw updateError;
-      }
-
-      // Add new dislike
-      const { error: insertError } = await supabase
-        .from('reply_reactions')
-        .insert({
-          reply_id: replyId,
-          user_id: userId,
-          reaction_type: 'dislike'
-        });
-
-      if (insertError) throw insertError;
-
-      // Increment dislikes count
-      const { data: reply, error: replyError } = await supabase
-        .from('replies')
-        .select('dislikes')
-        .eq('id', replyId)
-        .single();
-
-      if (replyError) throw replyError;
-
-      const { error: updateError } = await supabase
-        .from('replies')
-        .update({ dislikes: (reply?.dislikes || 0) + 1 })
-        .eq('id', replyId);
-
-      if (updateError) throw updateError;
-    }
-
-    // Get updated counts
-    const { data: updated, error: updatedError } = await supabase
-      .from('replies')
-      .select('likes, dislikes')
-      .eq('id', replyId)
-      .maybeSingle();
-
-    if (updatedError) throw updatedError;
-
-    return updated || { likes: 0, dislikes: 0 };
-  } catch (error) {
-    console.error('Error in dislikeReply:', error);
-    throw error; // Re-throw to let calling code handle it
-  }
+export const dislikeReply = async (replyId: string, userId: string) => {
+  const { data, error } = await supabase
+    .rpc('toggle_reply_reaction', {
+      p_reply_id: replyId,
+      p_user_id: userId,
+      p_reaction_type: 'dislike'
+    });
+  
+  if (error) throw error;
+  return data as { likes: number; dislikes: number };
 };
 
 // Functions for chat messages
-export const likeChatMessage = async (messageId: string, userId: string): Promise<any> => {
-  try {
-    // First check for existing reaction with proper headers
-    const { data: existingReaction, error: fetchError } = await supabase
-      .from('chat_message_reactions')
-      .select('*')
-      .eq('message_id', messageId)
-      .eq('user_id', userId)
-      .eq('reaction_type', 'like')
-      .maybeSingle();  // Using maybeSingle() instead of single()
-
-    if (fetchError) throw fetchError;
-
-    if (existingReaction) {
-      // Unlike if already liked
-      const { error: deleteError } = await supabase
-        .from('chat_message_reactions')
-        .delete()
-        .eq('id', existingReaction.id);
-
-      if (deleteError) throw deleteError;
-
-      // Decrement likes count
-      const { data: message, error: messageError } = await supabase
-        .from('chat_messages')
-        .select('likes')
-        .eq('id', messageId)
-        .single();
-
-      if (messageError) throw messageError;
-
-      const { error: updateError } = await supabase
-        .from('chat_messages')
-        .update({ likes: Math.max(0, (message?.likes || 0) - 1) })
-        .eq('id', messageId);
-
-      if (updateError) throw updateError;
-    } else {
-      // Remove dislike if exists
-      const { data: existingDislike, error: dislikeError } = await supabase
-        .from('chat_message_reactions')
-        .select('id')
-        .eq('message_id', messageId)
-        .eq('user_id', userId)
-        .eq('reaction_type', 'dislike')
-        .maybeSingle();
-
-      if (dislikeError) throw dislikeError;
-
-      if (existingDislike) {
-        const { error: deleteDislikeError } = await supabase
-          .from('chat_message_reactions')
-          .delete()
-          .eq('id', existingDislike.id);
-
-        if (deleteDislikeError) throw deleteDislikeError;
-
-        // Decrement dislikes count
-        const { data: message, error: messageError } = await supabase
-          .from('chat_messages')
-          .select('dislikes')
-          .eq('id', messageId)
-          .single();
-
-        if (messageError) throw messageError;
-
-        const { error: updateError } = await supabase
-          .from('chat_messages')
-          .update({ dislikes: Math.max(0, (message?.dislikes || 0) - 1) })
-          .eq('id', messageId);
-
-        if (updateError) throw updateError;
-      }
-
-      // Add new like
-      const { error: insertError } = await supabase
-        .from('chat_message_reactions')
-        .insert({
-          message_id: messageId,
-          user_id: userId,
-          reaction_type: 'like'
-        });
-
-      if (insertError) throw insertError;
-
-      // Increment likes count
-      const { data: message, error: messageError } = await supabase
-        .from('chat_messages')
-        .select('likes')
-        .eq('id', messageId)
-        .single();
-
-      if (messageError) throw messageError;
-
-      const { error: updateError } = await supabase
-        .from('chat_messages')
-        .update({ likes: (message?.likes || 0) + 1 })
-        .eq('id', messageId);
-
-      if (updateError) throw updateError;
-    }
-
-    // Get updated counts
-    const { data: updated, error: updatedError } = await supabase
-      .from('chat_messages')
-      .select('likes, dislikes')
-      .eq('id', messageId)
-      .single();
-
-    if (updatedError) throw updatedError;
-
-    return updated || { likes: 0, dislikes: 0 };
-  } catch (error) {
-    console.error('Error in likeChatMessage:', error);
-    throw error; // Re-throw to let calling code handle it
-  }
+export const likeChatMessage = async (messageId: string, userId: string) => {
+  const { data, error } = await supabase
+    .rpc('toggle_chat_message_reaction', {
+      p_message_id: messageId,
+      p_user_id: userId,
+      p_reaction_type: 'like'
+    });
+  
+  if (error) throw error;
+  return data as { likes: number; dislikes: number };
 };
 
-export const dislikeChatMessage = async (messageId: string, userId: string): Promise<any> => {
-  try {
-    // First check for existing reaction with proper headers
-    const { data: existingReaction, error: fetchError } = await supabase
-      .from('chat_message_reactions')
-      .select('*')
-      .eq('message_id', messageId)
-      .eq('user_id', userId)
-      .eq('reaction_type', 'dislike')
-      .maybeSingle();
-
-    if (fetchError) throw fetchError;
-
-    if (existingReaction) {
-      // Un-dislike if already disliked
-      const { error: deleteError } = await supabase
-        .from('chat_message_reactions')
-        .delete()
-        .eq('id', existingReaction.id);
-
-      if (deleteError) throw deleteError;
-
-      // Decrement dislikes count
-      const { data: message, error: messageError } = await supabase
-        .from('chat_messages')
-        .select('dislikes')
-        .eq('id', messageId)
-        .single();
-
-      if (messageError) throw messageError;
-
-      const { error: updateError } = await supabase
-        .from('chat_messages')
-        .update({ dislikes: Math.max(0, (message?.dislikes || 0) - 1) })
-        .eq('id', messageId);
-
-      if (updateError) throw updateError;
-    } else {
-      // Remove like if exists
-      const { data: existingLike, error: likeError } = await supabase
-        .from('chat_message_reactions')
-        .select('id')
-        .eq('message_id', messageId)
-        .eq('user_id', userId)
-        .eq('reaction_type', 'like')
-        .maybeSingle();
-
-      if (likeError) throw likeError;
-
-      if (existingLike) {
-        const { error: deleteLikeError } = await supabase
-          .from('chat_message_reactions')
-          .delete()
-          .eq('id', existingLike.id);
-
-        if (deleteLikeError) throw deleteLikeError;
-
-        // Decrement likes count
-        const { data: message, error: messageError } = await supabase
-          .from('chat_messages')
-          .select('likes')
-          .eq('id', messageId)
-          .single();
-
-        if (messageError) throw messageError;
-
-        const { error: updateError } = await supabase
-          .from('chat_messages')
-          .update({ likes: Math.max(0, (message?.likes || 0) - 1) })
-          .eq('id', messageId);
-
-        if (updateError) throw updateError;
-      }
-
-      // Add new dislike
-      const { error: insertError } = await supabase
-        .from('chat_message_reactions')
-        .insert({
-          message_id: messageId,
-          user_id: userId,
-          reaction_type: 'dislike'
-        });
-
-      if (insertError) throw insertError;
-
-      // Increment dislikes count
-      const { data: message, error: messageError } = await supabase
-        .from('chat_messages')
-        .select('dislikes')
-        .eq('id', messageId)
-        .single();
-
-      if (messageError) throw messageError;
-
-      const { error: updateError } = await supabase
-        .from('chat_messages')
-        .update({ dislikes: (message?.dislikes || 0) + 1 })
-        .eq('id', messageId);
-
-      if (updateError) throw updateError;
-    }
-
-    // Get updated counts
-    const { data: updated, error: updatedError } = await supabase
-      .from('chat_messages')
-      .select('likes, dislikes')
-      .eq('id', messageId)
-      .maybeSingle();
-
-    if (updatedError) throw updatedError;
-
-    return updated || { likes: 0, dislikes: 0 };
-  } catch (error) {
-    console.error('Error in dislikeChatMessage:', error);
-    throw error; // Re-throw to let calling code handle it
-  }
+export const dislikeChatMessage = async (messageId: string, userId: string) => {
+  const { data, error } = await supabase
+    .rpc('toggle_chat_message_reaction', {
+      p_message_id: messageId,
+      p_user_id: userId,
+      p_reaction_type: 'dislike'
+    });
+  
+  if (error) throw error;
+  return data as { likes: number; dislikes: number };
 };
 
 // Functions for getting user interaction status
