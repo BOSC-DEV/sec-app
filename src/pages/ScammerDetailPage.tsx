@@ -114,34 +114,39 @@ const CommentItem = ({ comment, profile }: { comment: Comment; profile: Profile 
       <div className="flex-1">
         <div className="flex items-center gap-2">
           <div className="font-medium">{comment.author_name}</div>
-          <div className="text-sm text-muted-foreground">{formatDate(comment.created_at)}</div>
+          {/* Date next to username on tablet/desktop, hidden on mobile */}
+          <div className="hidden md:block text-sm text-muted-foreground">{formatDate(comment.created_at)}</div>
         </div>
         <p className="mt-1">{comment.content}</p>
       </div>
       
       {/* Like/Dislike buttons on the right */}
-      <div className="flex items-center gap-2 ml-auto">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleLike}
-          disabled={isLoading || !profile}
-          className={`flex items-center gap-1 ${isLiked ? 'text-icc-gold' : ''}`}
-        >
-          <ThumbsUp className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
-          <span className="text-sm">{likes}</span>
-        </Button>
-        
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleDislike}
-          disabled={isLoading || !profile}
-          className={`flex items-center gap-1 ${isDisliked ? 'text-red-500' : ''}`}
-        >
-          <ThumbsDown className={`h-4 w-4 ${isDisliked ? 'fill-current' : ''}`} />
-          <span className="text-sm">{dislikes}</span>
-        </Button>
+      <div className="flex flex-col items-end gap-2 ml-auto">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLike}
+            disabled={isLoading || !profile}
+            className={`flex items-center gap-1 ${isLiked ? 'text-icc-gold' : ''}`}
+          >
+            <ThumbsUp className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+            <span className="text-sm">{likes}</span>
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleDislike}
+            disabled={isLoading || !profile}
+            className={`flex items-center gap-1 ${isDisliked ? 'text-red-500' : ''}`}
+          >
+            <ThumbsDown className={`h-4 w-4 ${isDisliked ? 'fill-current' : ''}`} />
+            <span className="text-sm">{dislikes}</span>
+          </Button>
+        </div>
+        {/* Date below thumbs on mobile only */}
+        <div className="md:hidden text-xs text-muted-foreground">{formatDate(comment.created_at)}</div>
       </div>
     </div>
   );
