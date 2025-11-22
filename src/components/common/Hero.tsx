@@ -22,7 +22,7 @@ const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
               className="h-32 w-32 object-contain"
             />
           </div>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-gothic font-bold text-white mb-6">
+          <h1 className="text-[2rem] md:text-5xl lg:text-6xl font-gothic font-bold text-white mb-6">
             {title || "Scams and E-Crimes Commission"}
           </h1>
           <p className="text-xl md:text-2xl text-gray-100 mb-8 max-w-2xl mx-auto">
