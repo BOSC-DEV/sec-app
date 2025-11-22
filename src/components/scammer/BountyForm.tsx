@@ -86,6 +86,17 @@ const BountyForm: React.FC<BountyFormProps> = ({
       });
       return;
     }
+
+    // Check if user has sufficient SEC balance
+    const userBalance = profile.sec_balance || 0;
+    if (userBalance < amount) {
+      toast({
+        title: "Insufficient balance",
+        description: `You need ${amount.toFixed(2)} SEC but only have ${userBalance.toFixed(2)} SEC. Please add funds to your wallet first.`,
+        variant: "destructive"
+      });
+      return;
+    }
     
     setIsProcessing(true);
     try {
@@ -108,6 +119,11 @@ const BountyForm: React.FC<BountyFormProps> = ({
       
       const transactionSignature = await sendTransactionToDevWallet(developerWalletAddress, amount);
       if (!transactionSignature) {
+        toast({
+          title: "Transaction failed",
+          description: "The transaction could not be completed. Please check your wallet connection and try again.",
+          variant: "destructive"
+        });
         setIsProcessing(false);
         return;
       }
@@ -124,11 +140,28 @@ const BountyForm: React.FC<BountyFormProps> = ({
       });
     } catch (error) {
       console.error("Bounty contribution error:", error);
-      handleError(error, {
-        fallbackMessage: "Failed to process bounty contribution. Please try again.",
-        severity: ErrorSeverity.MEDIUM,
-        context: "PROCESS_BOUNTY"
-      });
+      
+      // Check if it's a wallet-related error
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.toLowerCase().includes('insufficient') || errorMessage.toLowerCase().includes('balance')) {
+        toast({
+          title: "Insufficient funds",
+          description: "You don't have enough SEC tokens to complete this transaction.",
+          variant: "destructive"
+        });
+      } else if (errorMessage.toLowerCase().includes('wallet') || errorMessage.toLowerCase().includes('phantom')) {
+        toast({
+          title: "Wallet error",
+          description: "There was a problem connecting to your wallet. Please make sure Phantom is installed and unlocked.",
+          variant: "destructive"
+        });
+      } else {
+        handleError(error, {
+          fallbackMessage: "Failed to process bounty contribution. Please try again.",
+          severity: ErrorSeverity.MEDIUM,
+          context: "PROCESS_BOUNTY"
+        });
+      }
       setIsProcessing(false);
     }
   };
