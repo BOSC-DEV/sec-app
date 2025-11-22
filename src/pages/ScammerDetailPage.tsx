@@ -277,6 +277,9 @@ const CommentItem = ({
             <div className="hidden md:block text-sm text-muted-foreground">{formatDate(comment.created_at)}</div>
           </div>
           
+          {/* Date on mobile - top right */}
+          <div className="md:hidden text-xs text-muted-foreground">{formatDate(comment.created_at)}</div>
+          
           {/* Edit/Delete buttons for author - desktop */}
           {isAuthor && !isEditing && (
             <div className="hidden md:flex items-center gap-1">
@@ -358,9 +361,6 @@ const CommentItem = ({
               <ThumbsDown className={`h-4 w-4 ${isDisliked ? 'fill-current' : ''}`} />
               <span className="text-sm">{dislikes}</span>
             </Button>
-            
-            {/* Date on mobile */}
-            <div className="text-xs text-muted-foreground ml-auto">{formatDate(comment.created_at)}</div>
             
             {/* Edit/Delete buttons for author - mobile */}
             {isAuthor && (
