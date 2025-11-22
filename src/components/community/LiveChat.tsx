@@ -54,17 +54,36 @@ const LiveChat = () => {
     }
   }, [profile?.username]);
 
-  // Set up IntersectionObserver for infinite scroll
+  // Set up IntersectionObserver for infinite scroll with scroll position preservation
   useEffect(() => {
     if (!loadMoreTriggerRef.current || !hasMore) return;
 
     const observer = new IntersectionObserver(
-      (entries) => {
+      async (entries) => {
         const [entry] = entries;
         if (entry.isIntersecting && hasMore && !isLoadingMore.current && !isLoading) {
           console.log('Load more trigger visible, loading older messages...');
           isLoadingMore.current = true;
-          loadMore();
+          
+          // Preserve scroll position before loading
+          const viewport = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
+          if (viewport) {
+            const previousScrollHeight = viewport.scrollHeight;
+            const previousScrollTop = viewport.scrollTop;
+            
+            // Load more messages
+            await loadMore();
+            
+            // Restore scroll position after messages are loaded
+            requestAnimationFrame(() => {
+              const newScrollHeight = viewport.scrollHeight;
+              const heightDifference = newScrollHeight - previousScrollHeight;
+              viewport.scrollTop = previousScrollTop + heightDifference;
+            });
+          } else {
+            await loadMore();
+          }
+          
           // Reset the flag after a delay
           setTimeout(() => {
             isLoadingMore.current = false;
@@ -232,17 +251,16 @@ const LiveChat = () => {
     setNewMessage(prev => prev + emoji);
   };
 
-  const renderMessage = (message: any, index: number) => {
-    console.log("Rendering message:", message);
-    // Get badge info based on SEC balance
+  // Memoized ChatMessage component to prevent unnecessary re-renders
+  const ChatMessage = React.memo(({ message }: { message: any }) => {
     const userBadge = message.author_sec_balance !== undefined ? 
       calculateBadgeTier(message.author_sec_balance) : null;
     
-    console.log("User badge for message:", userBadge, "SEC balance:", message.author_sec_balance);
-    
     const isCurrentUser = message.author_id === profile?.wallet_address;
     const time = formatTimeAgo(message.created_at);
-    const messageContent = <div key={message.id} className="flex my-6">
+    
+    const messageContent = (
+      <div className="flex my-6 animate-fade-in">
         <div className={`flex ${isCurrentUser ? 'flex-row-reverse self-end ml-auto' : 'flex-row'} space-x-2 ${isCurrentUser ? 'space-x-reverse' : ''}`}>
           <div className="flex-shrink-0">
             <Link to={message.author_username ? `/profile/${message.author_username}` : '#'}>
@@ -266,13 +284,15 @@ const LiveChat = () => {
               {message.content}
             </div>
             
-            {message.image_url && <div className="mt-2 relative group">
+            {message.image_url && (
+              <div className="mt-2 relative group">
                 <img src={message.image_url} alt="Chat attachment" className="max-h-40 rounded-md object-contain bg-muted/20" />
                 <a href={message.image_url} target="_blank" rel="noopener noreferrer" className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity 
                   bg-background/80 rounded-full p-1" title="View full image">
                   <Download className="h-4 w-4" />
                 </a>
-              </div>}
+              </div>
+            )}
             
             <div className="flex justify-between items-center mt-1">
               <CommunityInteractionButtons itemId={message.id} itemType="message" initialLikes={message.likes} initialDislikes={message.dislikes} />
@@ -282,11 +302,21 @@ const LiveChat = () => {
             </div>
           </div>
         </div>
-      </div>;
-    return isUserAdmin ? <AdminContextMenu key={message.id} onDelete={() => handleDeleteMessage(message.id)} onBanUser={() => handleBanUser(message.author_username)}>
+      </div>
+    );
+    
+    return isUserAdmin ? (
+      <AdminContextMenu onDelete={() => handleDeleteMessage(message.id)} onBanUser={() => handleBanUser(message.author_username)}>
         {messageContent}
-      </AdminContextMenu> : messageContent;
-  };
+      </AdminContextMenu>
+    ) : messageContent;
+  }, (prevProps, nextProps) => {
+    // Only re-render if message data actually changed
+    return prevProps.message.id === nextProps.message.id &&
+           prevProps.message.likes === nextProps.message.likes &&
+           prevProps.message.dislikes === nextProps.message.dislikes &&
+           prevProps.message.content === nextProps.message.content;
+  });
 
   if (isLoading) {
     return <div className="flex justify-center py-12">
@@ -352,7 +382,7 @@ const LiveChat = () => {
                 </p>
               </div>
             ) : (
-              messages.map((message, index) => renderMessage(message, index))
+              messages.map((message) => <ChatMessage key={message.id} message={message} />)
             )}
           </div>
         </ScrollArea>
