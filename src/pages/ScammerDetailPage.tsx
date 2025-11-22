@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { getScammerById, deleteScammer, unarchiveScammer } from '@/services/scammerService';
-import { getScammerComments, addComment } from '@/services/commentService';
+import { getScammerComments, addComment, updateComment, deleteComment } from '@/services/commentService';
 import { commentReplyService, CommentReply } from '@/services/commentReplyService';
 import { likeScammer, dislikeScammer, getUserScammerInteraction, likeComment, dislikeComment, getUserCommentInteraction } from '@/services/interactionService';
 import { isScammerCreator } from '@/services/reportService';
@@ -11,7 +11,7 @@ import CompactHero from '@/components/common/CompactHero';
 import BountyContributionList from '@/components/scammer/BountyContributionList';
 import BountyTransferDialog from '@/components/scammer/BountyTransferDialog';
 import { CommentReplyItem } from '@/components/common/CommentReplyItem';
-import { ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, Link2, Eye, AlertTriangle, Shield, TrendingUp, Edit, Clipboard, Trash2, MessageSquare, Users, FileText, Wallet2, ShieldCheck, ArchiveRestore, Reply } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, Link2, Eye, AlertTriangle, Shield, TrendingUp, Edit, Clipboard, Trash2, MessageSquare, Users, FileText, Wallet2, ShieldCheck, ArchiveRestore, Reply, Edit2, X, Check } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
@@ -42,8 +42,17 @@ import { ArrowLeftRight } from 'lucide-react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-// Comment item component with like/dislike and reply functionality
-const CommentItem = ({ comment, profile }: { comment: Comment; profile: Profile | null }) => {
+
+// Comment item component with like/dislike, reply, edit, and delete functionality
+const CommentItem = ({ 
+  comment, 
+  profile,
+  onCommentDeleted 
+}: { 
+  comment: Comment; 
+  profile: Profile | null;
+  onCommentDeleted: () => void;
+}) => {
   const [likes, setLikes] = useState(comment.likes || 0);
   const [dislikes, setDislikes] = useState(comment.dislikes || 0);
   const [isLiked, setIsLiked] = useState(false);
@@ -53,6 +62,12 @@ const CommentItem = ({ comment, profile }: { comment: Comment; profile: Profile 
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replyContent, setReplyContent] = useState('');
   const [isSubmittingReply, setIsSubmittingReply] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState(comment.content);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  
+  const isAuthor = profile?.id === comment.author;
 
   // Load user interaction and replies on mount
   useEffect(() => {
@@ -167,99 +182,265 @@ const CommentItem = ({ comment, profile }: { comment: Comment; profile: Profile 
     }
   };
 
+  const handleEdit = async () => {
+    if (!editContent.trim()) {
+      toast({
+        title: "Error",
+        description: "Comment cannot be empty",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await updateComment(comment.id, editContent);
+      setIsEditing(false);
+      toast({
+        title: "Success",
+        description: "Comment updated successfully"
+      });
+    } catch (error) {
+      console.error('Error updating comment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update comment",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteComment(comment.id);
+      onCommentDeleted();
+      toast({
+        title: "Success",
+        description: "Comment deleted successfully"
+      });
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete comment",
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditContent(comment.content);
+  };
+
   return (
+    <>
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Comment</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this comment? This will also delete all replies. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     <div className="flex items-start space-x-4 py-4 border-b">
       <Avatar>
         <AvatarImage src={comment.author_profile_pic || '/placeholder.svg'} alt={`${comment.author_name}'s profile`} />
         <AvatarFallback>{comment.author_name.substring(0, 2)}</AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <div className="font-medium">{comment.author_name}</div>
-          {/* Date next to username on tablet/desktop, hidden on mobile */}
-          <div className="hidden md:block text-sm text-muted-foreground">{formatDate(comment.created_at)}</div>
-        </div>
-        <p className="mt-1 break-words">{comment.content}</p>
-        
-        {/* Like/Dislike buttons - below comment on mobile, hidden on tablet+ */}
-        <div className="flex md:hidden items-center gap-2 mt-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleLike}
-            disabled={isLoading || !profile}
-            className={`flex items-center gap-1 ${isLiked ? 'text-icc-gold' : ''}`}
-          >
-            <ThumbsUp className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
-            <span className="text-sm">{likes}</span>
-          </Button>
+        <div className="flex items-center gap-2 justify-between flex-wrap">
+          <div className="flex items-center gap-2">
+            <div className="font-medium">{comment.author_name}</div>
+            {/* Date next to username on tablet/desktop, hidden on mobile */}
+            <div className="hidden md:block text-sm text-muted-foreground">{formatDate(comment.created_at)}</div>
+          </div>
           
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleDislike}
-            disabled={isLoading || !profile}
-            className={`flex items-center gap-1 ${isDisliked ? 'text-red-500' : ''}`}
-          >
-            <ThumbsDown className={`h-4 w-4 ${isDisliked ? 'fill-current' : ''}`} />
-            <span className="text-sm">{dislikes}</span>
-          </Button>
-          
-          {/* Date on mobile */}
-          <div className="text-xs text-muted-foreground ml-auto">{formatDate(comment.created_at)}</div>
+          {/* Edit/Delete buttons for author - desktop */}
+          {isAuthor && !isEditing && (
+            <div className="hidden md:flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsEditing(true)}
+                className="h-7 w-7 p-0"
+                title="Edit comment"
+              >
+                <Edit2 className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowDeleteDialog(true)}
+                className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                title="Delete comment"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          )}
         </div>
         
-        {/* Reply button - mobile */}
-        <div className="flex md:hidden mt-2">
+        {isEditing ? (
+          <div className="mt-2 space-y-2">
+            <Textarea
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              className="min-h-[80px]"
+              disabled={isLoading}
+            />
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                onClick={handleEdit}
+                disabled={isLoading || !editContent.trim()}
+              >
+                <Check className="h-3.5 w-3.5 mr-1" />
+                Save
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={handleCancelEdit}
+                disabled={isLoading}
+              >
+                <X className="h-3.5 w-3.5 mr-1" />
+                Cancel
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <p className="mt-1 break-words">{comment.content}</p>
+        )}
+        
+        {/* Like/Dislike buttons - below comment on mobile, hidden on tablet+ - only show when not editing */}
+        {!isEditing && (
+          <div className="flex md:hidden items-center gap-2 mt-3 flex-wrap">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLike}
+              disabled={isLoading || !profile}
+              className={`flex items-center gap-1 ${isLiked ? 'text-icc-gold' : ''}`}
+            >
+              <ThumbsUp className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+              <span className="text-sm">{likes}</span>
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDislike}
+              disabled={isLoading || !profile}
+              className={`flex items-center gap-1 ${isDisliked ? 'text-red-500' : ''}`}
+            >
+              <ThumbsDown className={`h-4 w-4 ${isDisliked ? 'fill-current' : ''}`} />
+              <span className="text-sm">{dislikes}</span>
+            </Button>
+            
+            {/* Date on mobile */}
+            <div className="text-xs text-muted-foreground ml-auto">{formatDate(comment.created_at)}</div>
+            
+            {/* Edit/Delete buttons for author - mobile */}
+            {isAuthor && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsEditing(true)}
+                  className="h-7 w-7 p-0"
+                  title="Edit comment"
+                >
+                  <Edit2 className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                  title="Delete comment"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </>
+            )}
+          </div>
+        )}
+        
+        {/* Reply button - mobile - only show when not editing */}
+        {!isEditing && (
+          <div className="flex md:hidden mt-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowReplyForm(!showReplyForm)}
+              className="text-muted-foreground hover:text-foreground h-7 px-2"
+            >
+              <Reply className="h-3 w-3 mr-1" />
+              <span className="text-xs">Reply {replies.length > 0 && `(${replies.length})`}</span>
+            </Button>
+          </div>
+        )}
+      </div>
+      
+      {/* Like/Dislike buttons on the right - tablet/desktop only - only show when not editing */}
+      {!isEditing && (
+        <div className="hidden md:flex flex-col items-end gap-2 ml-auto">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLike}
+              disabled={isLoading || !profile}
+              className={`flex items-center gap-1 ${isLiked ? 'text-icc-gold' : ''}`}
+            >
+              <ThumbsUp className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+              <span className="text-sm">{likes}</span>
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDislike}
+              disabled={isLoading || !profile}
+              className={`flex items-center gap-1 ${isDisliked ? 'text-red-500' : ''}`}
+            >
+              <ThumbsDown className={`h-4 w-4 ${isDisliked ? 'fill-current' : ''}`} />
+              <span className="text-sm">{dislikes}</span>
+            </Button>
+          </div>
+          
+          {/* Reply button - desktop */}
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setShowReplyForm(!showReplyForm)}
-            className="text-muted-foreground hover:text-foreground h-7 px-2"
+            className="text-muted-foreground hover:text-foreground"
           >
             <Reply className="h-3 w-3 mr-1" />
             <span className="text-xs">Reply {replies.length > 0 && `(${replies.length})`}</span>
           </Button>
         </div>
-      </div>
-      
-      {/* Like/Dislike buttons on the right - tablet/desktop only */}
-      <div className="hidden md:flex flex-col items-end gap-2 ml-auto">
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleLike}
-            disabled={isLoading || !profile}
-            className={`flex items-center gap-1 ${isLiked ? 'text-icc-gold' : ''}`}
-          >
-            <ThumbsUp className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
-            <span className="text-sm">{likes}</span>
-          </Button>
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleDislike}
-            disabled={isLoading || !profile}
-            className={`flex items-center gap-1 ${isDisliked ? 'text-red-500' : ''}`}
-          >
-            <ThumbsDown className={`h-4 w-4 ${isDisliked ? 'fill-current' : ''}`} />
-            <span className="text-sm">{dislikes}</span>
-          </Button>
-        </div>
-        
-        {/* Reply button - desktop */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowReplyForm(!showReplyForm)}
-          className="text-muted-foreground hover:text-foreground"
-        >
-          <Reply className="h-3 w-3 mr-1" />
-          <span className="text-xs">Reply {replies.length > 0 && `(${replies.length})`}</span>
-        </Button>
-      </div>
+      )}
       
       {/* Reply form */}
       {showReplyForm && (
@@ -306,6 +487,7 @@ const CommentItem = ({ comment, profile }: { comment: Comment; profile: Profile 
         </div>
       )}
     </div>
+    </>
   );
 };
 
@@ -1003,7 +1185,18 @@ const ScammerDetailPage = () => {
                   const paginatedComments = sortedComments.slice(startIndex, endIndex);
                   return <div aria-label="Comments section" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} className="select-none">
                           <div className="min-h-[500px]">
-                            {paginatedComments.map(comment => <CommentItem key={comment.id} comment={comment} profile={profile} />)}
+                            {paginatedComments.map(comment => (
+                              <CommentItem 
+                                key={comment.id} 
+                                comment={comment} 
+                                profile={profile}
+                                onCommentDeleted={() => {
+                                  queryClient.invalidateQueries({
+                                    queryKey: ['comments', id]
+                                  });
+                                }}
+                              />
+                            ))}
                           </div>
                           
                           {/* Pagination Controls */}
