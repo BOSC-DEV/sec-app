@@ -69,7 +69,7 @@ const ContactDialog: React.FC<ContactDialogProps> = ({
                 <div>
                   
                   <p className="text-orange-700">
-                    For urgent reports involving active fraud or significant financial loss, please also contact your local law enforcement agency. The SEC platform is for informational purposes only and does not replace proper legal channels.
+                    For urgent reports involving active fraud or financial loss, please contact your local law enforcement agency. The SEC platform is for informational purposes only and does not replace proper legal channels.
                   </p>
                 </div>
               </div>
