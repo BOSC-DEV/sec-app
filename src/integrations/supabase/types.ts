@@ -310,6 +310,52 @@ export type Database = {
           },
         ]
       }
+      comment_reactions: {
+        Row: {
+          comment_id: string | null
+          created_at: string | null
+          id: string
+          reaction_type: string
+          user_id: string | null
+        }
+        Insert: {
+          comment_id?: string | null
+          created_at?: string | null
+          id?: string
+          reaction_type: string
+          user_id?: string | null
+        }
+        Update: {
+          comment_id?: string | null
+          created_at?: string | null
+          id?: string
+          reaction_type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comment_reactions_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comment_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comment_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comments: {
         Row: {
           author: string
@@ -954,6 +1000,14 @@ export type Database = {
       toggle_chat_message_reaction: {
         Args: {
           p_message_id: string
+          p_reaction_type: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      toggle_comment_reaction: {
+        Args: {
+          p_comment_id: string
           p_reaction_type: string
           p_user_id: string
         }

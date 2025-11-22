@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { getScammerById, deleteScammer, unarchiveScammer } from '@/services/scammerService';
 import { getScammerComments, addComment } from '@/services/commentService';
-import { likeScammer, dislikeScammer, getUserScammerInteraction } from '@/services/interactionService';
+import { likeScammer, dislikeScammer, getUserScammerInteraction, likeComment, dislikeComment, getUserCommentInteraction } from '@/services/interactionService';
 import { isScammerCreator } from '@/services/reportService';
 import { addBountyContribution, getScammerBountyContributions, getUserContributionAmountForScammer } from '@/services/bountyService';
 import CompactHero from '@/components/common/CompactHero';
@@ -39,6 +39,111 @@ import BountyForm from '@/components/scammer/BountyForm';
 import { ArrowLeftRight } from 'lucide-react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+// Comment item component with like/dislike functionality
+const CommentItem = ({ comment, profile }: { comment: Comment; profile: Profile | null }) => {
+  const [likes, setLikes] = useState(comment.likes || 0);
+  const [dislikes, setDislikes] = useState(comment.dislikes || 0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isDisliked, setIsDisliked] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Load user interaction on mount
+  useEffect(() => {
+    const loadInteraction = async () => {
+      if (!profile?.id) return;
+      
+      try {
+        const interaction = await getUserCommentInteraction(comment.id, profile.id);
+        if (interaction) {
+          setIsLiked(interaction.liked);
+          setIsDisliked(interaction.disliked);
+        }
+      } catch (error) {
+        console.error('Error loading comment interaction:', error);
+      }
+    };
+    
+    loadInteraction();
+  }, [comment.id, profile?.id]);
+
+  const handleLike = async () => {
+    if (!profile?.id || isLoading) return;
+    setIsLoading(true);
+    
+    try {
+      const result = await likeComment(comment.id, profile.id);
+      if (result) {
+        setLikes(result.likes);
+        setDislikes(result.dislikes);
+        setIsLiked(!isLiked);
+        if (isDisliked) setIsDisliked(false);
+      }
+    } catch (error) {
+      console.error('Error liking comment:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDislike = async () => {
+    if (!profile?.id || isLoading) return;
+    setIsLoading(true);
+    
+    try {
+      const result = await dislikeComment(comment.id, profile.id);
+      if (result) {
+        setLikes(result.likes);
+        setDislikes(result.dislikes);
+        setIsDisliked(!isDisliked);
+        if (isLiked) setIsLiked(false);
+      }
+    } catch (error) {
+      console.error('Error disliking comment:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex items-start space-x-4 py-4 border-b">
+      <Avatar>
+        <AvatarImage src={comment.author_profile_pic || '/placeholder.svg'} alt={`${comment.author_name}'s profile`} />
+        <AvatarFallback>{comment.author_name.substring(0, 2)}</AvatarFallback>
+      </Avatar>
+      <div className="flex-1">
+        <div className="font-medium">{comment.author_name}</div>
+        <div className="text-sm text-gray-500">{formatDate(comment.created_at)}</div>
+        <p className="mt-1">{comment.content}</p>
+        
+        {/* Like/Dislike buttons */}
+        <div className="flex items-center gap-4 mt-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLike}
+            disabled={isLoading || !profile}
+            className={`flex items-center gap-1 ${isLiked ? 'text-icc-gold' : ''}`}
+          >
+            <ThumbsUp className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+            <span className="text-sm">{likes}</span>
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleDislike}
+            disabled={isLoading || !profile}
+            className={`flex items-center gap-1 ${isDisliked ? 'text-red-500' : ''}`}
+          >
+            <ThumbsDown className={`h-4 w-4 ${isDisliked ? 'fill-current' : ''}`} />
+            <span className="text-sm">{dislikes}</span>
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ScammerDetailPage = () => {
   const {
     id
@@ -701,17 +806,7 @@ const ScammerDetailPage = () => {
                   const paginatedComments = comments.slice(startIndex, endIndex);
                   return <div aria-label="Comments section" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} className="select-none">
                           <div className="min-h-[500px]">
-                            {paginatedComments.map(comment => <div key={comment.id} className="flex items-start space-x-4 py-4 border-b">
-                              <Avatar>
-                                <AvatarImage src={comment.author_profile_pic || '/placeholder.svg'} alt={`${comment.author_name}'s profile`} />
-                                <AvatarFallback>{comment.author_name.substring(0, 2)}</AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <div className="font-medium">{comment.author_name}</div>
-                                <div className="text-sm text-gray-500">{formatDate(comment.created_at)}</div>
-                                <p className="mt-1">{comment.content}</p>
-                              </div>
-                            </div>)}
+                            {paginatedComments.map(comment => <CommentItem key={comment.id} comment={comment} profile={profile} />)}
                           </div>
                           
                           {/* Pagination Controls */}
