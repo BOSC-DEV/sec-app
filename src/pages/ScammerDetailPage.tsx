@@ -39,6 +39,7 @@ import BountyForm from '@/components/scammer/BountyForm';
 import { ArrowLeftRight } from 'lucide-react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 // Comment item component with like/dislike functionality
 const CommentItem = ({ comment, profile }: { comment: Comment; profile: Profile | null }) => {
   const [likes, setLikes] = useState(comment.likes || 0);
@@ -177,6 +178,7 @@ const ScammerDetailPage = () => {
   // Comment pagination state
   const [currentCommentPage, setCurrentCommentPage] = useState(1);
   const [commentsPerPage, setCommentsPerPage] = useState(5);
+  const [commentSortFilter, setCommentSortFilter] = useState<'newest' | 'oldest' | 'most_liked'>('newest');
 
   // Adjust comments per page based on screen size (9 for iPad, 5 for mobile/desktop)
   useEffect(() => {
@@ -790,6 +792,26 @@ const ScammerDetailPage = () => {
                     </Button>
                   </div>
 
+                  {/* Comment Sort Filter */}
+                  {comments && comments.length > 0 && (
+                    <div className="mb-4 flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">Sort by:</span>
+                      <Select value={commentSortFilter} onValueChange={(value: 'newest' | 'oldest' | 'most_liked') => {
+                        setCommentSortFilter(value);
+                        setCurrentCommentPage(1);
+                      }}>
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="newest">Newest</SelectItem>
+                          <SelectItem value="oldest">Oldest</SelectItem>
+                          <SelectItem value="most_liked">Most Liked</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
                   {isLoadingComments ? <div className="space-y-4" aria-live="polite" aria-busy="true">
                       {[1, 2, 3].map(index => <div key={index} className="flex items-start space-x-4">
                           <Skeleton className="h-10 w-10 rounded-full" />
@@ -800,10 +822,21 @@ const ScammerDetailPage = () => {
                         </div>)}
                       <span className="sr-only">Loading comments...</span>
                     </div> : errorComments ? <div className="text-red-500">Error loading comments.</div> : comments && comments.length > 0 ? (() => {
-                  const totalCommentPages = Math.ceil(comments.length / commentsPerPage);
+                  // Sort comments based on selected filter
+                  const sortedComments = [...comments].sort((a, b) => {
+                    if (commentSortFilter === 'most_liked') {
+                      return (b.likes || 0) - (a.likes || 0);
+                    } else if (commentSortFilter === 'oldest') {
+                      return new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime();
+                    } else { // newest
+                      return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+                    }
+                  });
+                  
+                  const totalCommentPages = Math.ceil(sortedComments.length / commentsPerPage);
                   const startIndex = (currentCommentPage - 1) * commentsPerPage;
                   const endIndex = startIndex + commentsPerPage;
-                  const paginatedComments = comments.slice(startIndex, endIndex);
+                  const paginatedComments = sortedComments.slice(startIndex, endIndex);
                   return <div aria-label="Comments section" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} className="select-none">
                           <div className="min-h-[500px]">
                             {paginatedComments.map(comment => <CommentItem key={comment.id} comment={comment} profile={profile} />)}
