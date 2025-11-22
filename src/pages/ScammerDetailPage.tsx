@@ -111,7 +111,7 @@ const CommentItem = ({ comment, profile }: { comment: Comment; profile: Profile 
         <AvatarImage src={comment.author_profile_pic || '/placeholder.svg'} alt={`${comment.author_name}'s profile`} />
         <AvatarFallback>{comment.author_name.substring(0, 2)}</AvatarFallback>
       </Avatar>
-      <div className="flex-1">
+      <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <div className="font-medium">{comment.author_name}</div>
           {/* Date next to username on tablet/desktop, hidden on mobile */}
