@@ -117,7 +117,7 @@ const CommentItem = ({ comment, profile }: { comment: Comment; profile: Profile 
           {/* Date next to username on tablet/desktop, hidden on mobile */}
           <div className="hidden md:block text-sm text-muted-foreground">{formatDate(comment.created_at)}</div>
         </div>
-        <p className="mt-1">{comment.content}</p>
+        <p className="mt-1 break-words">{comment.content}</p>
       </div>
       
       {/* Like/Dislike buttons on the right */}
