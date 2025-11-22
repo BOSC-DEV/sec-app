@@ -18,8 +18,8 @@ const DOCS_SEARCH_INDEX: SearchResult[] = [
   {
     id: 'docs-overview',
     title: 'SEC Documentation',
-    content: 'SEC Documentation Welcome to the complete guide for the Scams & E-crimes Commission platform',
-    excerpt: 'Welcome to the complete guide for the Scams & E-crimes Commission platform',
+    content: 'SEC Documentation Welcome to the complete guide for the Scams and E-Crimes Commission platform',
+    excerpt: 'Welcome to the complete guide for the Scams and E-Crimes Commission platform',
     path: '/docs',
     type: 'page'
   },
@@ -159,8 +159,8 @@ const DOCS_SEARCH_INDEX: SearchResult[] = [
   {
     id: 'quick-start',
     title: 'Quick Start Guide',
-    content: 'Quick Start Welcome to SEC Get started with the Scams E-crimes Commission platform. This guide will help you understand the basics and get you up and running quickly.',
-    excerpt: 'Get started with the Scams E-crimes Commission platform quickly',
+    content: 'Quick Start Welcome to SEC Get started with the Scams and E-Crimes Commission platform. This guide will help you understand the basics and get you up and running quickly.',
+    excerpt: 'Get started with the Scams and E-Crimes Commission platform quickly',
     path: '/docs/quick-start',
     type: 'page'
   },

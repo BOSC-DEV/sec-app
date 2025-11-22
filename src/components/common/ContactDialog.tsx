@@ -47,7 +47,7 @@ const ContactDialog: React.FC<ContactDialogProps> = ({
         <DialogHeader>
           <DialogTitle className="text-2xl font-gothic text-icc-blue">Contact Us</DialogTitle>
           <DialogDescription>
-            How to reach the Scams & E-crimes Commission team.
+            How to reach the Scams and E-Crimes Commission team.
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className="h-[45vh] pr-4">

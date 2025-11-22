@@ -20,7 +20,7 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
         <DialogHeader>
           <DialogTitle className="text-2xl font-gothic text-icc-blue flex items-center gap-2">
             <ShieldCheck className="h-6 w-6" />
-            About the Scams & E-crimes Commission
+            About the Scams and E-Crimes Commission
           </DialogTitle>
           <DialogDescription>
             Our mission, vision, and approach to combating digital fraud.
@@ -40,7 +40,7 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
               Executive Summary
             </h4>
             <p>
-              The Scams & E-crimes Commission (SEC) is a decentralized platform designed to create accountability and self-governance within the digital asset ecosystem. By leveraging community-driven reporting, verification, and incentivization mechanisms, the SEC aims to reduce the prevalence and impact of cryptocurrency scams and electronic crimes.
+              The Scams and E-Crimes Commission (SEC) is a decentralized platform designed to create accountability and self-governance within the digital asset ecosystem. By leveraging community-driven reporting, verification, and incentivization mechanisms, the SEC aims to reduce the prevalence and impact of cryptocurrency scams and electronic crimes.
             </p>
             
             <h4 className="font-bold">1. Introduction</h4>
@@ -137,7 +137,7 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
             </ul>
             
             <p className="mt-6 text-center font-semibold">
-              © 2025 Scams & E-crimes Commission | Updated: April 2025
+              © 2025 Scams and E-Crimes Commission | Updated: April 2025
             </p>
           </div>
         </ScrollArea>

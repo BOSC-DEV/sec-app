@@ -16,7 +16,7 @@ const TokenomicsPage = () => {
           <div className="bg-gradient-to-r from-icc-blue to-icc-blue-light rounded-lg p-8 text-white mb-6">
             <Coins className="h-12 w-12 mb-4" />
             <p className="text-xl leading-relaxed">
-              The SEC token is the native utility token of the Scams & E-crimes Commission 
+              The SEC token is the native utility token of the Scams and E-Crimes Commission 
               platform. It powers the bounty system, incentivizes quality reporting, and 
               enables community governance while maintaining a sustainable economic model.
             </p>

@@ -61,7 +61,7 @@ const MaintenanceMode: React.FC<MaintenanceModeProps> = ({
         </Card>
         
         <p className="text-center text-xs text-muted-foreground mt-8">
-          &copy; {new Date().getFullYear()} Scams & E-crimes Commission. All rights reserved.
+          &copy; {new Date().getFullYear()} Scams and E-Crimes Commission. All rights reserved.
         </p>
       </div>
     </div>

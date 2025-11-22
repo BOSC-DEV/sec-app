@@ -24,14 +24,14 @@ const SEO: React.FC<SEOProps> = ({
   ogType = "website",
   twitterCard = "summary_large_image",
   keywords = ["scams", "crypto scams", "scammer database", "fraud prevention", "scammer tracking"],
-  author = "Scams & E-crimes Commission",
+  author = "Scams and E-Crimes Commission",
   noIndex = false,
   schema,
   children
 }) => {
   const siteTitle = title 
-    ? `${title} | Scams & E-crimes Commission` 
-    : "Scams & E-crimes Commission";
+    ? `${title} | Scams and E-Crimes Commission` 
+    : "Scams and E-Crimes Commission";
     
   // Get current URL safely for both server and client environments
   const getUrl = () => {
@@ -55,7 +55,7 @@ const SEO: React.FC<SEOProps> = ({
   const defaultSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "Scams & E-crimes Commission",
+    name: "Scams and E-Crimes Commission",
     url: typeof window !== 'undefined' ? window.location.origin : '',
     description,
     ...(schema || {})
@@ -82,7 +82,7 @@ const SEO: React.FC<SEOProps> = ({
       <meta property="og:type" content={ogType} />
       <meta property="og:image" content={absoluteOgImage} />
       <meta property="og:url" content={absoluteCanonical} />
-      <meta property="og:site_name" content="Scams & E-crimes Commission" />
+      <meta property="og:site_name" content="Scams and E-Crimes Commission" />
       
       {/* Twitter */}
       <meta name="twitter:card" content={twitterCard} />

@@ -37,7 +37,7 @@ const Footer = () => {
             <Link to="/" className="flex justify-center md:justify-start items-center space-x-2 mb-4">
               <ICCLogo className="h-10 w-auto" />
               <div className="font-gothic">
-                <div className="text-base font-bold leading-tight">Scams & E-crimes Commission</div>
+                <div className="text-base font-bold leading-tight">Scams and E-Crimes Commission</div>
               </div>
             </Link>
             <p className="text-sm text-gray-300 dark:text-gray-400 mt-4 text-center md:text-left">
@@ -137,7 +137,7 @@ const Footer = () => {
         </div>
         
         <div className="border-t border-icc-blue-light dark:border-gray-700 mt-8 pt-8 text-sm text-gray-300 dark:text-gray-500 text-center md:text-left">
-          <p>&copy; {new Date().getFullYear()} Scams & E-crimes Commission. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Scams and E-Crimes Commission. All rights reserved.</p>
         </div>
       </div>
 

@@ -160,7 +160,7 @@ const SafetyDialog: React.FC<SafetyDialogProps> = ({
               Remember that staying informed is your best defense against scams. Regularly update yourself on the latest security practices and scam techniques in the cryptocurrency space.
             </p>
             <p className="text-center text-xs text-gray-500 dark:text-gray-400">
-              © 2025 Scams & E-crimes Commission | Safety Guidelines v3.2 | April 2025
+              © 2025 Scams and E-Crimes Commission | Safety Guidelines v3.2 | April 2025
             </p>
           </div>
         </ScrollArea>
