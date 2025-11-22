@@ -51,7 +51,7 @@ const CommunityPage = () => {
         <CompactHero title="Community" subtitle="Connect with fellow fraud fighters and stay updated on the latest scam prevention efforts" />
       </div>
       
-      <div className="icc-container py-8">
+      <div className="icc-container pt-5 pb-8 md:py-8">
         {splitScreen && !isMobile ? <>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold">Community</h2>
