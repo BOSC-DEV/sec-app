@@ -205,21 +205,69 @@ export const getUserScammerInteraction = async (scammerId: string, userId: strin
   }
 };
 
-// Exporting similar functions for comments
+// Comment interaction functions
 export const likeComment = async (commentId: string, userId: string): Promise<CommentInteractionResult> => {
-  // Similar implementation as likeScammer but for comments
-  // Implementation skipped for brevity
-  return { likes: 0, dislikes: 0 };
+  try {
+    const { data, error } = await supabase
+      .rpc('toggle_comment_reaction', {
+        p_comment_id: commentId,
+        p_user_id: userId,
+        p_reaction_type: 'like'
+      });
+    
+    if (error) throw error;
+    return data as { likes: number; dislikes: number };
+  } catch (error) {
+    handleError(error, {
+      fallbackMessage: 'Failed to like comment',
+      severity: ErrorSeverity.MEDIUM,
+      context: 'LIKE_COMMENT'
+    });
+    throw error;
+  }
 };
 
 export const dislikeComment = async (commentId: string, userId: string): Promise<CommentInteractionResult> => {
-  // Similar implementation as dislikeScammer but for comments
-  // Implementation skipped for brevity
-  return { likes: 0, dislikes: 0 };
+  try {
+    const { data, error } = await supabase
+      .rpc('toggle_comment_reaction', {
+        p_comment_id: commentId,
+        p_user_id: userId,
+        p_reaction_type: 'dislike'
+      });
+    
+    if (error) throw error;
+    return data as { likes: number; dislikes: number };
+  } catch (error) {
+    handleError(error, {
+      fallbackMessage: 'Failed to dislike comment',
+      severity: ErrorSeverity.MEDIUM,
+      context: 'DISLIKE_COMMENT'
+    });
+    throw error;
+  }
 };
 
 export const getUserCommentInteraction = async (commentId: string, userId: string): Promise<UserCommentInteraction | null> => {
-  // Similar implementation as getUserScammerInteraction but for comments
-  // Implementation skipped for brevity
-  return null;
+  try {
+    const { data, error } = await supabase
+      .from('comment_reactions')
+      .select('reaction_type')
+      .eq('comment_id', commentId)
+      .eq('user_id', userId);
+      
+    if (error) throw error;
+    
+    const liked = data?.some(r => r.reaction_type === 'like') ?? false;
+    const disliked = data?.some(r => r.reaction_type === 'dislike') ?? false;
+    
+    return { liked, disliked };
+  } catch (error) {
+    handleError(error, {
+      fallbackMessage: 'Failed to get user comment interaction',
+      severity: ErrorSeverity.LOW,
+      context: 'GET_USER_COMMENT_INTERACTION'
+    });
+    return null;
+  }
 };
