@@ -963,6 +963,14 @@ export type Database = {
         Args: { p_reaction_type: string; p_reply_id: string; p_user_id: string }
         Returns: Json
       }
+      toggle_scammer_reaction: {
+        Args: {
+          p_reaction_type: string
+          p_scammer_id: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       track_pageview: { Args: { pageview_data: Json }; Returns: undefined }
       track_visitor: { Args: { visitor_data: Json }; Returns: undefined }
     }
