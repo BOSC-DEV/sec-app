@@ -23,7 +23,7 @@ const TermsDialog: React.FC<TermsDialogProps> = ({
           <div className="space-y-4 text-sm">
             <h3 className="font-bold text-lg">1. Acceptance of Terms</h3>
             <p>
-              By accessing or using the Scams & E-crimes Commission (SEC) platform, you agree to be bound by these Terms of Service. 
+              By accessing or using the Scams and E-Crimes Commission (SEC) platform, you agree to be bound by these Terms of Service. 
               If you disagree with any part of these terms, you may not access the platform.
             </p>
             

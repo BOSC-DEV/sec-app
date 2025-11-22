@@ -259,7 +259,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
             }
 
             // Use a constant message for authentication (never changes)
-            const message = 'Sign in to Scams & E-crimes Commission';
+            const message = 'Sign in to Scams and E-Crimes Commission';
             const signature = await signMessageWithPhantom(message);
             
             if (!signature) {

@@ -160,7 +160,7 @@ const PublicProfilePage = () => {
   const defaultShareImage = '/lovable-uploads/3f23090d-4e36-43fc-b230-a8f898d7edd2.png';
   const pageImage = profile?.profile_pic_url || defaultShareImage;
   const pageTitle = profile ? `${profile.display_name} (@${profile.username}) | SEC.digital` : 'Profile | SEC.digital';
-  const pageDescription = profile?.bio || `Check out this profile on SEC.digital - The Scams & E-crimes Commission`;
+  const pageDescription = profile?.bio || `Check out this profile on SEC.digital - The Scams and E-Crimes Commission`;
   const formatDate = (dateString: string) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString();

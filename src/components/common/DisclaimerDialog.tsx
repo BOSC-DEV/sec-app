@@ -25,7 +25,7 @@ const DisclaimerDialog: React.FC<DisclaimerDialogProps> = ({
           <div className="space-y-4 text-sm">
             <h3 className="font-bold text-lg">1. Informational Purposes Only</h3>
             <p>
-              The Scams & E-crimes Commission (SEC) platform is provided for informational purposes only. 
+              The Scams and E-Crimes Commission (SEC) platform is provided for informational purposes only. 
               The information contained on this platform does not constitute legal, financial, or investment advice. 
               We do not guarantee the accuracy, completeness, or reliability of any information presented.
             </p>

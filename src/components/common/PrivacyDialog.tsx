@@ -23,7 +23,7 @@ const PrivacyDialog: React.FC<PrivacyDialogProps> = ({
           <div className="space-y-4 text-sm">
             <h3 className="font-bold text-lg">1. Information We Collect</h3>
             <p>
-              The Scams & E-crimes Commission (SEC) collects the following types of information:
+              The Scams and E-Crimes Commission (SEC) collects the following types of information:
             </p>
             <ul className="list-disc pl-5 space-y-2">
               <li><span className="font-semibold">Wallet Address:</span> When you connect your wallet to our platform</li>

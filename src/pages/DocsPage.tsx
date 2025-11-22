@@ -6,11 +6,11 @@ import { ExternalLink, Shield, Users, Coins, Trophy } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const DocsPage = () => {
-  return <DocsContent title="SEC Documentation" description="Welcome to the complete guide for the Scams & E-crimes Commission platform">
+  return <DocsContent title="SEC Documentation" description="Welcome to the complete guide for the Scams and E-Crimes Commission platform">
       <div className="space-y-8">
         {/* Hero Section */}
         <section className="bg-gradient-to-r from-icc-blue to-icc-blue-light rounded-lg p-8 text-white mb-8">
-          <h2 className="text-3xl font-bold mb-4 text-white">🏛️ SEC: Scams & E-crimes Commission</h2>
+          <h2 className="text-3xl font-bold mb-4 text-white">🏛️ SEC: Scams and E-Crimes Commission</h2>
           <p className="text-lg mb-6 opacity-90">
             A decentralized crime registry focused on the cryptocurrency and blockchain ecosystem. 
             SEC serves as a community-governed platform where users can report, track, and combat scams, 

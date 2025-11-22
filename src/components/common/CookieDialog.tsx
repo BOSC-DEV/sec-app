@@ -28,7 +28,7 @@ const CookieDialog: React.FC<CookieDialogProps> = ({
             
             <h3 className="font-bold text-lg">2. How We Use Cookies</h3>
             <p>
-              The Scams & E-crimes Commission (SEC) platform uses cookies for the following purposes:
+              The Scams and E-Crimes Commission (SEC) platform uses cookies for the following purposes:
             </p>
             <ul className="list-disc pl-5 space-y-2">
               <li><span className="font-semibold">Essential Cookies:</span> These cookies are necessary for the website to function properly. They enable core functionality such as security, network management, and account authentication.</li>

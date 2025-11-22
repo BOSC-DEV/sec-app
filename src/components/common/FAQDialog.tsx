@@ -38,7 +38,7 @@ const FAQDialog: React.FC<FAQDialogProps> = ({
             Frequently Asked Questions
           </DialogTitle>
           <DialogDescription>
-            Find answers to common questions about the Scams & E-crimes Commission.
+            Find answers to common questions about the Scams and E-Crimes Commission.
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className="h-[60vh] pr-4">
@@ -50,7 +50,7 @@ const FAQDialog: React.FC<FAQDialogProps> = ({
             <div>
               <h3 className="font-bold text-lg flex items-center gap-2">
                 <UserCheck className="h-5 w-5 text-icc-blue" />
-                1. What is the Scams & E-crimes Commission (SEC)?
+                1. What is the Scams and E-Crimes Commission (SEC)?
               </h3>
               <p>
                 The SEC is a community-driven platform designed to identify, report, and track cryptocurrency fraudsters and scammers. We provide a decentralized registry to bring accountability to the digital space and help protect users from fraud.

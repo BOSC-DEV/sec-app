@@ -23,7 +23,7 @@ const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
             />
           </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-gothic font-bold text-white mb-6">
-            {title || "Scams & E-crimes Commission"}
+            {title || "Scams and E-Crimes Commission"}
           </h1>
           <p className="text-xl md:text-2xl text-gray-100 mb-8 max-w-2xl mx-auto">
             {subtitle || "A decentralized crime registry bringing accountability and self governance to the new digital world."}
