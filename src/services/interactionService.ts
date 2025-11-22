@@ -62,194 +62,45 @@ export const likeScammer = async (scammerId: string, userId: string): Promise<Sc
       throw new Error(`Scammer with ID ${scammerId} does not exist`);
     }
     
-    // Check if user already liked or disliked
-    const { data: existingInteraction } = await supabase
-      .from('user_scammer_interactions')
-      .select('*')
-      .eq('scammer_id', scammerId)
-      .eq('user_id', userId)
-      .maybeSingle();
-
-    if (existingInteraction) {
-      if (existingInteraction.liked) {
-        // User already liked, so unlike
-        await supabase
-          .from('user_scammer_interactions')
-          .update({ liked: false, last_updated: new Date().toISOString() })
-          .eq('id', existingInteraction.id);
-
-        // Decrement likes count in scammers table
-        const { data: scammer } = await supabase
-          .from('scammers')
-          .select('likes')
-          .eq('id', scammerId)
-          .single();
-          
-        const newLikes = Math.max((scammer?.likes || 1) - 1, 0);
-        
-        await supabase
-          .from('scammers')
-          .update({ likes: newLikes })
-          .eq('id', scammerId);
-          
-        return getScammerLikesDislikes(scammerId);
-      } else if (existingInteraction.disliked) {
-        // User already disliked, so remove dislike and add like
-        await supabase
-          .from('user_scammer_interactions')
-          .update({ liked: true, disliked: false, last_updated: new Date().toISOString() })
-          .eq('id', existingInteraction.id);
-
-        // Decrement dislikes count and increment likes in scammers table
-        const { data: scammer } = await supabase
-          .from('scammers')
-          .select('likes, dislikes')
-          .eq('id', scammerId)
-          .single();
-          
-        const newLikes = (scammer?.likes || 0) + 1;
-        const newDislikes = Math.max((scammer?.dislikes || 1) - 1, 0);
-        
-        await supabase
-          .from('scammers')
-          .update({ 
-            likes: newLikes,
-            dislikes: newDislikes
-          })
-          .eq('id', scammerId);
-          
-        // Send notification
-        const { data: scammerData } = await supabase
-          .from('scammers')
-          .select('name, added_by')
-          .eq('id', scammerId)
-          .single();
-          
-        if (scammerData && scammerData.added_by && scammerData.added_by !== userId) {
-          const { data: userData } = await supabase
-            .from('profiles')
-            .select('display_name, username, profile_pic_url')
-            .eq('id', userId)
-            .single();
-            
-          if (userData) {
-            await notifyScammerLike(
-              scammerId,
-              scammerData.name,
-              scammerData.added_by,
-              userId,
-              userData.display_name,
-              userData.username,
-              userData.profile_pic_url
-            );
-          }
-        }
-        
-        return getScammerLikesDislikes(scammerId);
-      } else {
-        // User has an interaction but neither liked nor disliked (unusual state)
-        await supabase
-          .from('user_scammer_interactions')
-          .update({ liked: true, last_updated: new Date().toISOString() })
-          .eq('id', existingInteraction.id);
-
-        // Increment likes count in scammers table  
-        const { data: scammer } = await supabase
-          .from('scammers')
-          .select('likes')
-          .eq('id', scammerId)
-          .single();
-          
-        const newLikes = (scammer?.likes || 0) + 1;
-        
-        await supabase
-          .from('scammers')
-          .update({ likes: newLikes })
-          .eq('id', scammerId);
-          
-        // Send notification
-        const { data: scammerData } = await supabase
-          .from('scammers')
-          .select('name, added_by')
-          .eq('id', scammerId)
-          .single();
-          
-        if (scammerData && scammerData.added_by && scammerData.added_by !== userId) {
-          const { data: userData } = await supabase
-            .from('profiles')
-            .select('display_name, username, profile_pic_url')
-            .eq('id', userId)
-            .single();
-            
-          if (userData) {
-            await notifyScammerLike(
-              scammerId,
-              scammerData.name,
-              scammerData.added_by,
-              userId,
-              userData.display_name,
-              userData.username,
-              userData.profile_pic_url
-            );
-          }
-        }
-        
-        return getScammerLikesDislikes(scammerId);
-      }
-    } else {
-      // No existing interaction, create a new one with like
-      await supabase
-        .from('user_scammer_interactions')
-        .insert({
-          scammer_id: scammerId,
-          user_id: userId,
-          liked: true,
-          disliked: false
-        });
-
-      // Increment likes count in scammers table
-      const { data: scammer } = await supabase
-        .from('scammers')
-        .select('likes')
-        .eq('id', scammerId)
+    const { data, error } = await supabase
+      .rpc('toggle_scammer_reaction', {
+        p_scammer_id: scammerId,
+        p_user_id: userId,
+        p_reaction_type: 'like'
+      });
+    
+    if (error) throw error;
+    
+    const result = data as { likes: number; dislikes: number };
+    
+    // Send notification after successful like
+    const { data: scammerData } = await supabase
+      .from('scammers')
+      .select('name, added_by')
+      .eq('id', scammerId)
+      .single();
+      
+    if (scammerData && scammerData.added_by && scammerData.added_by !== userId) {
+      const { data: userData } = await supabase
+        .from('profiles')
+        .select('display_name, username, profile_pic_url')
+        .eq('id', userId)
         .single();
         
-      const newLikes = (scammer?.likes || 0) + 1;
-      
-      await supabase
-        .from('scammers')
-        .update({ likes: newLikes })
-        .eq('id', scammerId);
-        
-      // Send notification
-      const { data: scammerData } = await supabase
-        .from('scammers')
-        .select('name, added_by')
-        .eq('id', scammerId)
-        .single();
-        
-      if (scammerData && scammerData.added_by && scammerData.added_by !== userId) {
-        const { data: userData } = await supabase
-          .from('profiles')
-          .select('display_name, username, profile_pic_url')
-          .eq('id', userId)
-          .single();
-          
-        if (userData) {
-          await notifyScammerLike(
-            scammerId,
-            scammerData.name,
-            scammerData.added_by,
-            userId,
-            userData.display_name,
-            userData.username,
-            userData.profile_pic_url
-          );
-        }
+      if (userData) {
+        await notifyScammerLike(
+          scammerId,
+          scammerData.name,
+          scammerData.added_by,
+          userId,
+          userData.display_name,
+          userData.username,
+          userData.profile_pic_url
+        );
       }
-      
-      return getScammerLikesDislikes(scammerId);
     }
+    
+    return result;
   } catch (error) {
     handleError(error, {
       fallbackMessage: 'Failed to like scammer',
@@ -273,113 +124,15 @@ export const dislikeScammer = async (scammerId: string, userId: string): Promise
       throw new Error(`Scammer with ID ${scammerId} does not exist`);
     }
     
-    // Check if user already liked or disliked
-    const { data: existingInteraction } = await supabase
-      .from('user_scammer_interactions')
-      .select('*')
-      .eq('scammer_id', scammerId)
-      .eq('user_id', userId)
-      .maybeSingle();
-
-    if (existingInteraction) {
-      if (existingInteraction.disliked) {
-        // User already disliked, so undislike
-        await supabase
-          .from('user_scammer_interactions')
-          .update({ disliked: false, last_updated: new Date().toISOString() })
-          .eq('id', existingInteraction.id);
-
-        // Decrement dislikes count in scammers table
-        const { data: scammer } = await supabase
-          .from('scammers')
-          .select('dislikes')
-          .eq('id', scammerId)
-          .single();
-          
-        const newDislikes = Math.max((scammer?.dislikes || 1) - 1, 0);
-        
-        await supabase
-          .from('scammers')
-          .update({ dislikes: newDislikes })
-          .eq('id', scammerId);
-
-        return getScammerLikesDislikes(scammerId);
-      } else if (existingInteraction.liked) {
-        // User already liked, so remove like and add dislike
-        await supabase
-          .from('user_scammer_interactions')
-          .update({ liked: false, disliked: true, last_updated: new Date().toISOString() })
-          .eq('id', existingInteraction.id);
-
-        // Decrement likes count and increment dislikes in scammers table
-        const { data: scammer } = await supabase
-          .from('scammers')
-          .select('likes, dislikes')
-          .eq('id', scammerId)
-          .single();
-          
-        const newLikes = Math.max((scammer?.likes || 1) - 1, 0);
-        const newDislikes = (scammer?.dislikes || 0) + 1;
-        
-        await supabase
-          .from('scammers')
-          .update({ 
-            likes: newLikes,
-            dislikes: newDislikes 
-          })
-          .eq('id', scammerId);
-
-        return getScammerLikesDislikes(scammerId);
-      } else {
-        // User has an interaction but neither liked nor disliked (unusual state)
-        await supabase
-          .from('user_scammer_interactions')
-          .update({ disliked: true, last_updated: new Date().toISOString() })
-          .eq('id', existingInteraction.id);
-
-        // Increment dislikes count in scammers table
-        const { data: scammer } = await supabase
-          .from('scammers')
-          .select('dislikes')
-          .eq('id', scammerId)
-          .single();
-          
-        const newDislikes = (scammer?.dislikes || 0) + 1;
-        
-        await supabase
-          .from('scammers')
-          .update({ dislikes: newDislikes })
-          .eq('id', scammerId);
-
-        return getScammerLikesDislikes(scammerId);
-      }
-    } else {
-      // No existing interaction, create a new one with dislike
-      await supabase
-        .from('user_scammer_interactions')
-        .insert({
-          scammer_id: scammerId,
-          user_id: userId,
-          liked: false,
-          disliked: true
-        });
-
-      // Increment dislikes count in scammers table
-      const { data: scammer } = await supabase
-        .from('scammers')
-        .select('dislikes')
-        .eq('id', scammerId)
-        .single();
-        
-      const newDislikes = (scammer?.dislikes || 0) + 1;
-      
-      await supabase
-        .from('scammers')
-        .update({ dislikes: newDislikes })
-        .eq('id', scammerId);
-
-      return getScammerLikesDislikes(scammerId);
-    }
+    const { data, error } = await supabase
+      .rpc('toggle_scammer_reaction', {
+        p_scammer_id: scammerId,
+        p_user_id: userId,
+        p_reaction_type: 'dislike'
+      });
+    
+    if (error) throw error;
+    return data as { likes: number; dislikes: number };
   } catch (error) {
     handleError(error, {
       fallbackMessage: 'Failed to dislike scammer',
