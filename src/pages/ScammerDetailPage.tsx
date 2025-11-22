@@ -11,7 +11,7 @@ import CompactHero from '@/components/common/CompactHero';
 import BountyContributionList from '@/components/scammer/BountyContributionList';
 import BountyTransferDialog from '@/components/scammer/BountyTransferDialog';
 import { CommentReplyItem } from '@/components/common/CommentReplyItem';
-import { ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, Link2, Eye, AlertTriangle, Shield, TrendingUp, Edit, Clipboard, Trash2, MessageSquare, Users, FileText, Wallet2, ShieldCheck, ArchiveRestore, Reply, Edit2, X, Check } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, Link2, Eye, AlertTriangle, Shield, TrendingUp, Edit, Clipboard, Trash2, MessageSquare, Users, FileText, Wallet2, ShieldCheck, ArchiveRestore, Reply, Edit2, X, Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
@@ -59,6 +59,7 @@ const CommentItem = ({
   const [isDisliked, setIsDisliked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [replies, setReplies] = useState<CommentReply[]>([]);
+  const [showReplies, setShowReplies] = useState(false);
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replyContent, setReplyContent] = useState('');
   const [isSubmittingReply, setIsSubmittingReply] = useState(false);
@@ -156,6 +157,7 @@ const CommentItem = ({
       
       setReplyContent('');
       setShowReplyForm(false);
+      setShowReplies(true); // Keep replies expanded after submission
       
       toast({
         title: "Success",
@@ -392,11 +394,24 @@ const CommentItem = ({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setShowReplyForm(!showReplyForm)}
+              onClick={() => {
+                setShowReplies(!showReplies);
+                if (!showReplies) {
+                  setShowReplyForm(true);
+                } else {
+                  setShowReplyForm(false);
+                }
+              }}
               className="text-muted-foreground hover:text-foreground h-7 px-2"
             >
-              <Reply className="h-3 w-3 mr-1" />
-              <span className="text-xs">Reply {replies.length > 0 && `(${replies.length})`}</span>
+              {showReplies ? (
+                <ChevronUp className="h-3 w-3 mr-1" />
+              ) : (
+                <ChevronDown className="h-3 w-3 mr-1" />
+              )}
+              <span className="text-xs">
+                {showReplies ? 'Hide replies' : `Show replies${replies.length > 0 ? ` (${replies.length})` : ''}`}
+              </span>
             </Button>
           </div>
         )}
@@ -433,60 +448,78 @@ const CommentItem = ({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setShowReplyForm(!showReplyForm)}
+            onClick={() => {
+              setShowReplies(!showReplies);
+              if (!showReplies) {
+                setShowReplyForm(true);
+              } else {
+                setShowReplyForm(false);
+              }
+            }}
             className="text-muted-foreground hover:text-foreground"
           >
-            <Reply className="h-3 w-3 mr-1" />
-            <span className="text-xs">Reply {replies.length > 0 && `(${replies.length})`}</span>
+            {showReplies ? (
+              <ChevronUp className="h-3 w-3 mr-1" />
+            ) : (
+              <ChevronDown className="h-3 w-3 mr-1" />
+            )}
+            <span className="text-xs">
+              {showReplies ? 'Hide replies' : `Show replies${replies.length > 0 ? ` (${replies.length})` : ''}`}
+            </span>
           </Button>
         </div>
       )}
-      
-      {/* Reply form */}
-      {showReplyForm && (
-        <div className="mt-3 pl-4 md:pl-14 border-l-2 border-border/50">
-          <Textarea
-            value={replyContent}
-            onChange={(e) => setReplyContent(e.target.value)}
-            placeholder="Write a reply..."
-            className="min-h-[80px] mb-2"
-          />
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              onClick={handleReplySubmit}
-              disabled={!replyContent.trim() || isSubmittingReply}
-            >
-              {isSubmittingReply ? 'Posting...' : 'Post Reply'}
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => {
-                setShowReplyForm(false);
-                setReplyContent('');
-              }}
-            >
-              Cancel
-            </Button>
-          </div>
-        </div>
-      )}
-      
-      {/* Display replies */}
-      {replies.length > 0 && (
-        <div className="mt-3 space-y-2">
-          {replies.map((reply) => (
-            <CommentReplyItem
-              key={reply.id}
-              reply={reply}
-              onReplyUpdated={refreshReplies}
-              onReplyDeleted={refreshReplies}
-            />
-          ))}
-        </div>
-      )}
     </div>
+    
+    {/* Reply section - positioned below the comment */}
+    {showReplies && (
+      <div className="ml-4 md:ml-14 border-l-2 border-border/50 pl-4 mt-3 animate-accordion-down">
+        {/* Reply form */}
+        {showReplyForm && (
+          <div className="mb-4">
+            <Textarea
+              value={replyContent}
+              onChange={(e) => setReplyContent(e.target.value)}
+              placeholder="Write a reply..."
+              className="min-h-[80px] mb-2"
+            />
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                onClick={handleReplySubmit}
+                disabled={!replyContent.trim() || isSubmittingReply}
+              >
+                {isSubmittingReply ? 'Posting...' : 'Post Reply'}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  setShowReplyForm(false);
+                  setReplyContent('');
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+        
+        {/* Display replies */}
+        {replies.length > 0 && (
+          <div className="space-y-3">
+            {replies.map((reply) => (
+              <CommentReplyItem
+                key={reply.id}
+                reply={reply}
+                onReplyUpdated={refreshReplies}
+                onReplyDeleted={refreshReplies}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    )}
     </>
   );
 };
