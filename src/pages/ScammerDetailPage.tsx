@@ -118,10 +118,38 @@ const CommentItem = ({ comment, profile }: { comment: Comment; profile: Profile 
           <div className="hidden md:block text-sm text-muted-foreground">{formatDate(comment.created_at)}</div>
         </div>
         <p className="mt-1 break-words">{comment.content}</p>
+        
+        {/* Like/Dislike buttons - below comment on mobile, hidden on tablet+ */}
+        <div className="flex md:hidden items-center gap-2 mt-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLike}
+            disabled={isLoading || !profile}
+            className={`flex items-center gap-1 ${isLiked ? 'text-icc-gold' : ''}`}
+          >
+            <ThumbsUp className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+            <span className="text-sm">{likes}</span>
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleDislike}
+            disabled={isLoading || !profile}
+            className={`flex items-center gap-1 ${isDisliked ? 'text-red-500' : ''}`}
+          >
+            <ThumbsDown className={`h-4 w-4 ${isDisliked ? 'fill-current' : ''}`} />
+            <span className="text-sm">{dislikes}</span>
+          </Button>
+          
+          {/* Date on mobile */}
+          <div className="text-xs text-muted-foreground ml-auto">{formatDate(comment.created_at)}</div>
+        </div>
       </div>
       
-      {/* Like/Dislike buttons on the right */}
-      <div className="flex flex-col items-end gap-2 ml-auto">
+      {/* Like/Dislike buttons on the right - tablet/desktop only */}
+      <div className="hidden md:flex flex-col items-end gap-2 ml-auto">
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
@@ -145,8 +173,6 @@ const CommentItem = ({ comment, profile }: { comment: Comment; profile: Profile 
             <span className="text-sm">{dislikes}</span>
           </Button>
         </div>
-        {/* Date below thumbs on mobile only */}
-        <div className="md:hidden text-xs text-muted-foreground">{formatDate(comment.created_at)}</div>
       </div>
     </div>
   );
