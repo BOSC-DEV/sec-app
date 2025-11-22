@@ -18,7 +18,7 @@ const BottomNav = () => {
     {
       icon: MessageCircle,
       label: 'Chat',
-      path: '/community',
+      path: '/community?tab=chat',
       position: 'center-left'
     },
     {
@@ -36,6 +36,10 @@ const BottomNav = () => {
   ];
 
   const isActive = (path: string) => {
+    // Handle query params for community chat
+    if (path.includes('?tab=chat')) {
+      return location.pathname === '/community' && location.search.includes('tab=chat');
+    }
     if (path === '/') {
       return location.pathname === '/';
     }
