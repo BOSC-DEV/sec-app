@@ -12,48 +12,27 @@ interface Statistics {
 
 export const getStatistics = async (): Promise<Statistics> => {
   try {
-    // Get total bounty amount
-    const { data: bountyData, error: bountyError } = await supabase
-      .from('scammers')
-      .select('bounty_amount')
-      .is('deleted_at', null);
+    // Use database function to get all statistics (bypasses RLS for public counts)
+    const { data, error } = await supabase.rpc('get_public_statistics');
     
-    if (bountyError) throw bountyError;
+    if (error) throw error;
     
-    const totalBounty = bountyData.reduce((sum, scammer) => sum + (scammer.bounty_amount || 0), 0);
+    if (!data || data.length === 0) {
+      return {
+        totalBounty: 0,
+        scammersCount: 0,
+        reportersCount: 0,
+        usersCount: 0
+      };
+    }
     
-    // Get total scammers count
-    const { count: scammersCount, error: scammersError } = await supabase
-      .from('scammers')
-      .select('*', { count: 'exact', head: true })
-      .is('deleted_at', null);
-    
-    if (scammersError) throw scammersError;
-    
-    // Get unique reporters count
-    const { data: reportersData, error: reportersError } = await supabase
-      .from('scammers')
-      .select('added_by')
-      .is('deleted_at', null);
-    
-    if (reportersError) throw reportersError;
-    
-    // Filter out null values and count unique reporters
-    const uniqueReporters = new Set(reportersData.filter(item => item.added_by).map(item => item.added_by));
-    const reportersCount = uniqueReporters.size;
-    
-    // Get total users count
-    const { count: usersCount, error: usersError } = await supabase
-      .from('profiles')
-      .select('*', { count: 'exact', head: true });
-    
-    if (usersError) throw usersError;
+    const stats = data[0];
     
     return {
-      totalBounty,
-      scammersCount: scammersCount || 0,
-      reportersCount,
-      usersCount: usersCount || 0
+      totalBounty: Number(stats.total_bounty || 0),
+      scammersCount: Number(stats.scammers_count || 0),
+      reportersCount: Number(stats.reporters_count || 0),
+      usersCount: Number(stats.users_count || 0)
     };
   } catch (error) {
     handleError(error, {
