@@ -90,7 +90,7 @@ const SurveyDisplay: React.FC<SurveyProps> = ({
     if (!badgeInfo) {
       toast({
         title: "No badge tier",
-        description: "You need a badge to vote in surveys",
+        description: "You need a badge to vote",
         variant: "destructive"
       });
       return;
