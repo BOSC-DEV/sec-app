@@ -30,7 +30,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="icc-footer">
+    <footer className="icc-footer pb-20 md:pb-0">
       <div className="icc-container">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-1 text-center md:text-left">
