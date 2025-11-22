@@ -913,6 +913,15 @@ export type Database = {
           date: string
         }[]
       }
+      get_public_statistics: {
+        Args: never
+        Returns: {
+          reporters_count: number
+          scammers_count: number
+          total_bounty: number
+          users_count: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
