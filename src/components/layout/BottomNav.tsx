@@ -16,9 +16,9 @@ const BottomNav = () => {
       position: 'left'
     },
     {
-      icon: MessageCircle,
-      label: 'Chat',
-      path: '/community?tab=chat',
+      icon: User,
+      label: 'Profile',
+      path: isConnected ? '/profile' : '/profile',
       position: 'center-left'
     },
     {
@@ -28,9 +28,9 @@ const BottomNav = () => {
       position: 'center-right'
     },
     {
-      icon: User,
-      label: 'Profile',
-      path: isConnected ? '/profile' : '/profile',
+      icon: MessageCircle,
+      label: 'Chat',
+      path: '/community?tab=chat',
       position: 'right'
     }
   ];
