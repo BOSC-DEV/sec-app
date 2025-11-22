@@ -657,6 +657,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
               itemType="announcement"
               initialLikes={announcement.likes}
               initialDislikes={announcement.dislikes}
+              onUpdateInteraction={refetch}
             />
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <div className="flex items-center">
