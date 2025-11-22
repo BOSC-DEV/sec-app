@@ -260,7 +260,7 @@ const LiveChat = () => {
     const time = formatTimeAgo(message.created_at);
     
     const messageContent = (
-      <div className="flex my-6 animate-fade-in">
+      <div className="flex my-6">
         <div className={`flex ${isCurrentUser ? 'flex-row-reverse self-end ml-auto' : 'flex-row'} space-x-2 ${isCurrentUser ? 'space-x-reverse' : ''}`}>
           <div className="flex-shrink-0">
             <Link to={message.author_username ? `/profile/${message.author_username}` : '#'}>
