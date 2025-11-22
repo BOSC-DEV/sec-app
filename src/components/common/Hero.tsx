@@ -11,7 +11,7 @@ interface HeroProps {
 
 const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
   return (
-    <div className="relative bg-icc-blue text-white dark:bg-icc-blue -mt-[45px] md:mt-0" role="banner">
+    <div className="relative bg-icc-blue text-white dark:bg-icc-blue -mt-[50px] md:mt-0" role="banner">
       <div className="absolute inset-0 bg-[url('/images/cyber-pattern.png')] opacity-10" aria-hidden="true"></div>
       <div className="icc-container py-16 md:py-24 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
