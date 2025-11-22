@@ -16,21 +16,21 @@ const BottomNav = () => {
       position: 'left'
     },
     {
-      icon: User,
-      label: 'Profile',
-      path: isConnected ? '/profile' : '/profile',
-      position: 'center-left'
-    },
-    {
       icon: PlusCircle,
       label: 'Report',
       path: '/new-report',
-      position: 'center-right'
+      position: 'center-left'
     },
     {
       icon: MessageCircle,
       label: 'Chat',
       path: '/community?tab=chat',
+      position: 'center-right'
+    },
+    {
+      icon: User,
+      label: 'Profile',
+      path: isConnected ? '/profile' : '/profile',
       position: 'right'
     }
   ];
