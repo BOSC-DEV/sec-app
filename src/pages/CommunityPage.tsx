@@ -47,7 +47,9 @@ const CommunityPage = () => {
   return <>
       <SEO title="Community | Scams and E-Crimes Commission" description="Join the community to discuss and stay updated on the latest scams and fraud prevention." />
       
-      <CompactHero title="Community" subtitle="Connect with fellow fraud fighters and stay updated on the latest scam prevention efforts" />
+      <div className="hidden md:block">
+        <CompactHero title="Community" subtitle="Connect with fellow fraud fighters and stay updated on the latest scam prevention efforts" />
+      </div>
       
       <div className="icc-container py-8">
         {splitScreen && !isMobile ? <>
