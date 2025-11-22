@@ -3,13 +3,15 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { getScammerById, deleteScammer, unarchiveScammer } from '@/services/scammerService';
 import { getScammerComments, addComment } from '@/services/commentService';
+import { commentReplyService, CommentReply } from '@/services/commentReplyService';
 import { likeScammer, dislikeScammer, getUserScammerInteraction, likeComment, dislikeComment, getUserCommentInteraction } from '@/services/interactionService';
 import { isScammerCreator } from '@/services/reportService';
 import { addBountyContribution, getScammerBountyContributions, getUserContributionAmountForScammer } from '@/services/bountyService';
 import CompactHero from '@/components/common/CompactHero';
 import BountyContributionList from '@/components/scammer/BountyContributionList';
 import BountyTransferDialog from '@/components/scammer/BountyTransferDialog';
-import { ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, Link2, Eye, AlertTriangle, Shield, TrendingUp, Edit, Clipboard, Trash2, MessageSquare, Users, FileText, Wallet2, ShieldCheck, ArchiveRestore } from 'lucide-react';
+import { CommentReplyItem } from '@/components/common/CommentReplyItem';
+import { ThumbsUp, ThumbsDown, DollarSign, Share2, ArrowLeft, Copy, User, Calendar, Link2, Eye, AlertTriangle, Shield, TrendingUp, Edit, Clipboard, Trash2, MessageSquare, Users, FileText, Wallet2, ShieldCheck, ArchiveRestore, Reply } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
@@ -40,17 +42,21 @@ import { ArrowLeftRight } from 'lucide-react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-// Comment item component with like/dislike functionality
+// Comment item component with like/dislike and reply functionality
 const CommentItem = ({ comment, profile }: { comment: Comment; profile: Profile | null }) => {
   const [likes, setLikes] = useState(comment.likes || 0);
   const [dislikes, setDislikes] = useState(comment.dislikes || 0);
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [replies, setReplies] = useState<CommentReply[]>([]);
+  const [showReplyForm, setShowReplyForm] = useState(false);
+  const [replyContent, setReplyContent] = useState('');
+  const [isSubmittingReply, setIsSubmittingReply] = useState(false);
 
-  // Load user interaction on mount
+  // Load user interaction and replies on mount
   useEffect(() => {
-    const loadInteraction = async () => {
+    const loadData = async () => {
       if (!profile?.id) return;
       
       try {
@@ -59,12 +65,16 @@ const CommentItem = ({ comment, profile }: { comment: Comment; profile: Profile 
           setIsLiked(interaction.liked);
           setIsDisliked(interaction.disliked);
         }
+        
+        // Fetch replies
+        const fetchedReplies = await commentReplyService.fetchReplies(comment.id);
+        setReplies(fetchedReplies);
       } catch (error) {
-        console.error('Error loading comment interaction:', error);
+        console.error('Error loading comment data:', error);
       }
     };
     
-    loadInteraction();
+    loadData();
   }, [comment.id, profile?.id]);
 
   const handleLike = async () => {
@@ -102,6 +112,58 @@ const CommentItem = ({ comment, profile }: { comment: Comment; profile: Profile 
       console.error('Error disliking comment:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleReplySubmit = async () => {
+    if (!replyContent.trim() || !profile) {
+      toast({
+        title: "Error",
+        description: "Please enter a reply",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSubmittingReply(true);
+    try {
+      await commentReplyService.addReply(
+        comment.id,
+        replyContent,
+        profile.id,
+        profile.display_name,
+        profile.profile_pic_url
+      );
+      
+      // Refresh replies
+      const fetchedReplies = await commentReplyService.fetchReplies(comment.id);
+      setReplies(fetchedReplies);
+      
+      setReplyContent('');
+      setShowReplyForm(false);
+      
+      toast({
+        title: "Success",
+        description: "Reply added successfully"
+      });
+    } catch (error) {
+      console.error('Error submitting reply:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add reply",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmittingReply(false);
+    }
+  };
+
+  const refreshReplies = async () => {
+    try {
+      const fetchedReplies = await commentReplyService.fetchReplies(comment.id);
+      setReplies(fetchedReplies);
+    } catch (error) {
+      console.error('Error refreshing replies:', error);
     }
   };
 
@@ -146,6 +208,19 @@ const CommentItem = ({ comment, profile }: { comment: Comment; profile: Profile 
           {/* Date on mobile */}
           <div className="text-xs text-muted-foreground ml-auto">{formatDate(comment.created_at)}</div>
         </div>
+        
+        {/* Reply button - mobile */}
+        <div className="flex md:hidden mt-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowReplyForm(!showReplyForm)}
+            className="text-muted-foreground hover:text-foreground h-7 px-2"
+          >
+            <Reply className="h-3 w-3 mr-1" />
+            <span className="text-xs">Reply {replies.length > 0 && `(${replies.length})`}</span>
+          </Button>
+        </div>
       </div>
       
       {/* Like/Dislike buttons on the right - tablet/desktop only */}
@@ -173,7 +248,62 @@ const CommentItem = ({ comment, profile }: { comment: Comment; profile: Profile 
             <span className="text-sm">{dislikes}</span>
           </Button>
         </div>
+        
+        {/* Reply button - desktop */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowReplyForm(!showReplyForm)}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <Reply className="h-3 w-3 mr-1" />
+          <span className="text-xs">Reply {replies.length > 0 && `(${replies.length})`}</span>
+        </Button>
       </div>
+      
+      {/* Reply form */}
+      {showReplyForm && (
+        <div className="mt-3 pl-4 md:pl-14 border-l-2 border-border/50">
+          <Textarea
+            value={replyContent}
+            onChange={(e) => setReplyContent(e.target.value)}
+            placeholder="Write a reply..."
+            className="min-h-[80px] mb-2"
+          />
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              onClick={handleReplySubmit}
+              disabled={!replyContent.trim() || isSubmittingReply}
+            >
+              {isSubmittingReply ? 'Posting...' : 'Post Reply'}
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                setShowReplyForm(false);
+                setReplyContent('');
+              }}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
+      
+      {/* Display replies */}
+      {replies.length > 0 && (
+        <div className="mt-3 space-y-2">
+          {replies.map((reply) => (
+            <CommentReplyItem
+              key={reply.id}
+              reply={reply}
+              onReplyUpdated={refreshReplies}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
