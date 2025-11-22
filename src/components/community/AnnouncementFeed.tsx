@@ -408,7 +408,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
     if (!profile?.wallet_address || !badgeInfo?.tier) {
       toast({
         title: "Can't vote",
-        description: "You need to be connected and have a badge to vote",
+        description: "You need a badge to vote",
         variant: "destructive",
       });
       return false;
