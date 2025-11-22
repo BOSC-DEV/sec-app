@@ -318,20 +318,6 @@ const LiveChat = () => {
            prevProps.message.content === nextProps.message.content;
   });
 
-  if (isLoading) {
-    return <div className="flex justify-center py-12">
-        <div className="animate-pulse flex flex-col space-y-4 w-full">
-          {[1, 2, 3, 4, 5].map(i => <div key={i} className="flex items-start space-x-2">
-              <div className="rounded-full bg-muted h-8 w-8"></div>
-              <div className="flex-1">
-                <div className="h-2 bg-muted rounded w-1/4 mb-2"></div>
-                <div className="h-4 bg-muted rounded w-3/4"></div>
-              </div>
-            </div>)}
-        </div>
-      </div>;
-  }
-
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className={`pb-2 ${isMobile ? 'px-3 py-2' : 'px-4 py-3'}`}>
