@@ -112,8 +112,10 @@ const CommentItem = ({ comment, profile }: { comment: Comment; profile: Profile 
         <AvatarFallback>{comment.author_name.substring(0, 2)}</AvatarFallback>
       </Avatar>
       <div className="flex-1">
-        <div className="font-medium">{comment.author_name}</div>
-        <div className="text-sm text-gray-500">{formatDate(comment.created_at)}</div>
+        <div className="flex items-center gap-2">
+          <div className="font-medium">{comment.author_name}</div>
+          <div className="text-sm text-muted-foreground">{formatDate(comment.created_at)}</div>
+        </div>
         <p className="mt-1">{comment.content}</p>
       </div>
       
