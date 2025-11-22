@@ -125,7 +125,7 @@ const CommunityPage = () => {
             
             
             <TabsContent value="chat" className="mt-0">
-              <div className="h-[480px] md:h-[600px]">
+              <div className="h-[456px] md:h-[600px]">
                 <LiveChat />
               </div>
             </TabsContent>
