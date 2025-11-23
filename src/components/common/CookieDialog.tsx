@@ -84,11 +84,6 @@ const CookieDialog: React.FC<CookieDialogProps> = ({
             </p>
           </div>
         </ScrollArea>
-        <DialogFooter className="mt-4">
-          <DialogClose asChild>
-            <Button variant="neutral">I Understand</Button>
-          </DialogClose>
-        </DialogFooter>
       </DialogContent>
     </Dialog>;
 };
