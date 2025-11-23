@@ -264,11 +264,6 @@ const FAQDialog: React.FC<FAQDialogProps> = ({
             </div>
           </div>
         </ScrollArea>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="neutral" className="text-icc-blue hover:bg-gray-100">Close</Button>
-          </DialogClose>
-        </DialogFooter>
       </DialogContent>
     </Dialog>;
 };
