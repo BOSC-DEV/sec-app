@@ -137,7 +137,7 @@ const Footer = () => {
         </div>
         
         <div className="border-t border-icc-blue-light dark:border-gray-700 mt-8 pt-8 text-sm text-gray-300 dark:text-gray-500 text-center md:text-left">
-          <p className="text-xs">&copy; {new Date().getFullYear()} Scams and E-Crimes Commission. All rights reserved.</p>
+          <p className="text-xs whitespace-nowrap">&copy; {new Date().getFullYear()} Scams and E-Crimes Commission. All rights reserved.</p>
         </div>
       </div>
 
