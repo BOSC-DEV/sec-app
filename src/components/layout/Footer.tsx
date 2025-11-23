@@ -51,6 +51,7 @@ const Footer = () => {
                 <Copy className="h-5 w-5 text-white" />
               </Button>
             </div>
+            <p className="text-xs text-gray-300 dark:text-gray-500 mt-auto pt-6 whitespace-nowrap text-center md:text-left">&copy; {new Date().getFullYear()} Scams and E-Crimes Commission. All rights reserved.</p>
           </div>
           
           <div>
@@ -134,10 +135,6 @@ const Footer = () => {
               </li>
             </ul>
           </div>
-        </div>
-        
-        <div className="mt-8 pt-8 border-t border-icc-blue-light dark:border-gray-700">
-          <p className="text-xs text-gray-300 dark:text-gray-500 whitespace-nowrap text-left">&copy; {new Date().getFullYear()} Scams and E-Crimes Commission. All rights reserved.</p>
         </div>
       </div>
 
