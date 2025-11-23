@@ -33,7 +33,7 @@ const Footer = () => {
     <footer className="icc-footer pb-20 md:pb-0">
       <div className="icc-container">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="md:col-span-1 text-center md:text-left">
+          <div className="md:col-span-1 text-center md:text-left flex flex-col">
             <Link to="/" className="flex justify-center md:justify-start items-center space-x-2 mb-4">
               <ICCLogo className="h-10 w-auto" />
               <div className="font-gothic">
@@ -51,7 +51,7 @@ const Footer = () => {
                 <Copy className="h-5 w-5 text-white" />
               </Button>
             </div>
-            <p className="text-xs text-gray-300 dark:text-gray-500 mt-auto pt-6 whitespace-nowrap text-center md:text-left">&copy; {new Date().getFullYear()} Scams and E-Crimes Commission. All rights reserved.</p>
+            <p className="text-xs text-gray-300 dark:text-gray-500 mt-auto pt-8 whitespace-nowrap text-center md:text-left">&copy; {new Date().getFullYear()} Scams and E-Crimes Commission. All rights reserved.</p>
           </div>
           
           <div>
