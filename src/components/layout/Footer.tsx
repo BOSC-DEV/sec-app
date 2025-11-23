@@ -64,39 +64,38 @@ const Footer = () => {
               <li><Link to="/profile" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm">Profile</Link></li>
               <li><Link to="/notifications" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm">Notifications</Link></li>
             </ul>
-            <p className="md:hidden text-xs text-gray-300 dark:text-gray-500 mt-6 whitespace-nowrap text-center">&copy; {new Date().getFullYear()} Scams and E-Crimes Commission. All rights reserved.</p>
           </div>
           
-          <div>
+          <div className="text-center md:text-left">
             <h4 className="text-white dark:text-gray-200 font-gothic font-bold mb-4">Resources</h4>
-            <ul className="space-y-2">
+            <ul className="space-y-2 flex flex-col items-center md:items-start">
               <li>
-                <Link to="/docs" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
+                <Link to="/docs" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm md:text-left py-1 px-0 rounded transition-colors">
                   About SEC
                 </Link>
               </li>
               <li>
-                <Link to="/docs" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
+                <Link to="/docs" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm md:text-left py-1 px-0 rounded transition-colors">
                   Documentation
                 </Link>
               </li>
               <li>
-                <button onClick={() => setFaqOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
+                <button onClick={() => setFaqOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm md:text-left py-1 px-0 rounded transition-colors">
                   FAQ
                 </button>
               </li>
               <li>
-                <button onClick={() => setContactOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
+                <button onClick={() => setContactOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm md:text-left py-1 px-0 rounded transition-colors">
                   Contact Us
                 </button>
               </li>
               <li>
-                <button onClick={() => setSafetyOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
+                <button onClick={() => setSafetyOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm md:text-left py-1 px-0 rounded transition-colors">
                   Safety Guidelines
                 </button>
               </li>
               <li>
-                <Link to="/community" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
+                <Link to="/community" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm md:text-left py-1 px-0 rounded transition-colors">
                   Community
                 </Link>
               </li>
@@ -104,38 +103,42 @@ const Footer = () => {
                 
               </li>
               <li>
-                <button onClick={showTokenWarning} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
+                <button onClick={showTokenWarning} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm md:text-left py-1 px-0 rounded transition-colors">
                   SEC Token
                 </button>
               </li>
             </ul>
           </div>
           
-          <div>
+          <div className="text-center md:text-left">
             <h4 className="text-white dark:text-gray-200 font-gothic font-bold mb-4">Legal</h4>
-            <ul className="space-y-2">
+            <ul className="space-y-2 flex flex-col items-center md:items-start">
               <li>
-                <button onClick={() => setTermsOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
+                <button onClick={() => setTermsOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm md:text-left py-1 px-0 rounded transition-colors">
                   Terms of Service
                 </button>
               </li>
               <li>
-                <button onClick={() => setPrivacyOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
+                <button onClick={() => setPrivacyOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm md:text-left py-1 px-0 rounded transition-colors">
                   Privacy Policy
                 </button>
               </li>
               <li>
-                <button onClick={() => setDisclaimerOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
+                <button onClick={() => setDisclaimerOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm md:text-left py-1 px-0 rounded transition-colors">
                   Disclaimer
                 </button>
               </li>
               <li>
-                <button onClick={() => setCookiesOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm text-left w-full py-1 px-0 rounded transition-colors">
+                <button onClick={() => setCookiesOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm md:text-left py-1 px-0 rounded transition-colors">
                   Cookie Policy
                 </button>
               </li>
             </ul>
           </div>
+        </div>
+        
+        <div className="md:hidden mt-8 text-center">
+          <p className="text-xs text-gray-300 dark:text-gray-500 whitespace-nowrap">&copy; {new Date().getFullYear()} Scams and E-Crimes Commission. All rights reserved.</p>
         </div>
       </div>
 
