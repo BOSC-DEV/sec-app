@@ -120,11 +120,6 @@ const TermsDialog: React.FC<TermsDialogProps> = ({
             </p>
           </div>
         </ScrollArea>
-        <DialogFooter className="mt-4">
-          <DialogClose asChild>
-            <Button variant="neutral" className="text-icc-blue hover:bg-gray-100">I Agree</Button>
-          </DialogClose>
-        </DialogFooter>
       </DialogContent>
     </Dialog>;
 };

@@ -114,11 +114,6 @@ const PrivacyDialog: React.FC<PrivacyDialogProps> = ({
             </p>
           </div>
         </ScrollArea>
-        <DialogFooter className="mt-4">
-          <DialogClose asChild>
-            <Button variant="neutral" className="text-icc-blue hover:bg-gray-100">I Understand</Button>
-          </DialogClose>
-        </DialogFooter>
       </DialogContent>
     </Dialog>;
 };
