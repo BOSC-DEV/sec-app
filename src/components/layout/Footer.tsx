@@ -75,11 +75,6 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/docs" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm md:text-left py-1 px-0 rounded transition-colors">
-                  Documentation
-                </Link>
-              </li>
-              <li>
                 <button onClick={() => setFaqOpen(true)} className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm md:text-left py-1 px-0 rounded transition-colors">
                   FAQ
                 </button>
