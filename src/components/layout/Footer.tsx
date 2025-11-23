@@ -51,12 +51,12 @@ const Footer = () => {
                 <Copy className="h-5 w-5 text-white" />
               </Button>
             </div>
-            <p className="text-xs text-gray-300 dark:text-gray-500 mt-auto pt-8 whitespace-nowrap text-center md:text-left">&copy; {new Date().getFullYear()} Scams and E-Crimes Commission. All rights reserved.</p>
+            <p className="hidden md:block text-xs text-gray-300 dark:text-gray-500 mt-auto pt-8 whitespace-nowrap text-left">&copy; {new Date().getFullYear()} Scams and E-Crimes Commission. All rights reserved.</p>
           </div>
           
-          <div>
+          <div className="text-center md:text-left">
             <h4 className="text-white dark:text-gray-200 font-gothic font-bold mb-4">Quick Links</h4>
-            <ul className="space-y-2">
+            <ul className="space-y-2 flex flex-col items-center md:items-start">
               <li><Link to="/" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm">Home</Link></li>
               <li><Link to="/most-wanted" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm">Most Wanted</Link></li>
               <li><Link to="/new-report" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm">File a Report</Link></li>
@@ -64,6 +64,7 @@ const Footer = () => {
               <li><Link to="/profile" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm">Profile</Link></li>
               <li><Link to="/notifications" className="text-gray-300 dark:text-gray-400 hover:text-icc-gold dark:hover:text-icc-gold text-sm">Notifications</Link></li>
             </ul>
+            <p className="md:hidden text-xs text-gray-300 dark:text-gray-500 mt-6 whitespace-nowrap text-center">&copy; {new Date().getFullYear()} Scams and E-Crimes Commission. All rights reserved.</p>
           </div>
           
           <div>
