@@ -382,7 +382,7 @@ const MostWantedPage = () => {
                           </TableCell>
                           <TableCell className="text-center">
                             <div className="flex items-center justify-center gap-1">
-                              {scammer.links && scammer.links.length > 0 ? scammer.links.map((link, i) => <a key={i} href={link.startsWith('http') ? link : `https://${link}`} target="_blank" rel="noopener noreferrer" className="inline-block p-1 rounded-full bg-icc-blue hover:bg-icc-blue-light transition-colors" onClick={e => e.stopPropagation()}>
+                              {scammer.links && scammer.links.length > 0 ? scammer.links.map((link, i) => <a key={i} href={link.startsWith('http') ? link : `https://${link}`} target="_blank" rel="noopener noreferrer" className="inline-block p-2 rounded-full bg-icc-blue hover:bg-icc-blue-light transition-colors" onClick={e => e.stopPropagation()}>
                                     <Globe className="h-4 w-4 text-white" />
                                   </a>) : <span className="text-gray-400 dark:text-gray-300">-</span>}
                             </div>
