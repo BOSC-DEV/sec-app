@@ -62,20 +62,11 @@ const Header = () => {
   };
 
   const copyToClipboard = async () => {
-    const contractAddress = "HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump";
-    try {
-      await navigator.clipboard.writeText(contractAddress);
-      toast({
-        title: "Copied CA",
-        variant: "default"
-      });
-    } catch (err) {
-      toast({
-        title: "Copy failed",
-        variant: "destructive"
-      });
-      console.error("Failed to copy: ", err);
-    }
+    toast({
+      title: "$SEC coming soon!",
+      description: "Stay vigilant for imitation scams",
+      variant: "default"
+    });
   };
 
   const toggleNotifications = () => {
@@ -136,9 +127,8 @@ const Header = () => {
                     {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                   </Button>}
               </div> : <div className="flex items-center space-x-3">
-                <Button variant="ghost" size="sm" className="text-white hover:bg-icc-blue-light flex items-center gap-2" onClick={copyToClipboard}>
+                <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light" onClick={copyToClipboard}>
                   <Copy className="h-4 w-4" />
-                  <span className="hidden lg:inline">$SEC coming soon! Stay vigilant for imitation scams</span>
                 </Button>
                 {!isMobile && (
                   <Button variant="gold" size="sm" className="flex items-center gap-2" onClick={handleWalletButtonClick}>
