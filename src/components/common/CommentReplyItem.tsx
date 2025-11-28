@@ -160,12 +160,14 @@ export const CommentReplyItem: React.FC<CommentReplyItemProps> = ({
       </AlertDialog>
     
     <div className="flex gap-3 pl-12 py-3 border-l-2 border-border/30">
-      <Avatar className="h-8 w-8 flex-shrink-0">
-        <AvatarImage src={reply.author_profile_pic || undefined} alt={reply.author_name || 'User'} />
-        <AvatarFallback className="text-xs">
-          {reply.author_name?.substring(0, 2).toUpperCase() || 'U'}
-        </AvatarFallback>
-      </Avatar>
+      <Link to={`/profile/${reply.author}`}>
+        <Avatar className="h-8 w-8 flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity">
+          <AvatarImage src={reply.author_profile_pic || undefined} alt={reply.author_name || 'User'} />
+          <AvatarFallback className="text-xs">
+            {reply.author_name?.substring(0, 2).toUpperCase() || 'U'}
+          </AvatarFallback>
+        </Avatar>
+      </Link>
       
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap justify-between">
