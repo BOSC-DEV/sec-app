@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -169,7 +170,12 @@ export const CommentReplyItem: React.FC<CommentReplyItemProps> = ({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap justify-between">
           <div className="flex items-center gap-2">
-            <span className="font-medium text-sm">{reply.author_name || 'Anonymous'}</span>
+            <Link 
+              to={`/profile/${reply.author}`} 
+              className="font-medium text-sm hover:text-icc-gold hover:underline transition-colors"
+            >
+              {reply.author_name || 'Anonymous'}
+            </Link>
             <span className="text-xs text-muted-foreground">{formatDate(reply.created_at)}</span>
           </div>
           
