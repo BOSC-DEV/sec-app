@@ -15,6 +15,7 @@ import { useAdminGuard } from '@/hooks/useAdminGuard';
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [copyAnimating, setCopyAnimating] = useState(false);
   const {
     isConnected,
     connectWallet,
@@ -62,6 +63,8 @@ const Header = () => {
   };
 
   const copyToClipboard = async () => {
+    setCopyAnimating(true);
+    setTimeout(() => setCopyAnimating(false), 300);
     toast({
       title: "$SEC coming soon!",
       description: "Stay vigilant for imitation scams",
@@ -128,7 +131,7 @@ const Header = () => {
                   </Button>}
               </div> : <div className="flex items-center space-x-3">
                 <Button variant="ghost" size="icon" className="text-white hover:bg-icc-blue-light" onClick={copyToClipboard}>
-                  <Copy className="h-4 w-4" />
+                  <Copy className={`h-4 w-4 transition-transform duration-300 ${copyAnimating ? 'scale-125 rotate-12' : ''}`} />
                 </Button>
                 {!isMobile && (
                   <Button variant="gold" size="sm" className="flex items-center gap-2" onClick={handleWalletButtonClick}>
