@@ -53,9 +53,9 @@ export const getStatistics = async (): Promise<Statistics> => {
 // Add a function to get profile statistics for the leaderboard
 export const getProfileStatistics = async (): Promise<any[]> => {
   try {
-    // Get all profiles
+    // Get all profiles using public view (bypasses RLS for anonymous users)
     const { data: profiles, error: profilesError } = await supabase
-      .from('profiles')
+      .from('profiles_public')
       .select('*');
     
     if (profilesError) throw profilesError;
