@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
-import { getProfileByUsername, getProfileByWallet } from '@/services/profileService';
+import { getProfileByUsername, getProfileByWallet, getProfileById } from '@/services/profileService';
 import { Twitter, Globe, Copy, ExternalLink, Share2, Edit, LogOut, ExternalLinkIcon, ThumbsUp, MessageSquare, FileText, Trophy, Wallet as WalletIcon, Info, Package } from 'lucide-react';
 import { getScammersByReporter, getLikedScammersByUser } from '@/services/scammerService';
 import { getUserBountyContributions } from '@/services/bountyService';
@@ -41,16 +41,20 @@ const PublicProfilePage = () => {
     disconnectWallet
   } = useProfile();
   const userIdentifier = address || username;
-  const isWalletAddress = address || username && username.length > 30;
+  const isWalletAddress = address || (username && username.length > 30 && !username.includes('-'));
+  const isUUID = username && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(username);
   const {
     data: profile,
     isLoading,
     error,
     refetch
   } = useQuery({
-    queryKey: ['profile', userIdentifier, isWalletAddress],
+    queryKey: ['profile', userIdentifier, isWalletAddress, isUUID],
     queryFn: async () => {
       if (!userIdentifier) return null;
+      if (isUUID) {
+        return getProfileById(userIdentifier);
+      }
       if (isWalletAddress) {
         return getProfileByWallet(userIdentifier);
       }
