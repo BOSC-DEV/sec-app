@@ -265,10 +265,12 @@ const CommentItem = ({
       </AlertDialog>
 
     <div className="flex items-start space-x-4 py-4 border-b">
-      <Avatar>
-        <AvatarImage src={comment.author_profile_pic || '/placeholder.svg'} alt={`${comment.author_name}'s profile`} />
-        <AvatarFallback>{comment.author_name.substring(0, 2)}</AvatarFallback>
-      </Avatar>
+      <Link to={`/profile/${comment.author}`}>
+        <Avatar className="cursor-pointer hover:opacity-80 transition-opacity">
+          <AvatarImage src={comment.author_profile_pic || '/placeholder.svg'} alt={`${comment.author_name}'s profile`} />
+          <AvatarFallback>{comment.author_name.substring(0, 2)}</AvatarFallback>
+        </Avatar>
+      </Link>
       <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 justify-between flex-wrap">
           <div className="flex items-center gap-2">
