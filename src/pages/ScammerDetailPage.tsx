@@ -270,9 +270,14 @@ const CommentItem = ({
         <AvatarFallback>{comment.author_name.substring(0, 2)}</AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 justify-between flex-wrap">
+          <div className="flex items-center gap-2 justify-between flex-wrap">
           <div className="flex items-center gap-2">
-            <div className="font-medium">{comment.author_name}</div>
+            <Link 
+              to={`/profile/${comment.author}`}
+              className="font-medium hover:text-icc-gold hover:underline transition-colors"
+            >
+              {comment.author_name}
+            </Link>
             {/* Date next to username on tablet/desktop, hidden on mobile */}
             <div className="hidden md:block text-sm text-muted-foreground">{formatDate(comment.created_at)}</div>
           </div>
