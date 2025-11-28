@@ -63,6 +63,9 @@ const PublicProfilePage = () => {
     enabled: !!userIdentifier
   });
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [userIdentifier]);
+  useEffect(() => {
     refetch();
   }, [location, refetch]);
   const isOwnProfile = currentUserProfile?.wallet_address === profile?.wallet_address;
