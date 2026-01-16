@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import { getScammerById, deleteScammer, unarchiveScammer } from '@/services/scammerService';
 import { getScammerComments, addComment, updateComment, deleteComment } from '@/services/commentService';
@@ -1078,7 +1079,28 @@ const ScammerDetailPage = () => {
         </section>
       </div>;
   }
-  return <div>
+  const pageTitle = scammer ? `${scammer.name} - Scam Report | SEC.digital` : 'Scammer Detail | SEC.digital';
+  const pageDescription = scammer ? `${scammer.name} has been reported for ${scammer.accused_of}` : 'Report Today - Tracking and exposing digital & cryptocurrency scammers worldwide';
+  const pageImage = scammer?.photo_url || '/lovable-uploads/3f23090d-4e36-43fc-b230-a8f898d7edd2.png';
+
+  return <HelmetProvider>
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={window.location.href} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:image" content={pageImage} />
+        
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content={window.location.href} />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content={pageImage} />
+      </Helmet>
+      <div>
       <CompactHero title={scammer?.name} />
 
       <section className="icc-section bg-white">
@@ -1445,6 +1467,7 @@ const ScammerDetailPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>;
+    </div>
+  </HelmetProvider>;
 };
 export default ScammerDetailPage;
