@@ -45,25 +45,45 @@ function generateReportMetaHTML(scammer: any, reportUrl: string, isBot: boolean)
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${title}</title>
-  <meta name="description" content="${description}">
   
+  <!-- Primary Meta Tags -->
+  <meta name="title" content="${title}">
+  <meta name="description" content="${description}">
+  <link rel="icon" href="https://sec.digital/lovable-uploads/c850a89f-266d-4c68-abc5-e825eb8d23a5.png" />
+  
+  <!-- Open Graph / Facebook -->
   <meta property="og:type" content="article">
   <meta property="og:url" content="${reportUrl}">
   <meta property="og:title" content="${title}">
   <meta property="og:description" content="${description}">
   <meta property="og:image" content="${imageUrl}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="SEC.digital">
+  
+  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="${reportUrl}">
   <meta name="twitter:title" content="${title}">
   <meta name="twitter:description" content="${description}">
   <meta name="twitter:image" content="${imageUrl}">
   
   <link rel="canonical" href="${reportUrl}">
-  ${!isBot ? `<meta http-equiv="refresh" content="0; url=${reportUrl}">` : ''}
+  
+  ${!isBot ? `
+  <meta http-equiv="refresh" content="0; url=${reportUrl}">
+  <script>
+    if (!/bot|crawler|spider|crawling/i.test(navigator.userAgent)) {
+      window.location.href = '${reportUrl}';
+    }
+  </script>` : ''}
 </head>
 <body>
-  <h1>${scammer.name}</h1>
-  <p>${description}</p>
-  <p>Read more: <a href="${reportUrl}">${reportUrl}</a></p>
+  <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 100px auto; text-align: center; padding: 20px;">
+    <h1>${scammer.name}</h1>
+    <p>${description}</p>
+    <p>Read more: <a href="${reportUrl}">${reportUrl}</a></p>
+  </div>
 </body>
 </html>`;
 }
@@ -79,25 +99,44 @@ function generateProfileMetaHTML(profile: any, profileUrl: string, isBot: boolea
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${title}</title>
-  <meta name="description" content="${description}">
   
+  <!-- Primary Meta Tags -->
+  <meta name="title" content="${title}">
+  <meta name="description" content="${description}">
+  <link rel="icon" href="https://sec.digital/lovable-uploads/c850a89f-266d-4c68-abc5-e825eb8d23a5.png" />
+  
+  <!-- Open Graph / Facebook -->
   <meta property="og:type" content="profile">
   <meta property="og:url" content="${profileUrl}">
   <meta property="og:title" content="${title}">
   <meta property="og:description" content="${description}">
   <meta property="og:image" content="${imageUrl}">
+  <meta property="og:image:width" content="600">
+  <meta property="og:image:height" content="600">
+  <meta property="og:site_name" content="SEC.digital">
+  
+  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="${profileUrl}">
   <meta name="twitter:title" content="${title}">
   <meta name="twitter:description" content="${description}">
   <meta name="twitter:image" content="${imageUrl}">
   
   <link rel="canonical" href="${profileUrl}">
-  ${!isBot ? `<meta http-equiv="refresh" content="0; url=${profileUrl}">` : ''}
+  ${!isBot ? `
+  <meta http-equiv="refresh" content="0; url=${profileUrl}">
+  <script>
+    if (!/bot|crawler|spider|crawling/i.test(navigator.userAgent)) {
+      window.location.href = '${profileUrl}';
+    }
+  </script>` : ''}
 </head>
 <body>
-  <h1>${profile.display_name}</h1>
-  <p>${description}</p>
-  <p>View profile: <a href="${profileUrl}">${profileUrl}</a></p>
+  <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 100px auto; text-align: center; padding: 20px;">
+    <h1>${profile.display_name}</h1>
+    <p>${description}</p>
+    <p>View profile: <a href="${profileUrl}">${profileUrl}</a></p>
+  </div>
 </body>
 </html>`;
 }
@@ -114,17 +153,23 @@ function generateDefaultMetaHTML(targetUrl: string, isBot: boolean): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${title}</title>
   <meta name="description" content="${description}">
+  <link rel="icon" href="https://sec.digital/lovable-uploads/c850a89f-266d-4c68-abc5-e825eb8d23a5.png" />
+  
   <meta property="og:type" content="website">
   <meta property="og:url" content="${targetUrl}">
   <meta property="og:title" content="${title}">
   <meta property="og:description" content="${description}">
   <meta property="og:image" content="${imageUrl}">
+  <meta property="og:site_name" content="SEC.digital">
+  
   <meta name="twitter:card" content="summary_large_image">
   ${!isBot ? `<meta http-equiv="refresh" content="0; url=${targetUrl}">` : ''}
 </head>
 <body>
-  <h1>${title}</h1>
-  <p>${description}</p>
+  <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 100px auto; text-align: center; padding: 20px;">
+    <h1>${title}</h1>
+    <p>${description}</p>
+  </div>
 </body>
 </html>`;
 }
