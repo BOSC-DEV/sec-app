@@ -1,1 +1,10 @@
 project_id = "gparwhzrrvudmrxbxanb"
+
+[functions.auth-phantom]
+verify_jwt = false
+
+[functions.ssr-meta]
+verify_jwt = false
+
+[functions.upload-scammer-photo]
+verify_jwt = false
