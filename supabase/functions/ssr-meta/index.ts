@@ -143,7 +143,7 @@ serve(async (req) => {
         const baseDomain = "https://sec.digital";
         const fullUrl = `${baseDomain}${path}`;
 
-        console.log(`SSR Request for path: ${path}, isBot: ${isBot}`);
+        console.log(`[SSR] Request for path: ${path}, isBot: ${isBot}`);
 
         const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
         const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -151,33 +151,44 @@ serve(async (req) => {
 
         // Handle Report Pages
         if (path.startsWith('/report/') || path.startsWith('/scammer/')) {
-            const id = path.split('/').filter(Boolean).pop();
-            console.log(`Searching for Scammer with ID/ReportNum: ${id}`);
-            if (id) {
-                // Find by report_number or id
-                const { data: scammer, error } = await supabase
-                    .from('scammers')
-                    .select('*')
-                    .or(`report_number.eq.${id},id.eq.${id}`)
-                    .maybeSingle();
+            const segments = path.split('/').filter(Boolean);
+            const id = segments.pop();
+            console.log(`[SSR] Extracted Scammer ID: ${id}`);
 
-                if (error) console.error('Supabase DB Error (Scammer):', error);
+            if (id) {
+                // Check if id is a number (report_number) or UUID
+                const isNumeric = /^\d+$/.test(id);
+                console.log(`[SSR] ID is numeric: ${isNumeric}`);
+
+                let query = supabase.from('scammers').select('*');
+
+                if (isNumeric) {
+                    query = query.eq('report_number', parseInt(id));
+                } else {
+                    query = query.eq('id', id);
+                }
+
+                const { data: scammer, error } = await query.maybeSingle();
+
+                if (error) console.error('[SSR] Supabase DB Error (Scammer):', error);
 
                 if (scammer) {
-                    console.log(`Found Scammer: ${scammer.name}`);
+                    console.log(`[SSR] Success! Found Scammer: ${scammer.name}`);
                     return new Response(generateReportMetaHTML(scammer, fullUrl, isBot), {
                         headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
                     });
                 } else {
-                    console.log(`Scammer NOT found for ID: ${id}`);
+                    console.log(`[SSR] Scammer NOT found for identifier: ${id}`);
                 }
             }
         }
 
         // Handle Profile Pages
         if (path.startsWith('/profile/')) {
-            const username = path.split('/').filter(Boolean).pop();
-            console.log(`Searching for Profile with username: ${username}`);
+            const segments = path.split('/').filter(Boolean);
+            const username = segments.pop();
+            console.log(`[SSR] Extracted Profile identifier: ${username}`);
+
             if (username) {
                 const { data: profile, error } = await supabase
                     .from('profiles')
@@ -185,26 +196,27 @@ serve(async (req) => {
                     .or(`username.eq.${username},wallet_address.eq.${username},id.eq.${username}`)
                     .maybeSingle();
 
-                if (error) console.error('Supabase DB Error (Profile):', error);
+                if (error) console.error('[SSR] Supabase DB Error (Profile):', error);
 
                 if (profile) {
-                    console.log(`Found Profile: ${profile.display_name}`);
+                    console.log(`[SSR] Success! Found Profile: ${profile.display_name}`);
                     return new Response(generateProfileMetaHTML(profile, fullUrl, isBot), {
                         headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
                     });
                 } else {
-                    console.log(`Profile NOT found for: ${username}`);
+                    console.log(`[SSR] Profile NOT found for: ${username}`);
                 }
             }
         }
 
         // Default Fallback
+        console.log(`[SSR] Falling back to default meta for URL: ${fullUrl}`);
         return new Response(generateDefaultMetaHTML(fullUrl, isBot), {
             headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
         });
 
     } catch (error) {
-        console.error('Error in SSR function:', error);
+        console.error('[SSR] Critical Error in SSR function:', error);
         return new Response('Internal Server Error', { status: 500, headers: corsHeaders });
     }
 });
