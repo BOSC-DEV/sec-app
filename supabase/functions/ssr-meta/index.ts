@@ -143,43 +143,57 @@ serve(async (req) => {
         const baseDomain = "https://sec.digital";
         const fullUrl = `${baseDomain}${path}`;
 
+        console.log(`SSR Request for path: ${path}, isBot: ${isBot}`);
+
         const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
         const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
         const supabase = createClient(supabaseUrl, supabaseKey);
 
         // Handle Report Pages
         if (path.startsWith('/report/') || path.startsWith('/scammer/')) {
-            const id = path.split('/').pop();
+            const id = path.split('/').filter(Boolean).pop();
+            console.log(`Searching for Scammer with ID/ReportNum: ${id}`);
             if (id) {
                 // Find by report_number or id
-                const { data: scammer } = await supabase
+                const { data: scammer, error } = await supabase
                     .from('scammers')
                     .select('*')
                     .or(`report_number.eq.${id},id.eq.${id}`)
                     .maybeSingle();
 
+                if (error) console.error('Supabase DB Error (Scammer):', error);
+
                 if (scammer) {
+                    console.log(`Found Scammer: ${scammer.name}`);
                     return new Response(generateReportMetaHTML(scammer, fullUrl, isBot), {
                         headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
                     });
+                } else {
+                    console.log(`Scammer NOT found for ID: ${id}`);
                 }
             }
         }
 
         // Handle Profile Pages
         if (path.startsWith('/profile/')) {
-            const username = path.split('/').pop();
+            const username = path.split('/').filter(Boolean).pop();
+            console.log(`Searching for Profile with username: ${username}`);
             if (username) {
-                const { data: profile } = await supabase
+                const { data: profile, error } = await supabase
                     .from('profiles')
                     .select('*')
                     .or(`username.eq.${username},wallet_address.eq.${username},id.eq.${username}`)
                     .maybeSingle();
 
+                if (error) console.error('Supabase DB Error (Profile):', error);
+
                 if (profile) {
+                    console.log(`Found Profile: ${profile.display_name}`);
                     return new Response(generateProfileMetaHTML(profile, fullUrl, isBot), {
                         headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
                     });
+                } else {
+                    console.log(`Profile NOT found for: ${username}`);
                 }
             }
         }
