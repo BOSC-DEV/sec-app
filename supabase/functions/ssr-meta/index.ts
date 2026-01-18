@@ -2,44 +2,44 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 
 const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
 const BOT_AGENTS = [
-    'facebookexternalhit',
-    'twitterbot',
-    'linkedinbot',
-    'whatsapp',
-    'telegrambot',
-    'slackbot',
-    'discordbot',
-    'googlebot',
-    'bingbot',
-    'crawler',
-    'spider',
-    'bot',
+  'facebookexternalhit',
+  'twitterbot',
+  'linkedinbot',
+  'whatsapp',
+  'telegrambot',
+  'slackbot',
+  'discordbot',
+  'googlebot',
+  'bingbot',
+  'crawler',
+  'spider',
+  'bot',
 ];
 
 function isCrawler(userAgent: string | null): boolean {
-    if (!userAgent) return false;
-    const ua = userAgent.toLowerCase();
-    return BOT_AGENTS.some(bot => ua.includes(bot.toLowerCase()));
+  if (!userAgent) return false;
+  const ua = userAgent.toLowerCase();
+  return BOT_AGENTS.some(bot => ua.includes(bot.toLowerCase()));
 }
 
 function getAbsoluteImageUrl(imageUrl: string | null): string {
-    const defaultImage = "https://sec.digital/lovable-uploads/3f23090d-4e36-43fc-b230-a8f898d7edd2.png";
-    if (!imageUrl) return defaultImage;
-    if (imageUrl.startsWith('http')) return imageUrl;
-    return `https://sec.digital${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+  const defaultImage = "https://sec.digital/lovable-uploads/3f23090d-4e36-43fc-b230-a8f898d7edd2.png";
+  if (!imageUrl) return defaultImage;
+  if (imageUrl.startsWith('http')) return imageUrl;
+  return `https://sec.digital${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
 }
 
 function generateReportMetaHTML(scammer: any, reportUrl: string, isBot: boolean): string {
-    const title = `${scammer.name} - Scam Report | SEC.digital`;
-    const description = `${scammer.name} has been reported for ${scammer.accused_of}`;
-    const imageUrl = getAbsoluteImageUrl(scammer.photo_url);
+  const title = `${scammer.name} - Scam Report | SEC.digital`;
+  const description = `${scammer.name} has been reported for ${scammer.accused_of}`;
+  const imageUrl = getAbsoluteImageUrl(scammer.photo_url);
 
-    return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -89,11 +89,11 @@ function generateReportMetaHTML(scammer: any, reportUrl: string, isBot: boolean)
 }
 
 function generateProfileMetaHTML(profile: any, profileUrl: string, isBot: boolean): string {
-    const title = `${profile.display_name} (@${profile.username}) | SEC.digital`;
-    const description = `View scam fighting activity by ${profile.display_name}`;
-    const imageUrl = getAbsoluteImageUrl(profile.profile_pic_url);
+  const title = `${profile.display_name} (@${profile.username}) | SEC.digital`;
+  const description = `View scam fighting activity by ${profile.display_name}`;
+  const imageUrl = getAbsoluteImageUrl(profile.profile_pic_url);
 
-    return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -142,11 +142,11 @@ function generateProfileMetaHTML(profile: any, profileUrl: string, isBot: boolea
 }
 
 function generateDefaultMetaHTML(targetUrl: string, isBot: boolean): string {
-    const title = "SEC.digital - The Scams & E-crimes Commission";
-    const description = "Report Today - Tracking and exposing digital & cryptocurrency scammers worldwide";
-    const imageUrl = "https://sec.digital/lovable-uploads/3f23090d-4e36-43fc-b230-a8f898d7edd2.png";
+  const title = "SEC.digital - The Scams & E-crimes Commission";
+  const description = "Report Today - Tracking and exposing digital & cryptocurrency scammers worldwide";
+  const imageUrl = "https://sec.digital/lovable-uploads/3f23090d-4e36-43fc-b230-a8f898d7edd2.png";
 
-    return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -175,93 +175,94 @@ function generateDefaultMetaHTML(targetUrl: string, isBot: boolean): string {
 }
 
 serve(async (req) => {
-    if (req.method === 'OPTIONS') {
-        return new Response(null, { headers: corsHeaders });
-    }
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
 
-    try {
-        const url = new URL(req.url);
-        const userAgent = req.headers.get('user-agent');
-        const isBot = isCrawler(userAgent);
+  try {
+    const url = new URL(req.url);
+    const userAgent = req.headers.get('user-agent');
+    const isBot = isCrawler(userAgent);
 
-        const path = url.searchParams.get('path') || '';
-        const baseDomain = "https://sec.digital";
-        const fullUrl = `${baseDomain}${path}`;
+    const path = url.searchParams.get('path') || '';
+    const baseDomain = "https://sec.digital";
+    const fullUrl = `${baseDomain}${path}`;
 
-        console.log(`[SSR] Request for path: ${path}, isBot: ${isBot}`);
+    console.log(`[SSR] Request for path: ${path}, isBot: ${isBot}`);
 
-        const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-        const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-        const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-        // Handle Report Pages
-        if (path.startsWith('/report/') || path.startsWith('/scammer/')) {
-            const segments = path.split('/').filter(Boolean);
-            const id = segments.pop();
-            console.log(`[SSR] Extracted Scammer ID: ${id}`);
+    // Handle Report Pages
+    if (path.startsWith('/report/') || path.startsWith('/scammer/')) {
+      const segments = path.split('/').filter(Boolean);
+      const id = segments.pop();
+      console.log(`[SSR] Extracted Scammer ID: ${id}`);
 
-            if (id) {
-                // Check if id is a number (report_number) or UUID
-                const isNumeric = /^\d+$/.test(id);
-                console.log(`[SSR] ID is numeric: ${isNumeric}`);
+      if (id) {
+        // Check if id is a number (report_number) or UUID
+        const isNumeric = /^\d+$/.test(id);
+        console.log(`[SSR] ID is numeric: ${isNumeric}`);
 
-                let query = supabase.from('scammers').select('*');
+        let query = supabase.from('scammers').select('*');
 
-                if (isNumeric) {
-                    query = query.eq('report_number', parseInt(id));
-                } else {
-                    query = query.eq('id', id);
-                }
-
-                const { data: scammer, error } = await query.maybeSingle();
-
-                if (error) console.error('[SSR] Supabase DB Error (Scammer):', error);
-
-                if (scammer) {
-                    console.log(`[SSR] Success! Found Scammer: ${scammer.name}`);
-                    return new Response(generateReportMetaHTML(scammer, fullUrl, isBot), {
-                        headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
-                    });
-                } else {
-                    console.log(`[SSR] Scammer NOT found for identifier: ${id}`);
-                }
-            }
+        if (isNumeric) {
+          query = query.eq('report_number', parseInt(id));
+        } else {
+          query = query.eq('id', id);
         }
 
-        // Handle Profile Pages
-        if (path.startsWith('/profile/')) {
-            const segments = path.split('/').filter(Boolean);
-            const username = segments.pop();
-            console.log(`[SSR] Extracted Profile identifier: ${username}`);
+        const { data: scammer, error } = await query.maybeSingle();
 
-            if (username) {
-                const { data: profile, error } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .or(`username.eq.${username},wallet_address.eq.${username},id.eq.${username}`)
-                    .maybeSingle();
+        if (error) console.error('[SSR] Supabase DB Error (Scammer):', error);
 
-                if (error) console.error('[SSR] Supabase DB Error (Profile):', error);
-
-                if (profile) {
-                    console.log(`[SSR] Success! Found Profile: ${profile.display_name}`);
-                    return new Response(generateProfileMetaHTML(profile, fullUrl, isBot), {
-                        headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
-                    });
-                } else {
-                    console.log(`[SSR] Profile NOT found for: ${username}`);
-                }
-            }
-        }
-
-        // Default Fallback
-        console.log(`[SSR] Falling back to default meta for URL: ${fullUrl}`);
-        return new Response(generateDefaultMetaHTML(fullUrl, isBot), {
+        if (scammer) {
+          console.log(`[SSR] Success! Found Scammer: ${scammer.name}`);
+          return new Response(generateReportMetaHTML(scammer, fullUrl, isBot), {
             headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
-        });
-
-    } catch (error) {
-        console.error('[SSR] Critical Error in SSR function:', error);
-        return new Response('Internal Server Error', { status: 500, headers: corsHeaders });
+          });
+        } else {
+          console.log(`[SSR] Scammer NOT found for identifier: ${id}`);
+        }
+      }
     }
+
+    // Handle Profile Pages
+    if (path.startsWith('/profile/')) {
+      const segments = path.split('/').filter(Boolean);
+      const username = segments.pop();
+      console.log(`[SSR] Extracted Profile identifier: ${username}`);
+
+      if (username) {
+        // Match by username, display_name, wallet, or id (ilike for case-insensitivity)
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .or(`username.ilike.${username},display_name.ilike.${username},wallet_address.eq.${username},id.eq.${username}`)
+          .maybeSingle();
+
+        if (error) console.error('[SSR] Supabase DB Error (Profile):', error);
+
+        if (profile) {
+          console.log(`[SSR] Success! Found Profile: ${profile.display_name}`);
+          return new Response(generateProfileMetaHTML(profile, fullUrl, isBot), {
+            headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
+          });
+        } else {
+          console.log(`[SSR] Profile NOT found for: ${username}`);
+        }
+      }
+    }
+
+    // Default Fallback
+    console.log(`[SSR] Falling back to default meta for URL: ${fullUrl}`);
+    return new Response(generateDefaultMetaHTML(fullUrl, isBot), {
+      headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
+    });
+
+  } catch (error) {
+    console.error('[SSR] Critical Error in SSR function:', error);
+    return new Response('Internal Server Error', { status: 500, headers: corsHeaders });
+  }
 });
