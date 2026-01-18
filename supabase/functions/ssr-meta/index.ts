@@ -21,6 +21,13 @@ const BOT_AGENTS = [
   'bot',
 ];
 
+// UUID v4 regex pattern
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function isValidUUID(str: string): boolean {
+  return UUID_REGEX.test(str);
+}
+
 function isCrawler(userAgent: string | null): boolean {
   if (!userAgent) return false;
   const ua = userAgent.toLowerCase();
@@ -89,8 +96,10 @@ function generateReportMetaHTML(scammer: any, reportUrl: string, isBot: boolean)
 }
 
 function generateProfileMetaHTML(profile: any, profileUrl: string, isBot: boolean): string {
-  const title = `${profile.display_name} (@${profile.username}) | SEC.digital`;
-  const description = `View scam fighting activity by ${profile.display_name}`;
+  const displayName = profile.display_name || profile.username || 'User';
+  const username = profile.username || 'unknown';
+  const title = `${displayName} (@${username}) | SEC.digital`;
+  const description = `View scam fighting activity by ${displayName}`;
   const imageUrl = getAbsoluteImageUrl(profile.profile_pic_url);
 
   return `<!DOCTYPE html>
@@ -133,7 +142,7 @@ function generateProfileMetaHTML(profile: any, profileUrl: string, isBot: boolea
 </head>
 <body>
   <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 100px auto; text-align: center; padding: 20px;">
-    <h1>${profile.display_name}</h1>
+    <h1>${displayName}</h1>
     <p>${description}</p>
     <p>View profile: <a href="${profileUrl}">${profileUrl}</a></p>
   </div>
@@ -231,26 +240,74 @@ serve(async (req) => {
     // Handle Profile Pages
     if (path.startsWith('/profile/')) {
       const segments = path.split('/').filter(Boolean);
-      const username = segments.pop();
-      console.log(`[SSR] Extracted Profile identifier: ${username}`);
+      const identifier = segments.pop();
+      console.log(`[SSR] Extracted Profile identifier: ${identifier}`);
 
-      if (username) {
-        // Match by username, display_name, wallet, or id (ilike for case-insensitivity)
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .or(`username.ilike.${username},display_name.ilike.${username},wallet_address.eq.${username},id.eq.${username}`)
-          .maybeSingle();
+      if (identifier) {
+        let profile = null;
+        let error = null;
+
+        // If it's a valid UUID, search by id first
+        if (isValidUUID(identifier)) {
+          console.log(`[SSR] Identifier is a valid UUID, searching by id`);
+          const result = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', identifier)
+            .maybeSingle();
+          
+          profile = result.data;
+          error = result.error;
+        }
+
+        // If not found by UUID or not a UUID, search by username/display_name/wallet
+        if (!profile) {
+          console.log(`[SSR] Searching by username, display_name, or wallet_address`);
+          
+          // Try username first (case-insensitive)
+          const usernameResult = await supabase
+            .from('profiles')
+            .select('*')
+            .ilike('username', identifier)
+            .maybeSingle();
+          
+          if (usernameResult.data) {
+            profile = usernameResult.data;
+            error = usernameResult.error;
+          } else {
+            // Try display_name (case-insensitive)
+            const displayNameResult = await supabase
+              .from('profiles')
+              .select('*')
+              .ilike('display_name', identifier)
+              .maybeSingle();
+            
+            if (displayNameResult.data) {
+              profile = displayNameResult.data;
+              error = displayNameResult.error;
+            } else {
+              // Try wallet_address (exact match)
+              const walletResult = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('wallet_address', identifier)
+                .maybeSingle();
+              
+              profile = walletResult.data;
+              error = walletResult.error;
+            }
+          }
+        }
 
         if (error) console.error('[SSR] Supabase DB Error (Profile):', error);
 
         if (profile) {
-          console.log(`[SSR] Success! Found Profile: ${profile.display_name}`);
+          console.log(`[SSR] Success! Found Profile: ${profile.display_name || profile.username}`);
           return new Response(generateProfileMetaHTML(profile, fullUrl, isBot), {
             headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
           });
         } else {
-          console.log(`[SSR] Profile NOT found for: ${username}`);
+          console.log(`[SSR] Profile NOT found for: ${identifier}`);
         }
       }
     }
