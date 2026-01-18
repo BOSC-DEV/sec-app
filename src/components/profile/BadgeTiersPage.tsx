@@ -134,7 +134,7 @@ const BadgeTiersPage: React.FC = () => {
           <div className="mt-6 p-4 bg-muted/30 rounded-lg border border-dashed text-sm">
             <h4 className="font-medium mb-2">About Badges</h4>
             <p className="text-muted-foreground">
-              Badges are automatically assigned based on your SEC token holdings. Higher tier badges 
+              Badges are automatically assigned based on your SEC token holdings or total bounties generated. Higher tier badges 
               grant exclusive benefits and increased visibility in the community.
             </p>
             <p className="text-muted-foreground mt-2">
