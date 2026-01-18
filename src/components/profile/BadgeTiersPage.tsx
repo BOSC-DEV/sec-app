@@ -62,7 +62,7 @@ const BadgeTiersPage: React.FC = () => {
         <CardHeader>
           <CardTitle className="text-icc-gold">Badge Tiers</CardTitle>
           <CardDescription>
-            SEC token holders earn special badges based on their holdings
+            SEC token holders and bounty hunters earn special badges based on their holdings or total bounties generated
           </CardDescription>
         </CardHeader>
         <CardContent>

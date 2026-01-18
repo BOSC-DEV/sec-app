@@ -32,7 +32,7 @@ const BadgesPage = () => {
   return (
     <DocsContent 
       title="Badge & Tier System" 
-      description="Learn about the community recognition system based on SEC token holdings"
+      description="Learn about the community recognition system based on SEC token holdings or bounties generated"
     >
       <div className="space-y-8">
         {/* Overview */}
@@ -41,17 +41,17 @@ const BadgesPage = () => {
           <div className="bg-gradient-to-r from-icc-blue to-icc-blue-light rounded-lg p-8 text-white mb-6">
             <Badge className="h-12 w-12 mb-4 text-white" />
             <p className="text-xl leading-relaxed">
-              The SEC badge system recognizes community members based on their SEC token holdings. 
-              Each badge tier represents a different level of commitment to the platform and unlocks 
-              special privileges within the community, including enhanced voting power and delegation abilities.
+              The SEC badge system recognizes community members based on their SEC token holdings OR total bounties 
+              generated from their scam reports. Each badge tier represents a different level of commitment to the 
+              platform and unlocks special privileges within the community, including enhanced voting power and delegation abilities.
             </p>
           </div>
           
           <div className="grid md:grid-cols-4 gap-6 mt-6">
             <div className="p-6 bg-muted rounded-lg text-center">
               <Coins className="h-8 w-8 mx-auto mb-3 text-icc-gold" />
-              <h3 className="font-semibold mb-2">Token-Based Recognition</h3>
-              <p className="text-sm text-muted-foreground">Badges are automatically assigned based on your SEC holdings</p>
+              <h3 className="font-semibold mb-2">Dual Qualification</h3>
+              <p className="text-sm text-muted-foreground">Badges are assigned based on SEC holdings OR total bounties generated</p>
             </div>
             <div className="p-6 bg-muted rounded-lg text-center">
               <Trophy className="h-8 w-8 mx-auto mb-3 text-icc-gold" />
@@ -265,10 +265,10 @@ const BadgesPage = () => {
             <div className="p-6 bg-muted rounded-lg">
               <h3 className="text-xl font-semibold mb-3">Automatic Assignment</h3>
               <ul className="space-y-2">
-                <li>• Badges are automatically calculated based on your SEC balance</li>
-                <li>• Updates happen in real-time as your balance changes</li>
+                <li>• Badges are calculated from SEC balance OR total bounties raised</li>
+                <li>• The higher qualification (holdings vs bounties) is used</li>
+                <li>• Updates happen in real-time as values change</li>
                 <li>• No manual application or approval process required</li>
-                <li>• Badge tier is the highest level you qualify for</li>
               </ul>
             </div>
             <div className="p-6 bg-muted rounded-lg">
