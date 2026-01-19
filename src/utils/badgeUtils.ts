@@ -31,12 +31,12 @@ export interface BadgeInfo {
   };
 }
 
-// Define minimum SEC amount required for ANY badge (1,000 SEC)
-export const MIN_SEC_FOR_BADGE = 1000;
+// Define minimum SEC amount required for ANY badge (0 = everyone gets at least Shrimp)
+export const MIN_SEC_FOR_BADGE = 0;
 
-// Define badge tiers with their properties - Shrimp now starts at 0.0001% (1,000 SEC)
+// Define badge tiers with their properties - Shrimp is the default tier for all users
 export const BADGE_TIERS: { [key in BadgeTier]: { minPercent: number, color: string, icon: string } } = {
-  [BadgeTier.Shrimp]: { minPercent: 0.0001, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦐' },
+  [BadgeTier.Shrimp]: { minPercent: 0, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦐' },
   [BadgeTier.Frog]: { minPercent: 0.01, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🐸' },
   [BadgeTier.Bull]: { minPercent: 0.02, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🐂' },
   [BadgeTier.Lion]: { minPercent: 0.04, color: 'text-icc-blue bg-icc-blue/10 border-icc-blue/30 dark:bg-icc-blue/20', icon: '🦁' },
@@ -70,10 +70,8 @@ export const formatSecAmount = (amount: number): string => {
  * @returns Badge information or null if below minimum threshold
  */
 export const calculateBadgeTier = (secBalance: number): BadgeInfo | null => {
-  // Check if user has minimum required SEC for ANY badge
-  if (secBalance < MIN_SEC_FOR_BADGE) {
-    return null; // No badge if below minimum threshold
-  }
+  // Ensure non-negative balance for calculation
+  const effectiveBalance = Math.max(0, secBalance || 0);
 
   // Get all tiers sorted by min percent (ascending)
   const sortedTiers = Object.entries(BADGE_TIERS)
@@ -86,18 +84,13 @@ export const calculateBadgeTier = (secBalance: number): BadgeInfo | null => {
     }))
     .sort((a, b) => a.minPercent - b.minPercent);
 
-  // Find the highest tier the user qualifies for
-  let userTier = null;
+  // Find the highest tier the user qualifies for (default to Shrimp - first tier)
+  let userTier = sortedTiers[0]; // Default to Shrimp
   for (let i = sortedTiers.length - 1; i >= 0; i--) {
-    if (secBalance >= sortedTiers[i].minHolding) {
+    if (effectiveBalance >= sortedTiers[i].minHolding) {
       userTier = sortedTiers[i];
       break;
     }
-  }
-
-  // If no tier found (shouldn't happen since we checked minimum already, but just in case)
-  if (!userTier) {
-    return null;
   }
 
   // Find the next tier (if any)
