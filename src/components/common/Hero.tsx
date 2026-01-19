@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, Search } from 'lucide-react';
+import digitalSecLogo from '@/assets/digital-sec-logo.png';
 
 interface HeroProps {
   title?: string;
@@ -17,9 +18,9 @@ const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
         <div className="max-w-3xl mx-auto text-center">
           <div className="flex justify-center mb-6">
             <img 
-              src="/lovable-uploads/c850a89f-266d-4c68-abc5-e825eb8d23a5.png" 
-              alt="SEC Logo" 
-              className="h-32 w-32 object-contain"
+              src={digitalSecLogo} 
+              alt="The Digital SEC Logo" 
+              className="h-48 w-48 md:h-56 md:w-56 object-contain"
             />
           </div>
           <h1 className="text-[1.8rem] md:text-5xl lg:text-6xl font-gothic font-bold text-white mb-6 -mt-[5px]">
