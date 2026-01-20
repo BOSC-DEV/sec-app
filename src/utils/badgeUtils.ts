@@ -121,24 +121,19 @@ export const calculateBadgeTier = (secBalance: number): BadgeInfo | null => {
 };
 
 /**
- * Calculate badge tier based on the higher of SEC balance or bounties raised
+ * Calculate badge tier based on combined SEC balance and bounties raised
  * @param secBalance SEC token balance
- * @param bountiesRaised Total bounties raised from scam reports (in SOL, converted to SEC equivalent)
- * @param solToSecRate Optional rate to convert SOL to SEC (defaults to 1 SOL = 1000 SEC)
+ * @param bountiesRaised Total bounties raised from scam reports (in SEC tokens)
  * @returns Badge information or null if below minimum threshold
  */
 export const calculateBadgeTierWithBounties = (
   secBalance: number, 
-  bountiesRaised: number,
-  solToSecRate: number = 1000
+  bountiesRaised: number
 ): BadgeInfo | null => {
-  // Convert bounties raised (SOL) to SEC equivalent
-  const bountiesAsSecEquivalent = bountiesRaised * solToSecRate;
-  
   // Combine both SEC holdings and bounties for total badge calculation
-  const effectiveBalance = secBalance + bountiesAsSecEquivalent;
+  const effectiveBalance = (secBalance || 0) + (bountiesRaised || 0);
   
-  console.log(`Badge calculation - SEC: ${secBalance}, Bounties: ${bountiesRaised} SOL (${bountiesAsSecEquivalent} SEC equiv), Combined: ${effectiveBalance}`);
+  console.log(`Badge calculation - SEC Holdings: ${secBalance}, Bounties Raised: ${bountiesRaised}, Combined: ${effectiveBalance}`);
   
   return calculateBadgeTier(effectiveBalance);
 };
