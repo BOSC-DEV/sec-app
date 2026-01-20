@@ -238,6 +238,7 @@ export type Database = {
       }
       chat_messages: {
         Row: {
+          author_bounties_raised: number | null
           author_id: string | null
           author_name: string | null
           author_profile_pic: string | null
@@ -252,6 +253,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          author_bounties_raised?: number | null
           author_id?: string | null
           author_name?: string | null
           author_profile_pic?: string | null
@@ -266,6 +268,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          author_bounties_raised?: number | null
           author_id?: string | null
           author_name?: string | null
           author_profile_pic?: string | null

@@ -55,6 +55,7 @@ export const useChatMessages = () => {
     author_username?: string;
     author_profile_pic?: string;
     author_sec_balance?: number;
+    author_bounties_raised?: number;
     image_file?: File | null;
   }) => {
     try {
@@ -75,7 +76,8 @@ export const useChatMessages = () => {
         author_name: sanitizeInput(messageData.author_name),
         author_username: messageData.author_username ? sanitizeInput(messageData.author_username) : undefined,
         author_profile_pic: messageData.author_profile_pic,
-        author_sec_balance: messageData.author_sec_balance
+        author_sec_balance: messageData.author_sec_balance,
+        author_bounties_raised: messageData.author_bounties_raised ?? 0
       };
       
       let imageUrl = null;

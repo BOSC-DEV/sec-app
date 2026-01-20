@@ -18,7 +18,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link } from 'react-router-dom';
 import { useProfile } from '@/contexts/ProfileContext';
-import useBadgeTier from '@/hooks/useBadgeTier';
+import { useBadgeTierWithBounties } from '@/hooks/useBadgeTier';
 
 interface SurveyVoter {
   userId: string;
@@ -53,7 +53,7 @@ const SurveyDisplay: React.FC<SurveyProps> = ({
   } = useProfile();
   const [selectedOption, setSelectedOption] = useState<number | undefined>(survey.userVote);
   const [isVoting, setIsVoting] = useState(false);
-  const badgeInfo = useBadgeTier(profile?.sec_balance || 0);
+  const badgeInfo = useBadgeTierWithBounties(profile?.sec_balance || 0, 0); // TODO: add bounties_raised to profile context
   const [showResults, setShowResults] = useState(Boolean(survey.userVote !== undefined));
 
   useEffect(() => {

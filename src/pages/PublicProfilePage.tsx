@@ -12,14 +12,14 @@ import { toast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import { getProfileByUsername, getProfileByWallet, getProfileById } from '@/services/profileService';
 import { Twitter, Globe, Copy, ExternalLink, Share2, Edit, LogOut, ExternalLinkIcon, ThumbsUp, MessageSquare, FileText, Trophy, Wallet as WalletIcon, Info, Package } from 'lucide-react';
-import { getScammersByReporter, getLikedScammersByUser } from '@/services/scammerService';
+import { getScammersByReporter, getLikedScammersByUser, getBountiesRaisedByUser } from '@/services/scammerService';
 import { getUserBountyContributions } from '@/services/bountyService';
 import { Profile, Scammer } from '@/types/dataTypes';
 import ScammerCard from '@/components/common/ScammerCard';
 import { useProfile } from '@/contexts/ProfileContext';
 import WalletBalance from '@/components/profile/WalletBalance';
 import WalletInfo from '@/components/profile/WalletInfo';
-import { useBadgeTier } from '@/hooks/useBadgeTier';
+import { useBadgeTierWithBounties } from '@/hooks/useBadgeTier';
 import BadgeTier from '@/components/profile/BadgeTier';
 import { useIsMobile } from '@/hooks/use-mobile';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
@@ -77,7 +77,15 @@ const PublicProfilePage = () => {
     queryFn: () => getUserBountyContributions(profile?.id || '', 1, 50),
     enabled: !!profile?.id
   });
-  const badgeInfo = useBadgeTier(profile?.sec_balance || null);
+  
+  // Fetch bounties raised by this user for badge calculation
+  const { data: bountiesRaised = 0 } = useQuery({
+    queryKey: ['bountiesRaised', profile?.id],
+    queryFn: () => getBountiesRaisedByUser(profile?.id || ''),
+    enabled: !!profile?.id
+  });
+  
+  const badgeInfo = useBadgeTierWithBounties(profile?.sec_balance || null, bountiesRaised);
   const {
     data: scammerReports,
     isLoading: isLoadingReports

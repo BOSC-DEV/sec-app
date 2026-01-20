@@ -41,7 +41,7 @@ import SurveyDisplay from './SurveyDisplay';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { formatTimeAgo } from '@/utils/formatTime';
-import { useBadgeTier } from '@/hooks/useBadgeTier';
+import { useBadgeTierWithBounties } from '@/hooks/useBadgeTier';
 import { isAdmin } from '@/utils/adminUtils';
 import { BadgeTier } from '@/utils/badgeUtils';
 import { supabase } from '@/integrations/supabase/client';
@@ -63,7 +63,7 @@ const AnnouncementFeed: React.FC<AnnouncementFeedProps> = ({ useCarousel = false
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [surveyImageFile, setSurveyImageFile] = useState<File | null>(null);
   const [surveyImagePreview, setSurveyImagePreview] = useState<string | null>(null);
-  const badgeInfo = useBadgeTier(profile?.sec_balance || 0);
+  const badgeInfo = useBadgeTierWithBounties(profile?.sec_balance || 0, 0); // TODO: add bounties_raised to profile context
   
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editContent, setEditContent] = useState('');
