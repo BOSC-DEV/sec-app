@@ -25,16 +25,14 @@ export const useBadgeTier = (secBalance: number | null): BadgeInfo | null => {
 };
 
 /**
- * Hook to get badge tier information based on SEC balance OR bounties raised (whichever is higher)
+ * Hook to get badge tier information based on combined SEC balance and bounties raised
  * @param secBalance The user's SEC balance (can be null/undefined if not loaded yet)
- * @param bountiesRaised The total bounties raised from user's scam reports (in SOL)
- * @param solToSecRate Optional rate to convert SOL to SEC equivalent (defaults to 1000)
+ * @param bountiesRaised The total bounties raised from user's scam reports (in SEC tokens)
  * @returns Badge information or null if below threshold
  */
 export const useBadgeTierWithBounties = (
   secBalance: number | null, 
-  bountiesRaised: number | null,
-  solToSecRate: number = 1000
+  bountiesRaised: number | null
 ): BadgeInfo | null => {
   const [badgeInfo, setBadgeInfo] = useState<BadgeInfo | null>(null);
   
@@ -43,20 +41,18 @@ export const useBadgeTierWithBounties = (
     const bounties = bountiesRaised ?? 0;
     
     try {
-      // Calculate using bounties-aware function
-      const calculatedBadgeInfo = calculateBadgeTierWithBounties(sec, bounties, solToSecRate);
+      // Calculate using bounties-aware function (both values are in SEC)
+      const calculatedBadgeInfo = calculateBadgeTierWithBounties(sec, bounties);
       setBadgeInfo(calculatedBadgeInfo);
       
-      const bountiesAsSecEquiv = bounties * solToSecRate;
       if (calculatedBadgeInfo) {
-        const source = bountiesAsSecEquiv > sec ? 'bounties' : 'holdings';
-        console.log(`Badge tier: ${calculatedBadgeInfo.tier} (qualified via ${source})`);
+        console.log(`Badge tier: ${calculatedBadgeInfo.tier} (SEC: ${sec}, Bounties: ${bounties}, Total: ${sec + bounties})`);
       }
     } catch (error) {
       console.error("Error calculating badge tier with bounties:", error);
       setBadgeInfo(null);
     }
-  }, [secBalance, bountiesRaised, solToSecRate]);
+  }, [secBalance, bountiesRaised]);
   
   return badgeInfo;
 };

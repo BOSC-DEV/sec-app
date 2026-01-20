@@ -379,7 +379,7 @@ export const scammerExists = async (id: string): Promise<boolean> => {
 /**
  * Get total bounties raised by a specific user (sum of bounty_amount on scammers they reported)
  * @param userId The profile ID of the user
- * @returns The total bounties raised (in SOL)
+ * @returns The total bounties raised (in SEC tokens)
  */
 export const getBountiesRaisedByUser = async (userId: string): Promise<number> => {
   try {
