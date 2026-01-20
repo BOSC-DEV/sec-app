@@ -135,10 +135,10 @@ export const calculateBadgeTierWithBounties = (
   // Convert bounties raised (SOL) to SEC equivalent
   const bountiesAsSecEquivalent = bountiesRaised * solToSecRate;
   
-  // Use the higher value for badge calculation
-  const effectiveBalance = Math.max(secBalance, bountiesAsSecEquivalent);
+  // Combine both SEC holdings and bounties for total badge calculation
+  const effectiveBalance = secBalance + bountiesAsSecEquivalent;
   
-  console.log(`Badge calculation - SEC: ${secBalance}, Bounties: ${bountiesRaised} SOL (${bountiesAsSecEquivalent} SEC equiv), Using: ${effectiveBalance}`);
+  console.log(`Badge calculation - SEC: ${secBalance}, Bounties: ${bountiesRaised} SOL (${bountiesAsSecEquivalent} SEC equiv), Combined: ${effectiveBalance}`);
   
   return calculateBadgeTier(effectiveBalance);
 };
