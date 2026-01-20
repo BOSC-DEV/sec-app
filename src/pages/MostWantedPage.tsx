@@ -433,16 +433,12 @@ const MostWantedPage = () => {
               <div className="mb-4">
                 <Search className="h-12 w-12 mx-auto text-gray-400" />
               </div>
-              <h3 className="text-xl font-medium mb-2">No scammers found</h3>
+              <h3 className="text-xl font-medium mb-2">No reports yet</h3>
               <p className="text-gray-500 mb-6">
-                Try adjusting your search or filters to find what you're looking for.
+                File the first report for it to appear here!
               </p>
-              <Button onClick={() => {
-            setSearchQuery('');
-            setSortBy('bounty');
-            setShowFilters(false);
-          }}>
-                Clear All Filters
+              <Button onClick={() => window.location.href = '/report'}>
+                File a Report
               </Button>
             </div>}
         </div>
