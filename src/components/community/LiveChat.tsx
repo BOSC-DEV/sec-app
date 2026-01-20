@@ -18,7 +18,7 @@ import EmojiPicker from '@/components/community/EmojiPicker';
 import CommunityInteractionButtons from './CommunityInteractionButtons';
 import AdminContextMenu from './AdminContextMenu';
 import BadgeTier from '@/components/profile/BadgeTier';
-import { calculateBadgeTier } from '@/utils/badgeUtils';
+import { calculateBadgeTierWithBounties } from '@/utils/badgeUtils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useChatMessages } from '@/hooks/useChatMessages';
 import { useOnlineUsers } from '@/hooks/useOnlineUsers';
@@ -172,6 +172,7 @@ const LiveChat = () => {
         author_username: profile?.username || '',
         author_profile_pic: profile?.profile_pic_url || '',
         author_sec_balance: profile?.sec_balance || 0,
+        author_bounties_raised: 0, // Will be fetched from profile in future enhancement
         image_file: imageFile
       });
       setNewMessage('');
@@ -253,8 +254,10 @@ const LiveChat = () => {
 
   // Memoized ChatMessage component to prevent unnecessary re-renders
   const ChatMessage = React.memo(({ message }: { message: any }) => {
-    const userBadge = message.author_sec_balance !== undefined ? 
-      calculateBadgeTier(message.author_sec_balance) : null;
+    const userBadge = calculateBadgeTierWithBounties(
+      message.author_sec_balance ?? 0,
+      message.author_bounties_raised ?? 0
+    );
     
     const isCurrentUser = message.author_id === profile?.wallet_address;
     const time = formatTimeAgo(message.created_at);

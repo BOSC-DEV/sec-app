@@ -375,3 +375,39 @@ export const scammerExists = async (id: string): Promise<boolean> => {
     return false;
   }
 };
+
+/**
+ * Get total bounties raised by a specific user (sum of bounty_amount on scammers they reported)
+ * @param userId The profile ID of the user
+ * @returns The total bounties raised (in SOL)
+ */
+export const getBountiesRaisedByUser = async (userId: string): Promise<number> => {
+  try {
+    if (!userId || typeof userId !== 'string') {
+      return 0;
+    }
+    
+    const sanitizedUserId = sanitizeInput(userId);
+    
+    const { data, error } = await supabase
+      .from('scammers')
+      .select('bounty_amount')
+      .eq('added_by', sanitizedUserId)
+      .is('deleted_at', null);
+    
+    if (error) {
+      console.error('Error fetching bounties raised:', error);
+      return 0;
+    }
+    
+    if (!data || data.length === 0) {
+      return 0;
+    }
+    
+    const total = data.reduce((sum, scammer) => sum + Number(scammer.bounty_amount || 0), 0);
+    return total;
+  } catch (error) {
+    console.error('Error calculating bounties raised:', error);
+    return 0;
+  }
+};

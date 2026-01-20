@@ -15,7 +15,7 @@ import { formatNumber, formatProfileAge } from '@/lib/utils';
 import { formatCurrency } from '@/utils/formatCurrency';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
 import BadgeTier from '@/components/profile/BadgeTier';
-import { calculateBadgeTier } from '@/utils/badgeUtils';
+import { calculateBadgeTierWithBounties } from '@/utils/badgeUtils';
 
 type SortField = 'total_bounty' | 'rank' | 'name' | 'reports' | 'likes' | 'views' | 'comments' | 'bounty' | 'bounties_raised' | 'activity' | 'sec_balance';
 type SortOrder = 'asc' | 'desc';
@@ -358,7 +358,7 @@ const LeaderboardPage = () => {
                                     {profile.display_name}
                                     {profile.sec_balance !== undefined && profile.sec_balance !== null && (
                                       <BadgeTier 
-                                        badgeInfo={calculateBadgeTier(profile.sec_balance)}
+                                        badgeInfo={calculateBadgeTierWithBounties(profile.sec_balance, profile.bounties_raised || 0)}
                                         size="sm"
                                         showProgress={false}
                                         context="chat"

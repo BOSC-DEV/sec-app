@@ -2,9 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { formatSecAmount, BADGE_TIERS, BadgeTier, TOTAL_SEC_SUPPLY, MIN_SEC_FOR_BADGE } from '@/utils/badgeUtils';
+import { formatSecAmount, BADGE_TIERS, BadgeTier, TOTAL_SEC_SUPPLY, MIN_SEC_FOR_BADGE, calculateBadgeTierWithBounties } from '@/utils/badgeUtils';
 import BadgeTierComponent from '@/components/profile/BadgeTier';
-import { calculateBadgeTier } from '@/utils/badgeUtils';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Progress } from '@/components/ui/progress';
 import { AlertCircle } from 'lucide-react';
@@ -12,11 +11,10 @@ import { AlertCircle } from 'lucide-react';
 const BadgeTiersPage: React.FC = () => {
   const { profile } = useProfile();
   const secBalance = profile?.sec_balance || 0;
-  const [currentBadgeInfo, setCurrentBadgeInfo] = useState(calculateBadgeTier(secBalance));
+  const [currentBadgeInfo, setCurrentBadgeInfo] = useState(calculateBadgeTierWithBounties(secBalance, 0));
   
   useEffect(() => {
-    setCurrentBadgeInfo(calculateBadgeTier(secBalance));
-    console.log(`Current SEC balance: ${secBalance}, Badge tier: ${calculateBadgeTier(secBalance)?.tier || 'None'}`);
+    setCurrentBadgeInfo(calculateBadgeTierWithBounties(secBalance, 0));
   }, [secBalance]);
 
   const tiers = Object.entries(BADGE_TIERS).map(([tier, details]) => ({

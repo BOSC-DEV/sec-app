@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { calculateBadgeTier, calculateBadgeTierWithBounties, BadgeInfo, MIN_SEC_FOR_BADGE } from '@/utils/badgeUtils';
+import { calculateBadgeTier, calculateBadgeTierWithBounties, BadgeInfo } from '@/utils/badgeUtils';
 
 /**
  * Hook to get badge tier information based on SEC balance
@@ -10,24 +10,14 @@ export const useBadgeTier = (secBalance: number | null): BadgeInfo | null => {
   const [badgeInfo, setBadgeInfo] = useState<BadgeInfo | null>(null);
   
   useEffect(() => {
-    if (secBalance !== null && secBalance !== undefined) {
-      try {
-        // If the balance is less than minimum required, set to null
-        if (secBalance < MIN_SEC_FOR_BADGE) {
-          setBadgeInfo(null);
-          console.log(`No badge awarded: SEC balance ${secBalance} is below minimum requirement of ${MIN_SEC_FOR_BADGE}`);
-          return;
-        }
-        
-        // Otherwise calculate the badge tier
-        const calculatedBadgeInfo = calculateBadgeTier(secBalance);
-        setBadgeInfo(calculatedBadgeInfo);
-        console.log(`Badge tier calculated: ${calculatedBadgeInfo?.tier || 'None'} for balance: ${secBalance}`);
-      } catch (error) {
-        console.error("Error calculating badge tier:", error);
-        // Set to null in case of error
-        setBadgeInfo(null);
-      }
+    try {
+      // Calculate the badge tier (everyone gets at least Shrimp since MIN_SEC_FOR_BADGE is 0)
+      const calculatedBadgeInfo = calculateBadgeTier(secBalance ?? 0);
+      setBadgeInfo(calculatedBadgeInfo);
+    } catch (error) {
+      console.error("Error calculating badge tier:", error);
+      // Default to Shrimp tier calculation in case of error
+      setBadgeInfo(calculateBadgeTier(0));
     }
   }, [secBalance]);
   
