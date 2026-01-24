@@ -74,55 +74,15 @@ log.info('Application starting', 'app_initialization', {
   buildTime: process.env.BUILD_TIME || new Date().toISOString()
 });
 
-// Analytics tracker component - enhanced with visitor tracking
+// Analytics tracker component - simplified (no geo-tracking)
 const AnalyticsTracker = () => {
   const location = useLocation();
   const { profile } = useProfile();
   
-  // Track page views and visitor data
+  // Track page views
   useEffect(() => {
-    const trackVisit = async () => {
-      try {
-        const visitorId = localStorage.getItem('visitor_id') || crypto.randomUUID();
-        localStorage.setItem('visitor_id', visitorId);
-        
-        // Get visitor's IP and location data
-        const response = await fetch('https://api.ipapi.com/check?format=json');
-        const geoData = await response.json();
-        
-        // First track the visitor
-        await supabase.rpc('track_visitor', {
-          visitor_data: {
-            visitor_id: visitorId,
-            ip_address: geoData.ip || null,
-            user_agent: navigator.userAgent,
-            country_code: geoData.country_code || null,
-            country_name: geoData.country_name || null,
-            city: geoData.city || null,
-            referrer: document.referrer || null
-          }
-        });
-
-        // Then track the pageview
-        const title = document.title;
-        await supabase.rpc('track_pageview', {
-          pageview_data: {
-            visitor_id: visitorId,
-            page_path: location.pathname,
-            page_title: title,
-            session_id: localStorage.getItem('session_id') || null
-          }
-        });
-
-        analyticsService.trackPageView();
-        log.info(`Page view: ${location.pathname}`, 'page_navigation');
-      } catch (error) {
-        // Log error but don't throw - we don't want to break the app if analytics fails
-        log.error('Analytics tracking failed:', error);
-      }
-    };
-
-    trackVisit();
+    analyticsService.trackPageView();
+    log.info(`Page view: ${location.pathname}`, 'page_navigation');
   }, [location.pathname]);
   
   // Identify user when profile changes
