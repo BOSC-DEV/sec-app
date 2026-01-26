@@ -15,7 +15,7 @@ const BountyPage = () => {
         {/* Overview */}
         <section>
           <h2 className="text-2xl font-bold mb-4">Bounty System Overview</h2>
-          <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg p-8 text-white mb-6">
+          <div className="bg-icc-blue rounded-lg p-8 text-white mb-6">
             <Coins className="h-12 w-12 mb-4" />
             <p className="text-xl leading-relaxed">
               The SEC bounty system creates financial incentives for exposing scammers and fraudulent 
@@ -70,7 +70,7 @@ const BountyPage = () => {
         {/* Growth Flywheel */}
         <section>
           <h2 className="text-2xl font-bold mb-6">Growth Flywheel</h2>
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-8 text-white mb-6">
+          <div className="bg-icc-blue rounded-lg p-8 text-white mb-6">
             <RefreshCw className="h-12 w-12 mb-4" />
             <p className="text-xl leading-relaxed mb-4">
               As SEC value increases, bounty values increase proportionally, creating a powerful growth flywheel that benefits the entire ecosystem.

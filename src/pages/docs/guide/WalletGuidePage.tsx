@@ -14,7 +14,7 @@ const WalletGuidePage = () => {
         {/* Overview */}
         <section>
           <h2 className="text-2xl font-bold mb-4">Phantom Wallet Overview</h2>
-          <div className="bg-gradient-to-r from-icc-blue to-icc-blue-light rounded-lg p-8 text-white mb-6">
+          <div className="bg-icc-blue rounded-lg p-8 text-white mb-6">
             <Wallet className="h-12 w-12 mb-4" />
             <p className="text-xl leading-relaxed">
               Phantom is the recommended Solana wallet for the SEC platform. It provides secure 

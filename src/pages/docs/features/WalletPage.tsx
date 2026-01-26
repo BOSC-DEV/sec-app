@@ -14,7 +14,7 @@ const WalletPage = () => {
         {/* Overview */}
         <section>
           <h2 className="text-2xl font-bold mb-4">Why Phantom Wallet?</h2>
-          <div className="bg-gradient-to-r from-purple-600 to-purple-800 rounded-lg p-8 text-white mb-6">
+          <div className="bg-icc-blue rounded-lg p-8 text-white mb-6">
             <Wallet className="h-12 w-12 mb-4" />
             <p className="text-xl leading-relaxed">
               Phantom is the leading Solana wallet that provides secure, fast, and user-friendly 
