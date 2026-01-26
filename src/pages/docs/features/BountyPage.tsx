@@ -61,7 +61,7 @@ const BountyPage = () => {
               <div className="bg-icc-gold text-icc-blue-dark rounded-full w-8 h-8 flex items-center justify-center font-bold">5</div>
               <div>
                 <h3 className="text-xl font-semibold mb-2">Justice Served</h3>
-                <p>When the scammer is apprehended or funds recovered, bounty contributors are rewarded proportionally.</p>
+                <p>Scammers can put up bail, apologize and stop justice measures, paying off their bounty in equivalent SEC tokens. Which get distributed to bounty contributors proportionally.</p>
               </div>
             </div>
           </div>
