@@ -371,10 +371,10 @@ const MostWantedPage = () => {
                           </TableCell>
                           <TableCell>
                             {scammer.aliases && scammer.aliases.length > 0 ? <div className="flex flex-wrap gap-1">
-                                <Badge variant="gold" className="text-xs dark:text-white">
+                                <Badge variant="gold" className="text-xs text-black">
                                   {scammer.aliases[0]}
                                 </Badge>
-                                {scammer.aliases.length > 1 && <Badge variant="gold" className="text-xs flex items-center gap-0.5 dark:text-white">
+                                {scammer.aliases.length > 1 && <Badge variant="gold" className="text-xs flex items-center gap-0.5 text-black">
                                     <Plus className="h-3 w-3" />
                                     {scammer.aliases.length - 1}
                                   </Badge>}
