@@ -210,7 +210,6 @@ const BountiesGuidePage = () => {
               <li>• <strong>Pending Transaction:</strong> Wait for blockchain confirmation</li>
               <li>• <strong>Wrong Amount:</strong> Double-check decimals and token amounts</li>
               <li>• <strong>Missing Contribution:</strong> Verify transaction signature on blockchain</li>
-              <li>• <strong>Transfer Issues:</strong> Ensure you have permission to transfer</li>
             </ul>
           </div>
         </section>
