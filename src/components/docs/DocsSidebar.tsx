@@ -148,11 +148,12 @@ const DocsSidebar = ({ onClose }: DocsSidebarProps) => {
                           to={item.path}
                           onClick={onClose}
                           className={cn(
-                            "block px-2 py-1.5 text-xs rounded transition-colors hover:bg-accent hover:text-accent-foreground truncate",
+                            "block px-2 py-1.5 text-xs rounded transition-colors truncate",
                             location.pathname === item.path
-                              ? "bg-accent text-accent-foreground font-medium"
-                              : "text-muted-foreground hover:text-foreground"
+                              ? "bg-icc-gold font-medium"
+                              : "text-muted-foreground hover:bg-accent"
                           )}
+                          style={location.pathname === item.path ? { color: '#000000' } : undefined}
                         >
                           {item.title}
                         </Link>

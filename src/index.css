@@ -72,7 +72,7 @@
       @apply text-white;
     }
 
-    a {
+    a:not(.text-black):not([class*="accent-foreground"]) {
       @apply text-dark-text-secondary hover:text-white;
     }
 
@@ -82,6 +82,18 @@
 
     .text-table {
       @apply text-white;
+    }
+
+    /* Force black text on gold/accent backgrounds */
+    .bg-accent,
+    .bg-icc-gold,
+    [class*="bg-icc-gold"] {
+      color: #000000 !important;
+    }
+
+    .text-accent-foreground,
+    .hover\:text-accent-foreground:hover {
+      color: #000000 !important;
     }
   }
 }
