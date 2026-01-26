@@ -16,7 +16,7 @@ const VisionPage = () => {
             <Target className="h-8 w-8 text-icc-gold" />
             <h2 className="text-3xl font-bold">Our Vision</h2>
           </div>
-          <div className="bg-gradient-to-r from-icc-blue to-icc-blue-light rounded-lg p-8 text-white mb-6">
+          <div className="bg-icc-blue rounded-lg p-8 text-white mb-6">
             <p className="text-xl leading-relaxed">
               The SEC envisions a self-regulated, safer crypto space where bad actors are discouraged 
               through transparency and community vigilance. We strive to create an ecosystem where 

@@ -13,7 +13,7 @@ const ArchitecturePage = () => {
         {/* Overview */}
         <section>
           <h2 className="text-2xl font-bold mb-4">Architecture Overview</h2>
-          <div className="bg-gradient-to-r from-icc-blue to-icc-blue-light rounded-lg p-8 text-white mb-6">
+          <div className="bg-icc-blue rounded-lg p-8 text-white mb-6">
             <Layers className="h-12 w-12 mb-4" />
             <p className="text-xl leading-relaxed">
               The SEC platform is built on a modern, scalable architecture that combines 

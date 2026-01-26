@@ -120,7 +120,7 @@ const ReportingPage = () => {
         {/* Community Verification */}
         <section>
           <h2 className="text-2xl font-bold mb-6">Community Verification</h2>
-          <div className="bg-gradient-to-r from-icc-blue to-icc-blue-light rounded-lg p-6 text-white mb-6">
+          <div className="bg-icc-blue rounded-lg p-6 text-white mb-6">
             <Users className="h-8 w-8 mb-4" />
             <h3 className="text-xl font-semibold mb-3">Peer Review Process</h3>
             <p>

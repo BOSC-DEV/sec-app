@@ -38,7 +38,7 @@ const BadgesPage = () => {
         {/* Overview */}
         <section>
           <h2 className="text-2xl font-bold mb-4">Badge System Overview</h2>
-          <div className="bg-gradient-to-r from-icc-blue to-icc-blue-light rounded-lg p-8 text-white mb-6">
+          <div className="bg-icc-blue rounded-lg p-8 text-white mb-6">
             <Badge className="h-12 w-12 mb-4 text-white" />
             <p className="text-xl leading-relaxed">
               The SEC badge system recognizes community members based on their SEC token holdings OR total bounties 
@@ -88,7 +88,7 @@ const BadgesPage = () => {
         {/* Governance Section */}
         <section>
           <h2 className="text-2xl font-bold mb-6">Governance</h2>
-          <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 rounded-lg p-6 mb-6">
+          <div className="bg-muted rounded-lg p-6 mb-6">
             <div className="flex items-center gap-3 mb-4">
               <Vote className="h-8 w-8 text-purple-600 dark:text-purple-400" />
               <h3 className="text-xl font-semibold">Community Voting Power</h3>
@@ -114,7 +114,7 @@ const BadgesPage = () => {
         {/* Badge Delegation Section */}
         <section>
           <h2 className="text-2xl font-bold mb-6">Badge Delegation</h2>
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg p-6 mb-6">
+          <div className="bg-muted rounded-lg p-6 mb-6">
             <div className="flex items-center gap-3 mb-4">
               <Trophy className="h-8 w-8 text-green-600 dark:text-green-400" />
               <h3 className="text-xl font-semibold">Multi-Wallet Access & Social Rewards</h3>

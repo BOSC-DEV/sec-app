@@ -13,7 +13,7 @@ const TermsPage = () => {
         {/* Overview */}
         <section>
           <h2 className="text-2xl font-bold mb-4">Terms Overview</h2>
-          <div className="bg-gradient-to-r from-icc-blue to-icc-blue-light rounded-lg p-8 text-white mb-6">
+          <div className="bg-icc-blue rounded-lg p-8 text-white mb-6">
             <Scale className="h-12 w-12 mb-4" />
             <p className="text-xl leading-relaxed">
               These Terms of Service govern your access to and use of the SEC (Scams and E-Crimes Commission) 

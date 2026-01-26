@@ -201,7 +201,7 @@ const QuickStartPage = () => {
         </section>
 
         {/* Next steps */}
-        <section className="bg-gradient-to-r from-icc-blue to-icc-blue-light rounded-lg p-6 text-white">
+        <section className="bg-icc-blue rounded-lg p-6 text-white">
           <h2 className="text-xl font-bold mb-4">🎉 You're Ready!</h2>
           <p className="mb-4">
             You now have everything you need to start using SEC effectively. 
