@@ -154,8 +154,8 @@ const BountyPage = () => {
                 <span className="font-mono text-icc-gold">10%</span>
               </div>
               <div className="flex justify-between items-center p-3 bg-icc-gold text-icc-blue-dark rounded font-semibold">
-                <span>Recovered Amount (if 10,000 SEC recovered)</span>
-                <span className="font-mono">1,000 SEC</span>
+                <span>Your Reward (if 5,000 SEC bail paid)</span>
+                <span className="font-mono">500 SEC</span>
               </div>
             </div>
           </div>
