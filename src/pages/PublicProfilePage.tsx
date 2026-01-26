@@ -231,7 +231,8 @@ const PublicProfilePage = () => {
                               Disconnect
                             </Button>
                           </>}
-                        <Button variant="outline" size="sm" className="flex items-center gap-1" onClick={shareProfile}>
+                        {/* Share button - hidden on mobile, shown on desktop */}
+                        <Button variant="outline" size="sm" className="hidden md:flex items-center gap-1" onClick={shareProfile}>
                           <Share2 size={16} />
                           Share
                         </Button>
@@ -249,6 +250,15 @@ const PublicProfilePage = () => {
                       {profile?.website_link && <a href={profile.website_link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary p-2 rounded-full hover:bg-gray-100 transition-colors" title="Website">
                           <Globe size={20} />
                         </a>}
+                      
+                      {/* Share icon - shown on mobile only, same style as social icons */}
+                      <button 
+                        onClick={shareProfile} 
+                        className="md:hidden inline-flex items-center gap-1 text-muted-foreground hover:text-primary p-2 rounded-full hover:bg-gray-100 transition-colors" 
+                        title="Share"
+                      >
+                        <Share2 size={20} />
+                      </button>
                     </div>
                     
                     {profile?.wallet_address && <div className="pt-2">
