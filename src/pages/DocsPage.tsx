@@ -64,7 +64,7 @@ const DocsPage = () => {
             <div className="p-4 bg-muted rounded-lg text-center">
               <Users className="h-8 w-8 mx-auto mb-3 text-icc-gold" />
               <h3 className="font-semibold mb-2">Community Features</h3>
-              <p className="text-sm text-muted-foreground">Live chat, announcements, polls, reactions, and user profiles</p>
+              <p className="text-sm text-muted-foreground">Live chat, updates, polls, reactions, and user profiles</p>
               <Button variant="ghost" size="sm" className="mt-2" asChild>
                 <Link to="/docs/features/community">Learn More</Link>
               </Button>
