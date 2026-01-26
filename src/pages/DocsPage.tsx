@@ -55,8 +55,8 @@ const DocsPage = () => {
             </div>
             <div className="p-4 bg-muted rounded-lg text-center">
               <Coins className="h-8 w-8 mx-auto mb-3 text-icc-gold" />
-              <h3 className="font-semibold mb-2">Bounty System</h3>
-              <p className="text-sm text-muted-foreground">Token-based rewards for scammer exposure</p>
+              <h3 className="font-semibold mb-2">Bounties and Bail System</h3>
+              <p className="text-sm text-muted-foreground">Apply social justice and pressure, generating bail money for victims</p>
               <Button variant="ghost" size="sm" className="mt-2" asChild>
                 <Link to="/docs/features/bounty">Learn More</Link>
               </Button>
