@@ -437,7 +437,10 @@ const MostWantedPage = () => {
               <p className="text-gray-500 mb-6">
                 File the first report for it to appear here!
               </p>
-              <Button onClick={() => window.location.href = '/report'}>
+              <Button 
+                onClick={() => window.location.href = '/report'}
+                className="bg-icc-gold hover:bg-icc-gold-light text-black"
+              >
                 File a Report
               </Button>
             </div>}
