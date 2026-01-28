@@ -10,6 +10,7 @@ import CookieDialog from '../common/CookieDialog';
 import SafetyDialog from '../common/SafetyDialog';
 import FAQDialog from '../common/FAQDialog';
 import ContactDialog from '../common/ContactDialog';
+import GoldLine from '../common/GoldLine';
 import { toast } from '@/hooks/use-toast';
 
 const Footer = () => {
@@ -30,7 +31,9 @@ const Footer = () => {
   };
 
   return (
-    <footer className="icc-footer pb-20 md:pb-4">
+    <>
+      <GoldLine />
+      <footer className="icc-footer pb-20 md:pb-4">
       <div className="icc-container">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-1 text-center md:text-left flex flex-col">
@@ -145,6 +148,7 @@ const Footer = () => {
       <FAQDialog open={faqOpen} onOpenChange={setFaqOpen} />
       <ContactDialog open={contactOpen} onOpenChange={setContactOpen} />
     </footer>
+    </>
   );
 };
 
