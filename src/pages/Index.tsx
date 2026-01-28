@@ -133,7 +133,7 @@ const Index = () => {
         </div>
       </section>
 
-      <section className="icc-section bg-white dark:bg-gray-900">
+      <section className="icc-section bg-gray-50 dark:bg-gray-800">
         <div className="icc-container">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {isLoadingStats ? <>
