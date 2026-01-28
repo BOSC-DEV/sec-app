@@ -211,10 +211,10 @@ const PublicProfilePage = () => {
                   </Avatar>
                   
                     <div className="flex-1 space-y-3 text-center md:text-left">
-                    <div className="flex flex-wrap items-center justify-center md:justify-between gap-2">
-                      <div className="flex items-start gap-2">
+                    <div className="flex flex-wrap items-start justify-center md:justify-between gap-2">
+                      <div className="flex items-start gap-1">
                         <h1 className="text-3xl font-bold text-icc-gold">{profile?.display_name}</h1>
-                        {badgeInfo && <div className="mt-1">
+                        {badgeInfo && <div className="-mt-1">
                             <BadgeTier badgeInfo={badgeInfo} showTooltip={true} size="sm" variant="plain" />
                           </div>}
                       </div>
