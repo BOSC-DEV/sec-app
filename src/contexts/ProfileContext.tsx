@@ -269,7 +269,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       }
     });
     
-    // Check for existing session
+    // Check for existing session - NO auto-connect to Phantom, just restore if session is valid
     const checkExistingSession = async () => {
       try {
         setLoadingWithTimeout(true);
@@ -283,7 +283,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
           const sessionWalletAddress = existingSession.user.email?.split('@')[0];
           
           if (sessionWalletAddress) {
-            // Skip Phantom validation since we have a valid session
+            // Skip Phantom validation since we have a valid session - no wallet popup
             const isValid = await setValidatedWalletAddress(sessionWalletAddress, true);
             if (!isValid) {
               await supabase.auth.signOut();
@@ -296,61 +296,19 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
             }
           }
         } else if (existingSession) {
-          // Session exists but our 24hr window expired - need to re-validate with Phantom
-          console.log("Session exists but 24hr window expired, validating with Phantom...");
-          
-          // Wait for Phantom to initialize
-          const maxAttempts = 5;
-          let attempts = 0;
-          let provider = getPhantomProvider();
-          
-          while (!provider && attempts < maxAttempts) {
-            await new Promise(resolve => setTimeout(resolve, 500));
-            provider = getPhantomProvider();
-            attempts++;
-          }
-
-          if (!provider) {
-            console.log("Phantom provider not available, signing out");
-            await supabase.auth.signOut();
-            clearLoading();
-            initialCheckComplete.current = true;
-            return;
-          }
-
-          // Try to reconnect to Phantom
-          try {
-            if (!provider.isConnected && provider.isPhantom) {
-              console.log("Attempting to restore Phantom connection...");
-              await provider.connect({ onlyIfTrusted: true });
-            }
-          } catch (error) {
-            console.log("Could not auto-reconnect to Phantom:", error);
-          }
-
-          setSession(existingSession);
-          const sessionWalletAddress = existingSession.user.email?.split('@')[0];
-          
-          if (sessionWalletAddress) {
-            const isValid = await setValidatedWalletAddress(sessionWalletAddress, false);
-            if (isValid) {
-              // Refresh the session expiry since we successfully validated
-              setSessionExpiry();
-            } else {
-              await supabase.auth.signOut();
-              setWalletAddress(null);
-              setIsConnected(false);
-              setProfile(null);
-              setIsWalletReady(false);
-              localStorage.removeItem(WALLET_ADDRESS_KEY);
-              clearSessionExpiry();
-            }
-          }
+          // Session exists but our 24hr window expired - sign out, don't force reconnect
+          console.log("Session exists but 24hr window expired, signing out...");
+          await supabase.auth.signOut();
+          setWalletAddress(null);
+          setIsConnected(false);
+          setProfile(null);
+          setIsWalletReady(false);
+          localStorage.removeItem(WALLET_ADDRESS_KEY);
+          clearSessionExpiry();
         } else {
-          // No session - check if we have a saved wallet address
+          // No session - clear any stale data
           const savedWallet = localStorage.getItem(WALLET_ADDRESS_KEY);
           if (savedWallet) {
-            // Clear any stale data since we don't have a session
             localStorage.removeItem(WALLET_ADDRESS_KEY);
             clearSessionExpiry();
           }
@@ -420,6 +378,13 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
               localStorage.setItem(WALLET_ADDRESS_KEY, publicKey);
               // Set 24-hour session expiry
               setSessionExpiry();
+              
+              // Show success toast AFTER signature is confirmed
+              toast({
+                title: 'Wallet Connected',
+                description: 'Successfully signed in with your wallet',
+              });
+              
               await fetchProfile(publicKey);
             } else {
               console.error('Authentication failed - no session returned');
