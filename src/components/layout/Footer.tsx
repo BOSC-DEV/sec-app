@@ -31,7 +31,9 @@ const Footer = () => {
 
   return (
     <footer className="icc-footer pb-20 md:pb-4 relative">
-      <div className="h-px bg-icc-gold w-full absolute top-0 left-0" />
+      <div className="h-1 bg-gradient-to-r from-icc-gold-dark via-icc-gold to-icc-gold-dark w-full absolute top-0 left-0 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-gold-shimmer" />
+      </div>
       <div className="icc-container relative">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-1 text-center md:text-left flex flex-col">
