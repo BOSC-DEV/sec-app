@@ -275,7 +275,7 @@ const ProfilePage = () => {
                 <Button type="button" variant="outline" onClick={() => navigate('/')}>
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-icc-gold hover:bg-icc-gold-light text-icc-blue" disabled={isSaving}>
+                <Button type="submit" variant="gold" disabled={isSaving}>
                   {isSaving ? 'Saving...' : isNewProfile ? 'Create Profile' : 'Save Changes'}
                 </Button>
               </CardFooter>

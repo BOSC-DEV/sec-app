@@ -34,7 +34,8 @@ const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
             <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
               <Button 
                 asChild 
-                className="bg-icc-gold hover:bg-icc-gold-light text-black dark:text-black text-lg py-6 px-8 min-w-[200px] sm:min-w-[240px] font-medium"
+                variant="gold"
+                className="text-lg py-6 px-8 min-w-[200px] sm:min-w-[240px] font-medium"
                 aria-label="View reports list"
               >
                 <Link to="/most-wanted">
@@ -44,7 +45,8 @@ const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
               </Button>
               <Button 
                 asChild 
-                className="bg-icc-gold hover:bg-icc-gold-light text-black dark:text-black text-lg py-6 px-8 min-w-[200px] sm:min-w-[240px] font-medium"
+                variant="gold"
+                className="text-lg py-6 px-8 min-w-[200px] sm:min-w-[240px] font-medium"
                 aria-label="File a report"
               >
                 <Link to="/new-report">

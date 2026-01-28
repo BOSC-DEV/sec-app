@@ -59,8 +59,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           <DialogFooter className="sm:justify-center">
             {isPhantomAvailable ? (
               <Button 
-                variant="default" 
-                className="bg-icc-gold text-icc-blue hover:bg-icc-gold-light flex items-center gap-2" 
+                variant="gold" 
+                className="flex items-center gap-2" 
                 onClick={connectWallet}
               >
                 <LogIn className="h-4 w-4" />
@@ -68,8 +68,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
               </Button>
             ) : (
               <Button 
-                variant="default" 
-                className="bg-icc-gold text-icc-blue hover:bg-icc-gold-light flex items-center gap-2" 
+                variant="gold" 
+                className="flex items-center gap-2" 
                 onClick={() => window.open('https://phantom.app/', '_blank')}
               >
                 <ExternalLink className="h-4 w-4" />

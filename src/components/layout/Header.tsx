@@ -83,14 +83,14 @@ const Header = () => {
     label: 'Most Wanted',
     path: '/most-wanted'
   }, {
+    label: 'Community',
+    path: '/community'
+  }, {
     label: 'Report',
     path: '/new-report'
   }, {
     label: 'Leaderboard',
     path: '/leaderboard'
-  }, {
-    label: 'Community',
-    path: '/community'
   }, {
     label: 'Docs',
     path: '/docs'

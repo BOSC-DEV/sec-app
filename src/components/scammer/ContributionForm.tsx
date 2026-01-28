@@ -83,7 +83,8 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
       </div>
       
       <Button 
-        className="w-full bg-icc-gold hover:bg-icc-gold-dark text-icc-blue-dark dark:text-white border-icc-gold-dark font-medium" 
+        variant="gold"
+        className="w-full font-medium" 
         onClick={handleAddBounty} 
         disabled={isProcessing || (addBountyContributionMutation && addBountyContributionMutation.isPending) || hasInsufficientFunds} 
         aria-label="Contribute to bounty"

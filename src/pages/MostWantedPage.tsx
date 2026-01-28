@@ -438,8 +438,8 @@ const MostWantedPage = () => {
                 File the first report for it to appear here!
               </p>
               <Button 
+                variant="gold"
                 onClick={() => window.location.href = '/report'}
-                className="bg-icc-gold hover:bg-icc-gold-light text-black"
               >
                 File a Report
               </Button>
