@@ -1,73 +1,57 @@
 
 
-# Fix for Phantom Text Boxes / Flashing Cursor Issue
+# Fix: Display Name Turning Single Quote Into Double Quotes
 
-## Problem Summary
-You're experiencing phantom "text boxes" and flashing cursor indicators appearing throughout the application - on the home page logo, buttons, and other interactive elements. This creates a confusing experience where it looks like you can type anywhere.
+## Problem
+When you enter a single quote (`'`) in the display name field (like `O'Brien`), it gets saved as two single quotes (`O''Brien`). This is a bug in the input sanitization function.
 
-## Root Cause Analysis
-After investigating the codebase, the issue is caused by **Radix UI's TooltipProvider** accessibility features. The TooltipProvider wraps your entire application and creates hidden `<span>` elements with `position: fixed` and `tabindex="0"` for focus management. These elements can sometimes display text cursor indicators when focused.
+## Root Cause
+The `sanitizeInput` function in `src/utils/securityUtils.ts` (line 119) contains this code:
 
-Additionally, the existing focus ring styles (using `focus-visible:ring-2`) on buttons and interactive elements may be contributing to visible focus states that appear as text input indicators.
+```typescript
+.replace(/'/g, "''")  // Escape single quotes
+```
+
+This replaces every `'` with `''`. This is an outdated SQL injection prevention technique that was used for raw SQL queries. However, **Supabase's JavaScript client uses parameterized queries** which automatically handle escaping safely. This manual escaping is:
+1. Unnecessary (Supabase already protects against SQL injection)
+2. Harmful (it corrupts the user's data by doubling quotes)
 
 ## Solution
+Remove the single quote escaping from `sanitizeInput` since Supabase handles this automatically. The other sanitization (removing semicolons, comment markers, etc.) can remain as an extra layer of defense, but the quote doubling must go.
 
-### Step 1: Configure TooltipProvider with Better Defaults
-Update the TooltipProvider in `App.tsx` to use settings that prevent the focus-trapping behavior:
-- Add `delayDuration={0}` to prevent delayed tooltip showing
-- Add `disableHoverableContent` to simplify tooltip behavior
-- Add `skipDelayDuration={0}` for immediate response
+## Technical Details
 
-### Step 2: Add Global CSS to Hide Phantom Focus Elements
-Add CSS rules to `index.css` that:
-- Target fixed-position span elements with tabindex that are empty (Radix focus traps)
-- Hide them visually and prevent them from receiving focus indicators
-- Prevent text cursor from appearing on non-input elements
+### File to modify: `src/utils/securityUtils.ts`
 
-### Step 3: Clean Up App.css
-Remove the unused `App.css` file which contains leftover Vite template styles that aren't being used but could potentially conflict.
-
-## Technical Implementation Details
-
-### CSS Changes (index.css)
-```css
-/* Hide Radix focus trap elements that cause phantom cursors */
-span[tabindex="0"]:empty,
-span[tabindex="0"][style*="position: fixed"] {
-  caret-color: transparent !important;
-  outline: none !important;
-  pointer-events: none !important;
-}
-
-/* Prevent text cursor on non-input interactive elements */
-button, a, [role="button"], 
-img, svg, div[role="img"] {
-  caret-color: transparent;
-  cursor: pointer;
-}
-
-/* Ensure links and buttons don't show text cursor */
-a, button {
-  user-select: none;
-}
+**Before (line 117-127):**
+```typescript
+export const sanitizeInput = (input: string): string => {
+  if (!input) return '';
+  
+  // Replace SQL injection patterns
+  return input
+    .replace(/'/g, "''")  // Escape single quotes
+    .replace(/;/g, '')    // Remove semicolons
+    .replace(/--/g, '')   // Remove comment markers
+    ...
+};
 ```
 
-### App.tsx TooltipProvider Update
-```tsx
-<TooltipProvider delayDuration={0} skipDelayDuration={0}>
-  {/* rest of app */}
-</TooltipProvider>
+**After:**
+```typescript
+export const sanitizeInput = (input: string): string => {
+  if (!input) return '';
+  
+  // Replace SQL injection patterns
+  // Note: Single quotes are NOT escaped here because Supabase uses
+  // parameterized queries which handle escaping automatically
+  return input
+    .replace(/;/g, '')    // Remove semicolons
+    .replace(/--/g, '')   // Remove comment markers
+    ...
+};
 ```
 
-## Expected Outcome
-After these changes:
-- No more phantom text boxes appearing on logos, buttons, or other interactive elements
-- No more flashing cursor indicators where they shouldn't appear
-- Focus states will still work properly for accessibility (keyboard navigation)
-- All existing functionality remains intact
-
-## Files to Modify
-1. `src/index.css` - Add CSS rules to prevent caret/focus on non-input elements
-2. `src/App.tsx` - Update TooltipProvider configuration
-3. `src/App.css` - Delete this unused file to clean up the project
+## Expected Result
+After this fix, entering `Captain O'Brien` in the display name will save correctly as `Captain O'Brien` instead of `Captain O''Brien`.
 
