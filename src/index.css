@@ -107,6 +107,25 @@
     @apply bg-background text-foreground font-sans;
   }
 
+  /* Fix phantom cursor/text boxes on non-input elements (Radix focus traps) */
+  span[tabindex="0"]:empty,
+  span[tabindex="0"][style*="position: fixed"] {
+    caret-color: transparent !important;
+    outline: none !important;
+    pointer-events: none !important;
+  }
+
+  /* Prevent text cursor on interactive elements */
+  button, a, [role="button"], 
+  img, svg, div[role="img"] {
+    caret-color: transparent;
+  }
+
+  /* Prevent text selection on buttons and links */
+  a, button {
+    user-select: none;
+  }
+
   html {
     scrollbar-width: thin;
     scrollbar-color: #C8B06B transparent;
