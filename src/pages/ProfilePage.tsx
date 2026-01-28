@@ -220,7 +220,7 @@ const ProfilePage = () => {
             }) => <FormItem>
                     <FormLabel>Display Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your display name" {...field} />
+                      <Input placeholder="Enter your display name" {...field} value={field.value || ''} />
                     </FormControl>
                   </FormItem>} />
               
@@ -229,7 +229,7 @@ const ProfilePage = () => {
             }) => <FormItem>
                     <FormLabel>Username</FormLabel>
                     <FormControl>
-                      <Input placeholder="your_username" {...field} />
+                      <Input placeholder="your_username" {...field} value={field.value || ''} />
                     </FormControl>
                     <FormDescription>
                       Your profile will be accessible at sec.digital/
@@ -241,7 +241,7 @@ const ProfilePage = () => {
             }) => <FormItem>
                     <FormLabel>Bio</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Tell us about yourself" className="min-h-[120px]" {...field} />
+                      <Textarea placeholder="Tell us about yourself" className="min-h-[120px]" {...field} value={field.value || ''} />
                     </FormControl>
                   </FormItem>} />
               
@@ -254,7 +254,7 @@ const ProfilePage = () => {
                       <div className="flex items-center">
                         <Twitter className="mr-2 h-5 w-5 text-muted-foreground" />
                         <FormControl>
-                          <Input placeholder="https://x.com/username or x.com/username" {...field} />
+                          <Input placeholder="https://x.com/username or x.com/username" {...field} value={field.value || ''} />
                         </FormControl>
                       </div>
                     </FormItem>} />
@@ -265,7 +265,7 @@ const ProfilePage = () => {
                       <div className="flex items-center">
                         <Globe className="mr-2 h-5 w-5 text-muted-foreground" />
                         <FormControl>
-                          <Input placeholder="https://example.com or example.com" {...field} />
+                          <Input placeholder="https://example.com or example.com" {...field} value={field.value || ''} />
                         </FormControl>
                       </div>
                     </FormItem>} />
