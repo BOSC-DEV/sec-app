@@ -95,6 +95,11 @@
     .hover\:text-accent-foreground:hover {
       color: #000000 !important;
     }
+
+    /* Force gold text on profile tabs */
+    [role="tablist"] button[role="tab"] {
+      color: #C8B06B !important;
+    }
   }
 }
 
