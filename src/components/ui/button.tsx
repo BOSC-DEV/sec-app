@@ -19,7 +19,7 @@ const buttonVariants = cva(
         ghost: "bg-transparent hover:bg-accent hover:text-accent-foreground border-none",
         link: "text-primary underline-offset-4 hover:underline",
         iccblue: "bg-icc-blue text-white hover:bg-icc-blue-light",
-        gold: "relative overflow-hidden bg-icc-gold text-black hover:bg-icc-gold-dark hover:text-black border border-icc-gold-dark before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/40 before:to-transparent before:animate-gold-shimmer before:pointer-events-none",
+        gold: "relative overflow-hidden bg-icc-gold text-black hover:bg-icc-gold-dark hover:text-black border border-icc-gold-dark before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/40 before:to-transparent before:animate-gold-shimmer before:pointer-events-none after:absolute after:inset-0 after:bg-gradient-to-r after:from-transparent after:via-white/50 after:to-transparent after:translate-x-[-100%] after:pointer-events-none hover:after:translate-x-[100%] after:transition-transform after:duration-700 after:ease-in-out",
         danger: "bg-red-600 text-white hover:bg-red-700",
         neutral: "bg-neutral-200 text-neutral-800 hover:bg-neutral-300",
       },
