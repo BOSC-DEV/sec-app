@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, Search } from 'lucide-react';
 import digitalSecLogo from '@/assets/digital-sec-logo.png';
-
+import GoldLine from './GoldLine';
 interface HeroProps {
   title?: string;
   subtitle?: string;
@@ -57,9 +57,7 @@ const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
         </div>
       </div>
       
-      <div className="relative h-4 bg-gradient-to-r from-icc-gold-dark via-icc-gold to-icc-gold-dark overflow-hidden" aria-hidden="true">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-gold-shimmer" />
-      </div>
+      <GoldLine />
     </div>
   );
 };
