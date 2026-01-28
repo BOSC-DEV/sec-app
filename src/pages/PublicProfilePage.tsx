@@ -273,37 +273,37 @@ const PublicProfilePage = () => {
             
             <Tabs defaultValue="reports" className="w-full" value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="w-full justify-start overflow-x-auto bg-background/60 backdrop-blur-sm rounded-lg border p-1 mb-6">
-                <TabsTrigger value="reports" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                <TabsTrigger value="reports" className="text-icc-gold data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
                   {isMobile ? <FileText className="h-5 w-5" /> : <>
                       <FileText className="h-4 w-4 mr-2" />
                       Reports
                     </>}
                 </TabsTrigger>
-                <TabsTrigger value="bounties" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                <TabsTrigger value="bounties" className="text-icc-gold data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
                   {isMobile ? <Package className="h-5 w-5" /> : <>
                       <Package className="h-4 w-4 mr-2" />
                       Bounties
                     </>}
                 </TabsTrigger>
-                <TabsTrigger value="wallet" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                <TabsTrigger value="wallet" className="text-icc-gold data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
                   {isMobile ? <WalletIcon className="h-5 w-5" /> : <>
                       <WalletIcon className="h-4 w-4 mr-2" />
                       Wallet
                     </>}
                 </TabsTrigger>
-                <TabsTrigger value="info" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                <TabsTrigger value="info" className="text-icc-gold data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
                   {isMobile ? <Info className="h-5 w-5" /> : <>
                       <Info className="h-4 w-4 mr-2" />
                       Info
                     </>}
                 </TabsTrigger>
-                <TabsTrigger value="activity" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                <TabsTrigger value="activity" className="text-icc-gold data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
                   {isMobile ? <ThumbsUp className="h-5 w-5" /> : <>
                       <ThumbsUp className="h-4 w-4 mr-2" />
                       Agreed
                     </>}
                 </TabsTrigger>
-                <TabsTrigger value="comments" className="data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
+                <TabsTrigger value="comments" className="text-icc-gold data-[state=active]:bg-icc-gold/20 data-[state=active]:text-icc-gold">
                   {isMobile ? <MessageSquare className="h-5 w-5" /> : <>
                       <MessageSquare className="h-4 w-4 mr-2" />
                       Comments
