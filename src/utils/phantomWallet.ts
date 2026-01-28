@@ -124,19 +124,21 @@ export const connectPhantomWallet = async (): Promise<string | null> => {
     
     console.log("Phantom wallet connected successfully:", publicKey);
     
-    toast({
-      title: "Wallet connected",
-      description: "Phantom wallet connected successfully",
-    });
+    // Don't show success toast here - wait for signature confirmation
+    // The ProfileContext will handle showing success after full authentication
     
     return publicKey;
   } catch (error) {
     console.error("Error connecting to Phantom wallet:", error);
-    toast({
-      title: "Connection error",
-      description: "Failed to connect to Phantom wallet",
-      variant: "destructive",
-    });
+    // Only show error if user didn't reject
+    const err = error as any;
+    if (err?.code !== 4001 && !err?.message?.includes('User rejected')) {
+      toast({
+        title: "Connection error",
+        description: "Failed to connect to Phantom wallet",
+        variant: "destructive",
+      });
+    }
     return null;
   }
 };
