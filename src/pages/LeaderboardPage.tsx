@@ -354,15 +354,17 @@ const LeaderboardPage = () => {
                                   </AvatarFallback>
                                 </Avatar>
                                 <div>
-                                  <div className="font-medium text-icc-blue dark:text-white flex items-center gap-2">
-                                    {profile.display_name}
+                                  <div className="font-medium text-icc-blue dark:text-white flex items-start gap-1">
+                                    <span>{profile.display_name}</span>
                                     {profile.sec_balance !== undefined && profile.sec_balance !== null && (
-                                      <BadgeTier 
-                                        badgeInfo={calculateBadgeTierWithBounties(profile.sec_balance, profile.bounties_raised || 0)}
-                                        size="sm"
-                                        showProgress={false}
-                                        context="chat"
-                                      />
+                                      <div className="-mt-0.5">
+                                        <BadgeTier 
+                                          badgeInfo={calculateBadgeTierWithBounties(profile.sec_balance, profile.bounties_raised || 0)}
+                                          size="sm"
+                                          showProgress={false}
+                                          variant="plain"
+                                        />
+                                      </div>
                                     )}
                                   </div>
                                   <div className="text-sm text-gray-500 dark:text-gray-300">@{profile.username || profile.display_name.toLowerCase().replace(/\s/g, '')}</div>
