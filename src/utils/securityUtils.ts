@@ -115,8 +115,9 @@ export const sanitizeInput = (input: string): string => {
   if (!input) return '';
   
   // Replace SQL injection patterns
+  // Note: Single quotes are NOT escaped here because Supabase uses
+  // parameterized queries which handle escaping automatically
   return input
-    .replace(/'/g, "''")  // Escape single quotes
     .replace(/;/g, '')    // Remove semicolons
     .replace(/--/g, '')   // Remove comment markers
     .replace(/\/\*/g, '') // Remove block comment start
