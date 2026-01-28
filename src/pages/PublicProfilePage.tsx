@@ -313,7 +313,6 @@ const PublicProfilePage = () => {
                 
               <TabsContent value="reports" className="mt-0">
                 <div className="bg-background/60 backdrop-blur-sm rounded-lg p-6 border">
-                  <h2 className="text-2xl font-bold text-icc-gold mb-6">Reports</h2>
                   
                   {isLoadingReports ? <div className="space-y-4">
                       {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full" />)}
@@ -345,15 +344,12 @@ const PublicProfilePage = () => {
               
               <TabsContent value="bounties" className="mt-0">
                 <div className="bg-background/60 backdrop-blur-sm rounded-lg p-6 border">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-icc-gold">Bounties</h2>
-                    {bountyContributions && bountyContributions.totalBountyAmount > 0 && (
-                      <div className="flex items-center gap-1 text-lg font-semibold text-icc-blue dark:text-white">
-                        <CurrencyIcon size="sm" />
-                        {formatCurrency(bountyContributions.totalBountyAmount)} SEC
-                      </div>
-                    )}
-                  </div>
+                  {bountyContributions && bountyContributions.totalBountyAmount > 0 && (
+                    <div className="flex items-center justify-end gap-1 text-lg font-semibold text-icc-blue dark:text-white mb-4">
+                      <CurrencyIcon size="sm" />
+                      {formatCurrency(bountyContributions.totalBountyAmount)} SEC
+                    </div>
+                  )}
                   
                   {isLoadingBounties ? <div className="space-y-4">
                       {[1, 2, 3].map(i => <Skeleton key={i} className="h-20 w-full" />)}
@@ -413,7 +409,6 @@ const PublicProfilePage = () => {
               
               <TabsContent value="wallet" className="mt-0">
                 <div className="bg-background/60 backdrop-blur-sm rounded-lg p-6 border">
-                  <h2 className="text-2xl font-bold text-icc-gold mb-6">Wallet</h2>
                   
                   <div className="space-y-8">
                     {profile?.wallet_address ? <>
@@ -428,7 +423,6 @@ const PublicProfilePage = () => {
               
               <TabsContent value="info" className="mt-0">
                 <div className="bg-background/60 backdrop-blur-sm rounded-lg p-6 border">
-                  <h2 className="text-2xl font-bold text-icc-gold mb-6">User Information</h2>
                   {isLoading ? <div className="space-y-4">
                       <Skeleton className="h-12 w-full" />
                       <Skeleton className="h-12 w-full" />
@@ -465,10 +459,6 @@ const PublicProfilePage = () => {
               
               <TabsContent value="activity" className="mt-0">
                 <div className="bg-background/60 backdrop-blur-sm rounded-lg p-6 border">
-                  <h2 className="text-2xl font-bold text-icc-gold mb-6 flex items-center">
-                    <ThumbsUp className="mr-2 h-6 w-6" />
-                    Agreed
-                  </h2>
                   
                   {isLoadingLikedScammers ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {[1, 2, 3].map(i => <Skeleton key={i} className="h-64 w-full rounded-lg" />)}
@@ -485,7 +475,6 @@ const PublicProfilePage = () => {
               
               <TabsContent value="comments" className="mt-0">
                 <div className="bg-background/60 backdrop-blur-sm rounded-lg p-6 border">
-                  <h2 className="text-2xl font-bold text-icc-gold mb-6">Comments</h2>
                   <div className="text-center py-12">
                     <p className="text-muted-foreground text-lg">No comments yet</p>
                   </div>
