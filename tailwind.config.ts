@@ -115,13 +115,19 @@ export default {
         pulse: {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.5' },
-        }
+        },
+        "gold-shimmer": {
+          "0%": { transform: "translateX(-100%)" },
+          "5%": { transform: "translateX(100%)" },
+          "100%": { transform: "translateX(100%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         fadeIn: "fadeIn 0.5s ease-in-out",
         pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        "gold-shimmer": "gold-shimmer 20s ease-in-out infinite",
       },
       backgroundImage: {
         "hero-pattern": "url('/hero-background.jpg')",
