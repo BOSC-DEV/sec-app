@@ -9,7 +9,7 @@ const GoldLine: React.FC<GoldLineProps> = ({ className }) => {
   return (
     <div 
       className={cn(
-        "relative h-4 bg-gradient-to-r from-icc-gold-dark via-icc-gold to-icc-gold-dark overflow-hidden",
+        "relative h-2 bg-gradient-to-r from-icc-gold-dark via-icc-gold to-icc-gold-dark overflow-hidden",
         className
       )} 
       aria-hidden="true"
