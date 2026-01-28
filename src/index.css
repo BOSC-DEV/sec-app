@@ -115,15 +115,24 @@
     pointer-events: none !important;
   }
 
-  /* Prevent text cursor on interactive elements */
-  button, a, [role="button"], 
+  /* Prevent text cursor on interactive elements - but NOT on inputs/textareas inside them */
+  button:not(:has(input)):not(:has(textarea)), 
+  a:not(:has(input)):not(:has(textarea)), 
+  [role="button"]:not(:has(input)):not(:has(textarea)), 
   img, svg, div[role="img"] {
     caret-color: transparent;
   }
 
-  /* Prevent text selection on buttons and links */
-  a, button {
+  /* Prevent text selection on buttons and links - but NOT on form inputs */
+  a:not(:has(input)):not(:has(textarea)), 
+  button:not(:has(input)):not(:has(textarea)) {
     user-select: none;
+  }
+
+  /* Ensure form inputs always have visible caret and are selectable */
+  input, textarea, [contenteditable="true"] {
+    caret-color: auto !important;
+    user-select: text !important;
   }
 
   html {
