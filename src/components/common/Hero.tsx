@@ -57,7 +57,9 @@ const Hero: React.FC<HeroProps> = ({ title, subtitle, showCta = true }) => {
         </div>
       </div>
       
-      <div className="h-4 bg-gradient-to-r from-icc-gold-dark via-icc-gold to-icc-gold-dark" aria-hidden="true"></div>
+      <div className="relative h-4 bg-gradient-to-r from-icc-gold-dark via-icc-gold to-icc-gold-dark overflow-hidden" aria-hidden="true">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-gold-shimmer" />
+      </div>
     </div>
   );
 };
