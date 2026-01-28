@@ -476,7 +476,7 @@ const PublicProfilePage = () => {
                       {likedScammers.map(scammer => <ScammerCard key={scammer.id} scammer={scammer} />)}
                     </div> : <div className="text-center py-12">
                       <p className="text-muted-foreground text-lg mb-6">No liked reports yet</p>
-                      <Button asChild>
+                      <Button asChild variant="gold">
                         <Link to="/most-wanted">Browse Scammers <ExternalLink className="ml-2" size={16} /></Link>
                       </Button>
                     </div>}

@@ -125,7 +125,7 @@ const Index = () => {
                 <p className="text-gray-100 max-w-2xl">This platform is for informational purposes only. Always verify and follow all legal channels for reporting crimes.</p>
               </div>
             </div>
-            <Button variant="outline" onClick={() => setDisclaimerOpen(true)} className="w-full md:w-auto border-white text-white hover:text-white dark:border-gray-300 dark:text-gray-200 bg-slate-900 hover:bg-slate-800">
+            <Button variant="gold" onClick={() => setDisclaimerOpen(true)} className="w-full md:w-auto">
               Read Disclaimer
               <ExternalLink className="ml-2 h-4 w-4" />
             </Button>
