@@ -103,17 +103,9 @@ const DocsContent = ({ children, title, description }: DocsContentProps) => {
 
             {/* Footer */}
             <footer className="mt-12 pt-8 border-t">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">
-                  Last updated: {new Date().toLocaleDateString()}
-                </p>
-                <Button variant="outline" size="sm" asChild>
-                  <a href="https://github.com/BOSC-DEV/sec-platform" target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Edit on GitHub
-                  </a>
-                </Button>
-              </div>
+              <p className="text-sm text-muted-foreground">
+                Last updated: {new Date().toLocaleDateString()}
+              </p>
             </footer>
           </div>
 
