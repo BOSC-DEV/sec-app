@@ -30,8 +30,9 @@ const Footer = () => {
   };
 
   return (
-    <footer className="icc-footer pb-20 md:pb-4">
-      <div className="icc-container">
+    <footer className="icc-footer pb-20 md:pb-4 relative">
+      <div className="h-px bg-icc-gold w-full absolute top-0 left-0" />
+      <div className="icc-container relative">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-1 text-center md:text-left flex flex-col">
             <Link to="/" className="flex justify-center md:justify-start items-center space-x-2 mb-4">
