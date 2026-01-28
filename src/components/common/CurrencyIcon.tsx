@@ -5,17 +5,18 @@ import { LucideProps } from 'lucide-react';
 
 interface CurrencyIconProps {
   className?: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
 const CurrencyIcon: React.FC<CurrencyIconProps> = ({ 
   className,
   size = 'md'
 }) => {
-  const sizeClasses = {
+const sizeClasses = {
     sm: 'h-3 w-3',
     md: 'h-4 w-4',
-    lg: 'h-6 w-6'
+    lg: 'h-6 w-6',
+    xl: 'h-9 w-9'
   };
 
   return (
