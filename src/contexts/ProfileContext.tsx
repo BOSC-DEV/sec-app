@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import { createContext, useState, useContext, useEffect, ReactNode, useRef } from 'react';
 import { Profile } from '@/types/dataTypes';
 import { getProfileByWallet, uploadProfilePicture, saveProfile } from '@/services/profileService';
 import { toast } from '@/hooks/use-toast';
@@ -37,6 +37,9 @@ interface ProfileContextType {
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
 
+// Loading timeout duration (15 seconds)
+const LOADING_TIMEOUT_MS = 15000;
+
 export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
@@ -45,7 +48,40 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   const [isPhantomAvailable, setIsPhantomAvailable] = useState<boolean>(false);
   const [session, setSession] = useState<Session | null>(null);
   const [isWalletReady, setIsWalletReady] = useState<boolean>(false);
-  const [isConnecting, setIsConnecting] = useState<boolean>(false); // Prevent concurrent connections
+  const [isConnecting, setIsConnecting] = useState<boolean>(false);
+
+  // Refs for tracking state and preventing race conditions
+  const initialCheckComplete = useRef(false);
+  const loadingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Helper to set loading with timeout protection
+  const setLoadingWithTimeout = (loading: boolean) => {
+    // Clear any existing timeout
+    if (loadingTimeoutRef.current) {
+      clearTimeout(loadingTimeoutRef.current);
+      loadingTimeoutRef.current = null;
+    }
+    
+    setIsLoading(loading);
+    
+    // Set safety timeout when loading starts
+    if (loading) {
+      loadingTimeoutRef.current = setTimeout(() => {
+        console.warn('Loading timeout reached, forcing reset');
+        setIsLoading(false);
+        loadingTimeoutRef.current = null;
+      }, LOADING_TIMEOUT_MS);
+    }
+  };
+
+  // Helper to clear loading state safely
+  const clearLoading = () => {
+    if (loadingTimeoutRef.current) {
+      clearTimeout(loadingTimeoutRef.current);
+      loadingTimeoutRef.current = null;
+    }
+    setIsLoading(false);
+  };
 
   // Helper function to validate and set wallet address
   const setValidatedWalletAddress = async (address: string | null): Promise<boolean> => {
@@ -71,7 +107,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
 
         const publicKey = getWalletPublicKey();
         if (publicKey && publicKey.toLowerCase() === address.toLowerCase()) {
-          setWalletAddress(publicKey); // Use the actual public key with correct case
+          setWalletAddress(publicKey);
           localStorage.setItem('walletAddress', publicKey);
           setIsConnected(true);
           setIsWalletReady(true);
@@ -93,7 +129,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     
     try {
       console.log("Fetching profile for wallet:", address);
-      setIsLoading(true);
+      setLoadingWithTimeout(true);
       const fetchedProfile = await getProfileByWallet(address);
       console.log("Fetched profile:", fetchedProfile);
       
@@ -110,7 +146,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         variant: 'destructive',
       });
     } finally {
-      setIsLoading(false);
+      clearLoading();
     }
   };
 
@@ -129,7 +165,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     checkPhantomAvailability();
     
     // Setup auth state change listener for Supabase
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, sessionData) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, sessionData) => {
       console.log('Auth state changed:', event, sessionData?.user?.email);
       setSession(sessionData);
       
@@ -137,16 +173,22 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         // Extract wallet address from session email (it's in lowercase)
         const sessionWalletAddress = sessionData.user.email?.split('@')[0];
         if (sessionWalletAddress) {
-          const isValid = await setValidatedWalletAddress(sessionWalletAddress);
-          if (!isValid) {
-            // If wallet validation fails, sign out
-            await supabase.auth.signOut();
-            setWalletAddress(null);
-            setIsConnected(false);
-            setProfile(null);
-            setIsWalletReady(false);
-            localStorage.removeItem('walletAddress');
-          }
+          // Defer async operations to prevent deadlocks
+          setTimeout(async () => {
+            const isValid = await setValidatedWalletAddress(sessionWalletAddress);
+            if (!isValid) {
+              // Defer signOut to prevent recursive auth events
+              setTimeout(async () => {
+                await supabase.auth.signOut();
+              }, 0);
+              // Reset state synchronously
+              setWalletAddress(null);
+              setIsConnected(false);
+              setProfile(null);
+              setIsWalletReady(false);
+              localStorage.removeItem('walletAddress');
+            }
+          }, 0);
         }
       } else if (event === 'SIGNED_OUT') {
         setProfile(null);
@@ -154,13 +196,14 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         setIsConnected(false);
         setIsWalletReady(false);
         localStorage.removeItem('walletAddress');
+        clearLoading();
       }
     });
     
     // Check for existing session
     const checkExistingSession = async () => {
       try {
-        setIsLoading(true);
+        setLoadingWithTimeout(true);
 
         // First check if Phantom is available and wait a bit for it to initialize if needed
         const maxAttempts = 5;
@@ -175,7 +218,8 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
 
         if (!provider) {
           console.log("Phantom provider not available after waiting");
-          setIsLoading(false);
+          clearLoading();
+          initialCheckComplete.current = true;
           return;
         }
 
@@ -223,7 +267,8 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       } catch (error) {
         console.error('Error checking session:', error);
       } finally {
-        setIsLoading(false);
+        clearLoading();
+        initialCheckComplete.current = true;
       }
     };
 
@@ -234,6 +279,10 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       window.removeEventListener('DOMContentLoaded', checkPhantomAvailability);
       subscription.unsubscribe();
+      // Clean up timeout on unmount
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -244,7 +293,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       provider.on('connect', async () => {
         const publicKey = getWalletPublicKey();
         if (publicKey) {
-          setIsLoading(true);
+          setLoadingWithTimeout(true);
           // Need to authenticate with Supabase after wallet connect
           try {
             // Check if already authenticated
@@ -264,7 +313,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
             
             if (!signature) {
               console.log("Signature request was cancelled or already in progress");
-              setIsLoading(false);
+              clearLoading();
               return;
             }
             
@@ -282,18 +331,31 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
                 description: 'Could not authenticate with your wallet. Please try disconnecting and reconnecting.',
                 variant: 'destructive',
               });
+              // Reset loading state immediately before disconnecting
+              clearLoading();
               disconnectWallet();
             }
-          } catch (error) {
+          } catch (error: any) {
             console.error('Error during wallet authentication:', error);
-            toast({
-              title: 'Authentication Error',
-              description: 'Failed to authenticate wallet signature. Please try again.',
-              variant: 'destructive',
-            });
+            
+            // Handle user rejection (error code 4001)
+            if (error?.code === 4001 || error?.message?.includes('User rejected')) {
+              console.log("User rejected the signature request");
+              toast({
+                title: 'Signature Cancelled',
+                description: 'You cancelled the signature request. Please try again to sign in.',
+                variant: 'default',
+              });
+            } else {
+              toast({
+                title: 'Authentication Error',
+                description: 'Failed to authenticate wallet signature. Please try again.',
+                variant: 'destructive',
+              });
+            }
+            // Reset loading state immediately before disconnecting
+            clearLoading();
             disconnectWallet();
-          } finally {
-            setIsLoading(false);
           }
         }
       });
@@ -303,8 +365,11 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         setIsConnected(false);
         setProfile(null);
         localStorage.removeItem('walletAddress');
-        // Also sign out from Supabase
-        supabase.auth.signOut();
+        clearLoading();
+        // Defer signOut to prevent potential issues
+        setTimeout(() => {
+          supabase.auth.signOut();
+        }, 0);
       });
     }
   }, [isPhantomAvailable]);
@@ -320,7 +385,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
-      setIsLoading(true);
+      setLoadingWithTimeout(true);
       const publicUrl = await uploadProfilePicture(walletAddress, file);
       
       if (publicUrl && profile) {
@@ -352,7 +417,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       });
       return null;
     } finally {
-      setIsLoading(false);
+      clearLoading();
     }
   };
 
@@ -365,7 +430,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       setIsConnecting(true);
-      setIsLoading(true);
+      setLoadingWithTimeout(true);
       
       if (!isPhantomAvailable) {
         toast({
@@ -376,6 +441,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         
         // Open the Phantom wallet website in a new tab
         window.open('https://phantom.app/', '_blank');
+        clearLoading();
         return;
       }
       
@@ -387,16 +453,26 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         
         // Authentication will be handled in the connect event handler
       } else {
-        setIsLoading(false);
+        clearLoading();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error connecting wallet:', error);
-      toast({
-        title: 'Connection Failed',
-        description: 'Could not connect to wallet',
-        variant: 'destructive',
-      });
-      setIsLoading(false);
+      
+      // Handle user rejection
+      if (error?.code === 4001 || error?.message?.includes('User rejected')) {
+        toast({
+          title: 'Connection Cancelled',
+          description: 'You cancelled the wallet connection.',
+          variant: 'default',
+        });
+      } else {
+        toast({
+          title: 'Connection Failed',
+          description: 'Could not connect to wallet',
+          variant: 'destructive',
+        });
+      }
+      clearLoading();
     } finally {
       setIsConnecting(false);
     }
@@ -411,9 +487,12 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     setWalletAddress(null);
     setIsConnected(false);
     setProfile(null);
+    clearLoading();
     
-    // Also sign out from Supabase
-    supabase.auth.signOut();
+    // Defer signOut to prevent potential issues
+    setTimeout(() => {
+      supabase.auth.signOut();
+    }, 0);
   };
 
   const refreshProfile = async () => {
@@ -424,7 +503,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
 
   const updateProfile = async (updatedProfile: Profile): Promise<Profile | null> => {
     try {
-      setIsLoading(true);
+      setLoadingWithTimeout(true);
       const savedProfile = await saveProfile(updatedProfile);
       
       if (savedProfile) {
@@ -448,7 +527,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       });
       return null;
     } finally {
-      setIsLoading(false);
+      clearLoading();
     }
   };
 
