@@ -82,7 +82,7 @@ const BadgeTiersPage: React.FC = () => {
                 <TableRow>
                   <TableHead>Badge</TableHead>
                   <TableHead>Minimum Holding</TableHead>
-                  <TableHead>% of Supply</TableHead>
+                  <TableHead>% of 1b Supply</TableHead>
                   <TableHead>Progress</TableHead>
                 </TableRow>
               </TableHeader>
