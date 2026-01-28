@@ -9,6 +9,9 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
+// 24 hours in seconds
+const SESSION_EXPIRY_SECONDS = 86400
+
 interface AuthRequest {
   walletAddress: string
   signature: string
@@ -34,7 +37,13 @@ serve(async (req) => {
 
     const supabase = createClient(
       supabaseUrl ?? '',
-      supabaseKey ?? ''
+      supabaseKey ?? '',
+      {
+        auth: {
+          autoRefreshToken: true,
+          persistSession: true,
+        }
+      }
     )
 
     const { walletAddress, signature, message }: AuthRequest = await req.json()
@@ -73,10 +82,14 @@ serve(async (req) => {
     })
 
     if (!signInError && signInData.session) {
+      // Store the session expiry timestamp for client-side validation
+      const expiresAt = Math.floor(Date.now() / 1000) + SESSION_EXPIRY_SECONDS
+      
       return new Response(
         JSON.stringify({ 
           session: signInData.session,
-          user: signInData.user 
+          user: signInData.user,
+          expiresAt,
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
@@ -110,10 +123,13 @@ serve(async (req) => {
 
     // Check if we have a session (email confirmation disabled)
     if (signUpData.session) {
+      const expiresAt = Math.floor(Date.now() / 1000) + SESSION_EXPIRY_SECONDS
+      
       return new Response(
         JSON.stringify({ 
           session: signUpData.session,
-          user: signUpData.user 
+          user: signUpData.user,
+          expiresAt,
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
@@ -127,10 +143,13 @@ serve(async (req) => {
       })
 
       if (!retryError && retryData.session) {
+        const expiresAt = Math.floor(Date.now() / 1000) + SESSION_EXPIRY_SECONDS
+        
         return new Response(
           JSON.stringify({ 
             session: retryData.session,
-            user: retryData.user 
+            user: retryData.user,
+            expiresAt,
           }),
           { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
@@ -151,4 +170,3 @@ serve(async (req) => {
     )
   }
 })
-
