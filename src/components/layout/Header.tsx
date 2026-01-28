@@ -86,11 +86,11 @@ const Header = () => {
     label: 'Community',
     path: '/community'
   }, {
-    label: 'Report',
-    path: '/new-report'
-  }, {
     label: 'Leaderboard',
     path: '/leaderboard'
+  }, {
+    label: 'Report',
+    path: '/new-report'
   }, {
     label: 'Docs',
     path: '/docs'
