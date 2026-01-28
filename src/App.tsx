@@ -134,7 +134,7 @@ const PerformanceMonitor = () => {
 const App = () => (
   <EnhancedErrorBoundary componentName="App">
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
+      <TooltipProvider delayDuration={0} skipDelayDuration={0}>
         <BrowserRouter>
           <ProfileProvider>
             <HelmetProvider>
