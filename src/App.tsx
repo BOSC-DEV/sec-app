@@ -23,6 +23,7 @@ import DocsLayout from "./components/docs/DocsLayout";
 import DocsRouter from "./pages/docs/DocsRouter";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ProfileProvider, useProfile } from "./contexts/ProfileContext";
+import { WalletContextProvider } from "./contexts/WalletContext";
 import EnhancedErrorBoundary from "./components/common/EnhancedErrorBoundary";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import AdminProtectedRoute from "./components/common/AdminProtectedRoute";
@@ -32,6 +33,10 @@ import { handleError, ErrorSeverity } from "./utils/errorHandling";
 import environmentUtils from "./utils/environmentUtils";
 import { HelmetProvider } from "react-helmet-async";
 import { supabase } from "./integrations/supabase/client";
+
+// Import wallet adapter styles
+import '@solana/wallet-adapter-react-ui/styles.css';
+import './styles/wallet-adapter.css';
 
 // Initialize analytics service
 analyticsService.initAnalytics();
@@ -135,10 +140,11 @@ const App = () => (
   <EnhancedErrorBoundary componentName="App">
     <QueryClientProvider client={queryClient}>
       <TooltipProvider delayDuration={0} skipDelayDuration={0}>
-        <BrowserRouter>
-          <ProfileProvider>
-            <HelmetProvider>
-              <Toaster />
+        <WalletContextProvider>
+          <BrowserRouter>
+            <ProfileProvider>
+              <HelmetProvider>
+                <Toaster />
               <Sonner />
               <AnalyticsTracker />
               {environmentUtils.featureFlags.enablePerformanceMonitoring && <PerformanceMonitor />}
@@ -210,10 +216,11 @@ const App = () => (
                     </Layout>
                   } />
                 </Routes>
-              </EnhancedErrorBoundary>
-            </HelmetProvider>
-          </ProfileProvider>
-        </BrowserRouter>
+                </EnhancedErrorBoundary>
+              </HelmetProvider>
+            </ProfileProvider>
+          </BrowserRouter>
+        </WalletContextProvider>
       </TooltipProvider>
       {environmentUtils.isDevelopment() && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>

@@ -1,15 +1,10 @@
-import { createContext, useState, useContext, useEffect, ReactNode, useRef } from 'react';
+import { createContext, useState, useContext, useEffect, ReactNode, useRef, useCallback } from 'react';
+import { useWallet, useConnection } from '@solana/wallet-adapter-react';
+import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { Profile } from '@/types/dataTypes';
 import { getProfileByWallet, uploadProfilePicture, saveProfile } from '@/services/profileService';
 import { toast } from '@/hooks/use-toast';
-import { 
-  connectPhantomWallet, 
-  disconnectPhantomWallet, 
-  getPhantomProvider, 
-  getWalletPublicKey, 
-  isPhantomInstalled,
-  signMessageWithPhantom
-} from '@/utils/phantomWallet';
+import { signMessageWithWallet } from '@/utils/walletAdapter';
 import { supabase } from '@/integrations/supabase/client';
 import { authenticateWallet } from '@/utils/authUtils';
 import { Session } from '@supabase/supabase-js';
@@ -57,9 +52,11 @@ interface ProfileContextType {
   disconnectWallet: () => void;
   refreshProfile: () => Promise<void>;
   uploadAvatar: (file: File) => Promise<string | null>;
-  isPhantomAvailable: boolean;
+  isWalletAvailable: boolean;
   updateProfile: (updatedProfile: Profile) => Promise<Profile | null>;
   session: Session | null;
+  // Legacy alias for backwards compatibility
+  isPhantomAvailable: boolean;
 }
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
@@ -68,22 +65,28 @@ const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
 const LOADING_TIMEOUT_MS = 15000;
 
 export const ProfileProvider = ({ children }: { children: ReactNode }) => {
+  const wallet = useWallet();
+  const { setVisible: setWalletModalVisible } = useWalletModal();
+  
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isPhantomAvailable, setIsPhantomAvailable] = useState<boolean>(false);
   const [session, setSession] = useState<Session | null>(null);
   const [isWalletReady, setIsWalletReady] = useState<boolean>(false);
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
+  const [pendingAuthentication, setPendingAuthentication] = useState<boolean>(false);
 
   // Refs for tracking state and preventing race conditions
   const initialCheckComplete = useRef(false);
   const loadingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasAuthenticatedRef = useRef(false);
+
+  // Check if any wallet adapter is available
+  const isWalletAvailable = wallet.wallets.length > 0;
 
   // Helper to set loading with timeout protection
   const setLoadingWithTimeout = (loading: boolean) => {
-    // Clear any existing timeout
     if (loadingTimeoutRef.current) {
       clearTimeout(loadingTimeoutRef.current);
       loadingTimeoutRef.current = null;
@@ -91,7 +94,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     
     setIsLoading(loading);
     
-    // Set safety timeout when loading starts
     if (loading) {
       loadingTimeoutRef.current = setTimeout(() => {
         console.warn('Loading timeout reached, forcing reset');
@@ -111,13 +113,11 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Helper function to validate and set wallet address
-  // If skipWalletValidation is true, we trust the session and don't require Phantom connection
   const setValidatedWalletAddress = async (address: string | null, skipWalletValidation: boolean = false): Promise<boolean> => {
     if (address) {
-      // If we have a valid session within 24 hours, we can skip Phantom wallet validation
-      // This allows users to stay logged in without reconnecting their wallet
+      // If we have a valid session within 24 hours, we can skip wallet validation
       if (skipWalletValidation && isSessionValid()) {
-        console.log("Session is valid, skipping Phantom wallet validation");
+        console.log("Session is valid, skipping wallet validation");
         setWalletAddress(address);
         localStorage.setItem(WALLET_ADDRESS_KEY, address);
         setIsConnected(true);
@@ -125,64 +125,29 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         return true;
       }
 
-      const provider = getPhantomProvider();
-      if (!provider) {
-        console.log("Phantom provider not available");
-        // If we have a valid session but no provider, still allow connection
-        if (isSessionValid()) {
-          console.log("No Phantom provider but session is valid, allowing connection");
-          setWalletAddress(address);
-          localStorage.setItem(WALLET_ADDRESS_KEY, address);
+      // Check if wallet adapter is connected with matching address
+      if (wallet.connected && wallet.publicKey) {
+        const connectedAddress = wallet.publicKey.toString();
+        if (connectedAddress.toLowerCase() === address.toLowerCase()) {
+          setWalletAddress(connectedAddress);
+          localStorage.setItem(WALLET_ADDRESS_KEY, connectedAddress);
           setIsConnected(true);
           setIsWalletReady(true);
           return true;
         }
-        return false;
       }
 
-      try {
-        // If wallet is not connected, try to reconnect using trusted apps feature
-        if (!provider.isConnected) {
-          console.log("Attempting to reconnect to Phantom wallet...");
-          await provider.connect({ onlyIfTrusted: true });
-        }
-
-        // Check if the wallet is now connected and matches
-        if (!provider.isConnected || !provider.publicKey || provider.publicKey.toString().toLowerCase() !== address.toLowerCase()) {
-          console.log("Wallet not properly connected in Phantom");
-          // If we have a valid session, still allow connection even without Phantom
-          if (isSessionValid()) {
-            console.log("Phantom not connected but session is valid, allowing connection");
-            setWalletAddress(address);
-            localStorage.setItem(WALLET_ADDRESS_KEY, address);
-            setIsConnected(true);
-            setIsWalletReady(true);
-            return true;
-          }
-          return false;
-        }
-
-        const publicKey = getWalletPublicKey();
-        if (publicKey && publicKey.toLowerCase() === address.toLowerCase()) {
-          setWalletAddress(publicKey);
-          localStorage.setItem(WALLET_ADDRESS_KEY, publicKey);
-          setIsConnected(true);
-          setIsWalletReady(true);
-          return true;
-        }
-      } catch (error) {
-        console.error("Error reconnecting to Phantom wallet:", error);
-        // If we have a valid session, still allow connection even if Phantom reconnect fails
-        if (isSessionValid()) {
-          console.log("Phantom reconnect failed but session is valid, allowing connection");
-          setWalletAddress(address);
-          localStorage.setItem(WALLET_ADDRESS_KEY, address);
-          setIsConnected(true);
-          setIsWalletReady(true);
-          return true;
-        }
-        return false;
+      // If we have a valid session but wallet isn't connected, still allow connection
+      if (isSessionValid()) {
+        console.log("Wallet not connected but session is valid, allowing connection");
+        setWalletAddress(address);
+        localStorage.setItem(WALLET_ADDRESS_KEY, address);
+        setIsConnected(true);
+        setIsWalletReady(true);
+        return true;
       }
+
+      return false;
     }
     return false;
   };
@@ -223,32 +188,134 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [isWalletReady, walletAddress]);
 
-  useEffect(() => {
-    const checkPhantomAvailability = () => {
-      setIsPhantomAvailable(isPhantomInstalled());
-    };
+  // Handle wallet connection and authentication
+  const handleWalletAuthentication = useCallback(async () => {
+    if (!wallet.connected || !wallet.publicKey || hasAuthenticatedRef.current) {
+      return;
+    }
 
-    checkPhantomAvailability();
+    const publicKey = wallet.publicKey.toString();
+    console.log("Wallet connected, checking authentication for:", publicKey);
+
+    setLoadingWithTimeout(true);
     
-    // Setup auth state change listener for Supabase
+    try {
+      // Check if already authenticated
+      const { data: { session: existingSession } } = await supabase.auth.getSession();
+      if (existingSession?.user?.email === `${publicKey}@sec.digital`) {
+        console.log("Already authenticated with this wallet");
+        hasAuthenticatedRef.current = true;
+        setWalletAddress(publicKey);
+        setIsConnected(true);
+        setIsWalletReady(true);
+        localStorage.setItem(WALLET_ADDRESS_KEY, publicKey);
+        setSessionExpiry();
+        await fetchProfile(publicKey);
+        return;
+      }
+
+      // Need to authenticate - sign message
+      const message = 'Sign in to Scams and E-Crimes Commission';
+      console.log("Requesting signature for authentication...");
+      
+      const signature = await signMessageWithWallet(wallet, message);
+      
+      if (!signature) {
+        console.log("Signature request was cancelled or failed");
+        clearLoading();
+        wallet.disconnect();
+        return;
+      }
+      
+      const authenticated = await authenticateWallet(publicKey, signature, message);
+      
+      if (authenticated) {
+        hasAuthenticatedRef.current = true;
+        setWalletAddress(publicKey);
+        setIsConnected(true);
+        setIsWalletReady(true);
+        localStorage.setItem(WALLET_ADDRESS_KEY, publicKey);
+        setSessionExpiry();
+        
+        toast({
+          title: 'Wallet Connected',
+          description: 'Successfully signed in with your wallet',
+        });
+        
+        await fetchProfile(publicKey);
+      } else {
+        console.error('Authentication failed - no session returned');
+        toast({
+          title: 'Authentication Failed',
+          description: 'Could not authenticate with your wallet. Please try disconnecting and reconnecting.',
+          variant: 'destructive',
+        });
+        clearLoading();
+        wallet.disconnect();
+      }
+    } catch (error: any) {
+      console.error('Error during wallet authentication:', error);
+      
+      if (error?.code === 4001 || error?.message?.includes('User rejected')) {
+        console.log("User rejected the signature request");
+        toast({
+          title: 'Signature Cancelled',
+          description: 'You cancelled the signature request. Please try again to sign in.',
+          variant: 'default',
+        });
+      } else {
+        toast({
+          title: 'Authentication Error',
+          description: 'Failed to authenticate wallet signature. Please try again.',
+          variant: 'destructive',
+        });
+      }
+      clearLoading();
+      wallet.disconnect();
+    }
+  }, [wallet.connected, wallet.publicKey, wallet]);
+
+  // Watch for wallet connection changes
+  useEffect(() => {
+    if (wallet.connected && wallet.publicKey && pendingAuthentication) {
+      setPendingAuthentication(false);
+      handleWalletAuthentication();
+    }
+  }, [wallet.connected, wallet.publicKey, pendingAuthentication, handleWalletAuthentication]);
+
+  // Handle wallet disconnection
+  useEffect(() => {
+    if (!wallet.connected && hasAuthenticatedRef.current) {
+      console.log("Wallet disconnected");
+      hasAuthenticatedRef.current = false;
+      setWalletAddress(null);
+      setIsConnected(false);
+      setProfile(null);
+      setIsWalletReady(false);
+      localStorage.removeItem(WALLET_ADDRESS_KEY);
+      clearSessionExpiry();
+      clearLoading();
+      setTimeout(() => {
+        supabase.auth.signOut();
+      }, 0);
+    }
+  }, [wallet.connected]);
+
+  // Setup auth state listener and check existing session
+  useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, sessionData) => {
       console.log('Auth state changed:', event, sessionData?.user?.email);
       setSession(sessionData);
       
       if (sessionData && sessionData.user) {
-        // Extract wallet address from session email (it's in lowercase)
         const sessionWalletAddress = sessionData.user.email?.split('@')[0];
         if (sessionWalletAddress) {
-          // Defer async operations to prevent deadlocks
           setTimeout(async () => {
-            // Skip wallet validation if we have a valid session - allows 24hr persistence
             const isValid = await setValidatedWalletAddress(sessionWalletAddress, true);
             if (!isValid) {
-              // Defer signOut to prevent recursive auth events
               setTimeout(async () => {
                 await supabase.auth.signOut();
               }, 0);
-              // Reset state synchronously
               setWalletAddress(null);
               setIsConnected(false);
               setProfile(null);
@@ -269,21 +336,20 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       }
     });
     
-    // Check for existing session - NO auto-connect to Phantom, just restore if session is valid
+    // Check for existing session
     const checkExistingSession = async () => {
       try {
         setLoadingWithTimeout(true);
 
-        // Check for existing Supabase session first
         const { data: { session: existingSession } } = await supabase.auth.getSession();
         
         if (existingSession && isSessionValid()) {
           console.log("Found valid session within 24 hours, restoring...");
           setSession(existingSession);
+          hasAuthenticatedRef.current = true;
           const sessionWalletAddress = existingSession.user.email?.split('@')[0];
           
           if (sessionWalletAddress) {
-            // Skip Phantom validation since we have a valid session - no wallet popup
             const isValid = await setValidatedWalletAddress(sessionWalletAddress, true);
             if (!isValid) {
               await supabase.auth.signOut();
@@ -296,7 +362,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
             }
           }
         } else if (existingSession) {
-          // Session exists but our 24hr window expired - sign out, don't force reconnect
           console.log("Session exists but 24hr window expired, signing out...");
           await supabase.auth.signOut();
           setWalletAddress(null);
@@ -306,7 +371,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
           localStorage.removeItem(WALLET_ADDRESS_KEY);
           clearSessionExpiry();
         } else {
-          // No session - clear any stale data
           const savedWallet = localStorage.getItem(WALLET_ADDRESS_KEY);
           if (savedWallet) {
             localStorage.removeItem(WALLET_ADDRESS_KEY);
@@ -323,120 +387,13 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
 
     checkExistingSession();
     
-    window.addEventListener('DOMContentLoaded', checkPhantomAvailability);
-    
     return () => {
-      window.removeEventListener('DOMContentLoaded', checkPhantomAvailability);
       subscription.unsubscribe();
-      // Clean up timeout on unmount
       if (loadingTimeoutRef.current) {
         clearTimeout(loadingTimeoutRef.current);
       }
     };
   }, []);
-
-  useEffect(() => {
-    const provider = getPhantomProvider();
-    
-    if (provider) {
-      provider.on('connect', async () => {
-        const publicKey = getWalletPublicKey();
-        if (publicKey) {
-          setLoadingWithTimeout(true);
-          // Need to authenticate with Supabase after wallet connect
-          try {
-            // Check if already authenticated
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session?.user?.email === `${publicKey}@sec.digital`) {
-              console.log("Already authenticated with this wallet");
-              setWalletAddress(publicKey);
-              setIsConnected(true);
-              setIsWalletReady(true);
-              localStorage.setItem(WALLET_ADDRESS_KEY, publicKey);
-              // Refresh session expiry on successful reconnect
-              setSessionExpiry();
-              await fetchProfile(publicKey);
-              return;
-            }
-
-            // Use a constant message for authentication (never changes)
-            const message = 'Sign in to Scams and E-Crimes Commission';
-            const signature = await signMessageWithPhantom(message);
-            
-            if (!signature) {
-              console.log("Signature request was cancelled or already in progress");
-              clearLoading();
-              return;
-            }
-            
-            const authenticated = await authenticateWallet(publicKey, signature, message);
-            
-            if (authenticated) {
-              setWalletAddress(publicKey);
-              setIsConnected(true);
-              setIsWalletReady(true);
-              localStorage.setItem(WALLET_ADDRESS_KEY, publicKey);
-              // Set 24-hour session expiry
-              setSessionExpiry();
-              
-              // Show success toast AFTER signature is confirmed
-              toast({
-                title: 'Wallet Connected',
-                description: 'Successfully signed in with your wallet',
-              });
-              
-              await fetchProfile(publicKey);
-            } else {
-              console.error('Authentication failed - no session returned');
-              toast({
-                title: 'Authentication Failed',
-                description: 'Could not authenticate with your wallet. Please try disconnecting and reconnecting.',
-                variant: 'destructive',
-              });
-              // Reset loading state immediately before disconnecting
-              clearLoading();
-              disconnectWallet();
-            }
-          } catch (error: any) {
-            console.error('Error during wallet authentication:', error);
-            
-            // Handle user rejection (error code 4001)
-            if (error?.code === 4001 || error?.message?.includes('User rejected')) {
-              console.log("User rejected the signature request");
-              toast({
-                title: 'Signature Cancelled',
-                description: 'You cancelled the signature request. Please try again to sign in.',
-                variant: 'default',
-              });
-            } else {
-              toast({
-                title: 'Authentication Error',
-                description: 'Failed to authenticate wallet signature. Please try again.',
-                variant: 'destructive',
-              });
-            }
-            // Reset loading state immediately before disconnecting
-            clearLoading();
-            disconnectWallet();
-          }
-        }
-      });
-      
-      provider.on('disconnect', () => {
-        setWalletAddress(null);
-        setIsConnected(false);
-        setProfile(null);
-        setIsWalletReady(false);
-        localStorage.removeItem(WALLET_ADDRESS_KEY);
-        clearSessionExpiry();
-        clearLoading();
-        // Defer signOut to prevent potential issues
-        setTimeout(() => {
-          supabase.auth.signOut();
-        }, 0);
-      });
-    }
-  }, [isPhantomAvailable]);
 
   const uploadAvatar = async (file: File): Promise<string | null> => {
     if (!walletAddress) {
@@ -486,7 +443,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const connectWallet = async () => {
-    // Prevent concurrent connection attempts
     if (isConnecting) {
       console.log("Connection already in progress");
       return;
@@ -496,33 +452,34 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       setIsConnecting(true);
       setLoadingWithTimeout(true);
       
-      if (!isPhantomAvailable) {
+      if (!isWalletAvailable) {
         toast({
-          title: 'Phantom Wallet Not Installed',
-          description: 'Please install Phantom wallet to continue',
+          title: 'No Wallet Found',
+          description: 'Please install a Solana wallet like Phantom, Solflare, or Backpack to continue',
           variant: 'destructive',
         });
         
-        // Open the Phantom wallet website in a new tab
         window.open('https://phantom.app/', '_blank');
         clearLoading();
         return;
       }
       
-      const publicKey = await connectPhantomWallet();
-      
-      if (publicKey) {
-        // We'll handle authentication and profile fetching in the connect event handler
-        console.log("Wallet connected with public key:", publicKey);
-        
-        // Authentication will be handled in the connect event handler
-      } else {
-        clearLoading();
+      // If already connected, just authenticate
+      if (wallet.connected && wallet.publicKey) {
+        await handleWalletAuthentication();
+        return;
       }
+      
+      // Set flag to trigger authentication after connection
+      setPendingAuthentication(true);
+      
+      // Open wallet modal for selection
+      setWalletModalVisible(true);
+      
+      clearLoading();
     } catch (error: any) {
       console.error('Error connecting wallet:', error);
       
-      // Handle user rejection
       if (error?.code === 4001 || error?.message?.includes('User rejected')) {
         toast({
           title: 'Connection Cancelled',
@@ -543,9 +500,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const disconnectWallet = () => {
-    if (isPhantomAvailable) {
-      disconnectPhantomWallet();
-    }
+    wallet.disconnect();
     
     localStorage.removeItem(WALLET_ADDRESS_KEY);
     clearSessionExpiry();
@@ -553,12 +508,17 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     setIsConnected(false);
     setIsWalletReady(false);
     setProfile(null);
+    hasAuthenticatedRef.current = false;
     clearLoading();
     
-    // Defer signOut to prevent potential issues
     setTimeout(() => {
       supabase.auth.signOut();
     }, 0);
+    
+    toast({
+      title: "Wallet disconnected",
+      description: "Wallet disconnected successfully",
+    });
   };
 
   const refreshProfile = async () => {
@@ -606,9 +566,11 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     disconnectWallet,
     refreshProfile,
     uploadAvatar,
-    isPhantomAvailable,
+    isWalletAvailable,
     updateProfile,
-    session
+    session,
+    // Legacy alias for backwards compatibility
+    isPhantomAvailable: isWalletAvailable
   };
 
   return (

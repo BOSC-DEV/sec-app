@@ -18,7 +18,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     isConnected,
     isLoading,
     connectWallet,
-    isPhantomAvailable,
+    isWalletAvailable,
     session
   } = useProfile();
   
@@ -48,16 +48,16 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           <DialogHeader>
             <DialogTitle>Wallet Connection Required</DialogTitle>
             <DialogDescription>
-              {isPhantomAvailable 
+              {isWalletAvailable 
                 ? "To access this content, you need to connect your wallet first."
-                : "Phantom wallet is required but not installed. Please install it to continue."}
+                : "A Solana wallet is required but not detected. Please install Phantom, Solflare, Backpack, or another Solana wallet to continue."}
             </DialogDescription>
           </DialogHeader>
           <div className="flex items-center justify-center py-4">
             <Wallet className="h-12 w-12 text-icc-gold mb-2" />
           </div>
           <DialogFooter className="sm:justify-center">
-            {isPhantomAvailable ? (
+            {isWalletAvailable ? (
               <Button 
                 variant="gold" 
                 className="flex items-center gap-2" 
@@ -73,7 +73,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
                 onClick={() => window.open('https://phantom.app/', '_blank')}
               >
                 <ExternalLink className="h-4 w-4" />
-                Install Phantom Wallet
+                Install Solana Wallet
               </Button>
             )}
             <Button variant="outline" onClick={() => {
