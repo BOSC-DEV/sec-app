@@ -10,8 +10,8 @@ import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 import BadgeTier from './BadgeTier';
 import { useBadgeTier } from '@/hooks/useBadgeTier';
 
-// Import from walletAdapter utility
-import { getConnection, getFallbackConnection } from '@/utils/walletAdapter';
+// Import from phantomWallet utility
+import { getConnection, getFallbackConnection } from '@/utils/phantomWallet';
 
 // SEC token mint address
 const SEC_TOKEN_MINT = new PublicKey('HocVFWDa8JFg4NG33TetK4sYJwcACKob6uMeMFKhpump');

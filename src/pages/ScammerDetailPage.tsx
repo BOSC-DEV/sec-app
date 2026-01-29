@@ -33,7 +33,7 @@ import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
 import { handleError, ErrorSeverity } from '@/utils/errorHandling';
-import { sendSECTokensWithWallet } from '@/utils/walletAdapter';
+import { sendTransactionToDevWallet, connectPhantomWallet } from '@/utils/phantomWallet';
 import { PROFILE_UPDATED_EVENT } from '@/contexts/ProfileContext';
 import CurrencyIcon from '@/components/common/CurrencyIcon';
 import { Link } from 'react-router-dom';
@@ -541,8 +541,7 @@ const ScammerDetailPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const {
-    profile,
-    connectWallet
+    profile
   } = useProfile();
   const [commentText, setCommentText] = useState('');
   const [isLiked, setIsLiked] = useState(false);
@@ -965,7 +964,7 @@ const ScammerDetailPage = () => {
   };
   const handleAddBounty = async () => {
     if (!profile) {
-      await connectWallet();
+      await connectPhantomWallet();
       if (!profile) {
         toast({
           title: "Authentication required",
@@ -987,17 +986,21 @@ const ScammerDetailPage = () => {
     setIsLoading(true);
     try {
       console.log(`Processing bounty transaction of ${amount} $SEC to ${developerWalletAddress}`);
-      
-      // Note: Transaction is now handled by BountyForm component using wallet adapter
-      // This function is kept for backward compatibility but the bounty functionality
-      // should use the BountyForm component instead
-      toast({
-        title: "Please use the bounty form",
-        description: "Use the bounty form below to contribute to this bounty.",
-        variant: "default"
+      const transactionSignature = await sendTransactionToDevWallet(developerWalletAddress, amount);
+      if (!transactionSignature) {
+        setIsLoading(false);
+        return;
+      }
+      console.log("Recording bounty contribution in database");
+      addBountyContributionMutation.mutate({
+        scammer_id: scammer?.id || '',
+        amount: amount,
+        comment: bountyComment || undefined,
+        contributor_id: profile.id,
+        contributor_name: profile.display_name,
+        contributor_profile_pic: profile.profile_pic_url,
+        transaction_signature: transactionSignature
       });
-      setIsLoading(false);
-      return;
     } catch (error) {
       handleError(error, {
         fallbackMessage: "Failed to process bounty contribution. Please try again.",

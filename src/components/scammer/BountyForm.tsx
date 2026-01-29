@@ -1,11 +1,10 @@
 
 import React, { useState } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { toast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { addBountyContribution } from '@/services/bountyService';
-import { sendSECTokensWithWallet } from '@/utils/walletAdapter';
+import { sendTransactionToDevWallet } from '@/utils/phantomWallet';
 import { handleError, ErrorSeverity } from '@/utils/errorHandling';
 import DeveloperWalletDisplay from './DeveloperWalletDisplay';
 import ContributionForm from './ContributionForm';
@@ -24,7 +23,6 @@ const BountyForm: React.FC<BountyFormProps> = ({
   developerWalletAddress
 }) => {
   const { profile, connectWallet } = useProfile();
-  const wallet = useWallet();
   const queryClient = useQueryClient();
   const [contributionAmount, setContributionAmount] = useState('0.00');
   const [bountyComment, setBountyComment] = useState('');
@@ -119,8 +117,7 @@ const BountyForm: React.FC<BountyFormProps> = ({
         length: developerWalletAddress.length
       });
       
-      // Use wallet adapter for transaction
-      const transactionSignature = await sendSECTokensWithWallet(wallet, developerWalletAddress, amount);
+      const transactionSignature = await sendTransactionToDevWallet(developerWalletAddress, amount);
       if (!transactionSignature) {
         toast({
           title: "Transaction failed",
@@ -152,10 +149,10 @@ const BountyForm: React.FC<BountyFormProps> = ({
           description: "You don't have enough SEC tokens to complete this transaction.",
           variant: "destructive"
         });
-      } else if (errorMessage.toLowerCase().includes('wallet') || errorMessage.toLowerCase().includes('connect')) {
+      } else if (errorMessage.toLowerCase().includes('wallet') || errorMessage.toLowerCase().includes('phantom')) {
         toast({
           title: "Wallet error",
-          description: "There was a problem connecting to your wallet. Please make sure your wallet is connected and unlocked.",
+          description: "There was a problem connecting to your wallet. Please make sure Phantom is installed and unlocked.",
           variant: "destructive"
         });
       } else {
