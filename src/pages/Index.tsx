@@ -54,7 +54,7 @@ const Index = () => {
         <div className="icc-container">
           <div className="text-center mb-12">
             <h2 className="icc-title">The Most Wanted</h2>
-            <p className="max-w-2xl mx-auto text-icc-gray dark:text-gray-300"></p>
+            <p className="max-w-2xl mx-auto text-icc-gray dark:text-gray-300">File the first report for it to appear here!</p>
           </div>
 
           {isLoadingScammers ? <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
