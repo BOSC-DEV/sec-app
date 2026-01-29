@@ -1,6 +1,6 @@
 import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
-import { getConnection } from '@/utils/phantomWallet';
+import { getConnection } from '@/utils/walletAdapter';
 import { Profile } from '@/types/dataTypes';
 import { supabase } from '@/integrations/supabase/client';
 import { handleError } from '@/utils/errorHandling';

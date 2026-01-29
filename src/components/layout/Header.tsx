@@ -20,7 +20,7 @@ const Header = () => {
     isConnected,
     connectWallet,
     profile,
-    isPhantomAvailable,
+    isWalletAvailable,
     isLoading
   } = useProfile();
   const navigate = useNavigate();
@@ -48,14 +48,14 @@ const Header = () => {
   const handleWalletButtonClick = () => {
     if (isConnected) {
       navigate('/profile');
-    } else if (isPhantomAvailable) {
+    } else if (isWalletAvailable) {
       connectWallet();
     } else {
-      // Open Phantom install page
+      // Open wallet install page
       window.open('https://phantom.app/', '_blank');
       toast({
-        title: "Phantom Wallet Required",
-        description: "Please install Phantom wallet to continue",
+        title: "Solana Wallet Required",
+        description: "Please install a Solana wallet like Phantom, Solflare, or Backpack to continue",
         variant: "default"
       });
     }
@@ -135,9 +135,9 @@ const Header = () => {
                 </Button>
                 {!isMobile && (
                   <Button variant="gold" size="sm" className="flex items-center gap-2" onClick={handleWalletButtonClick}>
-                    {!isPhantomAvailable ? <>
+                    {!isWalletAvailable ? <>
                         <ExternalLink className="h-4 w-4" />
-                        <span className="hidden lg:inline">Install Phantom</span>
+                        <span className="hidden lg:inline">Install Wallet</span>
                       </> : <>
                         <Wallet className="h-4 w-4 text-white" />
                         <span className="hidden lg:inline">Connect Wallet</span>
