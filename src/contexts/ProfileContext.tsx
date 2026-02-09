@@ -76,6 +76,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isWalletReady, setIsWalletReady] = useState<boolean>(false);
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
+  const isConnectingRef = useRef<boolean>(false);
 
   // Refs for tracking state and preventing race conditions
   const initialCheckComplete = useRef(false);
@@ -342,6 +343,13 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       provider.on('connect', async () => {
         const publicKey = getWalletPublicKey();
         if (publicKey) {
+          // Only proceed with authentication if the user explicitly initiated the connection
+          // This prevents auto-connect (onlyIfTrusted) from prompting a signature on page load
+          if (!isConnectingRef.current) {
+            console.log("Phantom auto-connected but user didn't initiate - ignoring");
+            return;
+          }
+
           setLoadingWithTimeout(true);
           // Need to authenticate with Supabase after wallet connect
           try {
@@ -494,6 +502,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       setIsConnecting(true);
+      isConnectingRef.current = true;
       setLoadingWithTimeout(true);
       
       if (!isPhantomAvailable) {
@@ -539,6 +548,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       clearLoading();
     } finally {
       setIsConnecting(false);
+      isConnectingRef.current = false;
     }
   };
 
